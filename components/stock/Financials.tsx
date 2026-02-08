@@ -4,17 +4,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 
-export function Financials({ stock }: { stock: any }) {
+import { Stock } from "@/lib/types";
+
+export function Financials({ stock }: { stock: Stock }) {
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="text-lg font-medium">Protection Filter</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                <Metric label="ROCE (5yr Avg)" value="24%" threshold={15} />
-                <Metric label="Debt-to-Equity" value="0.45" threshold={0.6} inverse />
-                <Metric label="Promoter Holding" value="62%" threshold={50} />
-                <Metric label="Interest Coverage" value="12x" threshold={3} />
+                <Metric label="ROCE (5yr Avg)" value={`${stock.roce_5yr_avg || 0}%`} threshold={15} />
+                <Metric label="Debt-to-Equity" value={`${stock.debt_to_equity || 0}`} threshold={0.6} inverse />
+                {/* These fields might not be in Stock interface yet based on schema seeing, assuming they exist or need to be handled gracefully if missing */}
+                <Metric label="Market Cap" value={`₹${(stock.market_cap_crores / 1000).toFixed(1)}k Cr`} threshold={0} />
+                <Metric label="P/E Ratio" value={`${stock.pe_ratio || 0}x`} threshold={0} inverse />
             </CardContent>
         </Card>
     );

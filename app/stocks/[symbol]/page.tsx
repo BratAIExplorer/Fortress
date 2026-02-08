@@ -36,7 +36,7 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
                         <p className="text-xl text-muted-foreground">{stock.name}</p>
                     </div>
                     <div className="text-right">
-                        <div className="text-3xl font-mono font-bold">₹{stock.current_price || stock.price}</div>
+                        <div className="text-3xl font-mono font-bold">₹{stock.current_price.toLocaleString()}</div>
                         <div className="text-sm text-green-500 font-medium">Live</div>
                     </div>
                 </div>

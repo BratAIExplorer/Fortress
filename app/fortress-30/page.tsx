@@ -5,6 +5,7 @@ import { StockCard } from "@/components/fortress/StockCard";
 import { getStocks } from "@/app/actions";
 import { Shield } from "lucide-react";
 import { WisdomWidget } from "@/components/learning/WisdomWidget";
+import { Stock } from "@/lib/types";
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +42,7 @@ export default async function Fortress30Page() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        {stocks.map((stock: any, index: number) => (
+                        {stocks.map((stock: Stock, index: number) => (
                             <StockCardWrapper key={stock.id} stock={stock} index={index} />
                         ))}
 
@@ -56,7 +57,7 @@ export default async function Fortress30Page() {
     );
 }
 
-function StockCardWrapper({ stock, index }: { stock: any, index: number }) {
+function StockCardWrapper({ stock, index }: { stock: Stock, index: number }) {
     return (
         <div className="h-full">
             <StockCard stock={stock} />

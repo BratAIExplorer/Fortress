@@ -5,10 +5,16 @@ import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { mockStocks } from "@/lib/mock-data";
 import { concepts } from "@/lib/seed-concepts";
+import { Stock, StockWithThesis, Concept } from "@/lib/types";
 
-export async function getStocks() {
+// Helper to reduce duplication
+async function getSupabase() {
     const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    return createClient(cookieStore);
+}
+
+export async function getStocks(): Promise<Stock[]> {
+    const supabase = await getSupabase();
 
     const { data: stocks, error } = await supabase
         .from("stocks")
@@ -17,16 +23,14 @@ export async function getStocks() {
 
     if (error) {
         console.error("Error fetching stocks:", error);
-        // Fallback to mock data if DB fails or is empty, to prevent broken UI during dev
-        return mockStocks;
+        throw new Error(`Failed to fetch stocks: ${error.message}`);
     }
 
-    return stocks.length > 0 ? stocks : mockStocks;
+    return stocks || [];
 }
 
-export async function getStockBySymbol(symbol: string) {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+export async function getStockBySymbol(symbol: string): Promise<StockWithThesis | null> {
+    const supabase = await getSupabase();
 
     // First fetch the stock
     const { data: stock, error: stockError } = await supabase
@@ -35,10 +39,11 @@ export async function getStockBySymbol(symbol: string) {
         .ilike("symbol", symbol)
         .single();
 
-    if (stockError || !stock) {
+    if (stockError) {
         console.error("Error fetching stock:", stockError);
-        // Fallback to mock
-        return mockStocks.find(s => s.symbol.toLowerCase() === symbol.toLowerCase()) || null;
+        // If row not found, return null (404), otherwise throw
+        if (stockError.code === 'PGRST116') return null;
+        throw new Error(`Failed to fetch stock ${symbol}: ${stockError.message}`);
     }
 
     // Then fetch the thesis
@@ -48,12 +53,17 @@ export async function getStockBySymbol(symbol: string) {
         .eq("stock_id", stock.id)
         .single();
 
+    // It's possible a stock exists without a thesis? If so, handle gracefully.
+    // However, if DB error (not just missing), we should log it.
+    if (thesisError && thesisError.code !== 'PGRST116') {
+        console.error("Error fetching thesis:", thesisError);
+    }
+
     return { ...stock, thesis: thesis || null };
 }
 
 export async function seedDatabase() {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabase();
 
     // 1. Insert Stocks
     for (const stock of mockStocks) {
@@ -67,8 +77,8 @@ export async function seedDatabase() {
                 sector: stock.sector,
                 current_price: stock.price,
                 market_cap_crores: stock.market_cap,
-                quality_score: stock.quality_score, // We'll map this schema field freely
-                megatrend: stock.megatrend, // Postgres array
+                quality_score: stock.quality_score,
+                megatrend: stock.megatrend,
                 is_active: stock.status === 'Active'
             }).select().single();
 
@@ -102,26 +112,30 @@ export async function seedDatabase() {
 }
 
 // Data Fetching for Concepts
-export async function getConcepts() {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+export async function getConcepts(): Promise<Concept[]> {
+    const supabase = await getSupabase();
 
-    const { data } = await supabase.from('concepts').select('*');
+    const { data, error } = await supabase.from('concepts').select('*');
+    if (error) {
+        console.error("Error fetching concepts:", error);
+        throw new Error(`Failed to fetch concepts: ${error.message}`);
+    }
     return data || [];
 }
 
-export async function getRandomWisdom() {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+export async function getRandomWisdom(): Promise<Concept | null> {
+    const supabase = await getSupabase();
 
-    // Postgres doesn't have a clean "RANDOM()" in simple Supabase client select without RPC, 
-    // so we'll fetch a small batch and random pick in JS for this MVP scale
-    // In production, use .rpc('get_random_concept')
-    const { data } = await supabase.from('concepts').select('*');
+    // In production, use .rpc('get_random_concept') if available
+    const { data, error } = await supabase.from('concepts').select('*');
+
+    if (error) {
+        console.error("Error fetching wisdom:", error);
+        return null; // Graceful degradation for widgets
+    }
 
     if (!data || data.length === 0) {
-        // Fallback if DB empty
-        return concepts[Math.floor(Math.random() * concepts.length)];
+        return null;
     }
 
     return data[Math.floor(Math.random() * data.length)];
