@@ -2,8 +2,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+    DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
     // Optional for now but recommended for admin routes
     ADMIN_SECRET: z.string().optional(),
 });
