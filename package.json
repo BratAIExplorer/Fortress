@@ -1,4 +1,3 @@
-```json
 {
   "name": "fortress-app",
   "version": "0.1.0",
@@ -10,7 +9,10 @@
     "lint": "next lint",
     "drizzle:generate": "drizzle-kit generate",
     "drizzle:push": "drizzle-kit push",
-    "drizzle:studio": "drizzle-kit studio"
+    "drizzle:studio": "drizzle-kit studio",
+    "deploy:start": "pm2 start ecosystem.config.js",
+    "deploy:reload": "pm2 reload ecosystem.config.js",
+    "deploy:stop": "pm2 delete ecosystem.config.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
@@ -35,6 +37,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pm2": "^6.0.14",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
