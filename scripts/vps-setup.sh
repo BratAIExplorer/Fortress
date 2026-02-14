@@ -33,8 +33,14 @@ echo "🛡️ Configuring Firewall..."
 sudo ufw allow OpenSSH
 sudo ufw enable
 
+# 7. Create App Directory (Isolation)
+echo "file_folder: Creating /opt/fortress..."
+sudo mkdir -p /opt/fortress
+sudo chown -R $USER:$USER /opt/fortress
+sudo chmod -R 755 /opt/fortress
+
 echo "✅ Setup Complete!"
 echo "Next steps:"
-echo "1. Create your database user: sudo -u postgres createuser --interactive"
-echo "2. Clone your repo: git clone <your-repo-url>"
-echo "3. Run your app!"
+echo "1. Clone into the new folder: git clone <repo_url> /opt/fortress/app"
+echo "2. Create your database user: sudo -u postgres createuser --interactive"
+echo "3. Run your app from /opt/fortress/app"
