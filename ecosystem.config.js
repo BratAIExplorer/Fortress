@@ -2,8 +2,8 @@ module.exports = {
     apps: [
         {
             name: "fortress-app",
-            script: "server.js",
-            cwd: "/opt/fortress/app/.next/standalone",
+            script: ".next/standalone/server.js",
+            cwd: "/opt/fortress/app",
             env_file: "/opt/fortress/app/.env",
             env: {
                 NODE_ENV: "production",
