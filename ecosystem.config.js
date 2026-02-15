@@ -12,7 +12,7 @@ module.exports = {
                 // PM2 will load these when you run with --env production
                 // But .env.local usually overrides these
             },
-            env_file: "/opt/fortress/app/.env.local",
+            env_file: "/opt/fortress/app/.env",
             cwd: "/opt/fortress/app", // Explicit path on VPS
             // Optimization
             instances: 1, // Start with 1 instance to save RAM on VPS
