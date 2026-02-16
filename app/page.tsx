@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, TrendingUp, BookOpen, Database } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -17,8 +18,12 @@ export default function Home() {
             <span className="text-lg font-bold font-serif tracking-tight">Fortress Intelligence</span>
           </div>
           <nav className="flex items-center gap-4">
-            <Button variant="ghost" size="sm">Methodology</Button>
-            <Button variant="default" size="sm">Member Login</Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/methodology">Methodology</Link>
+            </Button>
+            <Button variant="default" size="sm" asChild>
+              <Link href="/admin">Member Login</Link>
+            </Button>
           </nav>
         </div>
       </header>
@@ -65,11 +70,15 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Button size="lg" className="gap-2">
-            Explore the Fortress 30 <ArrowRight className="h-4 w-4" />
+          <Button size="lg" className="gap-2" asChild>
+            <Link href="/fortress-30">
+              Explore the Fortress 30 <ArrowRight className="h-4 w-4" />
+            </Link>
           </Button>
-          <Button variant="outline" size="lg">
-            Read the Constitution
+          <Button variant="outline" size="lg" asChild>
+            <Link href="/constitution">
+              Read the Constitution
+            </Link>
           </Button>
         </motion.div>
       </section>
