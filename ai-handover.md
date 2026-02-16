@@ -1,10 +1,13 @@
-# Fortress Intelligence: AI Handover Document
+# Fortress Intelligence: Senior AI Handover & Infrastructure Blueprint
 
-## Project Overview
-Fortress Intelligence is a Next.js application migrated from Supabase to a self-hosted PostgreSQL environment. It utilizes Drizzle ORM for database management and PM2/Nginx for infrastructure.
+## 🎯 Product Vision (PO Perspective)
+Fortress Intelligence is designed as a mission-critical financial analysis engine. The infrastructure Goal is **Zero-Interference Hosting**. The current setup allows the business to scale to dozens of independent "Fortresses" (client instances or new projects) on a single VPS with institutional-grade isolation.
 
-## Infrastructure Strategy: Multi-Project Isolation
-The project is built for professional growth on a single VPS. It uses a **Vertical Isolation** strategy:
+## 🏗️ Architecture & Isolation Strategy
+We utilize a **Vertical Sandbox** approach:
+- **Process Isolation (PM2)**: Each app is a distinct OS process.
+- **Dependency Isolation (Standalone Build)**: We use Next.js `standalone` to lock dependencies per project, preventing "shared library" hell.
+- **Port Mapping**: A structured port-range strategy (3000, 3001, etc.) handled by Nginx.
 - **Process Level**: Each project runs in a dedicated PM2 process with its own internal port (3000, 3001, etc.).
 - **Path Level**: Projects are isolated in `/opt/<project-name>` to avoid permission and directory mess.
 - **Network Level**: Nginx acts as a reverse proxy, mapping external domains/IPs to specific internal ports.
