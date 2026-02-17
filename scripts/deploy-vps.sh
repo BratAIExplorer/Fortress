@@ -10,9 +10,9 @@ echo "🚀 Starting Deployment..."
 echo "📦 Pulling latest changes..."
 git pull origin main
 
-# 2. Install dependencies (in case of new packages)
+# 2. Install dependencies
 echo "📚 Installing dependencies..."
-npm ci
+npm install
 
 # 3. Build the Next.js app
 echo "🏗️ Building application..."
