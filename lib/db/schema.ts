@@ -38,6 +38,34 @@ export const stocks = pgTable("stocks", {
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+// 1b. SCANS TABLE (History & Status)
+export const scans = pgTable("scans", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    runAt: timestamp("run_at", { withTimezone: true }).defaultNow(),
+    status: text("status").notNull(), // 'PENDING', 'RUNNING', 'COMPLETED', 'FAILED'
+    totalScanned: integer("total_scanned"),
+    durationMs: integer("duration_ms"),
+    triggeredBy: text("triggered_by"), // 'MANUAL' | 'CRON'
+    errorMessage: text("error_message"),
+});
+
+// 1c. SCANRESULTS TABLE (Deep Snapshots)
+export const scanResults = pgTable("scan_results", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scanId: uuid("scan_id").notNull().references(() => scans.id, { onDelete: "cascade" }),
+    symbol: text("symbol").notNull(),
+    priceAtScan: numeric("price_at_scan"),
+    l1Pass: boolean("l1_pass"),
+    l2Pass: boolean("l2_pass"),
+    l3Pass: boolean("l3_pass"),
+    l4Pass: boolean("l4_pass"),
+    l5Pass: boolean("l5_pass"),
+    totalScore: integer("total_score"),
+    category: text("category"), // '52W_LOW', 'PENNY', 'SUB20', 'OFFLINE'
+    rankInCategory: integer("rank_in_category"),
+});
+
+
 // 2. THESES TABLE (The "Why" - Educational Layer)
 export const theses = pgTable("theses", {
     id: uuid("id").primaryKey().defaultRandom(),

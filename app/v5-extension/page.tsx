@@ -1,9 +1,10 @@
-
-import { getV5LowStocks, getV5PennyStocks, getV5SubTenStocks } from "@/app/actions";
+import { getV5LowStocks, getV5PennyStocks, getV5SubTenStocks, getV5TopMutualFunds, getV5TopIndexFunds, getV5TopFortressPicks, getGlossaryData } from "@/app/actions";
 import type { V5Stock } from "@/lib/types";
 import { V5StockCard } from "@/components/fortress/V5StockCard";
+import { V5TopPicks } from "@/components/fortress/V5TopPicks";
+import { V5Glossary } from "@/components/fortress/V5Glossary";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, TrendingDown, Coins, Zap } from "lucide-react";
+import { Shield, TrendingDown, Coins, Zap, Star, Info } from "lucide-react";
 import { Navbar } from "@/components/fortress/Navbar";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,10 @@ export default async function V5ExtensionPage() {
     const lowStocks = await getV5LowStocks();
     const pennyStocks = await getV5PennyStocks();
     const subTenStocks = await getV5SubTenStocks();
+    const topMF = await getV5TopMutualFunds();
+    const topIndex = await getV5TopIndexFunds();
+    const topPicks = await getV5TopFortressPicks();
+    const glossary = await getGlossaryData();
 
     return (
         <div className="min-h-screen bg-[#050505] text-slate-200 pb-20 selection:bg-primary/30">
@@ -45,6 +50,14 @@ export default async function V5ExtensionPage() {
                             <TabsTrigger value="speculative" className="data-[state=active]:bg-primary h-full px-6 transition-all">
                                 <Zap className="h-4 w-4 mr-2" />
                                 Sub-₹10 Spec
+                            </TabsTrigger>
+                            <TabsTrigger value="picks" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black h-full px-6 transition-all">
+                                <Star className="h-4 w-4 mr-2" />
+                                Top Picks & MF
+                            </TabsTrigger>
+                            <TabsTrigger value="glossary" className="data-[state=active]:bg-cyan-600 h-full px-6 transition-all">
+                                <Info className="h-4 w-4 mr-2" />
+                                Glossary
                             </TabsTrigger>
                         </TabsList>
 
@@ -89,6 +102,14 @@ export default async function V5ExtensionPage() {
                                 Sub-₹10 stocks are included for educational transparency. These companies have significant structural issues or extreme debt. While multi-bagger potential exists in recovery, the probability of 100% principal loss is high. Not recommended for core portfolios.
                             </p>
                         </div>
+                    </TabsContent>
+
+                    <TabsContent value="picks" className="mt-0 transition-all duration-500 data-[state=inactive]:opacity-0 data-[state=active]:opacity-100">
+                        <V5TopPicks picks={topPicks} mutualFunds={topMF} indexFunds={topIndex} />
+                    </TabsContent>
+
+                    <TabsContent value="glossary" className="mt-0 transition-all duration-500 data-[state=inactive]:opacity-0 data-[state=active]:opacity-100">
+                        <V5Glossary data={glossary} />
                     </TabsContent>
                 </Tabs>
             </main>

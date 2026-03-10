@@ -2,10 +2,11 @@
 
 import { db, schema } from "@/lib/db/client";
 import { eq, ilike, sql } from "drizzle-orm";
-import { v5LowStocks, v5PennyStocks, v5SubTenStocks, mockStocks } from "@/lib/mock-data";
-import { V5Stock } from "@/lib/types";
+import { v5LowStocks, v5PennyStocks, v5SubTenStocks, mockStocks, v5TopMutualFunds, v5TopIndexFunds, v5TopFortressPicks, glossaryData } from "@/lib/mock-data";
+import { V5Stock, MutualFund, IndexFund, TopPick, Glossary } from "@/lib/types";
 import { concepts as seedConcepts } from "@/lib/seed-concepts";
 import { Stock, StockWithThesis, Concept } from "@/lib/types";
+
 
 export async function getStocks(): Promise<Stock[]> {
     const stocks = await db
@@ -209,34 +210,62 @@ function mapV5Row(s: typeof schema.stocks.$inferSelect): V5Stock {
 }
 
 export async function getV5LowStocks(): Promise<V5Stock[]> {
-    const results = await db
-        .select()
-        .from(schema.stocks)
-        .where(eq(schema.stocks.v5Category, "low"));
+    try {
+        const results = await db
+            .select()
+            .from(schema.stocks)
+            .where(eq(schema.stocks.v5Category, "low"));
 
-    if (results.length > 0) return results.map(mapV5Row);
-    // Fallback to mock until DB is seeded
+        if (results.length > 0) return results.map(mapV5Row);
+    } catch (error) {
+        console.error("Error fetching V5 Low stocks from DB:", error);
+    }
     return v5LowStocks as V5Stock[];
 }
 
 export async function getV5PennyStocks(): Promise<V5Stock[]> {
-    const results = await db
-        .select()
-        .from(schema.stocks)
-        .where(eq(schema.stocks.v5Category, "penny"));
+    try {
+        const results = await db
+            .select()
+            .from(schema.stocks)
+            .where(eq(schema.stocks.v5Category, "penny"));
 
-    if (results.length > 0) return results.map(mapV5Row);
+        if (results.length > 0) return results.map(mapV5Row);
+    } catch (error) {
+        console.error("Error fetching V5 Penny stocks from DB:", error);
+    }
     return v5PennyStocks as V5Stock[];
 }
 
 export async function getV5SubTenStocks(): Promise<V5Stock[]> {
-    const results = await db
-        .select()
-        .from(schema.stocks)
-        .where(eq(schema.stocks.v5Category, "sub_ten"));
+    try {
+        const results = await db
+            .select()
+            .from(schema.stocks)
+            .where(eq(schema.stocks.v5Category, "sub_ten"));
 
-    if (results.length > 0) return results.map(mapV5Row);
+        if (results.length > 0) return results.map(mapV5Row);
+    } catch (error) {
+        console.error("Error fetching V5 Sub-Ten stocks from DB:", error);
+    }
     return v5SubTenStocks as V5Stock[];
+}
+
+export async function getV5TopMutualFunds(): Promise<MutualFund[]> {
+    // For now returning mock as we haven't added these to DB yet
+    return v5TopMutualFunds;
+}
+
+export async function getV5TopIndexFunds(): Promise<IndexFund[]> {
+    return v5TopIndexFunds;
+}
+
+export async function getV5TopFortressPicks(): Promise<TopPick[]> {
+    return v5TopFortressPicks;
+}
+
+export async function getGlossaryData(): Promise<Glossary> {
+    return glossaryData;
 }
 
 export async function seedV5Stocks(): Promise<{ success: boolean; inserted: number }> {

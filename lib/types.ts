@@ -96,3 +96,76 @@ export interface Concept {
     category?: string;
     source?: string;
 }
+
+export interface MutualFund {
+    name: string;
+    amc: string;
+    category: string;
+    cagr5y: number;
+    cagr3y: number;
+    aum: string;
+    minSIP: string;
+    risk: string;
+    why: string;
+    link?: string;
+}
+
+export interface IndexFund {
+    name: string;
+    category: string;
+    expense: string;
+    tracks: string;
+    why: string;
+    cagr5y: number;
+}
+
+export interface TopPick {
+    symbol: string;
+    name: string;
+    score: number;
+    tag: string;
+    roce: number;
+    de: number;
+    sector: string;
+    why: string;
+}
+
+export interface GlossaryTag {
+    name: string;
+    color: string;
+    emoji: string;
+    action: string;
+    plain: string;
+    recommendation: string;
+}
+
+export interface GlossaryRiskLevel {
+    level: string;
+    color: string;
+    emoji: string;
+    plain: string;
+    examples: string;
+}
+
+export interface GlossaryLayer {
+    layer: string;
+    icon: string;
+    color: string;
+    plain: string;
+    simple: string;
+}
+
+export interface GlossaryUpdate {
+    freq: string;
+    items: string[];
+    color: string;
+    why: string;
+    next: string;
+}
+
+export interface Glossary {
+    tags: GlossaryTag[];
+    riskLevels: GlossaryRiskLevel[];
+    fortressLayers: GlossaryLayer[];
+    updates: GlossaryUpdate[];
+}
