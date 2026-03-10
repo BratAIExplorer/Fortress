@@ -30,7 +30,7 @@ TabsList.displayName = "TabsList";
 const TabsTrigger = React.forwardRef<
     HTMLButtonElement,
     React.ButtonHTMLAttributes<HTMLButtonElement> & { value: string }
->(({ className, value: _value, ...props }, ref) => {
+>(({ className, value: __value, ...props }, ref) => {
 
     return (
         <button
@@ -48,7 +48,7 @@ TabsTrigger.displayName = "TabsTrigger";
 const TabsContent = React.forwardRef<
     HTMLDivElement,
     React.HTMLAttributes<HTMLDivElement> & { value: string }
->(({ className, value: _value, ...props }, ref) => (
+>(({ className, value: __value, ...props }, ref) => (
     <div
         ref={ref}
         className={cn(
