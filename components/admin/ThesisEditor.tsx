@@ -1,15 +1,13 @@
-
 "use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateThesis } from "@/app/actions";
 // Removed sonner import as it's not installed
 
-export function ThesisEditor({ thesis, onSave }: { thesis: any, onSave: () => void }) {
+export default function ThesisEditor({ thesis }: { thesis: any }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         oneLiner: thesis.oneLiner,
@@ -24,7 +22,7 @@ export function ThesisEditor({ thesis, onSave }: { thesis: any, onSave: () => vo
         setLoading(true);
         try {
             await updateThesis(thesis.id, formData);
-            onSave();
+            alert("Thesis updated successfully");
             // toast.success("Thesis updated successfully");
         } catch (error) {
             console.error(error);

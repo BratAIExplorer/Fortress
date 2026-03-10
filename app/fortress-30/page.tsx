@@ -27,7 +27,6 @@ export default async function Fortress30Page() {
                 </header>
 
                 <main className="container px-4 sm:px-8 pt-12">
-
                     <div className="mb-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
                         <div className="lg:col-span-2 text-left">
                             <h1 className="text-4xl font-serif font-bold tracking-tight mb-4">The Conviction List</h1>
@@ -42,13 +41,13 @@ export default async function Fortress30Page() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        {stocks.map((stock: Stock, index: number) => (
-                            <StockCardWrapper key={stock.id} stock={stock} index={index} />
+                        {stocks.map((stock: Stock) => (
+                            <StockCardWrapper key={stock.id} stock={stock} />
                         ))}
 
                         {/* Fillers if less than 15 stocks */}
                         {stocks.length < 15 && Array.from({ length: 15 - stocks.length }).map((_, i) => (
-                            <PlaceholderCard key={`placeholder-${i}`} index={i} />
+                            <PlaceholderCard key={`placeholder-${i}`} />
                         ))}
                     </div>
                 </main>
@@ -57,7 +56,7 @@ export default async function Fortress30Page() {
     );
 }
 
-function StockCardWrapper({ stock, index }: { stock: Stock, index: number }) {
+function StockCardWrapper({ stock }: { stock: Stock }) {
     return (
         <div className="h-full">
             <StockCard stock={stock} />
@@ -65,7 +64,7 @@ function StockCardWrapper({ stock, index }: { stock: Stock, index: number }) {
     )
 }
 
-function PlaceholderCard({ index }: { index: number }) {
+function PlaceholderCard() {
     return (
         <div className="opacity-30 pointer-events-none grayscale h-40 rounded-xl border border-dashed border-muted-foreground/30 flex items-center justify-center">
             <span className="text-xs text-muted-foreground">Open Slot</span>

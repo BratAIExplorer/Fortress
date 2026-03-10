@@ -29,10 +29,10 @@ export default function LoginPage() {
                 callbackUrl: "/admin",
             }) as any;
 
-            if (result?.error) {
+            if ((result as { error?: string })?.error) {
                 setError("Invalid credentials");
             }
-        } catch (err) {
+        } catch (_err) {
             setError("Something went wrong");
         } finally {
             setLoading(false);

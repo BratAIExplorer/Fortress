@@ -12,26 +12,18 @@ const playfair = Playfair_Display({
 });
 
 export default function GlobalError({
-    error,
     reset,
 }: {
-    error: Error & { digest?: string };
+    _error: Error & { digest?: string };
     reset: () => void;
 }) {
     return (
-        <html lang="en" className="dark">
-            <body
-                className={cn(
-                    "min-h-screen bg-background font-sans antialiased flex flex-col items-center justify-center text-center p-4",
-                    inter.variable,
-                    playfair.variable
-                )}
-            >
-                <h2 className="text-3xl font-bold font-serif mb-4">Critical Error</h2>
-                <p className="text-muted-foreground max-w-md mb-8">
-                    The application encountered a critical error and cannot recover automatically.
-                </p>
-                <Button onClick={() => reset()}>Refresh Application</Button>
+        <html>
+            <body>
+                <div className="flex flex-col items-center justify-center min-h-screen">
+                    <h2>Something went wrong!</h2>
+                    <button onClick={() => reset()}>Try again</button>
+                </div>
             </body>
         </html>
     );

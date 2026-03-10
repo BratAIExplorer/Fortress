@@ -1,12 +1,10 @@
+
 import { getTheses } from "@/app/actions";
-import { ThesisEditor } from "@/components/admin/ThesisEditor";
+import ThesisEditor from "@/components/admin/ThesisEditor";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
-export const dynamic = "force-dynamic";
-
-export default async function ThesesPage() {
+export default async function AdminThesesPage() {
     const theses = await getTheses();
 
     return (
@@ -21,21 +19,18 @@ export default async function ThesesPage() {
                 </Badge>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {theses.map((thesis: any) => (
                     <Card key={thesis.id} className="border-border/50 hover:border-primary/30 transition-colors">
                         <CardHeader className="pb-3 text-left">
                             <div className="flex items-center justify-between mb-2">
-                                <Badge variant="secondary" className="font-mono">{thesis.symbol}</Badge>
+                                <Badge variant="secondary" className="font-mono">{thesis.stockSymbol}</Badge>
                                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">v5 Qualified</span>
                             </div>
-                            <CardTitle className="text-base line-clamp-1">{thesis.name}</CardTitle>
-                            <CardDescription className="line-clamp-2 text-xs italic">
-                                "{thesis.oneLiner}"
-                            </CardDescription>
+                            <CardTitle className="text-base line-clamp-1">{thesis.stockName}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <ThesisEditor thesis={thesis} onSave={() => { }} />
+                            <ThesisEditor thesis={thesis} />
                         </CardContent>
                     </Card>
                 ))}

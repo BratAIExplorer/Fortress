@@ -35,7 +35,7 @@ export function V5StockCard({ stock }: { stock: Stock }) {
                     {/* Key Stats Row */}
                     <div className="grid grid-cols-2 gap-2 text-[10px] bg-secondary/20 p-2 rounded-sm border border-border/50">
                         <div className="flex flex-col">
-                            <span className="text-muted-foreground uppercase">Price</span>
+                            <span className="text-muted-foreground italic">&ldquo;Why it fell&rdquo;</span>
                             <span className="font-bold text-foreground">₹{stock.current_price}</span>
                         </div>
                         <div className="flex flex-col text-right">
