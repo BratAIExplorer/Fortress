@@ -1,22 +1,45 @@
-"use client";
+import { getTheses } from "@/app/actions";
+import { ThesisEditor } from "@/components/admin/ThesisEditor";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+export const dynamic = "force-dynamic";
 
-export default function ThesesPage() {
+export default async function ThesesPage() {
+    const theses = await getTheses();
+
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold font-serif tracking-tight">Theses Management</h1>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Coming Soon</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">
-                        This module is currently under development. You can manage theses through the
-                        <strong> Stocks</strong> section by editing individual stock entries.
-                    </p>
-                </CardContent>
-            </Card>
+        <div className="space-y-6 max-w-5xl mx-auto pb-10">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold font-serif tracking-tight">Theses Management</h1>
+                    <CardDescription>Review and refine investment arguments for your conviction list.</CardDescription>
+                </div>
+                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
+                    {theses.length} Active Theses
+                </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {theses.map((thesis: any) => (
+                    <Card key={thesis.id} className="border-border/50 hover:border-primary/30 transition-colors">
+                        <CardHeader className="pb-3 text-left">
+                            <div className="flex items-center justify-between mb-2">
+                                <Badge variant="secondary" className="font-mono">{thesis.symbol}</Badge>
+                                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">v5 Qualified</span>
+                            </div>
+                            <CardTitle className="text-base line-clamp-1">{thesis.name}</CardTitle>
+                            <CardDescription className="line-clamp-2 text-xs italic">
+                                "{thesis.oneLiner}"
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ThesisEditor thesis={thesis} onSave={() => { }} />
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
         </div>
     );
 }

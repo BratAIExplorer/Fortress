@@ -15,6 +15,24 @@ export interface Stock {
     is_active: boolean;
     created_at?: string;
     updated_at?: string;
+    // Extension fields for v5 compatibility
+    tag?: string;
+    risk?: string;
+    industry?: string;
+    drop52w?: number;
+    moat?: string;
+    l1?: number;
+    l2?: number;
+    l3?: number;
+    l4?: number;
+    l5?: number;
+    why_down?: string;
+    why_buy?: string;
+    penny_why?: string;
+    multi_bagger_case?: string;
+    killer_risk?: string;
+    fortress_note?: string;
+    ocf?: string;
 }
 
 export interface Thesis {

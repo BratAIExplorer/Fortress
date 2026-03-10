@@ -2,7 +2,7 @@
 
 import { db, schema } from "@/lib/db/client";
 import { eq, ilike, sql } from "drizzle-orm";
-import { mockStocks } from "@/lib/mock-data";
+import { v5LowStocks, v5PennyStocks, v5SubTenStocks, mockStocks } from "@/lib/mock-data";
 import { concepts as seedConcepts } from "@/lib/seed-concepts";
 import { Stock, StockWithThesis, Concept } from "@/lib/types";
 
@@ -168,4 +168,51 @@ export async function getRandomWisdom(): Promise<Concept | null> {
         category: c.category ?? undefined,
         source: c.source ?? undefined,
     };
+}
+
+export async function getV5LowStocks(): Promise<Stock[]> {
+    return v5LowStocks;
+}
+
+export async function getV5PennyStocks(): Promise<Stock[]> {
+    return v5PennyStocks;
+}
+
+export async function getV5SubTenStocks(): Promise<Stock[]> {
+    return v5SubTenStocks;
+}
+
+export async function getTheses() {
+    const results = await db
+        .select({
+            id: schema.theses.id,
+            symbol: schema.stocks.symbol,
+            name: schema.stocks.name,
+            oneLiner: schema.theses.oneLiner,
+            investmentLogic: schema.theses.investmentLogic,
+            risks: schema.theses.risks,
+            financialStrengthScore: schema.theses.financialStrengthScore,
+            moatSource: schema.theses.moatSource,
+        })
+        .from(schema.theses)
+        .innerJoin(schema.stocks, eq(schema.theses.stockId, schema.stocks.id));
+
+    return results;
+}
+
+export async function updateThesis(id: string, data: Partial<{
+    oneLiner: string,
+    investmentLogic: string,
+    risks: string,
+    financialStrengthScore: number,
+    moatSource: string
+}>) {
+    await db.update(schema.theses)
+        .set({
+            ...data,
+            updatedAt: new Date(),
+        })
+        .where(eq(schema.theses.id, id));
+
+    return { success: true };
 }

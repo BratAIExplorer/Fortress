@@ -50,7 +50,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          We don't predict prices. <br />
+          We don&apos;t predict prices. <br />
           <span className="text-primary">We publish frameworks.</span>
         </motion.h1>
 

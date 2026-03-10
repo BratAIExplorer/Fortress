@@ -19,7 +19,7 @@ export function WhyBox({ stock }: { stock: import("@/lib/types").StockWithThesis
                 <div>
                     <h4 className="font-medium text-sm text-muted-foreground mb-1">One-Liner</h4>
                     <p className="text-lg font-medium leading-relaxed">
-                        "{stock.thesis.one_liner}"
+                        &quot;{stock.thesis.one_liner}&quot;
                     </p>
                 </div>
 

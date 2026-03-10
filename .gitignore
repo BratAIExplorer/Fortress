@@ -39,3 +39,6 @@ next-env.d.ts
 # editor
 .vscode
 .idea
+
+scripts/debug-env.js
+test_vps/
