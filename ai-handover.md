@@ -4,121 +4,172 @@
 Fortress Intelligence is a mission-critical financial analysis engine for Indian equity markets. The infrastructure goal is **Zero-Interference Hosting**. The current setup allows the business to scale to dozens of independent "Fortresses" (client instances or new projects) on a single VPS with institutional-grade isolation.
 
 ## 🏗️ Architecture & Isolation Strategy
-We utilize a **Vertical Sandbox** approach:
-- **Process Isolation (PM2)**: Each app is a distinct OS process.
-- **Dependency Isolation (Standalone Build)**: Next.js `standalone` output locks dependencies per project, preventing "shared library" hell.
-- **Port Mapping**: Structured port-range strategy (3000, 3001, etc.) handled by Nginx.
-- **Data Level**: Every project uses a unique PostgreSQL user and database (see `scripts/create-db-user.sql`).
+**Vertical Sandbox** approach:
+- **Process Isolation (PM2)**: Each app is a distinct OS process named `fortress`, managed by `/opt/fortress/ecosystem.config.js`.
+- **Dependency Isolation**: Next.js `standalone` output configured in `next.config.ts`.
+- **Port**: App runs on **port 3000** on the VPS (`srv1327289`, Hostinger).
+- **Data Level**: PostgreSQL with dedicated user `fortress_user` and database `fortress`.
+
+## 🖥️ VPS Production State (as of Mar 2026)
+- **Server**: `srv1327289` (Hostinger VPS)
+- **App path**: `/opt/fortress/`
+- **Git remote**: `https://github.com/BratAIExplorer/Fortress.git` (branch: `main`)
+- **PM2 process**: `fortress` (id 0), running `npm start` from `/opt/fortress`
+- **Database**: PostgreSQL — `fortress_user` @ `localhost:5432/fortress`
+- **Env file**: `/opt/fortress/.env.local` (not in git — must be maintained manually on VPS)
+- **Node**: v20.20.0 | **npm**: 10.8.2 | **PM2**: 6.0.14
+
+### Required `/opt/fortress/.env.local`
+```env
+DATABASE_URL=postgresql://fortress_user:YOUR_PASSWORD@localhost:5432/fortress
+ADMIN_SECRET=your-admin-panel-password
+AUTH_SECRET=your-32-char-random-string
+```
+⚠️ This file is **not in git**. If the VPS is rebuilt, recreate it manually before starting the app.
 
 ## 🚀 v5 Extension (Mar 2026)
-Specialized deep-value scans ported from manual JSX files into the Next.js data layer:
-- **Data Layer**: `Stock` type in `lib/types.ts` extended. A new `V5Stock` interface (extends `Stock`) is the strict type for all v5 card rendering — avoids polluting the core `Stock` type with optional fields.
-- **Institutional Scans**: `/v5-extension` route provides tabbed access to "52W Lows", "Qualified Penny", and "Sub-₹10 Speculative" lists.
-- **Admin layer**: `/admin/theses` portal enables CRUD operations on investment arguments, protected by NextAuth.js.
+Specialized deep-value scans ported from manual JSX files into the Next.js + PostgreSQL data layer:
+- **Data Layer**: `V5Stock` interface (extends `Stock`) in `lib/types.ts` — strict typing for v5 cards.
+- **Institutional Scans**: `/v5-extension` — tabbed access to "52W Lows" (19 stocks), "Qualified Penny" (4 stocks), "Sub-₹10 Speculative" (1 stock). **24 total seeded to DB.**
+- **Admin layer**: `/admin/theses` — CRUD on investment theses, protected by NextAuth.js.
+- **DB seeded**: ✅ `GET /api/seed` and `GET /api/seed?target=v5` both confirmed successful.
 
 ## 🔑 Authentication (NextAuth.js v5 / Auth.js v5)
-Migrated from Basic Auth to **NextAuth.js (Auth.js v5)**:
-- **Provider**: `CredentialsProvider` using `ADMIN_SECRET` env var as the password for account `admin`.
-- **CRITICAL**: If `ADMIN_SECRET` is not set, login is **blocked entirely** (returns null, logs CRITICAL error). There is NO hardcoded fallback. Always set this in `.env.local` and on the production VPS.
-- **Proxy**: Routes under `/admin` are protected by `proxy.ts` at the project root.
+- **Provider**: `CredentialsProvider` — username `admin`, password = `ADMIN_SECRET` env var.
+- **CRITICAL**: No hardcoded fallback. Login blocked entirely if `ADMIN_SECRET` is unset.
+- **Proxy file**: `proxy.ts` at project root (NOT `middleware.ts` — Next.js 16 renamed the convention).
 
 ```ts
-// proxy.ts (project root) — DO NOT rename to middleware.ts
+// proxy.ts — DO NOT rename to middleware.ts
 export { auth as proxy } from "@/auth"
 export const config = { matcher: ["/admin/:path*"] }
 ```
 
-### ⚠️ Next.js 16 Critical Convention
-**Use `proxy.ts`, NOT `middleware.ts`.** Next.js 16+ deprecated the `middleware` file convention in favour of `proxy`. If renamed to `middleware.ts`, the build will emit a deprecation warning. The export name must be `proxy` (not `middleware`). This was confirmed via build output: `ƒ Proxy (Middleware)`.
+### ⚠️ Next.js 16 Convention
+`proxy.ts` is the correct filename. `middleware.ts` is **deprecated** in Next.js 16 and triggers a build warning. Confirmed via: `ƒ Proxy (Middleware)` in build output.
 
-## 🗄️ Database Schema (Drizzle ORM + PostgreSQL)
-Schema is in `lib/db/schema.ts`. The `stocks` table was extended with v5 columns in Mar 2026:
+## 🗄️ Database (Drizzle ORM + PostgreSQL)
+Schema: `lib/db/schema.ts` — pushed to production via `drizzle-kit push`.
 
-**New v5 columns on `stocks`**: `v5_category` (text: `'low'` | `'penny'` | `'sub_ten'` | null), `tag`, `risk`, `industry`, `drop_52w`, `moat`, `l1`–`l5` (integer scores 1–5), `why_down`, `why_buy`, `penny_why`, `multi_bagger_case`, `killer_risk`, `fortress_note`, `ocf`.
+**v5 columns on `stocks` table** (added Mar 2026, already applied to prod):
+`v5_category`, `tag`, `risk`, `industry`, `drop_52w`, `moat`, `l1`–`l5`, `why_down`, `why_buy`, `penny_why`, `multi_bagger_case`, `killer_risk`, `fortress_note`, `ocf`
 
-**To apply schema to production DB:**
+**Apply schema changes to prod DB:**
 ```bash
-npm run drizzle:push
+# Must prefix DATABASE_URL — drizzle-kit doesn't auto-load .env.local
+DATABASE_URL=postgresql://fortress_user:PASSWORD@localhost:5432/fortress npm run drizzle:push
 ```
 
-## 🌱 Data Seeding
-Two seed endpoints on `/api/seed`:
+## 🌱 Seed Endpoints
+| URL | Action | Status |
+|-----|--------|--------|
+| `GET /api/seed` | Core stocks + concepts | ✅ Done |
+| `GET /api/seed?target=v5` | 24 v5 stocks to PostgreSQL | ✅ Done (inserted: 24) |
 
-| URL | Action |
-|-----|--------|
-| `GET /api/seed` | Seeds core stocks + concepts from `mock-data.ts` |
-| `GET /api/seed?target=v5` | Seeds all v5 stocks (low, penny, sub_ten) into PostgreSQL |
+**v5 getter logic**: Queries `v5_category` column in DB first. Falls back to `lib/mock-data.ts` if no rows found (safe for fresh deployments before seeding).
 
-**v5 getter logic** (in `app/actions.ts`): Queries DB for `v5_category` rows first. Falls back to `lib/mock-data.ts` gracefully if the DB has not been seeded yet. After running `?target=v5`, data comes from PostgreSQL automatically.
+## 🚢 CI/CD Pipeline
+- **Repo**: `github.com/BratAIExplorer/Fortress`
+- **Workflow**: `.github/workflows/ci.yml`
+- **Trigger**: Every push to `main`
+- **Steps**: Build + lint → Deploy via native SSH to VPS
+
+### GitHub Secrets Required
+| Secret | Value |
+|--------|-------|
+| `VPS_HOST` | VPS IP address |
+| `VPS_USER` | `root` |
+| `VPS_SSH_KEY` | Full ed25519 private key from `/root/.ssh/fortress_deploy` |
+
+### SSH Key Location (VPS)
+```bash
+cat /root/.ssh/fortress_deploy        # private key → VPS_SSH_KEY secret
+cat /root/.ssh/fortress_deploy.pub    # verify this is in authorized_keys
+```
+
+### ⚠️ CI SSH Notes
+- Uses **native ubuntu SSH client** (NOT `appleboy/ssh-action` — its PEM parser is broken for ed25519).
+- Key is written via env var (`echo "$SSH_KEY"`) not inline secret — preserves newlines correctly.
+- `ssh-keyscan` handles host key verification automatically.
+
+### Deploy Script (on VPS)
+```bash
+cd /opt/fortress
+git pull origin main
+npm ci
+npm run build
+pm2 restart fortress --update-env || pm2 start npm --name "fortress" -- start
+pm2 save
+```
 
 ## 🎨 Visual Identity & UI
 - **Fonts**: DM Sans (Sans) + IBM Plex Mono (Mono) via `next/font/google`.
-- **Tailwind**: Font variables mapped in `globals.css`.
-- **Toast Notifications**: `sonner` v2 installed. `<Toaster>` is mounted in `app/layout.tsx`. Use `toast.success()` / `toast.error()` from `"sonner"` anywhere in the app.
-- **No external component library**: `Tabs`, `Input`, `Textarea`, `Button`, `Card` are custom primitives in `components/ui/`.
+- **Toast**: `sonner` v2 — `<Toaster>` in `app/layout.tsx`. Use `toast.success/error()` from `"sonner"`.
+- **No external UI library**: All primitives (`Tabs`, `Input`, `Textarea`, `Button`, `Card`) are custom in `components/ui/`.
 
 ## 📐 Type System
 ```
 Stock           — core DB-mapped type (lib/types.ts)
-V5Stock         — extends Stock, all v5 fields required (lib/types.ts)
+V5Stock         — extends Stock, v5 fields required (lib/types.ts)
 StockWithThesis — Stock + Thesis join result
-ThesisRow       — admin UI join type (symbol, name, oneLiner, etc.)
+ThesisRow       — admin UI join type (actions.ts)
 ```
-`V5StockCard` expects `V5Stock`. Do not pass a plain `Stock` — TypeScript will reject it.
-
-## CI/CD Pipeline
-- **GitHub Actions**: `.github/workflows/ci.yml`
-- **Workflow**: Build & lint on every push → Deploy via SSH on `main` push.
-- **Output**: Next.js `standalone` for minimal footprint.
-- **Pre-push discipline**: Always run `npm run lint && npm run build` locally before pushing. The Mar 2026 feature required 7 CI-fix commits due to skipping this — do not repeat.
+`V5StockCard` requires `V5Stock`. TypeScript will reject plain `Stock`.
 
 ## Key Technical Decisions
-1. **`proxy.ts` not `middleware.ts`**: Next.js 16 renamed the convention. `proxy.ts` is correct and clean.
-2. **`ADMIN_SECRET` is mandatory**: No hardcoded fallback. Login is blocked if env var is missing — this is by design.
-3. **v5 data has a DB fallback**: v5 getters try PostgreSQL first, fall back to mock if `v5_category` rows don't exist.
-4. **`getRandomWisdom` uses `ORDER BY RANDOM() LIMIT 1`**: O(1) DB query, not O(n) fetch-then-pick.
-5. **`V5Stock` interface**: Keeps core `Stock` clean. v5-specific fields are required on the `V5Stock` subtype.
-6. **`seedV5Stocks()` is upsert-safe**: Updates existing stocks with v5 fields if already in DB; inserts new ones otherwise.
+1. **`proxy.ts` not `middleware.ts`**: Next.js 16 convention. Never rename.
+2. **`ADMIN_SECRET` mandatory**: No fallback. Blocks login if unset — intentional.
+3. **v5 DB fallback**: `getV5*()` try DB first, fall back to mock-data. Safe pre-seed.
+4. **`getRandomWisdom` = `ORDER BY RANDOM() LIMIT 1`**: O(1), was O(n).
+5. **`V5Stock` interface**: Core `Stock` stays clean. v5 fields required on subtype.
+6. **`seedV5Stocks()` is upsert-safe**: Updates existing symbols, inserts new ones.
+7. **drizzle:push needs explicit DATABASE_URL**: Does not auto-load `.env.local`.
+8. **Native SSH in CI**: `appleboy/ssh-action` PEM parser broken for ed25519 keys.
 
-## ✅ Completion Status (Mar 2026 — Post Claude Code Session)
-- [x] v5 Data Migration: All manual entries from `fortress-v5.jsx` in `lib/mock-data.ts`
-- [x] Institutional UI: Shield/Warrior aesthetic in `/v5-extension`
-- [x] Admin Thesis Management: Full CRUD at `/admin/theses`
-- [x] NextAuth.js v5: `proxy.ts` protection, `ADMIN_SECRET` mandatory (no fallback)
-- [x] `V5Stock` type: Clean interface separation from core `Stock`
-- [x] `V5StockCard`: Fixed label — "CMP" now correctly describes current price (was "Why it fell")
-- [x] Toast system: `sonner` v2 installed, `<Toaster>` in layout, `ThesisEditor` uses `toast.success/error`
-- [x] `getRandomWisdom` efficiency: Now `ORDER BY RANDOM() LIMIT 1` — O(1)
-- [x] v5 schema columns: Added to `stocks` table in `schema.ts`
-- [x] `seedV5Stocks()` server action + `/api/seed?target=v5` endpoint
-- [x] "Curated Scan" badge: Replaced misleading "Live Engine" pulsing indicator
-- [x] Build: Clean — no errors, no warnings, no deprecations
+## ✅ Full Completion Status (Mar 10 2026)
+### Code
+- [x] v5 types: `V5Stock` interface, `Stock` kept clean
+- [x] v5 UI: `/v5-extension` with 3-tab deep value scans
+- [x] v5 data: `seedV5Stocks()` + `/api/seed?target=v5`
+- [x] v5 schema: 18 new columns on `stocks` table
+- [x] Admin: Full thesis CRUD at `/admin/theses`
+- [x] Auth: NextAuth.js v5, `proxy.ts`, no hardcoded secrets
+- [x] Toast: `sonner` v2, `ThesisEditor` uses `toast.success/error`
+- [x] Query efficiency: `getRandomWisdom` O(1)
+- [x] Label fix: `V5StockCard` "CMP" not "Why it fell"
+- [x] Badge fix: "Curated Scan" not "Live Engine"
+- [x] CI: Native SSH client replaces `appleboy/ssh-action`
+
+### Infrastructure
+- [x] VPS git repo initialized at `/opt/fortress`
+- [x] PostgreSQL `fortress_user` + `fortress` database confirmed
+- [x] `drizzle:push` applied — v5 schema live in production DB
+- [x] Core stocks + concepts seeded
+- [x] 24 v5 stocks seeded to PostgreSQL
+- [x] PM2 `fortress` process running on port 3000
+- [x] GitHub secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` set
 
 ## ⏳ Pending / Next Steps
-1. **Push schema to production PostgreSQL** (required before v5 seed):
-   ```bash
-   npm run drizzle:push
-   ```
-2. **Seed v5 stocks to production DB**:
-   ```bash
-   curl https://your-domain.com/api/seed?target=v5
-   ```
-3. **Mobile Polish**: Dense data cards in v5 extension need responsive review on small viewports.
-4. **Real-time Data**: Replace static curated scan data with a live market feed (NSE/BSE data provider).
-5. **Admin: v5 Stock Editor**: Currently `/admin` only manages theses. A UI to create/edit v5 stock entries would complete the admin layer.
+1. **Confirm CI pipeline green** — latest run `dd2ecfc` should be the first clean automated deploy.
+2. **Nginx reverse proxy** — currently app is on `:3000` directly. Set up Nginx to serve on port 80/443 with SSL.
+3. **Mobile polish** — v5 dense data cards need responsive review on small viewports.
+4. **Real-time data** — replace static curated scans with live NSE/BSE market data API.
+5. **Admin: v5 Stock Editor** — UI to create/edit v5 stock entries (currently read-only).
 
 ## Maintenance Commands
 ```bash
-# Full update cycle on VPS
-git pull origin main && npm ci && npm run build && pm2 reload fortress-app
+# On VPS — manual update
+cd /opt/fortress
+git pull origin main && npm ci && npm run build && pm2 restart fortress --update-env && pm2 save
 
-# Apply schema diff to PostgreSQL
-npm run drizzle:push
+# Schema changes (always prefix DATABASE_URL)
+DATABASE_URL=postgresql://fortress_user:PASSWORD@localhost:5432/fortress npm run drizzle:push
 
-# Seed v5 stocks (run after drizzle:push)
-curl http://localhost:3000/api/seed?target=v5
+# Reseed if needed
+curl http://localhost:3000/api/seed
+curl "http://localhost:3000/api/seed?target=v5"
 
 # Monitor
 pm2 status
-pm2 logs fortress-app
+pm2 logs fortress --lines 50
 ```
