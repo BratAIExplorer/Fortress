@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 
 import { getTheses, ThesisRow } from "@/app/actions";
 import ThesisEditor from "@/components/admin/ThesisEditor";
