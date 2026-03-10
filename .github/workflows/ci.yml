@@ -53,12 +53,46 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify SSH key is set
+        run: |
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "ERROR: VPS_SSH_KEY secret is empty"
+            exit 1
+          fi
+          echo "VPS_SSH_KEY length: ${#VPS_SSH_KEY}"
+          echo "VPS_HOST: ${{ secrets.VPS_HOST }}"
+          echo "VPS_USER: ${{ secrets.VPS_USER }}"
+          # Write key to temp file and inspect format
+          echo "${{ secrets.VPS_SSH_KEY }}" > /tmp/test_key.pem
+          echo "--- Key file head ---"
+          head -1 /tmp/test_key.pem
+          echo "--- Key file tail ---"
+          tail -1 /tmp/test_key.pem
+          echo "--- Line count ---"
+          wc -l /tmp/test_key.pem
+          # Check for CRLF corruption
+          if cat -A /tmp/test_key.pem | head -1 | grep -q '\^M'; then
+            echo "ERROR: Key has Windows CRLF line endings - this will break SSH parsing"
+          else
+            echo "Line endings: OK (LF only)"
+          fi
+          rm /tmp/test_key.pem
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Test VPS connectivity
+        run: |
+          echo "Testing TCP connectivity to VPS..."
+          nc -zv -w 5 ${{ secrets.VPS_HOST }} 22 && echo "Port 22 OPEN" || echo "Port 22 UNREACHABLE"
+
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          debug: true
           script: |
             cd /opt/fortress
             git pull origin main
