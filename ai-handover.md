@@ -89,7 +89,7 @@ cat /root/.ssh/fortress_deploy.pub    # verify this is in authorized_keys
 
 ### ⚠️ CI SSH Notes
 - Uses **native ubuntu SSH client** (NOT `appleboy/ssh-action` — its PEM parser is broken for ed25519).
-- Key is written via env var (`echo "$SSH_KEY"`) not inline secret — preserves newlines correctly.
+- Key is written to `~/.ssh/deploy_key` with a forced trailing newline `(echo "$SSH_KEY"; echo) > ...` to ensure `libcrypto` compatibility in GitHub Actions runners.
 - `ssh-keyscan` handles host key verification automatically.
 
 ### Deploy Script (on VPS)
@@ -147,10 +147,11 @@ ThesisRow       — admin UI join type (actions.ts)
 - [x] Core stocks + concepts seeded
 - [x] 24 v5 stocks seeded to PostgreSQL
 - [x] PM2 `fortress` process running on port 3000
-- [x] GitHub secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` set
+- [x] GitHub secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` set (SSH Key format fix applied)
 
-## ⏳ Pending / Next Steps
-1. **Confirm CI pipeline green** — latest run `dd2ecfc` should be the first clean automated deploy.
+## ✅ Deployment Summary (Mar 10 2026)
+Institutional-grade sandbox live at `srv1327289`. NextAuth.js v5 proxying admin routes. DB fully seeded with 24 v5 stocks. CI/CD pipeline hardened with robust SSH key ingestion.
+1. **Verify CI pipeline green** — commit `35` (this update) includes the `libcrypto` SSH fix.
 2. **Nginx reverse proxy** — currently app is on `:3000` directly. Set up Nginx to serve on port 80/443 with SSL.
 3. **Mobile polish** — v5 dense data cards need responsive review on small viewports.
 4. **Real-time data** — replace static curated scans with live NSE/BSE market data API.
