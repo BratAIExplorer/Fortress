@@ -127,9 +127,28 @@ export async function POST() {
 }
 
 export async function GET() {
-    // For status polling if needed
+    // 1. Get the most recent scan
     const lastScan = await db.query.scans.findFirst({
         orderBy: [desc(schema.scans.runAt)],
     });
-    return NextResponse.json(lastScan || { status: "IDLE" });
+
+    if (!lastScan) return NextResponse.json({ status: "IDLE" });
+
+    // 2. If it's running, calculate real-time progress
+    if (lastScan.status === "RUNNING") {
+        const results = await db.select()
+            .from(schema.scanResults)
+            .where(eq(schema.scanResults.scanId, lastScan.id));
+
+        // The python engine reports 'total' at the start, but we might not have it in the scan record yet
+        // If we don't have totalScanned, we can't show percentage, but we can show count
+        return NextResponse.json({
+            ...lastScan,
+            currentCount: results.length,
+            // Estimated progress if we know the total (usually around 2000 for full scan)
+            progress: lastScan.totalScanned ? Math.round((results.length / lastScan.totalScanned) * 100) : null
+        });
+    }
+
+    return NextResponse.json(lastScan);
 }

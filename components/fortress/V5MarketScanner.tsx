@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, ShieldCheck, Activity, RefreshCw } from "lucide-react";
+import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Info, Shield, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -12,7 +12,7 @@ interface ScanResult {
     scanId: string;
     newCount: number;
     droppedCount: number;
-    deltas: Record<string, unknown>;
+    deltas: any;
 }
 
 export function V5MarketScanner() {
@@ -21,19 +21,67 @@ export function V5MarketScanner() {
     const [scanStatus, setScanStatus] = useState("");
     const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
 
-    const runFullScan = async () => {
-        setIsScanning(true);
-        setScanProgress(0);
-        setScanStatus("Initializing scan...");
+    // 1. Sync with server state on mount
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                const res = await fetch("/api/scan/run");
+                const data = await res.json();
 
+                if (data.status === "RUNNING") {
+                    setIsScanning(true);
+                    setScanStatus(`Resuming active scan... (${data.currentCount} analysed)`);
+                    if (data.progress) setScanProgress(data.progress);
+
+                    // Start SSE listener to pick up the stream
+                    connectToSSE();
+                } else if (data.status === "COMPLETED") {
+                    // Load last results for deltas
+                    setLastScanResult({
+                        type: "complete",
+                        scanId: data.id,
+                        newCount: data.totalScanned || 0, // Simplified fallback
+                        droppedCount: 0,
+                        deltas: {}
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to check scan status", e);
+            }
+        };
+
+        checkStatus();
+    }, []);
+
+    const connectToSSE = async () => {
         try {
             const response = await fetch("/api/scan/run", { method: "POST" });
-            if (!response.ok) throw new Error("Already scanning or server error");
+            if (response.status === 409) {
+                // If already scanning, the POST returns 409, but we can't easily "join" a stream.
+                // In a production app, we'd use WebSockets or persistent SSE.
+                // For now, we'll poll the GET endpoint every 5 seconds if 409 happens.
+                const poll = setInterval(async () => {
+                    const res = await fetch("/api/scan/run");
+                    const data = await res.json();
+                    if (data.status === "RUNNING") {
+                        setScanStatus(`Scanning market... (${data.currentCount} found)`);
+                        if (data.progress) setScanProgress(data.progress);
+                    } else {
+                        setIsScanning(false);
+                        clearInterval(poll);
+                        toast.success("Background scan finished. Refresh to see totals.");
+                    }
+                }, 5000);
+                return;
+            }
+            if (!response.ok) throw new Error("Server error");
 
             const reader = response.body?.getReader();
             const decoder = new TextDecoder();
 
             if (!reader) return;
+
+            setIsScanning(true);
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -68,8 +116,30 @@ export function V5MarketScanner() {
         }
     };
 
+    const runFullScan = () => connectToSSE();
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-12">
+            {/* Legend Section first for clarity */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                {[
+                    { id: "L1", label: "Protection", icon: Shield, col: "text-emerald-400", desc: "D/E < 0.6 & OCF+" },
+                    { id: "L2", label: "Pricing", icon: BarChart3, col: "text-blue-400", desc: "ROCE > 20% & OPM" },
+                    { id: "L3", label: "Macro", icon: Activity, col: "text-amber-400", desc: "Govt Capex/Trend" },
+                    { id: "L4", label: "Growth", icon: TrendingUp, col: "text-purple-400", desc: "EPS & Order-book" },
+                    { id: "L5", label: "Governance", icon: CheckCircle2, col: "text-rose-400", desc: "No Pledges/Audit" },
+                ].map(layer => (
+                    <Card key={layer.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all cursor-help group">
+                        <CardContent className="p-4 flex flex-col items-center text-center">
+                            <layer.icon className={cn("h-6 w-6 mb-2", layer.col)} />
+                            <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">{layer.id}</span>
+                            <h4 className="text-xs font-bold text-white mb-1">{layer.label}</h4>
+                            <p className="text-[9px] text-slate-400 leading-tight opacity-0 group-hover:opacity-100 transition-opacity">{layer.desc}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
             <Card className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-white/10 overflow-hidden text-slate-200">
                 <CardHeader className="p-8 pb-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -79,22 +149,21 @@ export function V5MarketScanner() {
                                 BSE/NSE 5-Layer Scanner
                             </CardTitle>
                             <p className="text-slate-400 mt-2 max-w-xl text-sm leading-relaxed">
-                                Automated fundamental screening across 2,000+ NSE stocks. Scans for
-                                <span className="text-emerald-400 font-medium"> L1-Protection</span>,
-                                <span className="text-blue-400 font-medium"> L2-Pricing</span>,
-                                <span className="text-amber-400 font-medium"> L3-Macro</span>, and
-                                <span className="text-purple-400 font-medium"> L4-Growth</span>.
-                                Results are filtered: <span className="text-white">Score &lt; 60</span> goes to the Offline List.
+                                Automated fundamental screening across 2,000+ NSE stocks.
+                                <span className="block mt-1 text-[11px] text-slate-500 italic">Scores below 60 are automatically discarded.</span>
                             </p>
                         </div>
                         <Button
                             size="lg"
                             onClick={runFullScan}
                             disabled={isScanning}
-                            className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold h-12 px-8 transition-all shrink-0"
+                            className={cn(
+                                "font-bold h-12 px-8 transition-all shrink-0",
+                                isScanning ? "bg-white/5 text-slate-400" : "bg-emerald-500 hover:bg-emerald-600 text-black border-0"
+                            )}
                         >
                             {isScanning ? <RefreshCw className="h-5 w-5 mr-2 animate-spin" /> : <Activity className="h-5 w-5 mr-2" />}
-                            {isScanning ? "Scanning Market..." : "Run Full Scan"}
+                            {isScanning ? "Scan in Progress..." : "Run Full Scan"}
                         </Button>
                     </div>
                 </CardHeader>
@@ -102,8 +171,14 @@ export function V5MarketScanner() {
                     {isScanning && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                             <div className="flex justify-between text-sm mb-2">
-                                <span className="text-emerald-400 font-medium">{scanStatus}</span>
-                                <span className="text-slate-400">{scanProgress}%</span>
+                                <span className="text-emerald-400 font-medium flex items-center gap-2">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    </span>
+                                    {scanStatus}
+                                </span>
+                                <span className="text-slate-400">{scanProgress > 0 ? `${scanProgress}%` : "Calculating..."}</span>
                             </div>
                             <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                                 <div
@@ -112,7 +187,7 @@ export function V5MarketScanner() {
                                 />
                             </div>
                             <p className="text-[10px] text-slate-500 uppercase tracking-widest text-center mt-4">
-                                Note: Full scan takes ~5-15 mins based on Yahoo Finance latencies.
+                                Note: This scan is running on the cluster. You can refresh and the progress will resume.
                             </p>
                         </div>
                     )}
