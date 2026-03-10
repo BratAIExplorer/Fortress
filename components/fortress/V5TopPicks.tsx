@@ -16,12 +16,20 @@ interface V5TopPicksProps {
     indexFunds: IndexFund[];
 }
 
+interface ScanResult {
+    type: "complete";
+    scanId: string;
+    newCount: number;
+    droppedCount: number;
+    deltas: any; // Simplified for now, or define Delta interface
+}
+
 export function V5TopPicks({ picks, mutualFunds, indexFunds }: V5TopPicksProps) {
     const [view, setView] = useState<"picks" | "active" | "index" | "discovery">("picks");
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [scanStatus, setScanStatus] = useState("");
-    const [lastScanResult, setLastScanResult] = useState<any>(null);
+    const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
 
     const runFullScan = async () => {
         setIsScanning(true);
@@ -63,8 +71,9 @@ export function V5TopPicks({ picks, mutualFunds, indexFunds }: V5TopPicksProps) 
                     }
                 }
             }
-        } catch (error: any) {
-            toast.error(`Scan failed: ${error.message}`);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Unknown error occurred";
+            toast.error(`Scan failed: ${message}`);
             setIsScanning(false);
         }
     };
@@ -82,7 +91,7 @@ export function V5TopPicks({ picks, mutualFunds, indexFunds }: V5TopPicksProps) 
                         key={t.id}
                         variant={view === t.id ? "default" : "outline"}
                         size="sm"
-                        onClick={() => setView(t.id as any)}
+                        onClick={() => setView(t.id as "picks" | "active" | "index" | "discovery")}
                         className={cn(
                             "h-9 px-4 transition-all",
                             view === t.id ? "bg-amber-500 hover:bg-amber-600 text-black font-bold" : "border-white/10 hover:bg-white/5"

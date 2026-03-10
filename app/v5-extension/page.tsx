@@ -4,7 +4,7 @@ import { V5StockCard } from "@/components/fortress/V5StockCard";
 import { V5TopPicks } from "@/components/fortress/V5TopPicks";
 import { V5Glossary } from "@/components/fortress/V5Glossary";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, TrendingDown, Coins, Zap, Star, Info } from "lucide-react";
+import { TrendingDown, Coins, Zap, Star, Info } from "lucide-react";
 import { Navbar } from "@/components/fortress/Navbar";
 
 export const dynamic = "force-dynamic";

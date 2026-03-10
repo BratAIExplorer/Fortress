@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ArrowRight, Shield, TrendingUp, BookOpen, Database } from "lucide-react";
+import { ArrowRight, TrendingUp, BookOpen, Database } from "lucide-react";
 import Link from "next/link";
 import { Navbar } from "@/components/fortress/Navbar";
 

@@ -3,7 +3,6 @@ import { RiskProvider } from "@/components/fortress/RiskContext";
 import { RiskToggle } from "@/components/fortress/RiskToggle";
 import { StockCard } from "@/components/fortress/StockCard";
 import { getStocks } from "@/app/actions";
-import { Shield } from "lucide-react";
 import { WisdomWidget } from "@/components/learning/WisdomWidget";
 import { Stock } from "@/lib/types";
 import { Navbar } from "@/components/fortress/Navbar";

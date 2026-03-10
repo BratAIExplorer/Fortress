@@ -420,7 +420,7 @@ export async function updateV5Stock(id: string, data: Partial<V5Stock>) {
             multiBaggerCase: data.multi_bagger_case,
             killerRisk: data.killer_risk,
             fortressNote: data.fortress_note,
-            v5Category: data.v5Category as any,
+            v5Category: data.v5Category as "low" | "penny" | "sub_ten" | null,
             updatedAt: new Date(),
         })
         .where(eq(schema.stocks.id, id));

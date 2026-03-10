@@ -6,7 +6,7 @@ import { getScanDeltas } from "@/lib/db/scanner-utils";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
+export async function POST() {
     // 1. Check for active scan
     const activeScan = await db.query.scans.findFirst({
         where: eq(schema.scans.status, "RUNNING"),
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     const stream = new ReadableStream({
         async start(controller) {
-            const sendEvent = (data: any) => {
+            const sendEvent = (data: Record<string, unknown>) => {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
             };
 
