@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -32,6 +33,7 @@ export default function RootLayout({
         <main className="relative flex min-h-screen flex-col">
           {children}
         </main>
+        <Toaster theme="dark" richColors position="bottom-right" />
       </body>
     </html>
   );

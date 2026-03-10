@@ -53,6 +53,25 @@ export interface StockWithThesis extends Stock {
     thesis: Thesis | null;
 }
 
+export interface V5Stock extends Stock {
+    tag: string;
+    risk: string;
+    drop52w: number;
+    moat: string;
+    ocf: string;
+    why_down?: string;
+    why_buy?: string;
+    penny_why?: string;
+    multi_bagger_case?: string;
+    killer_risk?: string;
+    fortress_note?: string;
+    l1: number;
+    l2: number;
+    l3: number;
+    l4: number;
+    l5: number;
+}
+
 export interface Collection {
     id: string;
     name: string;

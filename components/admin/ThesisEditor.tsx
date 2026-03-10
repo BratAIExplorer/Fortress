@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { updateThesis } from "@/app/actions";
-// Removed sonner import as it's not installed
+import { toast } from "sonner";
 
 import { ThesisRow } from "@/app/actions";
 
@@ -24,11 +24,10 @@ export default function ThesisEditor({ thesis }: { thesis: ThesisRow }) {
         setLoading(true);
         try {
             await updateThesis(thesis.id, formData);
-            alert("Thesis updated successfully");
-            // toast.success("Thesis updated successfully");
+            toast.success("Thesis updated successfully");
         } catch (error) {
             console.error(error);
-            // toast.error("Failed to update thesis");
+            toast.error("Failed to update thesis");
         } finally {
             setLoading(false);
         }

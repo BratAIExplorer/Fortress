@@ -11,9 +11,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                // For MVP, we use the ADMIN_SECRET as the password for account 'admin'
                 const validUser = "admin";
-                const validPassword = process.env.ADMIN_SECRET || "fortress2024";
+                const validPassword = process.env.ADMIN_SECRET;
+
+                if (!validPassword) {
+                    console.error("CRITICAL: ADMIN_SECRET environment variable is not set. Login is disabled.");
+                    return null;
+                }
 
                 if (
                     credentials.username === validUser &&

@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { TrendingDown, Target, Zap } from "lucide-react";
-import { Stock } from "@/lib/types";
+import { V5Stock } from "@/lib/types";
 
-export function V5StockCard({ stock }: { stock: Stock }) {
+export function V5StockCard({ stock }: { stock: V5Stock }) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
@@ -35,7 +35,7 @@ export function V5StockCard({ stock }: { stock: Stock }) {
                     {/* Key Stats Row */}
                     <div className="grid grid-cols-2 gap-2 text-[10px] bg-secondary/20 p-2 rounded-sm border border-border/50">
                         <div className="flex flex-col">
-                            <span className="text-muted-foreground italic">&ldquo;Why it fell&rdquo;</span>
+                            <span className="text-muted-foreground uppercase text-[9px]">CMP</span>
                             <span className="font-bold text-foreground">₹{stock.current_price}</span>
                         </div>
                         <div className="flex flex-col text-right">

@@ -1,5 +1,6 @@
 
 import { getV5LowStocks, getV5PennyStocks, getV5SubTenStocks } from "@/app/actions";
+import type { V5Stock } from "@/lib/types";
 import { V5StockCard } from "@/components/fortress/V5StockCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, TrendingDown, Coins, Zap } from "lucide-react";
@@ -57,18 +58,18 @@ export default async function V5ExtensionPage() {
 
                         <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                             <div className="flex items-center gap-2">
-                                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                                Live Engine
+                                <div className="h-2 w-2 rounded-full bg-amber-500" />
+                                Curated Scan
                             </div>
                             <div className="border-l border-white/10 pl-4">
-                                Updated: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                                Reviewed: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                             </div>
                         </div>
                     </div>
 
                     <TabsContent value="lows" className="mt-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {lowStocks.map((stock) => (
+                            {lowStocks.map((stock: V5Stock) => (
                                 <V5StockCard key={stock.symbol} stock={stock} />
                             ))}
                         </div>
@@ -76,7 +77,7 @@ export default async function V5ExtensionPage() {
 
                     <TabsContent value="penny" className="mt-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {pennyStocks.map((stock) => (
+                            {pennyStocks.map((stock: V5Stock) => (
                                 <V5StockCard key={stock.symbol} stock={stock} />
                             ))}
                         </div>
@@ -84,7 +85,7 @@ export default async function V5ExtensionPage() {
 
                     <TabsContent value="speculative" className="mt-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {subTenStocks.map((stock) => (
+                            {subTenStocks.map((stock: V5Stock) => (
                                 <V5StockCard key={stock.symbol} stock={stock} />
                             ))}
                         </div>
