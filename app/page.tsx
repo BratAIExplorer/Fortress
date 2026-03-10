@@ -56,14 +56,19 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Button size="lg" className="gap-2" asChild>
-            <Link href="/fortress-30">
-              Explore the Fortress 30 <ArrowRight className="h-4 w-4" />
+          <Button size="lg" className="gap-2 bg-amber-500 hover:bg-amber-600 text-black font-bold" asChild>
+            <Link href="/v5-extension">
+              Explore V5 Extension <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
+            <Link href="/fortress-30">
+              Fortress 30 List
+            </Link>
+          </Button>
+          <Button variant="ghost" size="lg" asChild>
             <Link href="/constitution">
-              Read the Constitution
+              Our Constitution
             </Link>
           </Button>
         </motion.div>
