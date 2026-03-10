@@ -15,7 +15,7 @@ export default function ThesisEditor({ thesis }: { thesis: ThesisRow }) {
         oneLiner: thesis.oneLiner,
         investmentLogic: thesis.investmentLogic,
         risks: thesis.risks,
-        financialStrengthScore: thesis.financialStrengthScore,
+        financialStrengthScore: thesis.financialStrengthScore ?? 5,
         moatSource: thesis.moatSource || "",
     });
 
