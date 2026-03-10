@@ -7,18 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { updateV5Stock } from "@/app/actions";
 import { toast } from "sonner";
 import { V5Stock } from "@/lib/types";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogFooter
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-
-// Since I don't have Dialog component in ui directory yet, I'll check if I can build a simple modal or use what's available.
-// I'll check components/ui again.
 
 export default function V5StockEditor({ stock }: { stock: V5Stock }) {
     const [loading, setLoading] = useState(false);
