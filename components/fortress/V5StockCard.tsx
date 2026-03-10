@@ -4,7 +4,7 @@
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Shield, TrendingDown, Target, Zap, AlertTriangle } from "lucide-react";
+import { TrendingDown, Target, Zap } from "lucide-react";
 import { Stock } from "@/lib/types";
 
 export function V5StockCard({ stock }: { stock: Stock }) {
@@ -51,7 +51,7 @@ export function V5StockCard({ stock }: { stock: Stock }) {
                                 <TrendingDown className="h-3 w-3" /> Why It Fell
                             </div>
                             <p className="text-[11px] leading-relaxed text-muted-foreground italic line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
-                                "{stock.why_down}"
+                                &ldquo;{stock.why_down}&rdquo;
                             </p>
                         </div>
                     )}

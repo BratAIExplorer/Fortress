@@ -23,7 +23,7 @@ export function Financials({ stock }: { stock: Stock }) {
     );
 }
 
-function Metric({ label, value, threshold, inverse = false }: { label: string, value: string, threshold: number, inverse?: boolean }) {
+function Metric({ label, value, inverse = false }: { label: string, value: string, threshold?: number, inverse?: boolean }) {
     // Mock progress calculation
     const numValue = parseFloat(value.replace(/[^0-9.]/g, ''));
     const max = inverse ? 1.0 : 30; // Arbitrary max for visualization

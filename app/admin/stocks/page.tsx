@@ -66,8 +66,8 @@ export default function AdminStocksPage() {
                                         </td>
                                         <td className="p-4 align-middle font-bold text-primary">{stock.quality_score}</td>
                                         <td className="p-4 align-middle">
-                                            <Badge variant={stock.status === 'Active' ? 'default' : 'outline'}>
-                                                {stock.status}
+                                            <Badge variant={stock.is_active ? 'default' : 'outline'}>
+                                                {stock.is_active ? 'Active' : 'Hidden'}
                                             </Badge>
                                         </td>
                                         <td className="p-4 align-middle text-right">

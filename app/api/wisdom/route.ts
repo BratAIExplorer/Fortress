@@ -6,7 +6,7 @@ export async function GET() {
     try {
         const wisdom = await getRandomWisdom();
         return NextResponse.json(wisdom);
-    } catch (_error) {
+    } catch {
         return NextResponse.json({ error: "Failed to fetch wisdom" }, { status: 500 });
     }
 }

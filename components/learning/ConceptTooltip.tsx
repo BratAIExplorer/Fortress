@@ -7,7 +7,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+
 
 export function ConceptTooltip({ term, definition }: { term: string, definition: string }) {
     return (

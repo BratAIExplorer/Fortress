@@ -27,12 +27,12 @@ export default function LoginPage() {
                 password,
                 redirect: true,
                 callbackUrl: "/admin",
-            }) as any;
+            }) as { error?: string } | undefined;
 
-            if ((result as { error?: string })?.error) {
+            if (result?.error) {
                 setError("Invalid credentials");
             }
-        } catch (_err) {
+        } catch {
             setError("Something went wrong");
         } finally {
             setLoading(false);
