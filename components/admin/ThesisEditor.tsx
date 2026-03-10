@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { updateThesis } from "@/app/actions";
 // Removed sonner import as it's not installed
 
-export default function ThesisEditor({ thesis }: { thesis: any }) {
+import { ThesisRow } from "@/app/actions";
+
+export default function ThesisEditor({ thesis }: { thesis: ThesisRow }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         oneLiner: thesis.oneLiner,

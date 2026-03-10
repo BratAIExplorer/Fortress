@@ -103,11 +103,11 @@ export async function seedDatabase() {
                 symbol: stock.symbol,
                 name: stock.name,
                 sector: stock.sector,
-                currentPrice: String(stock.price),
-                marketCapCrores: String(stock.market_cap),
+                currentPrice: String(stock.current_price),
+                marketCapCrores: String(stock.market_cap_crores),
                 qualityScore: stock.quality_score,
                 megatrend: stock.megatrend,
-                isActive: stock.status === 'Active'
+                isActive: stock.is_active
             }).returning();
 
             if (newStock) {
@@ -182,7 +182,18 @@ export async function getV5SubTenStocks(): Promise<Stock[]> {
     return v5SubTenStocks;
 }
 
-export async function getTheses() {
+export interface ThesisRow {
+    id: string;
+    symbol: string;
+    name: string;
+    oneLiner: string;
+    investmentLogic: string;
+    risks: string;
+    financialStrengthScore: number | null;
+    moatSource: string | null;
+}
+
+export async function getTheses(): Promise<ThesisRow[]> {
     const results = await db
         .select({
             id: schema.theses.id,
