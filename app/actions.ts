@@ -357,3 +357,44 @@ export async function updateThesis(id: string, data: Partial<{
 
     return { success: true };
 }
+
+export async function getV5StocksForAdmin(): Promise<V5Stock[]> {
+    const results = await db
+        .select()
+        .from(schema.stocks)
+        .where(sql`${schema.stocks.v5Category} IS NOT NULL`)
+        .orderBy(schema.stocks.symbol);
+
+    return results.map(mapV5Row);
+}
+
+export async function updateV5Stock(id: string, data: Partial<V5Stock>) {
+    // Only allow updating v5-specific fields and common editable fields
+    await db.update(schema.stocks)
+        .set({
+            currentPrice: data.current_price ? String(data.current_price) : undefined,
+            qualityScore: data.quality_score,
+            tag: data.tag,
+            risk: data.risk,
+            industry: data.industry,
+            drop52w: data.drop52w ? String(data.drop52w) : undefined,
+            moat: data.moat,
+            ocf: data.ocf,
+            l1: data.l1,
+            l2: data.l2,
+            l3: data.l3,
+            l4: data.l4,
+            l5: data.l5,
+            whyDown: data.why_down,
+            whyBuy: data.why_buy,
+            pennyWhy: data.penny_why,
+            multiBaggerCase: data.multi_bagger_case,
+            killerRisk: data.killer_risk,
+            fortressNote: data.fortress_note,
+            v5Category: data.v5Category as any,
+            updatedAt: new Date(),
+        })
+        .where(eq(schema.stocks.id, id));
+
+    return { success: true };
+}

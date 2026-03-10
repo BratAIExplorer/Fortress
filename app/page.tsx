@@ -6,27 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, TrendingUp, BookOpen, Database } from "lucide-react";
 import Link from "next/link";
+import { Navbar } from "@/components/fortress/Navbar";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center justify-between px-4 sm:px-8">
-          <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
-            <span className="text-lg font-bold font-serif tracking-tight">Fortress Intelligence</span>
-          </div>
-          <nav className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/methodology">Methodology</Link>
-            </Button>
-            <Button variant="default" size="sm" asChild>
-              <Link href="/admin">Member Login</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative flex flex-col items-center justify-center pt-24 pb-32 px-4 text-center space-y-8 overflow-hidden">

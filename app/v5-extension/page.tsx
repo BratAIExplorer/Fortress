@@ -4,6 +4,7 @@ import type { V5Stock } from "@/lib/types";
 import { V5StockCard } from "@/components/fortress/V5StockCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, TrendingDown, Coins, Zap } from "lucide-react";
+import { Navbar } from "@/components/fortress/Navbar";
 
 export const dynamic = "force-dynamic";
 
@@ -14,20 +15,11 @@ export default async function V5ExtensionPage() {
 
     return (
         <div className="min-h-screen bg-[#050505] text-slate-200 pb-20 selection:bg-primary/30">
-            {/* Header */}
-            <header className="sticky top-0 z-50 border-b border-white/5 bg-black/60 backdrop-blur-xl">
-                <div className="container flex h-16 items-center justify-between px-4 sm:px-8">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20">
-                            <Shield className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                            <span className="text-xl font-serif font-bold tracking-tight block leading-none">Fortress Intelligence</span>
-                            <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-1 block">Institutional Expansion v5</span>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            {/* Navbar */}
+            <Navbar
+                subtitle="Institutional Expansion v5"
+                className="border-white/5 bg-black/60 backdrop-blur-xl"
+            />
 
             <main className="container px-4 sm:px-8 pt-12 max-w-7xl">
                 <div className="mb-12 space-y-4">

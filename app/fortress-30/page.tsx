@@ -6,6 +6,7 @@ import { getStocks } from "@/app/actions";
 import { Shield } from "lucide-react";
 import { WisdomWidget } from "@/components/learning/WisdomWidget";
 import { Stock } from "@/lib/types";
+import { Navbar } from "@/components/fortress/Navbar";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,16 +16,11 @@ export default async function Fortress30Page() {
     return (
         <RiskProvider>
             <div className="min-h-screen bg-background pb-20">
-                {/* Header */}
-                <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-                    <div className="container flex h-16 items-center justify-between px-4 sm:px-8">
-                        <div className="flex items-center gap-2">
-                            <Shield className="h-6 w-6 text-primary" />
-                            <span className="text-lg font-bold font-serif">Fortress 30</span>
-                        </div>
-                        <RiskToggle />
-                    </div>
-                </header>
+                {/* Navbar */}
+                <Navbar
+                    title="Fortress 30"
+                    rightElement={<RiskToggle />}
+                />
 
                 <main className="container px-4 sm:px-8 pt-12">
                     <div className="mb-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">

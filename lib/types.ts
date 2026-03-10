@@ -33,6 +33,7 @@ export interface Stock {
     killer_risk?: string;
     fortress_note?: string;
     ocf?: string;
+    v5Category?: "low" | "penny" | "sub_ten" | null;
 }
 
 export interface Thesis {
