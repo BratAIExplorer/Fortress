@@ -6,17 +6,15 @@ import { MutualFund, IndexFund, TopPick } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, BarChart3, TrendingUp, Info, Search, ShieldCheck, Activity, RefreshCw } from "lucide-react";
+import { Star, BarChart3, TrendingUp, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-
 interface V5TopPicksProps {
     picks: TopPick[];
     mutualFunds: MutualFund[];
     indexFunds: IndexFund[];
 }
 
-export function V5TopPicks({ picks, mutualFunds, indexFunds }: V5TopPicksProps) {
+export function V5TopPicks({ picks, mutualFunds }: V5TopPicksProps) {
     const [view, setView] = useState<"picks" | "active" | "index">("picks");
 
     return (

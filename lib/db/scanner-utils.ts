@@ -1,5 +1,5 @@
 import { db, schema } from "./client";
-import { eq, and, ne, desc, sql } from "drizzle-orm";
+import { eq, and, ne, desc } from "drizzle-orm";
 
 export async function getScanDeltas(currentScanId: string, market: string = "NSE") {
     // 1. Get the previous completed scan for this market
