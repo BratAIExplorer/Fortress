@@ -1,4 +1,4 @@
-import { Stock, MutualFund, IndexFund, TopPick, Glossary } from "./types";
+import { Stock, MutualFund, IndexFund, TopPick, Glossary, GlossaryGemTier, GlossaryGemCriteria, GlossaryRiskMode } from "./types";
 
 export const mockStocks: Stock[] = [
     {
@@ -445,4 +445,141 @@ export const glossaryData: Glossary = {
         { freq: "MONTHLY", items: ["52W scanner refresh", "New IPO additions", "Sector rotation checks"], color: "#FBBF24", why: "Monthly catches structural changes without noise-trading.", next: "10 Apr 2026" },
         { freq: "EVENT-BASED", items: ["Earnings surprises", "FDA/SEBI decisions", "Management changes"], color: "#FB923C", why: "Some triggers need immediate attention.", next: "As needed" },
     ],
+
+    // ── Sovereign Alpha GEM SCORE System ──────────────────────────────────────
+
+    gemTiers: [
+        {
+            tier: "Diamond",
+            scoreRange: "80–100",
+            color: "#60A5FA",
+            emoji: "💎",
+            plain: "A rare hidden gem — strong fundamentals, massively undervalued, AND showing early momentum. These are the picks that can 3x–10x. They exist because the market genuinely missed them, not because the business is broken.",
+            action: "Warrants serious, deep-dive research. Position sizing: 5–8% of portfolio.",
+            frequency: "Expect 2–5 Diamond picks per full market scan. More than that means your filters are too loose.",
+        },
+        {
+            tier: "Sapphire",
+            scoreRange: "60–79",
+            color: "#818CF8",
+            emoji: "🔷",
+            plain: "Very good company with minor gaps. Could be that the institutional blindspot hasn't fully formed yet, or the momentum signal is early. This is your bread-and-butter category — reliable, researched, real upside.",
+            action: "Worth a deep dive. Position sizing: 3–5% of portfolio.",
+            frequency: "The most common quality tier. A good scan produces 5–15 Sapphires.",
+        },
+        {
+            tier: "Emerald",
+            scoreRange: "40–59",
+            color: "#34D399",
+            emoji: "💚",
+            plain: "Interesting story but missing a catalyst or a key fundamental qualifier. These sit on a watchlist — not ready to buy yet, but worth monitoring quarterly for the trigger that could push them to Sapphire.",
+            action: "Add to watchlist. Buy only when a clear catalyst emerges. Position sizing: 1–2% maximum.",
+            frequency: "These are the most common. Don't over-allocate to Emeralds hoping they become Diamonds.",
+        },
+        {
+            tier: "Quartz",
+            scoreRange: "20–39",
+            color: "#F59E0B",
+            emoji: "🟡",
+            plain: "Speculative territory. Something is interesting — maybe the valuation is extreme — but the fundamentals are too weak or the signals are too noisy to trust. Treat like a lottery ticket, not an investment.",
+            action: "Only in Aggressive mode. Maximum 1% of portfolio. Stop-loss mandatory at -8%.",
+            frequency: "If you're finding lots of Quartz, you're scanning the wrong markets or the scanner needs recalibration.",
+        },
+    ] as GlossaryGemTier[],
+
+    gemCriteria: [
+        {
+            name: "Valuation Edge",
+            code: "undervaluation",
+            weight: 30,
+            color: "#F59E0B",
+            icon: "⚖️",
+            plain: "Is this stock genuinely cheap compared to what it's worth — and cheap vs its own sector, not just in absolute terms? A stock trading at P/E of 8 in a sector where the median is 20 is undervalued. A stock at P/E of 8 in a distressed sector may be value trap.",
+            signals: ["P/E below sector median", "P/B < 1.5", "EV/EBITDA below peers", "PEG ratio < 1.2"],
+            redFlags: ["PE low due to one-time gain", "EV/EBITDA low due to high debt", "P/B low due to asset write-down"],
+        },
+        {
+            name: "Institutional Blindspot",
+            code: "institutional",
+            weight: 25,
+            color: "#6366F1",
+            icon: "🔍",
+            plain: "How many big funds and analysts are NOT watching this stock? The fewer institutions own it and the fewer analysts cover it, the bigger the discovery opportunity when the market finally wakes up. This is the 'dark horse' score.",
+            signals: ["Institutional ownership < 15%", "Analyst coverage < 3 firms", "Low media mentions", "FII/DII buying quietly"],
+            redFlags: ["No institutional interest because business is genuinely broken", "Low coverage because company refuses transparency"],
+        },
+        {
+            name: "Fundamental Strength",
+            code: "fundamental",
+            weight: 25,
+            color: "#10B981",
+            icon: "🏗️",
+            plain: "Is the underlying business actually healthy? Revenue growing, margins holding, balance sheet clean, cash flowing. A cheap stock with bad fundamentals is not a hidden gem — it's a value trap waiting to spring.",
+            signals: ["Revenue growth > 15% YoY", "ROE > 15%", "Debt/Equity < 1.0", "Positive free cash flow", "Operating margins stable or improving"],
+            redFlags: ["Revenue declining 2+ consecutive years", "Negative operating cash flow", "Debt growing faster than revenue"],
+        },
+        {
+            name: "Momentum Divergence",
+            code: "momentum",
+            weight: 20,
+            color: "#F97316",
+            icon: "⚡",
+            plain: "The business is doing well but the stock price hasn't caught up yet — or the stock is showing early signs of accumulation (unusual volume, price consolidating at support). This is the timing signal that separates a gem from a cheap stock that stays cheap.",
+            signals: ["Strong fundamentals, price flat or down 6+ months", "Volume spikes without news catalyst", "Insider buying in open market", "Promoter increasing stake quietly"],
+            redFlags: ["Price rising fast already — gem may be discovered", "Volume spike on negative news", "Insider selling while business improves"],
+        },
+    ] as GlossaryGemCriteria[],
+
+    riskModes: [
+        {
+            mode: "Conservative",
+            code: "conservative",
+            color: "#60A5FA",
+            emoji: "🛡️",
+            plain: "Built for capital preservation first, growth second. These are the picks where you're protecting money that cannot afford to go to zero — think parents' savings, emergency fund allocation, or money needed in 5–7 years. Zero tolerance for turnarounds or high-debt plays.",
+            tiers: ["Diamond", "Sapphire"],
+            maxPicks: 10,
+            stopLoss: "None — buy & hold only. If thesis breaks, exit manually.",
+            rules: [
+                "Debt/Equity must be below 0.5",
+                "Promoter holding must be above 55%",
+                "No turnaround plays — business must already be healthy",
+                "Positive free cash flow required",
+                "Minimum 5 years operating history",
+            ],
+        },
+        {
+            mode: "Balanced",
+            code: "balanced",
+            color: "#F59E0B",
+            emoji: "⚖️",
+            plain: "The full Fortress spectrum with position sizing guidance. For money you want to grow meaningfully over 3–5 years without gambling. Includes strong Emerald picks if they have a clear catalyst. Some risk, but calculated and sized appropriately.",
+            tiers: ["Diamond", "Sapphire", "Emerald (catalyst required)"],
+            maxPicks: 15,
+            stopLoss: "-15% trailing stop-loss per position",
+            rules: [
+                "Standard GEM scoring — no special overrides",
+                "Top Emeralds included only with identified catalyst",
+                "Position sizing: Diamonds 5%, Sapphires 4%, Emeralds 2%",
+                "Rebalance quarterly",
+            ],
+        },
+        {
+            mode: "Aggressive",
+            code: "aggressive",
+            color: "#F87171",
+            emoji: "🎯",
+            plain: "Maximum upside hunting. For money you can afford to lose — 'brother's money' — small allocation chasing 5x–20x outcomes. Includes turnaround plays, concentrated conviction bets, and high-momentum momentum plays. Tight stop-losses are non-negotiable.",
+            tiers: ["Diamond", "Sapphire", "Emerald", "Quartz"],
+            maxPicks: 20,
+            stopLoss: "-8% hard stop-loss. No exceptions. No averaging down on losers.",
+            rules: [
+                "Higher debt allowed if momentum and growth are strong",
+                "Turnaround plays allowed — minimum 2 quarters of improving results",
+                "Momentum signals weighted heavily",
+                "Top 5 picks get concentrated sizing (8–10% each)",
+                "Set stop-loss orders the day you buy — do not wait",
+            ],
+        },
+    ] as GlossaryRiskMode[],
 };

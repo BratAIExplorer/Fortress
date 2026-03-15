@@ -1,11 +1,12 @@
 import { db, schema } from "./client";
 import { eq, and, ne, desc, sql } from "drizzle-orm";
 
-export async function getScanDeltas(currentScanId: string) {
-    // 1. Get the previous completed scan
+export async function getScanDeltas(currentScanId: string, market: string = "NSE") {
+    // 1. Get the previous completed scan for this market
     const previousScan = await db.query.scans.findFirst({
         where: and(
             eq(schema.scans.status, "COMPLETED"),
+            eq(schema.scans.market, market),
             ne(schema.scans.id, currentScanId)
         ),
         orderBy: [desc(schema.scans.runAt)],
@@ -37,15 +38,18 @@ export async function getScanDeltas(currentScanId: string) {
     };
 }
 
-export async function getLatestScanSummary() {
+export async function getLatestScanSummary(market: string = "NSE") {
     const lastScan = await db.query.scans.findFirst({
-        where: eq(schema.scans.status, "COMPLETED"),
+        where: and(
+            eq(schema.scans.status, "COMPLETED"),
+            eq(schema.scans.market, market)
+        ),
         orderBy: [desc(schema.scans.runAt)],
     });
 
     if (!lastScan) return null;
 
-    const deltas = await getScanDeltas(lastScan.id);
+    const deltas = await getScanDeltas(lastScan.id, market);
 
     return {
         ...lastScan,

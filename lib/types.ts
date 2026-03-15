@@ -163,9 +163,47 @@ export interface GlossaryUpdate {
     next: string;
 }
 
+// ── Sovereign Alpha GEM SCORE types ──────────────────────────────────────────
+
+export interface GlossaryGemTier {
+    tier: string;           // 'Diamond' | 'Sapphire' | 'Emerald' | 'Quartz'
+    scoreRange: string;     // '80–100'
+    color: string;
+    emoji: string;
+    plain: string;          // Non-technical description
+    action: string;         // What to do
+    frequency: string;      // How rare
+}
+
+export interface GlossaryGemCriteria {
+    name: string;           // 'Undervaluation Edge'
+    code: string;           // 'undervaluation'
+    weight: number;         // 30
+    color: string;
+    icon: string;
+    plain: string;          // What it measures in simple English
+    signals: string[];      // What looks for
+    redFlags: string[];     // What disqualifies
+}
+
+export interface GlossaryRiskMode {
+    mode: string;           // 'Conservative'
+    code: string;           // 'conservative'
+    color: string;
+    emoji: string;
+    plain: string;          // Who it's for
+    tiers: string[];        // Which gem tiers shown
+    maxPicks: number;
+    stopLoss: string;
+    rules: string[];        // Special rules
+}
+
 export interface Glossary {
     tags: GlossaryTag[];
     riskLevels: GlossaryRiskLevel[];
     fortressLayers: GlossaryLayer[];
     updates: GlossaryUpdate[];
+    gemTiers: GlossaryGemTier[];
+    gemCriteria: GlossaryGemCriteria[];
+    riskModes: GlossaryRiskMode[];
 }

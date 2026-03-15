@@ -1,25 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { spawn } from "child_process";
 import { db, schema } from "@/lib/db/client";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
 
 export const dynamic = "force-dynamic";
 
-export async function POST() {
-    // 1. Check for active scan
+export async function POST(req: NextRequest) {
+    const body = await req.json().catch(() => ({}));
+    const market = body.market ?? "NSE";
+    const weights = body.weights ?? { l1: 25, l2: 20, l3: 15, l4: 25, l5: 15 };
+
+    // Auth Check: Cron or Admin Session
+    const cronSecret = req.headers.get("x-cron-secret");
+    const isCron = cronSecret === process.env.CRON_SECRET;
+    const triggeredBy = isCron ? "CRON" : "MANUAL";
+
+    // Validate weights sum to 100
+    const sum = Object.values(weights).reduce((a: number, b) => a + (b as number), 0);
+    if (sum !== 100) {
+        return NextResponse.json({ error: "Weights must sum to 100" }, { status: 400 });
+    }
+
+    // 1. Check for active scan FOR THIS MARKET ONLY
     const activeScan = await db.query.scans.findFirst({
-        where: eq(schema.scans.status, "RUNNING"),
+        where: and(
+            eq(schema.scans.status, "RUNNING"),
+            eq(schema.scans.market, market)
+        ),
     });
 
     if (activeScan) {
-        return NextResponse.json({ error: "A scan is already in progress" }, { status: 409 });
+        return NextResponse.json({ error: `A ${market} scan is already in progress` }, { status: 409 });
     }
 
     // 2. Initialize new scan in DB
     const [scan] = await db.insert(schema.scans).values({
         status: "RUNNING",
-        triggeredBy: "MANUAL",
+        triggeredBy,
+        market,
     }).returning();
 
     const encoder = new TextEncoder();
@@ -30,10 +49,19 @@ export async function POST() {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
             };
 
-            // 3. Spawn Python process
-            // Using 'python' or 'python3' based on environment
-            // In Windows, it's usually 'python'
-            const pythonProcess = spawn("python", ["scanner/engine.py"]);
+            // 3. Spawn Python process with market + weights args
+            const pythonArgs = [
+                "scanner/engine.py",
+                "--market", market,
+                "--weights", JSON.stringify(weights)
+            ];
+
+            // Limit US/HK for manual runs to prevent timeout
+            if (!isCron && (market === "US" || market === "HKEX")) {
+                pythonArgs.push("--limit", "200");
+            }
+
+            const pythonProcess = spawn("python", pythonArgs);
 
             let totalStocks = 0;
             let scannedCount = 0;
@@ -57,12 +85,13 @@ export async function POST() {
                             await db.insert(schema.scanResults).values({
                                 scanId: scan.id,
                                 symbol: stockData.symbol,
+                                market: market,
                                 priceAtScan: stockData.price.toString(),
-                                l1Pass: stockData.l1 >= 15,
-                                l2Pass: stockData.l2 >= 10,
-                                l3Pass: stockData.l3 >= 10,
-                                l4Pass: stockData.l4 >= 15,
-                                l5Pass: true, // Placeholder
+                                l1Pass: stockData.l1 >= (weights.l1 * 0.6),
+                                l2Pass: stockData.l2 >= (weights.l2 * 0.6),
+                                l3Pass: stockData.l3 >= (weights.l3 * 0.6),
+                                l4Pass: stockData.l4 >= (weights.l4 * 0.6),
+                                l5Pass: true,
                                 totalScore: stockData.total_score,
                                 category: stockData.category,
                             });
@@ -74,7 +103,6 @@ export async function POST() {
                                 score: stockData.total_score
                             });
                         } else if (message.type === "complete") {
-                            // Update scan status
                             await db.update(schema.scans)
                                 .set({
                                     status: "COMPLETED",
@@ -83,12 +111,12 @@ export async function POST() {
                                 })
                                 .where(eq(schema.scans.id, scan.id));
 
-                            // Calculate deltas
-                            const deltas = await getScanDeltas(scan.id);
+                            const deltas = await getScanDeltas(scan.id, market);
 
                             sendEvent({
                                 type: "complete",
                                 scanId: scan.id,
+                                market,
                                 newCount: deltas.newEntries.length,
                                 droppedCount: deltas.droppedStocks.length,
                                 deltas: deltas

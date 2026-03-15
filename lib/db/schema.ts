@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, numeric, integer, boolean, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, numeric, integer, boolean, timestamp, primaryKey, jsonb } from "drizzle-orm/pg-core";
 
 // 1. STOCKS TABLE (The Core Reference)
 export const stocks = pgTable("stocks", {
@@ -46,6 +46,7 @@ export const scans = pgTable("scans", {
     totalScanned: integer("total_scanned"),
     durationMs: integer("duration_ms"),
     triggeredBy: text("triggered_by"), // 'MANUAL' | 'CRON'
+    market: text("market").notNull().default("NSE"), // 'NSE' | 'US' | 'HKEX'
     errorMessage: text("error_message"),
 });
 
@@ -62,6 +63,7 @@ export const scanResults = pgTable("scan_results", {
     l5Pass: boolean("l5_pass"),
     totalScore: integer("total_score"),
     category: text("category"), // '52W_LOW', 'PENNY', 'SUB20', 'OFFLINE'
+    market: text("market").notNull().default("NSE"),
     rankInCategory: integer("rank_in_category"),
 });
 
@@ -120,4 +122,89 @@ export const concepts = pgTable("concepts", {
     definition: text("definition").notNull(),
     category: text("category"),
     source: text("source"),
+});
+
+// ─── SOVEREIGN ALPHA LAYER ────────────────────────────────────────────────────
+// The self-learning feedback loop. Every prediction tracked, scored, learned from.
+
+// 7. ALPHA_SCANS — Each GEM SCORE scan session
+export const alphaScans = pgTable("alpha_scans", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scanDate: timestamp("scan_date", { withTimezone: true }).defaultNow(),
+    markets: text("markets").array(), // ['NSE','US','ETF','MF']
+    riskMode: text("risk_mode").notNull(), // 'conservative' | 'balanced' | 'aggressive'
+    totalPicks: integer("total_picks"),
+    activeWeights: jsonb("active_weights"), // {undervaluation:30,institutional:25,fundamental:25,momentum:20}
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 8. ALPHA_PREDICTIONS — Every individual pick with full GEM SCORE breakdown
+export const alphaPredictions = pgTable("alpha_predictions", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scanId: uuid("scan_id").notNull().references(() => alphaScans.id, { onDelete: "cascade" }),
+    ticker: text("ticker").notNull(),
+    name: text("name"),
+    market: text("market").notNull(), // 'NSE' | 'US' | 'BSE' | 'ETF' | 'MF' | 'SGX' etc.
+    gemScore: integer("gem_score").notNull(),
+    scoreBreakdown: jsonb("score_breakdown").notNull(), // {undervaluation:24,institutional:18,fundamental:20,momentum:15}
+    bonusModifiers: jsonb("bonus_modifiers"), // [{label:'promoter_buying',pts:7}]
+    penaltyModifiers: jsonb("penalty_modifiers"), // [{label:'pledge',pts:-10}]
+    scoreTier: text("score_tier").notNull(), // 'Diamond'|'Sapphire'|'Emerald'|'Quartz'
+    entryPrice: numeric("entry_price", { precision: 14, scale: 4 }),
+    entryDate: timestamp("entry_date", { withTimezone: true }).defaultNow(),
+    riskTier: text("risk_tier").notNull(), // 'conservative'|'balanced'|'aggressive'
+    thesis: text("thesis"),
+    keyRisk: text("key_risk"),
+    sector: text("sector"),
+    currency: text("currency").default("USD"),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 9. ALPHA_TRACKING — Price checks at 30, 60, 90 days (auto + manual)
+export const alphaTracking = pgTable("alpha_tracking", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    predictionId: uuid("prediction_id").notNull().references(() => alphaPredictions.id, { onDelete: "cascade" }),
+    checkDate: timestamp("check_date", { withTimezone: true }).defaultNow(),
+    checkType: text("check_type").notNull(), // '30d'|'60d'|'90d'|'manual'
+    currentPrice: numeric("current_price", { precision: 14, scale: 4 }),
+    returnPct: numeric("return_pct", { precision: 8, scale: 4 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 10. ALPHA_OVERRIDES — Manual context tags per pick
+export const alphaOverrides = pgTable("alpha_overrides", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    predictionId: uuid("prediction_id").notNull().references(() => alphaPredictions.id, { onDelete: "cascade" }),
+    overrideDate: timestamp("override_date", { withTimezone: true }).defaultNow(),
+    // 'market_crash_intact'|'management_change'|'sector_rotation'|'thesis_broken'|'external_factor'
+    overrideType: text("override_type").notNull(),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 11. ALPHA_INSIGHTS — Learning reports generated after 90-day review cycles
+export const alphaInsights = pgTable("alpha_insights", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    cycleId: text("cycle_id").notNull().unique(), // '2026-Q1'
+    generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
+    criteriaPerformance: jsonb("criteria_performance"), // {undervaluation:0.52,institutional:0.68,...}
+    weightRecommendations: jsonb("weight_recommendations"), // {undervaluation:25,institutional:27,...}
+    hitRateByMarket: jsonb("hit_rate_by_market"), // {NSE:0.61,US:0.55,...}
+    hitRateByTier: jsonb("hit_rate_by_tier"), // {Diamond:0.78,Sapphire:0.64,...}
+    totalPicksAnalyzed: integer("total_picks_analyzed"),
+    overallHitRate: numeric("overall_hit_rate", { precision: 5, scale: 4 }),
+    summary: text("summary"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 12. ALPHA_WEIGHT_HISTORY — Audit trail for scoring weight changes
+export const alphaWeightHistory = pgTable("alpha_weight_history", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    effectiveDate: timestamp("effective_date", { withTimezone: true }).defaultNow(),
+    oldWeights: jsonb("old_weights"),
+    newWeights: jsonb("new_weights"),
+    reason: text("reason"),
+    insightId: uuid("insight_id").references(() => alphaInsights.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
