@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Info, Shield, CheckCircle2 } from "lucide-react";
+import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -12,7 +12,7 @@ interface ScanResult {
     scanId: string;
     newCount: number;
     droppedCount: number;
-    deltas: any;
+    deltas: Record<string, unknown>;
 }
 
 export function V5MarketScanner() {

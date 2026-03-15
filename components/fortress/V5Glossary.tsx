@@ -3,9 +3,8 @@
 
 import { Glossary } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Tag, ShieldAlert, Layers, RefreshCcw } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface V5GlossaryProps {
     data: Glossary;

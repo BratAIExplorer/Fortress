@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db/client";
-import { eq, and, sql, isNull } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { env } from "@/lib/env";
 
 // POST /api/alpha/track
@@ -94,7 +94,6 @@ export async function GET(req: NextRequest) {
     // 60-day: entry_date + 60 days <= now AND no 60d record
     // 90-day: entry_date + 90 days <= now AND no 90d record
     const now = new Date();
-    const nowTs = now.toISOString();
 
     // Get all active predictions
     const predictions = await db

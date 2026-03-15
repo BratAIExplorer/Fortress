@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db/client";
-import { eq, and, gte, isNotNull, sql } from "drizzle-orm";
+import { eq, and, isNotNull, sql } from "drizzle-orm";
 import { env } from "@/lib/env";
 
 // POST /api/alpha/learn

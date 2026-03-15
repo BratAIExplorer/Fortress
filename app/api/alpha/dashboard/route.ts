@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db/client";
-import { eq, and, isNotNull, sql, desc } from "drizzle-orm";
+import { eq, isNotNull, sql, desc } from "drizzle-orm";
 import { env } from "@/lib/env";
 
 // GET /api/alpha/dashboard

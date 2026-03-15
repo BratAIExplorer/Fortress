@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db/client";
-import { eq, desc } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { env } from "@/lib/env";
 
 // POST /api/alpha/weights

@@ -206,9 +206,6 @@ export default function AlphaDashboard() {
 
     const { summary, performance, model, recentScans } = data;
 
-    // Parse hit rate % for ring
-    const hitRatePct = parseInt(summary.overallHitRate) || 0;
-
     return (
         <div className="flex flex-col min-h-screen">
             <Navbar />
