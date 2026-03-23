@@ -152,28 +152,56 @@ MARKET_ADAPTERS = {
 # ─── SCORING ENGINE (Market-Agnostic) ─────────────────────────────────────────
 
 def calculate_l1(info, market="NSE", max_pts=25):
-    """L1: Protection (D/E, OCF, ROCE)"""
+    """L1: Protection (D/E, ROCE, OCF, FCF Yield, Earnings Quality)
+
+    Upgraded from v1 (snapshot D/E + ROCE + OCF binary)
+    to v2 adding FCF Yield and Earnings Quality ratio.
+
+    FCF Yield: FCF / MarketCap — tells you what % return you get in real cash
+    Earnings Quality: FCF / Net Income — ratio > 0.8 means profits are real cash,
+      not accounting entries. Ratio < 0.5 is a red flag (Satyam pattern).
+    """
     score = 0
-    # yfinance returns debtToEquity * 100 for NSE, but usually raw for US/HK
     de_raw = info.get('debtToEquity', 999)
     de = de_raw / 100 if market == "NSE" and de_raw > 5 else de_raw
-    
+
     roce = info.get('returnOnCapitalEmployed', 0)
     ocf = info.get('operatingCashflow', 0)
-    
-    # Weights for sub-components (relative to max_pts)
-    de_wt = max_pts * 0.4
-    roce_wt = max_pts * 0.4
-    ocf_wt = max_pts * 0.2
+    fcf = info.get('freeCashflow', 0)
+    net_income = info.get('netIncomeToCommon', 1) or 1
+    market_cap = info.get('marketCap', 1) or 1
 
-    if de < 0.6: score += de_wt
+    # Redistributed weights to accommodate FCF quality checks
+    de_wt   = max_pts * 0.28   # Debt safety
+    roce_wt = max_pts * 0.28   # Capital efficiency
+    ocf_wt  = max_pts * 0.14   # Cash generation (binary)
+    fcf_wt  = max_pts * 0.18   # FCF Yield (new)
+    eq_wt   = max_pts * 0.12   # Earnings Quality ratio (new)
+
+    # D/E check
+    if de < 0.6:   score += de_wt
     elif de < 1.0: score += (de_wt / 2)
-    
-    if roce > 0.15: score += roce_wt
+
+    # ROCE check
+    if roce > 0.15:   score += roce_wt
     elif roce > 0.10: score += (roce_wt / 2)
-    
+
+    # OCF positive check
     if ocf > 0: score += ocf_wt
-    
+
+    # FCF Yield check (new)
+    if market_cap > 0 and fcf > 0:
+        fcf_yield = fcf / market_cap
+        if fcf_yield > 0.05:   score += fcf_wt        # > 5% yield = strong cash return
+        elif fcf_yield > 0.02: score += (fcf_wt / 2)  # > 2% = decent
+
+    # Earnings Quality check (new): FCF ÷ Net Income
+    # > 0.8 = earnings backed by real cash | < 0.5 = accounting concern
+    if net_income > 0 and fcf > 0:
+        eq_ratio = fcf / net_income
+        if eq_ratio > 0.8:   score += eq_wt
+        elif eq_ratio > 0.5: score += (eq_wt / 2)
+
     return int(score)
 
 def calculate_l2(info, max_pts=20):
@@ -215,20 +243,48 @@ def calculate_l3(ticker, hist, benchmark_hist, max_pts=15):
     return 0
 
 def calculate_l4(info, max_pts=25):
-    """L4: Growth Visibility (CAGR)"""
-    score = 0
-    rev_growth = info.get('revenueGrowth', 0)
-    earnings_growth = info.get('earningsGrowth', 0)
-    
-    rev_wt = max_pts * 0.5
-    earn_wt = max_pts * 0.5
+    """L4: Growth Visibility (Revenue CAGR, Earnings CAGR, PEG Ratio)
 
-    if rev_growth > 0.15: score += rev_wt
+    Upgraded from v1 (revenue + earnings growth snapshots only)
+    to v2 adding PEG ratio — the most important valuation-growth bridge.
+
+    PEG = P/E ÷ Earnings Growth Rate (as a %)
+      PEG < 0.8  → you are getting growth cheaper than it costs (Peter Lynch buy signal)
+      PEG 0.8–1.2 → fairly priced growth
+      PEG 1.2–2.0 → growth is getting expensive
+      PEG > 2.0  → fully priced, no margin of safety
+
+    A company growing 35% at P/E 30 (PEG 0.86) is CHEAPER than
+    a company growing 5% at P/E 15 (PEG 3.0).
+    """
+    score = 0
+    rev_growth     = info.get('revenueGrowth', 0)
+    earnings_growth = info.get('earningsGrowth', 0)
+    trailing_pe    = info.get('trailingPE', 0)
+
+    rev_wt  = max_pts * 0.35   # Revenue growth (was 0.5)
+    earn_wt = max_pts * 0.35   # Earnings growth (was 0.5)
+    peg_wt  = max_pts * 0.30   # PEG ratio (new)
+
+    # Revenue growth check
+    if rev_growth > 0.15:   score += rev_wt
     elif rev_growth > 0.10: score += (rev_wt / 2)
-    
-    if earnings_growth > 0.15: score += earn_wt
+
+    # Earnings growth check
+    if earnings_growth > 0.15:   score += earn_wt
     elif earnings_growth > 0.10: score += (earn_wt / 2)
-    
+
+    # PEG ratio check (new)
+    if trailing_pe > 0 and earnings_growth > 0:
+        peg = trailing_pe / (earnings_growth * 100)
+        if peg < 0.8:    score += peg_wt               # Growth on sale
+        elif peg < 1.2:  score += int(peg_wt * 0.67)   # Fair value
+        elif peg < 2.0:  score += int(peg_wt * 0.33)   # Getting expensive
+        # peg >= 2.0: no points — growth fully priced in
+    elif trailing_pe == 0 and earnings_growth > 0.15:
+        # Profitable but no meaningful PE yet (e.g. very recent profitability)
+        score += int(peg_wt * 0.33)
+
     return int(score)
 
 def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
@@ -247,18 +303,34 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
         
         total_score = l1 + l2 + l3 + l4 + l5
         price = info.get('currentPrice', 0) or info.get('regularMarketPrice', 0)
-        
+
+        # ── Derived metrics for transparency ─────────────────────────────────
+        fcf        = info.get('freeCashflow', 0) or 0
+        net_income = info.get('netIncomeToCommon', 1) or 1
+        market_cap = info.get('marketCap', 1) or 1
+        trailing_pe     = info.get('trailingPE', 0) or 0
+        earnings_growth = info.get('earningsGrowth', 0) or 0
+
+        fcf_yield = round(fcf / market_cap * 100, 2) if market_cap > 0 and fcf else None
+        earnings_quality = round(fcf / net_income, 2) if net_income > 0 and fcf else None
+        peg = round(trailing_pe / (earnings_growth * 100), 2) \
+              if trailing_pe > 0 and earnings_growth > 0 else None
+
         category = "OFFLINE"
         if total_score >= 60:
             category = adapter.classify_price(price)
-            
+
         return {
             "symbol": symbol,
             "price": price,
             "currency": adapter.currency,
             "l1": l1, "l2": l2, "l3": l3, "l4": l4, "l5": l5,
             "total_score": total_score,
-            "category": category
+            "category": category,
+            # New transparency fields (P0 upgrade)
+            "fcf_yield_pct": fcf_yield,          # % — higher is better
+            "earnings_quality": earnings_quality, # > 0.8 clean | < 0.5 concern
+            "peg": peg,                           # < 1.0 buy signal | > 2.0 expensive
         }
     except:
         return None

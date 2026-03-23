@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X } from "lucide-react";
+import { Shield, Menu, X, Brain } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,6 +49,12 @@ export function Navbar({
                             </Button>
                             <Button variant="ghost" size="sm" asChild>
                                 <Link href="/v5-extension" className="text-sm">V5 Extension</Link>
+                            </Button>
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link href="/intelligence" className="text-sm flex items-center gap-1.5">
+                                    <Brain className="h-3.5 w-3.5 text-primary" />
+                                    Intelligence
+                                </Link>
                             </Button>
                         </>
                     )}
@@ -101,6 +107,14 @@ export function Navbar({
                                     className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50"
                                 >
                                     V5 Extension
+                                </Link>
+                                <Link
+                                    href="/intelligence"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50 flex items-center gap-2"
+                                >
+                                    <Brain className="h-4 w-4 text-primary" />
+                                    Intelligence
                                 </Link>
                                 <Link
                                     href="/admin"

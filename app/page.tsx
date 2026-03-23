@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ArrowRight, TrendingUp, BookOpen, Database } from "lucide-react";
+import { ArrowRight, TrendingUp, BookOpen, Database, Brain } from "lucide-react";
 import Link from "next/link";
 import { Navbar } from "@/components/fortress/Navbar";
 
@@ -69,6 +69,12 @@ export default function Home() {
           <Button variant="ghost" size="lg" asChild>
             <Link href="/constitution">
               Our Constitution
+            </Link>
+          </Button>
+          <Button variant="outline" size="lg" className="gap-2 border-primary/40 text-primary hover:bg-primary/10" asChild>
+            <Link href="/intelligence">
+              <Brain className="h-4 w-4" />
+              How It Works
             </Link>
           </Button>
         </motion.div>
