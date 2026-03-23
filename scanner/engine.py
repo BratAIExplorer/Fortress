@@ -354,60 +354,228 @@ def classify_megatrend(info: dict) -> tuple[str, str]:
     return ("Diversified", "📦")
 
 
+# ─── HISTORICAL DATA HELPERS ──────────────────────────────────────────────────
+#
+# Why these exist:
+#   The yfinance `info` dict is a single snapshot. It tells you D/E TODAY,
+#   not whether it was 3.0 two years ago and is now 0.8 (a re-rating story)
+#   or 0.3 two years ago and now 1.5 (a growing problem).
+#
+#   Direction is more important than position for these signals.
+#   Both helpers use the already-created yf.Ticker object — no extra API calls.
+
+
+def get_debt_trajectory(balance_sheet) -> dict:
+    """Extract D/E direction over up to 3 historical years.
+
+    Why direction > snapshot:
+      D/E of 0.9 could be a company deleveraging from 3.0 (buy signal)
+      or leveraging up from 0.2 (warning signal). Same number, opposite story.
+
+    Scoring (used as add-on modifier inside L1):
+      Falling 3 years  → +8 pts  (deleveraging = re-rating catalyst)
+      Falling 2 years  → +5 pts
+      Stable           → +2 pts
+      Rising 2+ years  → 0 pts   (debt accumulating — no bonus)
+
+    Returns direction string + trajectory_score for L1 integration.
+    Silently returns zeroes if balance_sheet unavailable (yfinance can be flaky).
+    """
+    empty = {"de_history": [], "de_direction": "unknown", "trajectory_pts": 0}
+    try:
+        if balance_sheet is None or balance_sheet.empty:
+            return empty
+
+        de_values = []
+        # yfinance balance_sheet columns = datetime index, most recent first
+        for col in list(balance_sheet.columns)[:3]:
+            try:
+                # Try 'Total Debt' first, fall back to Long + Short term
+                if 'Total Debt' in balance_sheet.index:
+                    total_debt = float(balance_sheet.loc['Total Debt', col] or 0)
+                else:
+                    ltd = float(balance_sheet.loc.get('Long Term Debt', {}).get(col, 0) or 0)
+                    std = float(balance_sheet.loc.get('Short Long Term Debt', {}).get(col, 0) or 0)
+                    total_debt = ltd + std
+
+                # Equity: try both common field names
+                equity = 0
+                for eq_field in ['Stockholders Equity', 'Total Equity', 'Common Stock Equity']:
+                    if eq_field in balance_sheet.index:
+                        equity = float(balance_sheet.loc[eq_field, col] or 0)
+                        if equity != 0:
+                            break
+
+                de_values.append(round(total_debt / equity, 2) if equity > 0 else None)
+            except Exception:
+                de_values.append(None)
+
+        valid = [v for v in de_values if v is not None]
+        if len(valid) < 2:
+            return {**empty, "de_history": de_values}
+
+        # de_values[0] = most recent year, de_values[-1] = oldest available year
+        falling_count = sum(
+            1 for i in range(len(valid) - 1) if valid[i] < valid[i + 1]
+        )
+
+        if falling_count == len(valid) - 1:   # Every year improving
+            direction, pts = "falling", 8
+        elif falling_count >= 1:               # At least one year improving
+            direction, pts = "falling", 5
+        elif all(abs(valid[i] - valid[i+1]) < 0.2 for i in range(len(valid)-1)):
+            direction, pts = "stable", 2       # Flat ± 0.2
+        else:
+            direction, pts = "rising", 0       # Getting worse
+
+        return {"de_history": de_values, "de_direction": direction, "trajectory_pts": pts}
+
+    except Exception:
+        return empty
+
+
+def get_margin_trend(income_stmt) -> dict:
+    """Extract operating margin expansion/contraction over 3 historical years.
+
+    Why this replaces the single-point proxy in MB operating leverage score:
+      A company with 12% operating margin today could be:
+        (a) expanding from 6% three years ago → operating leverage firing
+        (b) contracting from 20% three years ago → margin pressure
+      Same margin today, completely different investment thesis.
+
+    Returns margin_expansion_pts (percentage point change, recent minus oldest)
+    and ol_score (0–20) used to replace the proxy in calculate_multibagger_score.
+
+    Silently returns zeroes if income_stmt unavailable.
+    """
+    empty = {"margin_history": [], "margin_expansion_pts": None,
+             "margin_direction": "unknown", "ol_score": 0}
+    try:
+        if income_stmt is None or income_stmt.empty:
+            return empty
+
+        margins = []
+        for col in list(income_stmt.columns)[:3]:
+            try:
+                # Try EBIT first, then Operating Income
+                ebit = None
+                for field in ['EBIT', 'Operating Income', 'Operating Profit']:
+                    if field in income_stmt.index:
+                        val = income_stmt.loc[field, col]
+                        if val is not None and str(val) != 'nan':
+                            ebit = float(val)
+                            break
+
+                revenue = None
+                for field in ['Total Revenue', 'Revenue', 'Net Revenue']:
+                    if field in income_stmt.index:
+                        val = income_stmt.loc[field, col]
+                        if val is not None and str(val) != 'nan':
+                            revenue = float(val)
+                            break
+
+                if ebit is not None and revenue and revenue > 0:
+                    margins.append(round(ebit / revenue * 100, 1))
+                else:
+                    margins.append(None)
+            except Exception:
+                margins.append(None)
+
+        valid = [v for v in margins if v is not None]
+        if len(valid) < 2:
+            return {**empty, "margin_history": margins}
+
+        # Recent (index 0) minus oldest available
+        expansion_pts = round(valid[0] - valid[-1], 1)
+
+        if expansion_pts > 5:     direction, score = "expanding", 20
+        elif expansion_pts > 2:   direction, score = "expanding", 14
+        elif expansion_pts > -2:  direction, score = "stable",    8
+        elif expansion_pts > -5:  direction, score = "contracting", 3
+        else:                     direction, score = "contracting", 0
+
+        return {
+            "margin_history": margins,
+            "margin_expansion_pts": expansion_pts,
+            "margin_direction": direction,
+            "ol_score": score,
+        }
+
+    except Exception:
+        return empty
+
+
 # ─── SCORING ENGINE (Market-Agnostic) ─────────────────────────────────────────
 
-def calculate_l1(info, market="NSE", max_pts=25):
-    """L1: Protection (D/E, ROCE, OCF, FCF Yield, Earnings Quality)
+def calculate_l1(info, market="NSE", max_pts=25, debt_trajectory: dict | None = None):
+    """L1: Protection — v3 (snapshot quality + real cash + debt direction)
 
-    Upgraded from v1 (snapshot D/E + ROCE + OCF binary)
-    to v2 adding FCF Yield and Earnings Quality ratio.
+    What changed from v1 → v3:
+      v1: D/E snapshot + ROCE + OCF binary (3 checks)
+      v2: + FCF Yield + Earnings Quality ratio (5 checks)
+      v3: + Debt Trajectory modifier from 3yr balance sheet (6 checks)
 
-    FCF Yield: FCF / MarketCap — tells you what % return you get in real cash
-    Earnings Quality: FCF / Net Income — ratio > 0.8 means profits are real cash,
-      not accounting entries. Ratio < 0.5 is a red flag (Satyam pattern).
+    The debt trajectory is additive — it cannot push score above max_pts,
+    but a company actively deleveraging earns back points lost on a high
+    current D/E. A company leveraging up loses the trajectory bonus entirely.
+
+    Weight distribution (max_pts = 25):
+      D/E snapshot:       22% = 5.5 pts
+      ROCE:               26% = 6.5 pts
+      OCF positive:       12% = 3.0 pts
+      FCF Yield:          18% = 4.5 pts
+      Earnings Quality:   12% = 3.0 pts
+      Debt Trajectory:    10% = 2.5 pts (from trajectory_pts helper, capped)
     """
     score = 0
     de_raw = info.get('debtToEquity', 999)
     de = de_raw / 100 if market == "NSE" and de_raw > 5 else de_raw
 
-    roce = info.get('returnOnCapitalEmployed', 0)
-    ocf = info.get('operatingCashflow', 0)
-    fcf = info.get('freeCashflow', 0)
+    roce       = info.get('returnOnCapitalEmployed', 0)
+    ocf        = info.get('operatingCashflow', 0)
+    fcf        = info.get('freeCashflow', 0)
     net_income = info.get('netIncomeToCommon', 1) or 1
     market_cap = info.get('marketCap', 1) or 1
 
-    # Redistributed weights to accommodate FCF quality checks
-    de_wt   = max_pts * 0.28   # Debt safety
-    roce_wt = max_pts * 0.28   # Capital efficiency
-    ocf_wt  = max_pts * 0.14   # Cash generation (binary)
-    fcf_wt  = max_pts * 0.18   # FCF Yield (new)
-    eq_wt   = max_pts * 0.12   # Earnings Quality ratio (new)
+    de_wt    = max_pts * 0.22
+    roce_wt  = max_pts * 0.26
+    ocf_wt   = max_pts * 0.12
+    fcf_wt   = max_pts * 0.18
+    eq_wt    = max_pts * 0.12
+    traj_wt  = max_pts * 0.10   # Debt trajectory bonus (capped)
 
-    # D/E check
+    # ── D/E snapshot ─────────────────────────────────────────────────────────
     if de < 0.6:   score += de_wt
     elif de < 1.0: score += (de_wt / 2)
 
-    # ROCE check
+    # ── ROCE ─────────────────────────────────────────────────────────────────
     if roce > 0.15:   score += roce_wt
     elif roce > 0.10: score += (roce_wt / 2)
 
-    # OCF positive check
+    # ── OCF positive ─────────────────────────────────────────────────────────
     if ocf > 0: score += ocf_wt
 
-    # FCF Yield check (new)
+    # ── FCF Yield ────────────────────────────────────────────────────────────
     if market_cap > 0 and fcf > 0:
         fcf_yield = fcf / market_cap
-        if fcf_yield > 0.05:   score += fcf_wt        # > 5% yield = strong cash return
-        elif fcf_yield > 0.02: score += (fcf_wt / 2)  # > 2% = decent
+        if fcf_yield > 0.05:   score += fcf_wt
+        elif fcf_yield > 0.02: score += (fcf_wt / 2)
 
-    # Earnings Quality check (new): FCF ÷ Net Income
-    # > 0.8 = earnings backed by real cash | < 0.5 = accounting concern
+    # ── Earnings Quality: FCF ÷ Net Income ───────────────────────────────────
     if net_income > 0 and fcf > 0:
         eq_ratio = fcf / net_income
         if eq_ratio > 0.8:   score += eq_wt
         elif eq_ratio > 0.5: score += (eq_wt / 2)
 
-    return int(score)
+    # ── Debt Trajectory modifier (from get_debt_trajectory helper) ────────────
+    # trajectory_pts from helper: falling=8, stable=2, rising=0
+    # Scale to traj_wt allocation and cap at traj_wt
+    if debt_trajectory:
+        raw_pts = debt_trajectory.get("trajectory_pts", 0)
+        traj_bonus = min(traj_wt, traj_wt * (raw_pts / 8))
+        score += traj_bonus
+
+    return min(int(score), max_pts)   # Hard cap at max_pts
 
 def calculate_l2(info, max_pts=20):
     """L2: Pricing Power (Margins)"""
@@ -492,7 +660,8 @@ def calculate_l4(info, max_pts=25):
 
     return int(score)
 
-def calculate_multibagger_score(info: dict, market_key: str = "NSE") -> dict:
+def calculate_multibagger_score(info: dict, market_key: str = "NSE",
+                                margin_trend: dict | None = None) -> dict:
     """Multi-Bagger Potential Score (0–100) — separate from 5-layer quality score.
 
     Answers a different question from L1-L5:
@@ -584,20 +753,22 @@ def calculate_multibagger_score(info: dict, market_key: str = "NSE") -> dict:
     else:                             compound_score = 0
 
     # ── C: Operating Leverage Score (0–20) ───────────────────────────────────
-    # Proxy: are current margins above industry-typical thresholds?
-    # Full version (Sprint 3): compare Year-3 vs Year-0 margins from income_stmt.
-    # Current proxy: operating margin expansion signal from gross vs operating delta.
-    margin_delta = gross_margin - operating_margin  # narrower gap = more efficient
-    if gross_margin > 0.35 and operating_margin > 0.15:
-        op_lev_score = 20   # High margins = pricing power + scale already working
-    elif gross_margin > 0.25 and operating_margin > 0.10:
-        op_lev_score = 13
-    elif gross_margin > 0.15 and operating_margin > 0.05:
-        op_lev_score = 7
-    elif gross_margin > 0 and operating_margin > 0:
-        op_lev_score = 3
+    # v2: Uses real 3-year income statement trend from get_margin_trend() helper.
+    # If margin_trend not available (yfinance flaky), falls back to single-point proxy.
+    if margin_trend and margin_trend.get("margin_direction") != "unknown":
+        op_lev_score = margin_trend["ol_score"]
     else:
-        op_lev_score = 0
+        # Single-point proxy fallback (used when income_stmt unavailable)
+        if gross_margin > 0.35 and operating_margin > 0.15:
+            op_lev_score = 20
+        elif gross_margin > 0.25 and operating_margin > 0.10:
+            op_lev_score = 13
+        elif gross_margin > 0.15 and operating_margin > 0.05:
+            op_lev_score = 7
+        elif gross_margin > 0 and operating_margin > 0:
+            op_lev_score = 3
+        else:
+            op_lev_score = 0
 
     # ── D: Discovery Gap Score (0–20) ────────────────────────────────────────
     # Sector-median P/E lookup (approximate, avoids per-stock manual work).
@@ -670,64 +841,93 @@ def calculate_multibagger_score(info: dict, market_key: str = "NSE") -> dict:
 def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
     try:
         ticker = yf.Ticker(symbol)
-        info = ticker.info
-        
-        # We pre-fetch history for score calculation
-        hist = ticker.history(period="3mo")
-        
-        l1 = calculate_l1(info, market=market_key, max_pts=weights['l1'])
+        info   = ticker.info
+        hist   = ticker.history(period="3mo")
+
+        # ── Historical data (fetched once, reused across all scorers) ─────────
+        # Wrapped individually so a failure on one doesn't kill the entire scan.
+        try:
+            balance_sheet = ticker.balance_sheet
+        except Exception:
+            balance_sheet = None
+
+        try:
+            income_stmt = ticker.income_stmt
+        except Exception:
+            income_stmt = None
+
+        # ── Derive trajectory helpers ─────────────────────────────────────────
+        debt_traj    = get_debt_trajectory(balance_sheet)
+        margin_trend = get_margin_trend(income_stmt)
+
+        # ── 5-Layer scores ────────────────────────────────────────────────────
+        l1 = calculate_l1(info, market=market_key, max_pts=weights['l1'],
+                          debt_trajectory=debt_traj)
         l2 = calculate_l2(info, max_pts=weights['l2'])
         l3 = calculate_l3(symbol, hist, benchmark_hist, max_pts=weights['l3'])
         l4 = calculate_l4(info, max_pts=weights['l4'])
-        l5 = weights['l5'] # Manual Governance placeholder
-        
+        l5 = weights['l5']   # Manual governance placeholder (automated in Sprint 3)
+
         total_score = l1 + l2 + l3 + l4 + l5
         price = info.get('currentPrice', 0) or info.get('regularMarketPrice', 0)
 
-        # ── Derived metrics for transparency ─────────────────────────────────
-        fcf        = info.get('freeCashflow', 0) or 0
-        net_income = info.get('netIncomeToCommon', 1) or 1
-        market_cap = info.get('marketCap', 1) or 1
+        # ── Transparency metrics (P0) ─────────────────────────────────────────
+        fcf             = info.get('freeCashflow', 0) or 0
+        net_income      = info.get('netIncomeToCommon', 1) or 1
+        market_cap      = info.get('marketCap', 1) or 1
         trailing_pe     = info.get('trailingPE', 0) or 0
         earnings_growth = info.get('earningsGrowth', 0) or 0
 
-        fcf_yield = round(fcf / market_cap * 100, 2) if market_cap > 0 and fcf else None
+        fcf_yield        = round(fcf / market_cap * 100, 2) if market_cap > 0 and fcf else None
         earnings_quality = round(fcf / net_income, 2) if net_income > 0 and fcf else None
-        peg = round(trailing_pe / (earnings_growth * 100), 2) \
-              if trailing_pe > 0 and earnings_growth > 0 else None
+        peg              = round(trailing_pe / (earnings_growth * 100), 2) \
+                           if trailing_pe > 0 and earnings_growth > 0 else None
 
         # ── Multi-Bagger Score (fully automated) ─────────────────────────────
-        mb = calculate_multibagger_score(info, market_key)
+        mb = calculate_multibagger_score(info, market_key, margin_trend=margin_trend)
 
         category = "OFFLINE"
         if total_score >= 60:
             category = adapter.classify_price(price)
 
         return {
-            "symbol": symbol,
-            "price": price,
+            "symbol":   symbol,
+            "price":    price,
             "currency": adapter.currency,
+
+            # 5-Layer scores
             "l1": l1, "l2": l2, "l3": l3, "l4": l4, "l5": l5,
             "total_score": total_score,
-            "category": category,
-            # P0 transparency fields
-            "fcf_yield_pct": fcf_yield,
+            "category":    category,
+
+            # P0 transparency (FCF quality, PEG)
+            "fcf_yield_pct":    fcf_yield,
             "earnings_quality": earnings_quality,
-            "peg": peg,
-            # Multi-Bagger Score (fully automated — no manual input)
-            "mb_score": mb["mb_score"],
-            "mb_tier": mb["mb_tier"],
-            "mb_runway": mb["mb_runway"],
-            "mb_compound": mb["mb_compound"],
-            "mb_op_leverage": mb["mb_op_leverage"],
-            "mb_discovery": mb["mb_discovery"],
-            "mb_smallcap": mb["mb_smallcap"],
-            "penetration_pct": mb["penetration_pct"],
+            "peg":              peg,
+
+            # Debt trajectory (L1 v3 — 3yr direction)
+            "de_history":    debt_traj.get("de_history", []),
+            "de_direction":  debt_traj.get("de_direction", "unknown"),
+
+            # Margin trend (MB score v2 — 3yr operating leverage)
+            "margin_history":       margin_trend.get("margin_history", []),
+            "margin_expansion_pts": margin_trend.get("margin_expansion_pts"),
+            "margin_direction":     margin_trend.get("margin_direction", "unknown"),
+
+            # Multi-Bagger Score
+            "mb_score":             mb["mb_score"],
+            "mb_tier":              mb["mb_tier"],
+            "mb_runway":            mb["mb_runway"],
+            "mb_compound":          mb["mb_compound"],
+            "mb_op_leverage":       mb["mb_op_leverage"],
+            "mb_discovery":         mb["mb_discovery"],
+            "mb_smallcap":          mb["mb_smallcap"],
+            "penetration_pct":      mb["penetration_pct"],
             "compounding_engine_pct": mb["compounding_engine_pct"],
-            "megatrend": mb["megatrend"],
-            "megatrend_emoji": mb["megatrend_emoji"],
+            "megatrend":            mb["megatrend"],
+            "megatrend_emoji":      mb["megatrend_emoji"],
         }
-    except:
+    except Exception:
         return None
 
 def main():
