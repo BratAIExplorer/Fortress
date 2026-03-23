@@ -98,7 +98,7 @@ function WhatIsFortress({ mode }: SectionProps) {
         <div className="space-y-5">
           <BeginnerBadge />
           <p className="text-lg text-muted-foreground leading-relaxed mt-3">
-            Imagine you want to buy a phone but you don't know which one is actually good vs which one just has a nice ad. Fortress is like having a very experienced engineer friend who looks inside every phone and tells you honestly — <strong className="text-white">this one is built to last, this one will break in 6 months.</strong>
+            Imagine you want to buy a phone but you don&apos;t know which one is actually good vs which one just has a nice ad. Fortress is like having a very experienced engineer friend who looks inside every phone and tells you honestly — <strong className="text-white">this one is built to last, this one will break in 6 months.</strong>
           </p>
           <p className="text-muted-foreground leading-relaxed">
             Instead of phones, we do this for companies listed on the stock market. We run every company through a <strong className="text-white">5-question quality test</strong>, give them a score, and flag the ones that actually deserve your attention — not the ones with the loudest news.
@@ -291,7 +291,7 @@ function FiveLayerEngine({ mode }: SectionProps) {
         <div className="mb-6">
           <BeginnerBadge />
           <p className="text-muted-foreground leading-relaxed mt-3">
-            Every company we scan gets put through <strong className="text-white">5 questions</strong>. Each question is worth points. A company needs at least <strong className="text-white">60 out of 100</strong> to even show up on our radar. Click each layer to see what we're actually checking.
+            Every company we scan gets put through <strong className="text-white">5 questions</strong>. Each question is worth points. A company needs at least <strong className="text-white">60 out of 100</strong> to even show up on our radar. Click each layer to see what we&apos;re actually checking.
           </p>
         </div>
       ) : (
@@ -441,7 +441,7 @@ function GemScore({ mode }: SectionProps) {
         <div className="mb-6">
           <BeginnerBadge />
           <p className="text-muted-foreground leading-relaxed mt-3">
-            The 5-layer engine tells you if a company is <em>financially safe</em>. The GEM Score asks a different question: is this a <strong className="text-white">hidden opportunity</strong> — something genuinely good that the market hasn't noticed yet? It scores 0–100 across 4 criteria and assigns a tier (Diamond down to Quartz).
+            The 5-layer engine tells you if a company is <em>financially safe</em>. The GEM Score asks a different question: is this a <strong className="text-white">hidden opportunity</strong> — something genuinely good that the market hasn&apos;t noticed yet? It scores 0–100 across 4 criteria and assigns a tier (Diamond down to Quartz).
           </p>
         </div>
       ) : (
@@ -539,7 +539,7 @@ function SovereignAlpha({ mode }: SectionProps) {
             Every stock pick Fortress makes is tracked automatically at 30, 60, and 90 days. If a pick was right, the system learns which scoring rules led to it and uses those more. If it was wrong, it learns to trust those rules less.
           </Callout>
           <p className="text-muted-foreground leading-relaxed">
-            It's like a doctor who checks back on every patient to see if their diagnosis was right — and uses those results to become a better diagnostician over time. Most stock platforms never tell you if their picks actually worked. We track every single one.
+            It&apos;s like a doctor who checks back on every patient to see if their diagnosis was right — and uses those results to become a better diagnostician over time. Most stock platforms never tell you if their picks actually worked. We track every single one.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
@@ -555,7 +555,7 @@ function SovereignAlpha({ mode }: SectionProps) {
             ))}
           </div>
           <Callout emoji="🎯" title="The fair game rule" color="green">
-            If a stock went down because of a market crash or a surprise geopolitical event — that's not the system's fault. Fortress lets you tag these "unfair" outcomes so the learning engine is only judged on genuine prediction quality.
+            If a stock went down because of a market crash or a surprise geopolitical event — that&apos;s not the system&apos;s fault. Fortress lets you tag these &quot;unfair&quot; outcomes so the learning engine is only judged on genuine prediction quality.
           </Callout>
         </div>
       ) : (
@@ -630,7 +630,7 @@ function MarketWeather({ mode }: SectionProps) {
 
       {mode === "beginner" && (
         <Callout emoji="🌤️" title="Think of this as a weather forecast for your money" color="blue">
-          Just like you'd dress differently on a rainy vs sunny day — you should invest differently depending on what the economy is doing. This section tells you what the economy weather looks like right now.
+          Just like you&apos;d dress differently on a rainy vs sunny day — you should invest differently depending on what the economy is doing. This section tells you what the economy weather looks like right now.
         </Callout>
       )}
 
