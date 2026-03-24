@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, numeric, integer, boolean, timestamp, primaryKey, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, numeric, integer, boolean, timestamp, date, primaryKey, jsonb } from "drizzle-orm/pg-core";
 
 // 1. STOCKS TABLE (The Core Reference)
 export const stocks = pgTable("stocks", {
@@ -222,4 +222,19 @@ export const alphaWeightHistory = pgTable("alpha_weight_history", {
     reason: text("reason"),
     insightId: uuid("insight_id").references(() => alphaInsights.id),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 13. MACRO_SNAPSHOTS — Weekly market pulse snapshots
+export const macroSnapshots = pgTable("macro_snapshots", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    snapshotDate: date("snapshot_date").notNull().unique(),
+    nifty50: numeric("nifty_50"),
+    bankNifty: numeric("bank_nifty"),
+    usdInr: numeric("usd_inr"),
+    goldUsd: numeric("gold_usd"),
+    crudeOilUsd: numeric("crude_oil_usd"),
+    us10yYield: numeric("us_10y_yield"),
+    cboeVix: numeric("cboe_vix"),
+    indiaVix: numeric("india_vix"),
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).defaultNow(),
 });

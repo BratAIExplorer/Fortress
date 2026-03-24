@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, Brain } from "lucide-react";
+import { Shield, Menu, X, Brain, Globe, BookMarked } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -54,6 +54,18 @@ export function Navbar({
                                 <Link href="/intelligence" className="text-sm flex items-center gap-1.5">
                                     <Brain className="h-3.5 w-3.5 text-primary" />
                                     Intelligence
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link href="/macro" className="text-sm flex items-center gap-1.5">
+                                    <Globe className="h-3.5 w-3.5 text-primary" />
+                                    Market Pulse
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link href="/guide" className="text-sm flex items-center gap-1.5">
+                                    <BookMarked className="h-3.5 w-3.5 text-primary" />
+                                    Guide
                                 </Link>
                             </Button>
                         </>
@@ -115,6 +127,22 @@ export function Navbar({
                                 >
                                     <Brain className="h-4 w-4 text-primary" />
                                     Intelligence
+                                </Link>
+                                <Link
+                                    href="/macro"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50 flex items-center gap-2"
+                                >
+                                    <Globe className="h-4 w-4 text-primary" />
+                                    Market Pulse
+                                </Link>
+                                <Link
+                                    href="/guide"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50 flex items-center gap-2"
+                                >
+                                    <BookMarked className="h-4 w-4 text-primary" />
+                                    Guide
                                 </Link>
                                 <Link
                                     href="/admin"
