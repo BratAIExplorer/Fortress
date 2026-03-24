@@ -1138,7 +1138,19 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
         l2 = calculate_l2(info, max_pts=weights['l2'])
         l3 = calculate_l3(symbol, hist, benchmark_hist, max_pts=weights['l3'])
         l4 = calculate_l4(info, max_pts=weights['l4'])
-        l5 = weights['l5']   # Manual governance placeholder (automated in Sprint 3)
+        # L5: Basic governance proxy using available yfinance data
+        # Full Trendlyne integration planned — this uses observable signals only
+        def calculate_l5_basic(info, debt_traj, max_pts):
+            score = 0
+            de_raw = info.get('debtToEquity', 999)
+            de = de_raw / 100 if market_key == 'NSE' and de_raw > 5 else de_raw
+            if de < 1.0:                              score += max_pts * 0.35
+            elif de < 2.0:                            score += max_pts * 0.15
+            if info.get('operatingCashflow', 0) > 0:  score += max_pts * 0.35
+            if debt_traj.get('de_direction') == 'falling': score += max_pts * 0.30
+            elif debt_traj.get('de_direction') == 'stable': score += max_pts * 0.15
+            return int(score)
+        l5 = calculate_l5_basic(info, debt_traj, weights['l5'])
 
         total_score = l1 + l2 + l3 + l4 + l5
         price = info.get('currentPrice', 0) or info.get('regularMarketPrice', 0)

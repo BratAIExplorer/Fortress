@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
                                 l2Pass: stockData.l2 >= (weights.l2 * 0.6),
                                 l3Pass: stockData.l3 >= (weights.l3 * 0.6),
                                 l4Pass: stockData.l4 >= (weights.l4 * 0.6),
-                                l5Pass: true,
+                                l5Pass: stockData.l5 >= (weights.l5 * 0.6),
                                 totalScore: stockData.total_score,
                                 category: stockData.category,
                                 // Engine v3 fields
