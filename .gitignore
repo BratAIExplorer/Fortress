@@ -42,3 +42,8 @@ next-env.d.ts
 
 scripts/debug-env.js
 test_vps/
+.venv/
+scanner/__pycache__/
+**/__pycache__/
+*.pyc
+/tmp/patch*.py
