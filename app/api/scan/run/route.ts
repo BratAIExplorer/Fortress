@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
                 pythonArgs.push("--limit", "200");
             }
 
-            const pythonProcess = spawn("python", pythonArgs);
+            const pythonBin = process.env.PYTHON_BIN ?? "python3";
+            const pythonProcess = spawn(pythonBin, pythonArgs);
 
             let totalStocks = 0;
             let scannedCount = 0;
