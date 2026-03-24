@@ -1,0 +1,80 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db, schema } from "@/lib/db/client";
+import { eq, desc, and, isNotNull } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
+
+// GET /api/scan/results?scanId=<id>&sort=mb_score|total_score&tier=Rocket&megatrend=Defence
+// Returns scan results for a specific scan (or most recent) with all engine v3 fields.
+export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url);
+
+    // Resolve which scan to fetch
+    let scanId = searchParams.get("scanId");
+    if (!scanId) {
+        const lastScan = await db.query.scans.findFirst({
+            where: eq(schema.scans.status, "COMPLETED"),
+            orderBy: [desc(schema.scans.runAt)],
+        });
+        if (!lastScan) {
+            return NextResponse.json({ results: [], scanId: null, total: 0 });
+        }
+        scanId = lastScan.id;
+    }
+
+    const sort = searchParams.get("sort") ?? "mb_score";
+    const tierFilter = searchParams.get("tier");
+    const megatrendFilter = searchParams.get("megatrend");
+    const categoryFilter = searchParams.get("category");
+    const limit = Math.min(parseInt(searchParams.get("limit") ?? "200"), 500);
+    const offset = parseInt(searchParams.get("offset") ?? "0");
+
+    // Build where conditions
+    const conditions = [eq(schema.scanResults.scanId, scanId)];
+    if (tierFilter) conditions.push(eq(schema.scanResults.mbTier, tierFilter));
+    if (megatrendFilter) conditions.push(eq(schema.scanResults.megatrendTag, megatrendFilter));
+    if (categoryFilter) conditions.push(eq(schema.scanResults.category, categoryFilter));
+
+    // Fetch with sort
+    const orderCol = sort === "total_score"
+        ? desc(schema.scanResults.totalScore)
+        : desc(schema.scanResults.mbScore);
+
+    const rows = await db
+        .select()
+        .from(schema.scanResults)
+        .where(and(...conditions))
+        .orderBy(orderCol)
+        .limit(limit)
+        .offset(offset);
+
+    // Also fetch total count for pagination
+    const allRows = await db
+        .select({ id: schema.scanResults.id })
+        .from(schema.scanResults)
+        .where(and(...conditions));
+
+    return NextResponse.json({
+        scanId,
+        results: rows.map(r => ({
+            symbol: r.symbol,
+            price: r.priceAtScan,
+            total_score: r.totalScore,
+            category: r.category,
+            market: r.market,
+            l1: r.l1Pass, l2: r.l2Pass, l3: r.l3Pass, l4: r.l4Pass,
+            mb_score: r.mbScore,
+            mb_tier: r.mbTier,
+            megatrend: r.megatrendTag,
+            megatrend_emoji: r.megatrendEmoji,
+            fcf_yield_pct: r.fcfYieldPct != null ? Number(r.fcfYieldPct) : null,
+            earnings_quality: r.earningsQuality != null ? Number(r.earningsQuality) : null,
+            peg: r.pegRatio != null ? Number(r.pegRatio) : null,
+            de_direction: r.deDirection,
+            margin_direction: r.marginDirection,
+        })),
+        total: allRows.length,
+        offset,
+        limit,
+    });
+}

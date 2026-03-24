@@ -65,6 +65,16 @@ export const scanResults = pgTable("scan_results", {
     category: text("category"), // '52W_LOW', 'PENNY', 'SUB20', 'OFFLINE'
     market: text("market").notNull().default("NSE"),
     rankInCategory: integer("rank_in_category"),
+    // ── Engine v3 fields ──────────────────────────────────────────────────────
+    mbScore: integer("mb_score"),               // 0-100 multi-bagger score
+    mbTier: text("mb_tier"),                    // Rocket/Launcher/Builder/Crawler/Grounded
+    megatrendTag: text("megatrend_tag"),         // e.g. "Defence & Aerospace"
+    megatrendEmoji: text("megatrend_emoji"),     // e.g. "🛡️"
+    fcfYieldPct: numeric("fcf_yield_pct"),       // FCF ÷ MarketCap × 100
+    earningsQuality: numeric("earnings_quality"), // FCF ÷ NetIncome
+    pegRatio: numeric("peg_ratio"),              // P/E ÷ EarningsGrowth%
+    deDirection: text("de_direction"),           // "falling" | "stable" | "rising" | "unknown"
+    marginDirection: text("margin_direction"),   // "expanding" | "stable" | "contracting" | "unknown"
 });
 
 

@@ -94,6 +94,16 @@ export async function POST(req: NextRequest) {
                                 l5Pass: true,
                                 totalScore: stockData.total_score,
                                 category: stockData.category,
+                                // Engine v3 fields
+                                mbScore: stockData.mb_score ?? null,
+                                mbTier: stockData.mb_tier ?? null,
+                                megatrendTag: stockData.megatrend ?? null,
+                                megatrendEmoji: stockData.megatrend_emoji ?? null,
+                                fcfYieldPct: stockData.fcf_yield_pct != null ? stockData.fcf_yield_pct.toString() : null,
+                                earningsQuality: stockData.earnings_quality != null ? stockData.earnings_quality.toString() : null,
+                                pegRatio: stockData.peg != null ? stockData.peg.toString() : null,
+                                deDirection: stockData.de_direction ?? null,
+                                marginDirection: stockData.margin_direction ?? null,
                             });
 
                             sendEvent({

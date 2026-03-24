@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2 } from "lucide-react";
+import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2, Table2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ScanResultsTable } from "@/components/fortress/ScanResultsTable";
 
 interface ScanResult {
     type: "complete";
@@ -15,11 +16,14 @@ interface ScanResult {
     deltas: Record<string, unknown>;
 }
 
+type ScannerView = "summary" | "results";
+
 export function V5MarketScanner() {
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [scanStatus, setScanStatus] = useState("");
     const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
+    const [view, setView] = useState<ScannerView>("summary");
 
     // 1. Sync with server state on mount
     useEffect(() => {
@@ -119,7 +123,55 @@ export function V5MarketScanner() {
     const runFullScan = () => connectToSSE();
 
     return (
-        <div className="space-y-12">
+        <div className="space-y-8">
+            {/* View toggle */}
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={() => setView("summary")}
+                    className={cn(
+                        "flex items-center gap-2 text-sm px-4 py-2 rounded-lg border transition-all",
+                        view === "summary"
+                            ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
+                            : "border-white/10 text-muted-foreground hover:bg-white/5"
+                    )}
+                >
+                    <Activity className="h-4 w-4" /> Scanner
+                </button>
+                <button
+                    onClick={() => setView("results")}
+                    className={cn(
+                        "flex items-center gap-2 text-sm px-4 py-2 rounded-lg border transition-all",
+                        view === "results"
+                            ? "bg-primary/20 border-primary/40 text-primary"
+                            : "border-white/10 text-muted-foreground hover:bg-white/5"
+                    )}
+                >
+                    <Table2 className="h-4 w-4" /> Live Results
+                    {lastScanResult && (
+                        <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                            {lastScanResult.newCount}
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            {/* Results view */}
+            {view === "results" && (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-bold text-white">Scan Results</h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                Sorted by Multi-Bagger Score. Click column headers to re-sort.
+                            </p>
+                        </div>
+                    </div>
+                    <ScanResultsTable scanId={lastScanResult?.scanId} />
+                </div>
+            )}
+
+            {view === "summary" && (
+            <div className="space-y-12">
             {/* Legend Section first for clarity */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 {[
@@ -228,8 +280,17 @@ export function V5MarketScanner() {
                             <span className="font-bold text-red-400 mx-1">{lastScanResult.droppedCount} EXITS</span> since last scan.
                         </span>
                     </div>
-                    <Button variant="link" size="sm" className="text-amber-500 text-xs h-auto p-0">View Changes</Button>
+                    <Button
+                        variant="link"
+                        size="sm"
+                        className="text-amber-500 text-xs h-auto p-0"
+                        onClick={() => setView("results")}
+                    >
+                        View Results →
+                    </Button>
                 </div>
+            )}
+            </div>
             )}
         </div>
     );
