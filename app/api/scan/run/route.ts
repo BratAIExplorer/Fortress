@@ -104,8 +104,16 @@ export async function POST(req: NextRequest) {
             let totalStocks = 0;
             let scannedCount = 0;
 
+            // Buffer stdout so JSON lines split across multiple data events
+            // are never partially parsed (same issue as SSE chunk splitting).
+            let stdoutBuffer = "";
+
             pythonProcess.stdout.on("data", async (data) => {
-                const lines = data.toString().split("\n");
+                stdoutBuffer += data.toString();
+                const lines = stdoutBuffer.split("\n");
+                // Last element may be an incomplete line — keep it in the buffer
+                stdoutBuffer = lines.pop() ?? "";
+
                 for (const line of lines) {
                     if (!line.trim()) continue;
                     try {
