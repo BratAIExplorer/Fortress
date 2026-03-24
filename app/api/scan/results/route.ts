@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
             total_score: r.totalScore,
             category: r.category,
             market: r.market,
-            l1: r.l1Pass, l2: r.l2Pass, l3: r.l3Pass, l4: r.l4Pass,
+            l1: r.l1Pass, l2: r.l2Pass, l3: r.l3Pass, l4: r.l4Pass, l5: r.l5Pass, l6: r.l6Pass,
             mb_score: r.mbScore,
             mb_tier: r.mbTier,
             megatrend: r.megatrendTag,

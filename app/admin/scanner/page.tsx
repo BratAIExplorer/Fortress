@@ -4,15 +4,15 @@ import { useState } from "react";
 import { Navbar } from "@/components/fortress/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, BarChart3, Activity, TrendingUp, CheckCircle2, RefreshCw, AlertTriangle } from "lucide-react";
+import { Shield, BarChart3, Activity, TrendingUp, CheckCircle2, RefreshCw, AlertTriangle, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const WEIGHT_PRESETS = {
-    balanced: { l1: 25, l2: 20, l3: 15, l4: 25, l5: 15 },
-    conservative: { l1: 40, l2: 20, l3: 10, l4: 15, l5: 15 },
-    aggressive: { l1: 15, l2: 15, l3: 20, l4: 40, l5: 10 },
-    growth_nri: { l1: 20, l2: 15, l3: 25, l4: 35, l5: 5 },
+    balanced:     { l1: 25, l2: 20, l3: 10, l4: 25, l5: 15, l6: 5 },
+    conservative: { l1: 40, l2: 20, l3:  5, l4: 15, l5: 15, l6: 5 },
+    aggressive:   { l1: 15, l2: 15, l3: 15, l4: 40, l5: 10, l6: 5 },
+    growth_nri:   { l1: 20, l2: 15, l3: 20, l4: 35, l5:  5, l6: 5 },
 };
 
 const MARKETS = [
@@ -26,7 +26,7 @@ export default function AdminScannerPage() {
     const [weights, setWeights] = useState(WEIGHT_PRESETS.balanced);
     const [isScanning, setIsScanning] = useState(false);
 
-    const total = weights.l1 + weights.l2 + weights.l3 + weights.l4 + weights.l5;
+    const total = weights.l1 + weights.l2 + weights.l3 + weights.l4 + weights.l5 + weights.l6;
     const isValid = total === 100;
 
     const handleWeightChange = (layer: keyof typeof weights, value: number) => {
@@ -137,9 +137,10 @@ export default function AdminScannerPage() {
                             {[
                                 { id: "l1", label: "Protection", icon: Shield, color: "text-emerald-400", desc: "D/E, OCF+, and ROCE Stability" },
                                 { id: "l2", label: "Pricing Power", icon: BarChart3, color: "text-blue-400", desc: "Gross & Operating Margin consistency" },
-                                { id: "l3", label: "Relative Strength", icon: Activity, color: "text-amber-400", desc: "3M Return vs Nifty 50 Benchmark" },
+                                { id: "l3", label: "Relative Strength", icon: Activity, color: "text-amber-400", desc: "3M / 6M / 1Y Return vs Nifty 50" },
                                 { id: "l4", label: "Growth Visibility", icon: TrendingUp, color: "text-purple-400", desc: "Revenue & Earnings CAGR trajectory" },
-                                { id: "l5", label: "Governance", icon: CheckCircle2, color: "text-rose-400", desc: "Promoter Pledging & Audit Quality" },
+                                { id: "l5", label: "Ownership Quality", icon: CheckCircle2, color: "text-rose-400", desc: "Insider + FII Holding conviction" },
+                                { id: "l6", label: "Valuation Discipline", icon: Scale, color: "text-violet-400", desc: "Bubble filter — P/E, PEG, EV/EBITDA" },
                             ].map(l => (
                                 <div key={l.id} className="space-y-4">
                                     <div className="flex justify-between items-end">

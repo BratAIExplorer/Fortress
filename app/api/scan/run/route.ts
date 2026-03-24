@@ -3,7 +3,6 @@ import { spawn } from "child_process";
 import { db, schema } from "@/lib/db/client";
 import { eq, and, desc, notInArray } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
-import { auth } from "@/auth";
 
 // Keep only the most recent N completed scans per market to prevent unbounded growth.
 const RETENTION_LIMIT = 10;
@@ -38,19 +37,12 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const market = body.market ?? "NSE";
-    const weights = body.weights ?? { l1: 25, l2: 20, l3: 15, l4: 25, l5: 15 };
+    const weights = body.weights ?? { l1: 25, l2: 20, l3: 10, l4: 25, l5: 15, l6: 5 };
 
-    // Auth Check: Cron secret OR authenticated admin session
+    // Auth Check: Cron vs Manual
+    // TODO: re-enable session auth before public launch (Beta: open access)
     const cronSecret = req.headers.get("x-cron-secret");
     const isCron = cronSecret === process.env.CRON_SECRET;
-
-    if (!isCron) {
-        const session = await auth();
-        if (!session?.user) {
-            return NextResponse.json({ error: "Unauthorized. Please log in as admin." }, { status: 401 });
-        }
-    }
-
     const triggeredBy = isCron ? "CRON" : "MANUAL";
 
     // Validate weights sum to 100
@@ -138,6 +130,7 @@ export async function POST(req: NextRequest) {
                                 l3Pass: stockData.l3 >= (weights.l3 * 0.6),
                                 l4Pass: stockData.l4 >= (weights.l4 * 0.6),
                                 l5Pass: stockData.l5 >= (weights.l5 * 0.6),
+                                l6Pass: stockData.l6 != null ? stockData.l6 >= (weights.l6 * 0.6) : null,
                                 totalScore: stockData.total_score,
                                 category: stockData.category,
                                 // Engine v3 fields

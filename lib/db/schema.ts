@@ -61,6 +61,7 @@ export const scanResults = pgTable("scan_results", {
     l3Pass: boolean("l3_pass"),
     l4Pass: boolean("l4_pass"),
     l5Pass: boolean("l5_pass"),
+    l6Pass: boolean("l6_pass"),
     totalScore: integer("total_score"),
     category: text("category"), // '52W_LOW', 'PENNY', 'SUB20', 'OFFLINE'
     market: text("market").notNull().default("NSE"),

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2, Table2 } from "lucide-react";
+import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2, Table2, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ScanResultsTable } from "@/components/fortress/ScanResultsTable";
@@ -184,13 +184,14 @@ export function V5MarketScanner() {
             {view === "summary" && (
             <div className="space-y-12">
             {/* Legend Section first for clarity */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                 {[
                     { id: "L1", label: "Protection", icon: Shield, col: "text-emerald-400", desc: "D/E < 0.6 & OCF+" },
-                    { id: "L2", label: "Pricing", icon: BarChart3, col: "text-blue-400", desc: "ROCE > 20% & OPM" },
-                    { id: "L3", label: "Rel. Strength", icon: Activity, col: "text-amber-400", desc: "3M Return vs Nifty 50" },
-                    { id: "L4", label: "Growth", icon: TrendingUp, col: "text-purple-400", desc: "EPS & Order-book" },
-                    { id: "L5", label: "Governance", icon: CheckCircle2, col: "text-rose-400", desc: "No Pledges/Audit" },
+                    { id: "L2", label: "Pricing", icon: BarChart3, col: "text-blue-400", desc: "Margins + ROCE > 20%" },
+                    { id: "L3", label: "Momentum", icon: Activity, col: "text-amber-400", desc: "3M/6M/1Y vs Nifty 50" },
+                    { id: "L4", label: "Growth", icon: TrendingUp, col: "text-purple-400", desc: "EPS & Revenue CAGR" },
+                    { id: "L5", label: "Ownership", icon: CheckCircle2, col: "text-rose-400", desc: "Insider + FII Holding" },
+                    { id: "L6", label: "Valuation", icon: Scale, col: "text-violet-400", desc: "No Bubble — P/E & PEG" },
                 ].map(layer => (
                     <Card key={layer.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all cursor-help group">
                         <CardContent className="p-4 flex flex-col items-center text-center">
