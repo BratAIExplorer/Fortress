@@ -1,9 +1,25 @@
 # Fortress Intelligence 🛡️
 
+> **"Not prediction. Preparation."**
+> Structure and discipline replace gut feel. Fortress doesn't tell you what to buy.
+> It tells you what deserves your attention — and builds a track record to prove it.
+
+**Project Motto:** Sovereign Wealth Intelligence Engine for disciplined investors.
+**AI's Role:** Triangulation (qualitative research at scale), Pattern Recognition
+(Sovereign Alpha learns which factors predict real alpha), and Discipline Enforcement
+(the score is the score — no emotional override).
+
+**Data Source Policy:** Free-first. yfinance with statement-level fallbacks for FCF/ROCE.
+Paid sources (Trendlyne, Kite Connect) only after alpha is empirically proven.
+
+---
+
 Sovereign Wealth Intelligence Engine for NRI investors. Finds hidden gems across Stocks, ETFs, and Mutual Funds using a self-learning, multi-market prediction system that improves accuracy with every 90-day scan cycle.
 
-## 🚀 Production Status: Sovereign Alpha Active
-As of March 15, 2026, the Sovereign Alpha self-learning layer is deployed on `srv1327289`.
+## 🚀 Production Status: Sovereign Alpha — Data Collection Started
+As of March 25, 2026: 215 NSE predictions recorded at Nifty 22,912. First 90-day alpha measurement due June 2026.
+
+**Engine fixes applied March 25:** Timeout guard (was 86% failure rate), FCF/ROCE calculated from statements (was null for ~90% NSE stocks), sanity-checked against Asian Paints, Tata Elxsi, Vodafone Idea, Suzlon.
 
 ---
 

@@ -1,10 +1,18 @@
 # Fortress Intelligence: Senior AI Handover & Infrastructure Blueprint
-**Last updated: March 15, 2026**
+**Last updated: March 25, 2026**
 
 ---
 
-## 🎯 Product Vision
-Fortress Intelligence is a Sovereign Wealth Intelligence Engine for NRI investors. It finds hidden gems across Stocks, ETFs, and Mutual Funds using a self-learning prediction system that improves accuracy with every 90-day scan cycle. The infrastructure goal is **Zero-Interference Hosting** — scale to multiple products on a single VPS with institutional-grade isolation.
+## 🎯 Product Vision & Motto
+
+> **"Not prediction. Preparation."**
+
+Fortress Intelligence is a Sovereign Wealth Intelligence Engine for NRI investors.
+Structure and discipline replace gut feel. The AI's role is triangulation (qualitative
+research at scale), pattern recognition (Sovereign Alpha), and discipline enforcement.
+
+**Data Source Policy (March 2026):** Free-first. yfinance with statement-level FCF/ROCE
+fallbacks. No paid sources until alpha is empirically proven at 90-day cycle. It finds hidden gems across Stocks, ETFs, and Mutual Funds using a self-learning prediction system that improves accuracy with every 90-day scan cycle. The infrastructure goal is **Zero-Interference Hosting** — scale to multiple products on a single VPS with institutional-grade isolation.
 
 ---
 
@@ -106,11 +114,27 @@ Used for automated quality filtering — scanning thousands of tickers in real-t
 |---|---|---|
 | L1 | Protection (D/E, ROCE, OCF) | 25 |
 | L2 | Pricing Power (margins) | 20 |
-| L3 | Macro Tailwind (vs benchmark) | 15 |
+| L3 | Relative Strength (vs benchmark) — note: mislabelled 'Macro Tailwind', rename pending | 15 |
 | L4 | Growth Visibility (revenue CAGR) | 25 |
 | L5 | Governance (manual placeholder) | 15 |
 
 ---
+
+
+### Engine Fixes Applied March 25, 2026
+- **Timeout guard**: `as_completed(timeout=120)` + `future.result(timeout=30)` — was causing 86% scan failure rate
+- **FCF from statements**: `get_fcf_from_cashflow()` — yfinance `freeCashflow` null for ~90% NSE stocks
+- **ROCE from statements**: `get_roce_from_statements()` — calculated from income_stmt + balance_sheet
+- **Always override**: Calculated values override yfinance info dict (unreliable even when present)
+- **Sanity check passed**: Asian Paints 42→50, Tata Elxsi 42→53, Vodafone Idea 25 (correct)
+
+### Sovereign Alpha — Actual State (March 25, 2026)
+- **215 predictions recorded** from first clean NSE scan
+- **Benchmark locked**: Nifty 50 at 22,912.4
+- **First outcome measurement**: June 2026 (90 days)
+- **108 cc_confirmed** (cc_score ≥ 60) — historically consistent quality
+- **55 cc_divergent** (cc_score < 40) — snapshot quality only, higher risk
+- Top entries: ARIES.NS (92), GANDHITUBE.NS (91), EMCURE.NS (91), CANTABIL.NS (90)
 
 ## 🔄 Sovereign Alpha Feedback Loop
 

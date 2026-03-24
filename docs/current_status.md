@@ -1,3 +1,34 @@
+# Current Status — March 25, 2026
+
+## Today's Session — Engine Hardening + Sovereign Alpha Bootstrap
+
+### What Was Fixed
+1. **Scan reliability** — 86% failure rate (6/7 scans stuck/crashed). Root cause: no timeout
+   on yfinance calls. Fixed with `as_completed(timeout=120)` + `future.result(timeout=30)`.
+
+2. **Data layer** — FCF/ROCE null for ~90% NSE stocks. Fixed by calculating directly from
+   cashflow statement and income_stmt/balance_sheet. Sanity check confirmed on 5 known stocks.
+
+3. **Sovereign Alpha bootstrapped** — 215 NSE predictions recorded at Nifty 22,912.
+   First 90-day alpha measurement due June 2026.
+
+### Sanity Check Results (before → after fix)
+| Stock | Total | L1 | FCF Yield | Verdict |
+|---|---|---|---|---|
+| Asian Paints | 42→50 | 7→15 | None→1.22% | Correctly improved |
+| Tata Elxsi | 42→53 | 7→18 | None→3.06% | cc=100 confirmed |
+| Vodafone Idea | 25→25 | 0→0 | None→-1.09% | Correctly poor |
+| Suzlon | 57→63 | 7→13 | None→1.28% | Turnaround captured |
+
+### Known Issues (carry forward)
+- L3 labelled "Macro Tailwind" — actually measures Relative Strength (momentum)
+- Sovereign Alpha outcome metric must track alpha vs Nifty, not raw return
+- TAM table uses USD for domestic Indian stocks (distorts NBFC/banking MB scores)
+- HDFC Bank compounding = 0 (banking ROCE formula not adapted)
+- No thesis invalidation signals yet
+
+---
+
 # Sprint 8: Sovereign Alpha — Self-Learning Prediction Engine
 **Completed: March 15, 2026**
 
