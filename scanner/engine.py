@@ -1039,6 +1039,66 @@ def calculate_multibagger_score(info: dict, market_key: str = "NSE",
     }
 
 
+
+def get_fcf_from_cashflow(cashflow):
+    """FCF = Operating Cash Flow - CapEx. Returns None if either is missing."""
+    if cashflow is None or cashflow.empty:
+        return None
+    try:
+        col = list(cashflow.columns)[0]
+        ocf = None
+        for field in ['Operating Cash Flow', 'Cash From Operations',
+                      'Total Cash From Operating Activities']:
+            if field in cashflow.index:
+                val = cashflow.loc[field, col]
+                if val is not None and str(val) != 'nan':
+                    ocf = float(val)
+                    break
+        capex = None
+        for field in ['Capital Expenditure', 'Purchase Of Property Plant And Equipment',
+                      'Capital Expenditures']:
+            if field in cashflow.index:
+                val = cashflow.loc[field, col]
+                if val is not None and str(val) != 'nan':
+                    capex = abs(float(val))
+                    break
+        if ocf is not None and capex is not None:
+            return ocf - capex
+        return None  # Missing CapEx = unreliable FCF, don't guess
+    except Exception:
+        return None
+
+def get_roce_from_statements(income_stmt, balance_sheet):
+    """ROCE = EBIT / (Total Assets - Current Liabilities). Institution-grade calculation."""
+    try:
+        if income_stmt is None or income_stmt.empty:
+            return None
+        if balance_sheet is None or balance_sheet.empty:
+            return None
+        col = list(income_stmt.columns)[0]
+        bs_col = list(balance_sheet.columns)[0]
+        ebit = None
+        for field in ['EBIT', 'Operating Income', 'Operating Profit']:
+            if field in income_stmt.index:
+                val = income_stmt.loc[field, col]
+                if val is not None and str(val) != 'nan':
+                    ebit = float(val)
+                    break
+        total_assets, current_liab = None, None
+        if 'Total Assets' in balance_sheet.index:
+            total_assets = float(balance_sheet.loc['Total Assets', bs_col] or 0)
+        for field in ['Current Liabilities', 'Total Current Liabilities']:
+            if field in balance_sheet.index:
+                current_liab = float(balance_sheet.loc[field, bs_col] or 0)
+                break
+        if ebit and total_assets and current_liab:
+            capital_employed = total_assets - current_liab
+            if capital_employed > 0:
+                return round(ebit / capital_employed, 4)
+        return None
+    except Exception:
+        return None
+
 def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
     try:
         ticker = yf.Ticker(symbol)
@@ -1056,9 +1116,19 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
             income_stmt = ticker.income_stmt
         except Exception:
             income_stmt = None
+        try:
+            cashflow = ticker.cashflow
+        except Exception:
+            cashflow = None
 
         # ── Derive trajectory + quality helpers ──────────────────────────────
         debt_traj    = get_debt_trajectory(balance_sheet)
+        fcf_calc  = get_fcf_from_cashflow(cashflow)
+        roce_calc = get_roce_from_statements(income_stmt, balance_sheet)
+        if fcf_calc is not None:
+            info = {**info, "freeCashflow": fcf_calc}
+        if roce_calc is not None:
+            info = {**info, "returnOnCapitalEmployed": roce_calc}
         margin_trend = get_margin_trend(income_stmt)
         coffee_can   = calculate_coffee_can_score(income_stmt, balance_sheet)
 
@@ -1115,8 +1185,6 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
             "margin_history":       margin_trend.get("margin_history", []),
             "margin_expansion_pts": margin_trend.get("margin_expansion_pts"),
             "margin_direction":     margin_trend.get("margin_direction", "unknown"),
-
-            # Coffee Can Score
             "cc_score":             coffee_can["cc_score"],
             "cc_tier":              coffee_can["cc_tier"],
             "cc_revenue_cagr":      coffee_can["cc_revenue_cagr"],
@@ -1182,10 +1250,13 @@ def main():
         for i in range(0, total, BATCH_SIZE):
             batch = tickers[i:i+BATCH_SIZE]
             futures = {executor.submit(scan_stock, s, adapter, market_key, benchmark_hist, weights): s for s in batch}
-            
-            for future in concurrent.futures.as_completed(futures):
-                res = future.result()
+            for future in concurrent.futures.as_completed(futures, timeout=120):
+                try:
+                    res = future.result(timeout=30)
+                except (concurrent.futures.TimeoutError, Exception):
+                    continue
                 if res:
+
                     # In coffeecan mode: only emit Strong or Classic stocks
                     if coffeecan_mode and res.get("cc_score", 0) < 60:
                         continue
