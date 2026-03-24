@@ -44,3 +44,22 @@
 | TAM currency mismatch            | Noted, not yet addressed                    |
 | Missing thesis invalidation      | Not yet built                               |
 | Sovereign Alpha table missing    | Not yet created                             |
+
+## 2026-03-25 (continued)
+
+### Fixed
+- **L5 governance hardcoding**: `l5Pass: true` in route.ts bypassed Python engine output entirely.
+  All 215 existing predictions have inflated L5 scores (15/15 for every stock including
+  Vodafone Idea). Future scans use honest governance proxy.
+- **L5 engine placeholder**: Python engine also hardcoded `l5 = weights['l5']` (full credit).
+  Replaced with basic proxy: D/E < 1.0 (35%), positive OCF (35%), debt trajectory (30%).
+  Vodafone Idea now correctly scores l5=0. Asian Paints/Tata Elxsi score 9/15.
+- **Database indexes added**: scan_results (scan_id+score), scan_results (market+score),
+  alpha_predictions (entry_date+symbol).
+
+### Impact on Existing Predictions
+- 215 predictions recorded 2026-03-25 have l5 scores inflated by +6 to +15 points.
+- These are the baseline dataset — leave as-is for historical consistency.
+- All future scans use corrected L5 scoring.
+- Effective threshold for "genuinely qualified" in existing dataset: total_score >= 66
+  (accounts for ~6pt L5 inflation on average).
