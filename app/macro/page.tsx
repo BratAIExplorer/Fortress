@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { Navbar } from "@/components/fortress/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, RefreshCw, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -160,13 +162,42 @@ function IndicatorCard({ cfg, current, prev }: {
 export default function MacroPage() {
     const [snapshots, setSnapshots] = useState<MacroSnapshot[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [secret, setSecret] = useState("");
+    const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
 
-    useEffect(() => {
+    const loadSnapshots = () => {
+        setLoading(true);
         fetch("/api/macro?limit=8")
             .then(r => r.json())
             .then(d => setSnapshots(d.snapshots ?? []))
             .finally(() => setLoading(false));
-    }, []);
+    };
+
+    useEffect(() => { loadSnapshots(); }, []);
+
+    const triggerRefresh = async () => {
+        if (!secret) return;
+        setRefreshing(true);
+        setRefreshMsg(null);
+        try {
+            const res = await fetch("/api/macro", {
+                method: "POST",
+                headers: { "x-cron-secret": secret },
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setRefreshMsg("Snapshot saved successfully.");
+                loadSnapshots();
+            } else {
+                setRefreshMsg(data.error ?? "Refresh failed.");
+            }
+        } catch {
+            setRefreshMsg("Network error.");
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     const latest = snapshots[0] ?? null;
     const previous = snapshots[1] ?? null;
@@ -193,6 +224,36 @@ export default function MacroPage() {
                             <p className="text-sm font-medium text-white">{formatDate(latest.snapshotDate)}</p>
                             <p className="text-[10px] text-muted-foreground mt-0.5">Updates weekly</p>
                         </div>
+                    )}
+                </div>
+
+                {/* Admin refresh panel */}
+                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manual Refresh (Admin)</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <Input
+                            type="password"
+                            placeholder="Enter CRON_SECRET to refresh data"
+                            value={secret}
+                            onChange={e => setSecret(e.target.value)}
+                            className="h-8 text-sm bg-white/5 border-white/10 flex-1"
+                        />
+                        <Button
+                            size="sm"
+                            onClick={triggerRefresh}
+                            disabled={refreshing || !secret}
+                            className="h-8 px-4 text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0 shrink-0"
+                        >
+                            {refreshing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Fetch Now"}
+                        </Button>
+                    </div>
+                    {refreshMsg && (
+                        <p className={cn("text-xs mt-2", refreshMsg.includes("success") ? "text-emerald-400" : "text-red-400")}>
+                            {refreshMsg}
+                        </p>
                     )}
                 </div>
 
