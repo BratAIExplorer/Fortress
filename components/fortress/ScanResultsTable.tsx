@@ -108,9 +108,9 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
         } finally {
             setLoading(false);
         }
-    }, [scanId, sortKey, tierFilter, categoryFilter]);
+    }, [scanId, sortKey, tierFilter, ccTierFilter, categoryFilter]);
 
-    useEffect(() => { fetchResults(); }, [fetchResults, ccTierFilter]);
+    useEffect(() => { fetchResults(); }, [fetchResults]);
 
     const toggleSort = (key: SortKey) => {
         setSortKey(key);

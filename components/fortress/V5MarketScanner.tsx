@@ -78,10 +78,6 @@ export function V5MarketScanner() {
                 }, 5000);
                 return;
             }
-            if (response.status === 409) {
-                const body = await response.json().catch(() => ({}));
-                throw new Error(body.error ?? "A scan is already in progress. Wait for it to finish or reset it.");
-            }
             if (!response.ok) {
                 const body = await response.json().catch(() => ({}));
                 throw new Error(body.error ?? `Server error (${response.status})`);
