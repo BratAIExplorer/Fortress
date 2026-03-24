@@ -1,8 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { spawn } from "child_process";
 import { db, schema } from "@/lib/db/client";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, notInArray } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
+import { auth } from "@/auth";
+
+// Keep only the most recent N completed scans per market to prevent unbounded growth.
+const RETENTION_LIMIT = 10;
+
+async function pruneOldScans(market: string) {
+    try {
+        const completed = await db
+            .select({ id: schema.scans.id })
+            .from(schema.scans)
+            .where(and(eq(schema.scans.status, "COMPLETED"), eq(schema.scans.market, market)))
+            .orderBy(desc(schema.scans.runAt))
+            .limit(RETENTION_LIMIT);
+
+        if (completed.length < RETENTION_LIMIT) return; // Nothing to prune yet
+
+        const keepIds = completed.map(s => s.id);
+        await db.delete(schema.scans).where(
+            and(
+                eq(schema.scans.status, "COMPLETED"),
+                eq(schema.scans.market, market),
+                notInArray(schema.scans.id, keepIds)
+            )
+        );
+    } catch (e) {
+        // Non-fatal — log and continue
+        console.error("pruneOldScans failed:", e);
+    }
+}
 
 export const dynamic = "force-dynamic";
 
@@ -11,9 +40,17 @@ export async function POST(req: NextRequest) {
     const market = body.market ?? "NSE";
     const weights = body.weights ?? { l1: 25, l2: 20, l3: 15, l4: 25, l5: 15 };
 
-    // Auth Check: Cron or Admin Session
+    // Auth Check: Cron secret OR authenticated admin session
     const cronSecret = req.headers.get("x-cron-secret");
     const isCron = cronSecret === process.env.CRON_SECRET;
+
+    if (!isCron) {
+        const session = await auth();
+        if (!session?.user) {
+            return NextResponse.json({ error: "Unauthorized. Please log in as admin." }, { status: 401 });
+        }
+    }
+
     const triggeredBy = isCron ? "CRON" : "MANUAL";
 
     // Validate weights sum to 100
@@ -126,6 +163,9 @@ export async function POST(req: NextRequest) {
                                     durationMs: Date.now() - scan.runAt!.getTime()
                                 })
                                 .where(eq(schema.scans.id, scan.id));
+
+                            // Prune old scans to enforce retention policy
+                            await pruneOldScans(market);
 
                             const deltas = await getScanDeltas(scan.id, market);
 

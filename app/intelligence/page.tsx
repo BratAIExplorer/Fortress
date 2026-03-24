@@ -210,10 +210,10 @@ const layers = [
     id: "L3",
     icon: "💨",
     color: "#A78BFA",
-    label: "L3 — Macro Tailwind",
+    label: "L3 — Relative Strength",
     beginner: {
-      question: "Is the wind blowing behind this company or against it?",
-      analogy: "Cycling uphill (no tailwind) is hard even for a great cyclist. Cycling downhill (tailwind) makes even average cyclists look fast. L3 checks if the broad economy is helping or hurting this company.",
+      question: "Is this stock outrunning the broader market?",
+      analogy: "Cycling uphill against the wind is hard even for a great cyclist. L3 checks if this stock is actually beating the market index — if it can't outperform when conditions are neutral, that's a warning sign.",
       whatWeCheck: [
         "Has the stock outperformed its country's main index over 3 months?",
         "Is it beating the Nifty 50 (India), S&P 500 (US), or Hang Seng (HK)?",

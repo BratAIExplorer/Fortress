@@ -228,9 +228,9 @@ export default function GuidePage() {
                             detail="Looks at Return on Capital Employed (ROCE), operating margins, and whether margins are expanding or contracting. A company that can charge what it wants is a durable business."
                         />
                         <LayerRow
-                            id="L3" label="Macro Tailwind" icon={Activity} color="bg-amber-600"
-                            plain="Is it riding a national priority trend?"
-                            detail="Checks if the stock outperforms the Nifty 50 benchmark and whether it belongs to a megatrend sector: Defence, Digital India, EV, Infrastructure, Healthcare, etc."
+                            id="L3" label="Relative Strength" icon={Activity} color="bg-amber-600"
+                            plain="Is it outperforming the broader market?"
+                            detail="Checks if the stock outperforms the Nifty 50 benchmark over 3 months and whether it belongs to a megatrend sector: Defence, Digital India, EV, Infrastructure, Healthcare, etc."
                         />
                         <LayerRow
                             id="L4" label="Growth Engine" icon={TrendingUp} color="bg-purple-600"

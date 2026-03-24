@@ -90,29 +90,37 @@ export function V5MarketScanner() {
 
             setIsScanning(true);
 
+            // Buffer accumulates bytes across chunks so SSE messages that span
+            // multiple TCP packets are never partially parsed.
+            let buffer = "";
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split("\n\n");
+                buffer += decoder.decode(value, { stream: true });
 
-                for (const line of lines) {
-                    if (line.startsWith("data: ")) {
-                        const data = JSON.parse(line.replace("data: ", ""));
-                        if (data.type === "start") {
-                            setScanStatus(`Scanning ${data.total} stocks...`);
-                        } else if (data.type === "progress") {
-                            setScanProgress(data.progress);
-                            setScanStatus(`Analyzing ${data.symbol}... (Score: ${data.score})`);
-                        } else if (data.type === "complete") {
-                            setScanStatus("Scan complete!");
-                            setLastScanResult(data);
-                            setIsScanning(false);
-                            toast.success("Market scan completed successfully!");
-                        } else if (data.type === "error") {
-                            throw new Error(data.message);
-                        }
+                // SSE messages are delimited by double newline
+                const parts = buffer.split("\n\n");
+                // The last element may be an incomplete message — keep it in buffer
+                buffer = parts.pop() ?? "";
+
+                for (const part of parts) {
+                    const line = part.trim();
+                    if (!line.startsWith("data: ")) continue;
+                    const data = JSON.parse(line.slice(6));
+                    if (data.type === "start") {
+                        setScanStatus(`Scanning ${data.total} stocks...`);
+                    } else if (data.type === "progress") {
+                        setScanProgress(data.progress);
+                        setScanStatus(`Analyzing ${data.symbol}... (Score: ${data.score})`);
+                    } else if (data.type === "complete") {
+                        setScanStatus("Scan complete!");
+                        setLastScanResult(data);
+                        setIsScanning(false);
+                        toast.success("Market scan completed successfully!");
+                    } else if (data.type === "error") {
+                        throw new Error(data.message);
                     }
                 }
             }
@@ -180,7 +188,7 @@ export function V5MarketScanner() {
                 {[
                     { id: "L1", label: "Protection", icon: Shield, col: "text-emerald-400", desc: "D/E < 0.6 & OCF+" },
                     { id: "L2", label: "Pricing", icon: BarChart3, col: "text-blue-400", desc: "ROCE > 20% & OPM" },
-                    { id: "L3", label: "Macro", icon: Activity, col: "text-amber-400", desc: "Govt Capex/Trend" },
+                    { id: "L3", label: "Rel. Strength", icon: Activity, col: "text-amber-400", desc: "3M Return vs Nifty 50" },
                     { id: "L4", label: "Growth", icon: TrendingUp, col: "text-purple-400", desc: "EPS & Order-book" },
                     { id: "L5", label: "Governance", icon: CheckCircle2, col: "text-rose-400", desc: "No Pledges/Audit" },
                 ].map(layer => (

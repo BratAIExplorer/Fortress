@@ -137,7 +137,7 @@ export default function AdminScannerPage() {
                             {[
                                 { id: "l1", label: "Protection", icon: Shield, color: "text-emerald-400", desc: "D/E, OCF+, and ROCE Stability" },
                                 { id: "l2", label: "Pricing Power", icon: BarChart3, color: "text-blue-400", desc: "Gross & Operating Margin consistency" },
-                                { id: "l3", label: "Macro Tailwind", icon: Activity, color: "text-amber-400", desc: "Outperformance vs Market Benchmark" },
+                                { id: "l3", label: "Relative Strength", icon: Activity, color: "text-amber-400", desc: "3M Return vs Nifty 50 Benchmark" },
                                 { id: "l4", label: "Growth Visibility", icon: TrendingUp, color: "text-purple-400", desc: "Revenue & Earnings CAGR trajectory" },
                                 { id: "l5", label: "Governance", icon: CheckCircle2, color: "text-rose-400", desc: "Promoter Pledging & Audit Quality" },
                             ].map(l => (
