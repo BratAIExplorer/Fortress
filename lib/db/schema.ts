@@ -75,6 +75,11 @@ export const scanResults = pgTable("scan_results", {
     pegRatio: numeric("peg_ratio"),              // P/E ÷ EarningsGrowth%
     deDirection: text("de_direction"),           // "falling" | "stable" | "rising" | "unknown"
     marginDirection: text("margin_direction"),   // "expanding" | "stable" | "contracting" | "unknown"
+    // ── Coffee Can fields ─────────────────────────────────────────────────────
+    ccScore: integer("cc_score"),               // 0-100 (Classic/Strong/Developing/Inconsistent)
+    ccTier: text("cc_tier"),                    // "Classic" | "Strong" | "Developing" | "Inconsistent"
+    ccRevenueCagr: numeric("cc_revenue_cagr"),  // 4yr revenue CAGR as %
+    ccYearsChecked: integer("cc_years_checked"), // how many years of data were available
 });
 
 

@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
     const tierFilter = searchParams.get("tier");
     const megatrendFilter = searchParams.get("megatrend");
     const categoryFilter = searchParams.get("category");
+    const ccTierFilter = searchParams.get("cc_tier");
     const limit = Math.min(parseInt(searchParams.get("limit") ?? "200"), 500);
     const offset = parseInt(searchParams.get("offset") ?? "0");
 
@@ -34,10 +35,13 @@ export async function GET(req: NextRequest) {
     if (tierFilter) conditions.push(eq(schema.scanResults.mbTier, tierFilter));
     if (megatrendFilter) conditions.push(eq(schema.scanResults.megatrendTag, megatrendFilter));
     if (categoryFilter) conditions.push(eq(schema.scanResults.category, categoryFilter));
+    if (ccTierFilter) conditions.push(eq(schema.scanResults.ccTier, ccTierFilter));
 
     // Fetch with sort
     const orderCol = sort === "total_score"
         ? desc(schema.scanResults.totalScore)
+        : sort === "cc_score"
+        ? desc(schema.scanResults.ccScore)
         : desc(schema.scanResults.mbScore);
 
     const rows = await db
@@ -72,6 +76,10 @@ export async function GET(req: NextRequest) {
             peg: r.pegRatio != null ? Number(r.pegRatio) : null,
             de_direction: r.deDirection,
             margin_direction: r.marginDirection,
+            cc_score: r.ccScore,
+            cc_tier: r.ccTier,
+            cc_revenue_cagr: r.ccRevenueCagr != null ? Number(r.ccRevenueCagr) : null,
+            cc_years_checked: r.ccYearsChecked,
         })),
         total: allRows.length,
         offset,

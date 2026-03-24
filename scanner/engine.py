@@ -505,6 +505,207 @@ def get_margin_trend(income_stmt) -> dict:
         return empty
 
 
+# ─── COFFEE CAN SCORING ───────────────────────────────────────────────────────
+#
+# Saurabh Mukherjea's Coffee Can methodology:
+#   Invest in companies with Revenue CAGR > 10% AND ROCE > 15%
+#   for 10 consecutive years — then do nothing for 10 years.
+#
+# yfinance limitation: ~4 years of annual financials available.
+# We run a 4-year consistency check as a proxy. All thresholds remain
+# the same; we simply acknowledge we need 4 clean years not 10.
+#
+# Why 4 years is still meaningful:
+#   A company that passes ALL checks across 4 consecutive years is already
+#   in the top 5% of listed stocks. The 10-year bar is aspirational — we
+#   flag candidates that are ON TRACK, not ones that have crossed the finish line.
+
+
+def calculate_coffee_can_score(income_stmt, balance_sheet) -> dict:
+    """Coffee Can Score (0–100) — consistency of quality over 4 years.
+
+    Three components:
+
+    A. Revenue Consistency (0–40):
+       - Is revenue growing EVERY year (no single decline)?
+       - Is the 4-year CAGR above 10%?
+       Scoring: All years growing + CAGR > 10% = 40 | CAGR > 7% = 28 |
+                2/3 years growing + CAGR > 10% = 20 | else scaled
+
+    B. ROCE Consistency (0–40):
+       - Is ROCE above 15% in ALL available years?
+       - Calculated from income_stmt (EBIT) and balance_sheet (Capital Employed)
+       Scoring: All years > 15% = 40 | All > 10% = 24 | Most > 15% = 20
+
+    C. Stability Bonus (0–20):
+       - +10 pts if no year had revenue decline (zero bad years)
+       - +10 pts if ROCE never dipped below 10% across all years
+
+    Tiers:
+      Classic    (80–100): True Coffee Can candidate. 4 clean years.
+      Strong     (60–79):  Near-Coffee Can. Minor lapses. Watch for 2 more years.
+      Developing (40–59):  Growing into it. ROCE or revenue not yet fully consistent.
+      Inconsistent (0–39): Lumpy business. Not Coffee Can material.
+
+    Returns dict with score, tier, component breakdown, and raw year data.
+    Silently returns zeroes if insufficient data (needs ≥ 3 years to be meaningful).
+    """
+    empty = {
+        "cc_score": 0,
+        "cc_tier": "Insufficient Data",
+        "cc_revenue_score": 0,
+        "cc_roce_score": 0,
+        "cc_stability_bonus": 0,
+        "cc_revenue_cagr": None,
+        "cc_revenue_years": [],
+        "cc_roce_years": [],
+        "cc_years_checked": 0,
+    }
+
+    try:
+        if income_stmt is None or income_stmt.empty:
+            return empty
+        if balance_sheet is None or balance_sheet.empty:
+            return empty
+
+        cols = list(income_stmt.columns)[:4]  # most recent 4 years, newest first
+        if len(cols) < 3:
+            return empty
+
+        # ── A: Revenue data ───────────────────────────────────────────────────
+        revenues = []
+        for col in cols:
+            rev = None
+            for field in ['Total Revenue', 'Revenue', 'Net Revenue']:
+                if field in income_stmt.index:
+                    val = income_stmt.loc[field, col]
+                    if val is not None and str(val) != 'nan':
+                        rev = float(val)
+                        break
+            revenues.append(rev)
+
+        valid_rev = [r for r in revenues if r is not None and r > 0]
+        if len(valid_rev) < 3:
+            return {**empty, "cc_revenue_years": revenues}
+
+        # Revenue CAGR: oldest to newest (reverse because cols are newest-first)
+        rev_oldest = valid_rev[-1]
+        rev_newest = valid_rev[0]
+        n_years = len(valid_rev) - 1
+        rev_cagr = (rev_newest / rev_oldest) ** (1 / n_years) - 1 if rev_oldest > 0 else 0
+
+        # Count how many consecutive year-on-year growths (newest first → compare pairs)
+        rev_growing_years = sum(
+            1 for i in range(len(valid_rev) - 1) if valid_rev[i] > valid_rev[i + 1]
+        )
+        total_pairs = len(valid_rev) - 1
+
+        # Revenue score
+        if rev_growing_years == total_pairs:          # Every year grew
+            if rev_cagr > 0.10:   rev_score = 40
+            elif rev_cagr > 0.07: rev_score = 28
+            else:                  rev_score = 16
+        elif rev_growing_years >= total_pairs - 1:    # One bad year
+            if rev_cagr > 0.10:   rev_score = 20
+            elif rev_cagr > 0.07: rev_score = 12
+            else:                  rev_score = 6
+        else:                                          # Two+ bad years
+            rev_score = max(0, int(rev_cagr * 100))   # Proportional to CAGR only
+
+        # ── B: ROCE from statements ───────────────────────────────────────────
+        # ROCE = EBIT ÷ Capital Employed (Total Assets − Current Liabilities)
+        bs_cols = list(balance_sheet.columns)[:4]
+        roce_years = []
+
+        for i, col in enumerate(cols):
+            try:
+                # EBIT from income_stmt
+                ebit = None
+                for field in ['EBIT', 'Operating Income', 'Operating Profit']:
+                    if field in income_stmt.index:
+                        val = income_stmt.loc[field, col]
+                        if val is not None and str(val) != 'nan':
+                            ebit = float(val)
+                            break
+
+                # Capital Employed from balance_sheet (same year index if available)
+                bs_col = bs_cols[i] if i < len(bs_cols) else None
+                capital_employed = None
+                if bs_col is not None:
+                    total_assets = None
+                    for field in ['Total Assets']:
+                        if field in balance_sheet.index:
+                            val = balance_sheet.loc[field, bs_col]
+                            if val is not None and str(val) != 'nan':
+                                total_assets = float(val)
+                                break
+
+                    current_liab = None
+                    for field in ['Current Liabilities', 'Total Current Liabilities']:
+                        if field in balance_sheet.index:
+                            val = balance_sheet.loc[field, bs_col]
+                            if val is not None and str(val) != 'nan':
+                                current_liab = float(val)
+                                break
+
+                    if total_assets and current_liab:
+                        capital_employed = total_assets - current_liab
+
+                if ebit is not None and capital_employed and capital_employed > 0:
+                    roce_years.append(round(ebit / capital_employed, 3))
+                else:
+                    roce_years.append(None)
+            except Exception:
+                roce_years.append(None)
+
+        valid_roce = [r for r in roce_years if r is not None]
+
+        # ROCE score
+        if len(valid_roce) >= 2:
+            all_above_15 = all(r > 0.15 for r in valid_roce)
+            all_above_10 = all(r > 0.10 for r in valid_roce)
+            most_above_15 = sum(1 for r in valid_roce if r > 0.15) >= len(valid_roce) - 1
+            avg_roce = sum(valid_roce) / len(valid_roce)
+
+            if all_above_15:          roce_score = 40
+            elif most_above_15:       roce_score = 28
+            elif all_above_10:        roce_score = 20
+            elif avg_roce > 0.10:     roce_score = 12
+            else:                     roce_score = max(0, int(avg_roce * 100))
+        else:
+            roce_score = 0
+
+        # ── C: Stability bonus ────────────────────────────────────────────────
+        stability = 0
+        if rev_growing_years == total_pairs:         # Zero revenue declines
+            stability += 10
+        if valid_roce and all(r > 0.10 for r in valid_roce):  # ROCE never < 10%
+            stability += 10
+
+        # ── Total ─────────────────────────────────────────────────────────────
+        total = rev_score + roce_score + stability
+
+        if total >= 80:   tier = "Classic"
+        elif total >= 60: tier = "Strong"
+        elif total >= 40: tier = "Developing"
+        else:             tier = "Inconsistent"
+
+        return {
+            "cc_score":           total,
+            "cc_tier":            tier,
+            "cc_revenue_score":   rev_score,
+            "cc_roce_score":      roce_score,
+            "cc_stability_bonus": stability,
+            "cc_revenue_cagr":    round(rev_cagr * 100, 1),   # as %
+            "cc_revenue_years":   [round(r / 1e7, 1) if r else None for r in revenues],  # in ₹Cr
+            "cc_roce_years":      [round(r * 100, 1) if r else None for r in roce_years], # as %
+            "cc_years_checked":   len(valid_rev),
+        }
+
+    except Exception:
+        return empty
+
+
 # ─── SCORING ENGINE (Market-Agnostic) ─────────────────────────────────────────
 
 def calculate_l1(info, market="NSE", max_pts=25, debt_trajectory: dict | None = None):
@@ -856,9 +1057,10 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
         except Exception:
             income_stmt = None
 
-        # ── Derive trajectory helpers ─────────────────────────────────────────
+        # ── Derive trajectory + quality helpers ──────────────────────────────
         debt_traj    = get_debt_trajectory(balance_sheet)
         margin_trend = get_margin_trend(income_stmt)
+        coffee_can   = calculate_coffee_can_score(income_stmt, balance_sheet)
 
         # ── 5-Layer scores ────────────────────────────────────────────────────
         l1 = calculate_l1(info, market=market_key, max_pts=weights['l1'],
@@ -914,6 +1116,13 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
             "margin_expansion_pts": margin_trend.get("margin_expansion_pts"),
             "margin_direction":     margin_trend.get("margin_direction", "unknown"),
 
+            # Coffee Can Score
+            "cc_score":             coffee_can["cc_score"],
+            "cc_tier":              coffee_can["cc_tier"],
+            "cc_revenue_cagr":      coffee_can["cc_revenue_cagr"],
+            "cc_roce_years":        coffee_can["cc_roce_years"],
+            "cc_years_checked":     coffee_can["cc_years_checked"],
+
             # Multi-Bagger Score
             "mb_score":             mb["mb_score"],
             "mb_tier":              mb["mb_tier"],
@@ -935,10 +1144,13 @@ def main():
     parser.add_argument("--market", default="NSE", choices=["NSE", "US", "HKEX"])
     parser.add_argument("--weights", default='{"l1":25,"l2":20,"l3":15,"l4":25,"l5":15}')
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--mode", default="standard", choices=["standard", "coffeecan"],
+                        help="coffeecan: only output stocks with cc_score >= 60 (Strong or Classic)")
     args = parser.parse_args()
 
     market_key = args.market
     weights = json.loads(args.weights)
+    coffeecan_mode = (args.mode == "coffeecan")
     
     AdapterClass = MARKET_ADAPTERS[market_key]
     adapter = AdapterClass()
@@ -974,6 +1186,9 @@ def main():
             for future in concurrent.futures.as_completed(futures):
                 res = future.result()
                 if res:
+                    # In coffeecan mode: only emit Strong or Classic stocks
+                    if coffeecan_mode and res.get("cc_score", 0) < 60:
+                        continue
                     results_count += 1
                     print(json.dumps({"type": "progress", "data": res}))
             

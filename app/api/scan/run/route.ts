@@ -104,6 +104,11 @@ export async function POST(req: NextRequest) {
                                 pegRatio: stockData.peg != null ? stockData.peg.toString() : null,
                                 deDirection: stockData.de_direction ?? null,
                                 marginDirection: stockData.margin_direction ?? null,
+                                // Coffee Can fields
+                                ccScore: stockData.cc_score ?? null,
+                                ccTier: stockData.cc_tier ?? null,
+                                ccRevenueCagr: stockData.cc_revenue_cagr != null ? stockData.cc_revenue_cagr.toString() : null,
+                                ccYearsChecked: stockData.cc_years_checked ?? null,
                             });
 
                             sendEvent({

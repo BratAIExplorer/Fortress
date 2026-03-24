@@ -23,9 +23,13 @@ interface ScanRow {
     peg: number | null;
     de_direction: string | null;
     margin_direction: string | null;
+    cc_score: number | null;
+    cc_tier: string | null;
+    cc_revenue_cagr: number | null;
+    cc_years_checked: number | null;
 }
 
-type SortKey = "mb_score" | "total_score";
+type SortKey = "mb_score" | "total_score" | "cc_score";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -66,7 +70,15 @@ function ScoreBar({ value, max = 100, color }: { value: number; max?: number; co
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const ALL_TIERS = ["All", "Rocket", "Launcher", "Builder", "Crawler", "Grounded"];
+const ALL_CC_TIERS = ["All", "Classic", "Strong", "Developing"];
 const ALL_CATEGORIES = ["All", "52W_LOW", "PENNY", "SUB20"];
+
+const CC_TIER_CONFIG: Record<string, { emoji: string; color: string; bg: string }> = {
+    Classic:      { emoji: "☕", color: "text-amber-300",  bg: "bg-amber-500/20 border-amber-500/40" },
+    Strong:       { emoji: "🌱", color: "text-emerald-400", bg: "bg-emerald-500/20 border-emerald-500/40" },
+    Developing:   { emoji: "📈", color: "text-blue-400",   bg: "bg-blue-500/20 border-blue-500/40" },
+    Inconsistent: { emoji: "📉", color: "text-slate-400",  bg: "bg-white/5 border-white/10" },
+};
 
 export function ScanResultsTable({ scanId }: { scanId?: string }) {
     const [rows, setRows] = useState<ScanRow[]>([]);
@@ -74,6 +86,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
     const [loading, setLoading] = useState(true);
     const [sortKey, setSortKey] = useState<SortKey>("mb_score");
     const [tierFilter, setTierFilter] = useState("All");
+    const [ccTierFilter, setCcTierFilter] = useState("All");
     const [categoryFilter, setCategoryFilter] = useState("All");
 
     const fetchResults = useCallback(async () => {
@@ -82,6 +95,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
             const params = new URLSearchParams({ sort: sortKey, limit: "200" });
             if (scanId) params.set("scanId", scanId);
             if (tierFilter !== "All") params.set("tier", tierFilter);
+            if (ccTierFilter !== "All") params.set("cc_tier", ccTierFilter);
             if (categoryFilter !== "All") params.set("category", categoryFilter);
 
             const res = await fetch(`/api/scan/results?${params}`);
@@ -96,7 +110,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
         }
     }, [scanId, sortKey, tierFilter, categoryFilter]);
 
-    useEffect(() => { fetchResults(); }, [fetchResults]);
+    useEffect(() => { fetchResults(); }, [fetchResults, ccTierFilter]);
 
     const toggleSort = (key: SortKey) => {
         setSortKey(key);
@@ -125,6 +139,27 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
                             )}
                         >
                             {t !== "All" ? `${MB_TIER_CONFIG[t]?.emoji} ` : ""}{t}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="h-4 w-px bg-white/10" />
+
+                {/* Coffee Can tier filter */}
+                <div className="flex gap-1.5 flex-wrap">
+                    {ALL_CC_TIERS.map(t => (
+                        <button
+                            key={t}
+                            onClick={() => setCcTierFilter(t)}
+                            className={cn(
+                                "text-[10px] px-2.5 py-1 rounded-full border transition-all font-medium",
+                                ccTierFilter === t
+                                    ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
+                                    : "border-white/20 text-muted-foreground hover:border-white/40"
+                            )}
+                        >
+                            {t !== "All" ? `${CC_TIER_CONFIG[t]?.emoji} ` : "☕ All CC"}
+                            {t !== "All" ? t : ""}
                         </button>
                     ))}
                 </div>
@@ -192,6 +227,10 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
                                 <th className="text-right text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">PEG</th>
                                 <th className="text-center text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">Debt</th>
                                 <th className="text-center text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">Margin</th>
+                                <th className="text-right text-muted-foreground py-3 px-4 font-medium whitespace-nowrap cursor-pointer hover:text-white"
+                                    onClick={() => toggleSort("cc_score")}>
+                                    ☕ CC Score <SortIcon col="cc_score" />
+                                </th>
                                 <th className="text-left text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">Category</th>
                             </tr>
                         </thead>
@@ -290,6 +329,24 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
                                             </span>
                                         </td>
 
+                                        {/* Coffee Can Score */}
+                                        <td className="py-3 px-4 text-right">
+                                            {row.cc_score != null && row.cc_tier && row.cc_tier !== "Insufficient Data" ? (() => {
+                                                const cc = CC_TIER_CONFIG[row.cc_tier] ?? CC_TIER_CONFIG.Inconsistent;
+                                                return (
+                                                    <div className="flex flex-col items-end gap-0.5">
+                                                        <span className={cn("font-mono font-bold text-sm", cc.color)}>{row.cc_score}</span>
+                                                        <span className={cn("text-[9px] px-1.5 py-0.5 rounded-full border font-medium", cc.bg, cc.color)}>
+                                                            {cc.emoji} {row.cc_tier}
+                                                        </span>
+                                                        {row.cc_revenue_cagr != null && (
+                                                            <span className="text-[9px] text-muted-foreground">Rev CAGR {row.cc_revenue_cagr.toFixed(1)}%</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })() : <span className="text-slate-600">–</span>}
+                                        </td>
+
                                         {/* Category */}
                                         <td className="py-3 px-4">
                                             <span className="text-[10px] text-muted-foreground">
@@ -314,6 +371,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
                 <span><span className="text-emerald-400">EQ &gt; 0.8</span> = Earnings quality clean</span>
                 <span><span className="text-emerald-400">PEG &lt; 0.8</span> = Growth underpriced</span>
                 <span><span className="text-emerald-400">FCF &gt; 5%</span> = Strong cash yield</span>
+                <span><span className="text-amber-300">☕ Classic</span> = Rev CAGR &gt;10% + ROCE &gt;15% for 4yr</span>
             </div>
         </div>
     );

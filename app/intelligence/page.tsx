@@ -823,7 +823,96 @@ function MultiBaggerScore({ mode }: SectionProps) {
   );
 }
 
-// ─── Section 5c: Megatrend Tags ───────────────────────────────────────────────
+// ─── Section 5c: Coffee Can Mode ─────────────────────────────────────────────
+
+const ccTiers = [
+  { tier: "Classic",      emoji: "☕", color: "#FCD34D", range: "80–100", beginner: "4 clean years of Revenue CAGR > 10% AND ROCE > 15%. Extremely rare. This is the buy-and-hold-forever tier.", expert: "All revenue growth years + CAGR > 10% + All ROCE years > 15% + stability bonus. ~top 3% of NSE stocks will qualify. 4-year proxy for Mukherjea's 10-year original criterion." },
+  { tier: "Strong",       emoji: "🌱", color: "#4ADE80", range: "60–79", beginner: "Nearly Coffee Can quality. One small lapse in 4 years. These are the stocks you put on a serious watchlist.", expert: "Minor inconsistency in one metric or one year. Still demonstrates structural quality consistency. Most reliable candidates for the classic approach." },
+  { tier: "Developing",   emoji: "📈", color: "#60A5FA", range: "40–59", beginner: "Growing into Coffee Can territory. The business is improving but hasn't yet shown 4 years of proven consistency.", expert: "Revenue or ROCE showing improvement but not yet fully consistent. Monitor for 1–2 more years. May qualify as Strong/Classic in future scans." },
+  { tier: "Inconsistent", emoji: "📉", color: "#94A3B8", range: "0–39",  beginner: "Lumpy business. Revenue or returns are uneven year to year. Not suitable for the buy-and-hold Coffee Can approach.", expert: "Cyclical, volatile, or early-stage business. Standard 5-layer and GEM scoring still applies — inconsistency here doesn't mean it's a bad business, just not Coffee Can material." },
+];
+
+function CoffeeCanSection({ mode }: SectionProps) {
+  return (
+    <section id="coffee-can" className="scroll-mt-20">
+      <SectionTitle icon={<BookOpen className="h-7 w-7" />}>Coffee Can Mode</SectionTitle>
+
+      {mode === "beginner" ? (
+        <div className="space-y-5">
+          <BeginnerBadge />
+          <Callout emoji="☕" title="What is Coffee Can Investing?" color="amber">
+            In 1986, Robert Kirby described putting stock certificates in a coffee can and locking it in a safe for 10 years — no checking, no selling, no panic. The idea: find companies so fundamentally strong that you can ignore the market noise entirely. Saurabh Mukherjea (Marcellus Investment) adapted this for India, with two strict rules: Revenue growing at 10%+ AND Returns above 15% — every single year — for 10 years.
+          </Callout>
+          <p className="text-muted-foreground leading-relaxed">
+            The key insight: most companies can have <em>one</em> good year. Very few can have <strong className="text-white">10 consecutive good years</strong>. The ones that do tend to have deep competitive moats — the kind that compound wealth quietly while everyone else is checking their portfolio every day.
+          </p>
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            {ccTiers.map(t => (
+              <div key={t.tier} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{t.emoji}</span>
+                  <span className="font-bold text-sm" style={{ color: t.color }}>{t.tier}</span>
+                  <span className="text-[10px] text-muted-foreground ml-auto">{t.range}</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{t.beginner}</p>
+              </div>
+            ))}
+          </div>
+          <Callout emoji="⚠️" title="Why 4 years, not 10?" color="amber">
+            yfinance (our data source) provides ~4 years of annual financial history. We run a 4-year consistency check as a proxy. A stock passing all 4-year checks is already in the top 5% of listed companies — it's ON TRACK for Coffee Can status, not necessarily already there.
+          </Callout>
+        </div>
+      ) : (
+        <div className="space-y-5">
+          <ExpertBadge />
+          <p className="text-muted-foreground leading-relaxed mt-3">
+            Coffee Can Score (0–100) — 3 automated components using <code className="text-xs bg-white/10 px-1 rounded">income_stmt</code> and <code className="text-xs bg-white/10 px-1 rounded">balance_sheet</code> from yfinance. Run with <code className="text-xs bg-white/10 px-1 rounded">python engine.py --mode coffeecan</code> to filter output to Strong + Classic only.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left text-muted-foreground py-2 pr-6 font-medium">Component</th>
+                  <th className="text-left text-muted-foreground py-2 pr-6 font-medium">Max Pts</th>
+                  <th className="text-left text-muted-foreground py-2 font-medium">Scoring Logic</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Revenue Consistency", "40", "All years growing + CAGR>10% = 40 | CAGR>7% = 28 | 1 bad year + CAGR>10% = 20 | else scaled"],
+                  ["ROCE Consistency",    "40", "All years > 15% = 40 | Most > 15% = 28 | All > 10% = 20 | avg>10% = 12 | else scaled"],
+                  ["Stability Bonus",     "20", "+10 if zero revenue declines | +10 if ROCE never < 10%"],
+                ].map(([k, pts, logic]) => (
+                  <tr key={k} className="border-b border-white/5">
+                    <td className="py-2 pr-6 font-mono text-primary text-[11px]">{k}</td>
+                    <td className="py-2 pr-6 text-muted-foreground">{pts}</td>
+                    <td className="py-2 text-muted-foreground">{logic}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {ccTiers.map(t => (
+              <div key={t.tier} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+                <div className="text-2xl mb-1">{t.emoji}</div>
+                <p className="font-bold text-xs" style={{ color: t.color }}>{t.tier}</p>
+                <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{t.expert}</p>
+              </div>
+            ))}
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-muted-foreground space-y-1">
+            <p><strong className="text-white">ROCE calculation:</strong> EBIT ÷ (Total Assets − Current Liabilities) — computed directly from income_stmt + balance_sheet, not from yfinance snapshot field</p>
+            <p><strong className="text-white">Revenue CAGR:</strong> (Revenue<sub>newest</sub> ÷ Revenue<sub>oldest</sub>)^(1÷N) − 1 across available years</p>
+            <p><strong className="text-white">CLI usage:</strong> <code className="bg-white/10 px-1 rounded">python engine.py --market NSE --mode coffeecan</code> — outputs only Strong + Classic (cc_score ≥ 60)</p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ─── Section 5d: Megatrend Tags ───────────────────────────────────────────────
 
 const megatrends = [
   { tag: "Defence & Aerospace",            emoji: "🛡️", color: "#4ADE80",  beginner: "India is replacing imported weapons with locally made ones. This is a 10-year policy shift — defence budgets never get cut.",                  expert: "Atmanirbhar Bharat. Indigenisation mandate. 68% defence procurement reserved for domestic. Multi-year order books. HAL, BEL, Solar Industries, Data Patterns." },
@@ -1053,6 +1142,7 @@ const navItems = [
   { id: "what-is-fortress", label: "What is Fortress?", icon: Shield },
   { id: "five-layers", label: "5-Layer Engine", icon: Cpu },
   { id: "multibagger", label: "Multi-Bagger Score", icon: TrendingUp },
+  { id: "coffee-can", label: "Coffee Can Mode", icon: BookOpen },
   { id: "megatrend", label: "Megatrend Tags", icon: Globe },
   { id: "gem-score", label: "GEM Score", icon: Star },
   { id: "sovereign-alpha", label: "Sovereign Alpha", icon: Brain },
@@ -1178,6 +1268,7 @@ export default function IntelligencePage() {
                 <WhatIsFortress mode={mode} />
                 <FiveLayerEngine mode={mode} />
                 <MultiBaggerScore mode={mode} />
+                <CoffeeCanSection mode={mode} />
                 <MegatrendSection mode={mode} />
                 <GemScore mode={mode} />
                 <SovereignAlpha mode={mode} />
