@@ -157,26 +157,28 @@ const layers = [
     label: "L1 — Protection",
     beginner: {
       question: "Is this company financially safe?",
-      analogy: "Think of it like checking if someone has savings and no credit card debt before lending them money.",
+      analogy: "Think of it like checking if someone has savings and no credit card debt before lending them money — AND checking whether their debt is going up or coming down every year.",
       whatWeCheck: [
         "Does the company owe more than it earns? (Debt check)",
         "Does it actually generate real cash, not just accounting profit?",
         "Is it earning a good return on the money invested in it?",
         "What percentage of its profit actually becomes real cash in hand?",
+        "Is the company's debt growing or shrinking year-on-year? (3-year direction)",
       ],
-      passExample: "Asian Paints, Pidilite — zero or very low debt, consistent cash generation.",
-      failExample: "A real estate developer with 5x debt-to-equity and negative cash flow.",
+      passExample: "Asian Paints, Pidilite — zero or very low debt, consistent cash generation, debt falling every year.",
+      failExample: "A real estate developer with 5x debt-to-equity, negative cash flow, and debt rising for 3 years.",
     },
     expert: {
       metrics: [
         { name: "Debt/Equity (D/E)", threshold: "< 0.6 full pts | 0.6–1.0 half pts | > 1.0 zero", note: "NSE raw values divided by 100 for normalisation" },
         { name: "ROCE", threshold: "> 15% full pts | 10–15% half pts", note: "Return on Capital Employed" },
         { name: "Operating Cash Flow", threshold: "Positive = pass (binary)", note: "" },
-        { name: "FCF Yield (NEW)", threshold: "> 5% full | 2–5% half", note: "freeCashflow ÷ marketCap" },
-        { name: "Earnings Quality (NEW)", threshold: "> 0.8 full | 0.5–0.8 half", note: "freeCashflow ÷ netIncomeToCommon" },
+        { name: "FCF Yield", threshold: "> 5% full | 2–5% half", note: "freeCashflow ÷ marketCap" },
+        { name: "Earnings Quality", threshold: "> 0.8 full | 0.5–0.8 half", note: "freeCashflow ÷ netIncomeToCommon" },
+        { name: "Debt Trajectory (v3)", threshold: "Falling 3yr = full bonus | Falling partial = half | Stable = small | Rising = zero", note: "3yr D/E direction from balance_sheet — direction matters more than snapshot" },
       ],
       maxPts: 25,
-      weight: "28% D/E | 28% ROCE | 14% OCF | 18% FCF Yield | 12% Earnings Quality",
+      weight: "22% D/E | 26% ROCE | 12% OCF | 18% FCF Yield | 12% Earnings Quality | 10% Debt Trajectory",
     },
   },
   {
@@ -670,6 +672,249 @@ function MarketWeather({ mode }: SectionProps) {
   );
 }
 
+// ─── Section 5b: Multi-Bagger Score ──────────────────────────────────────────
+
+const mbComponents = [
+  {
+    id: "A",
+    label: "Runway Score",
+    maxPts: 25,
+    emoji: "🛣️",
+    color: "#4ADE80",
+    beginner: "How much room does the company still have to grow? We compare its size today to the total size of its entire market. A company that's captured only 0.1% of its market has 99.9% of the road ahead of it.",
+    expert: "Market Cap (USD) ÷ Sector TAM (USD). Penetration < 0.1% = 25pts, < 0.5% = 20, < 1% = 14, < 3% = 8, < 5% = 3, ≥ 5% = 0. TAM from 72-sector SECTOR_TAM_USD_BN lookup table — no manual input per stock.",
+  },
+  {
+    id: "B",
+    label: "Compounding Engine",
+    maxPts: 25,
+    emoji: "⚙️",
+    color: "#60A5FA",
+    beginner: "Is this company reinvesting its profits to grow even faster? A company that keeps most of its profit inside the business (instead of paying it out as dividends) and earns a high return on that money is a compounding machine.",
+    expert: "ROCE × Reinvestment Rate = theoretical annual earnings growth. Reinvestment Rate = 1 − (dividendRate × sharesOutstanding ÷ netIncomeToCommon). Compounding Engine > 20%/yr = 25pts, > 15% = 18, > 10% = 11, > 5% = 5, else 0. All fields from yfinance info.",
+  },
+  {
+    id: "C",
+    label: "Operating Leverage",
+    maxPts: 20,
+    emoji: "📈",
+    color: "#A78BFA",
+    beginner: "Is the company getting more profitable as it gets bigger? If revenue doubles but profits triple, that's operating leverage — the business is becoming more efficient at scale.",
+    expert: "3-year operating margin expansion from income_stmt. Expanding > 5 pts = 20, > 2 pts = 14, stable = 8, contracting > −5 = 3, else 0. Uses real income_stmt data (not a single-point proxy) — margin direction > margin level.",
+  },
+  {
+    id: "D",
+    label: "Discovery Gap",
+    maxPts: 20,
+    emoji: "🔭",
+    color: "#FBBF24",
+    beginner: "Is the stock priced much lower than similar companies in the same industry? If a great company is trading at half the P/E of its peers, that gap will eventually close — which means the stock doubles before earnings grow at all.",
+    expert: "Current P/E ÷ Sector Median P/E (SECTOR_PE_MEDIAN lookup). Ratio < 0.50 = 20pts, < 0.70 = 14, < 0.90 = 8, < 1.10 = 3, ≥ 1.10 = 0. No P/E (loss-making growth) = 5 partial credit.",
+  },
+  {
+    id: "E",
+    label: "Small-Cap Opportunity",
+    maxPts: 10,
+    emoji: "🔬",
+    color: "#FB923C",
+    beginner: "Almost every 10x or 100x stock started as a small company. Large companies are already well-known and owned by every fund manager — the discovery has happened. Small companies can still be found.",
+    expert: "Market cap in USD. < $300M micro-cap = 10pts, $300M–$1B small = 8, $1B–$5B mid = 5, $5B–$20B large = 2, > $20B = 0. Cross-market normalised to USD (INR ÷ 83, HKD ÷ 7.8).",
+  },
+];
+
+const mbTiers = [
+  { tier: "Rocket", emoji: "🚀", range: "80–100", color: "#4ADE80", desc: "All 5 drivers aligned. Rare. This is the structure that produces 10x–50x returns over 5–10 years." },
+  { tier: "Launcher", emoji: "🛸", range: "60–79", color: "#60A5FA", desc: "3–4 drivers strong. Good multi-bagger candidate. One missing piece — worth tracking for catalyst." },
+  { tier: "Builder", emoji: "🏗️", range: "40–59", color: "#FBBF24", desc: "Growing into multi-bagger potential. Present but not yet fully aligned. Watchlist candidate." },
+  { tier: "Crawler", emoji: "🐢", range: "20–39", color: "#FB923C", desc: "1–2 signals only. Possible early-stage or distressed. Very high risk — not for most investors." },
+  { tier: "Grounded", emoji: "⛔", range: "0–19", color: "#F87171", desc: "Multi-bagger conditions absent. Large cap, mature market, low ROCE, no margin expansion." },
+];
+
+function MultiBaggerScore({ mode }: SectionProps) {
+  const [activeComp, setActiveComp] = useState(0);
+  return (
+    <section id="multibagger" className="scroll-mt-20">
+      <SectionTitle icon={<TrendingUp className="h-7 w-7" />}>Multi-Bagger Score</SectionTitle>
+
+      {mode === "beginner" ? (
+        <div className="space-y-5">
+          <BeginnerBadge />
+          <Callout emoji="🚀" title="What is a multi-bagger?" color="green">
+            A multi-bagger is a stock that multiplies your money — 2x is a double-bagger, 10x is a ten-bagger. The term comes from Peter Lynch (the most successful fund manager in history). Multi-baggers don't happen by accident — they have a specific structure.
+          </Callout>
+          <p className="text-muted-foreground leading-relaxed">
+            The 5-Layer engine tells you if a company is <strong className="text-white">safe</strong>. The Multi-Bagger Score asks a different question: does this company have the <strong className="text-white">structure to multiply your money?</strong> A company can be safe but not a multi-bagger. The best stocks pass both.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <ExpertBadge />
+          <p className="text-muted-foreground leading-relaxed mt-3">
+            MB Score (0–100) is fully automated — zero manual input per stock. Five components derived entirely from yfinance data + two lookup tables (SECTOR_TAM_USD_BN, SECTOR_PE_MEDIAN). Answers: <em>does this company have the structural prerequisites to 5x–50x?</em> Separate from the 5-layer quality score and the GEM discovery score.
+          </p>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-muted-foreground">
+            <strong className="text-white">Score composition:</strong> Runway 25 + Compounding Engine 25 + Operating Leverage 20 + Discovery Gap 20 + Small-Cap 10 = 100
+          </div>
+        </div>
+      )}
+
+      {/* Tiers */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-6 mb-8">
+        {mbTiers.map(t => (
+          <div key={t.tier} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+            <div className="text-2xl mb-1">{t.emoji}</div>
+            <p className="font-bold text-xs" style={{ color: t.color }}>{t.tier}</p>
+            <p className="text-[10px] text-muted-foreground">{t.range} pts</p>
+            <p className="text-[10px] text-muted-foreground mt-1 leading-tight hidden sm:block">{t.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Component deep-dive */}
+      <p className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">The 5 Components</p>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {mbComponents.map((c, i) => (
+          <button
+            key={c.id}
+            onClick={() => setActiveComp(i)}
+            className={cn(
+              "text-xs px-3 py-1.5 rounded-full border transition-all",
+              activeComp === i ? "border-primary text-white bg-primary/20" : "border-white/20 text-muted-foreground hover:border-white/40"
+            )}
+          >
+            {c.emoji} {c.label}
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeComp}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{mbComponents[activeComp].emoji}</span>
+                  <span className="font-bold" style={{ color: mbComponents[activeComp].color }}>
+                    {mbComponents[activeComp].label}
+                  </span>
+                </div>
+                <Badge className="bg-white/10 border-0 text-xs">0–{mbComponents[activeComp].maxPts} pts</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {mode === "beginner" ? mbComponents[activeComp].beginner : mbComponents[activeComp].expert}
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </AnimatePresence>
+
+      {mode === "beginner" && (
+        <Callout emoji="💡" title="Why this is separate from the safety score" color="blue">
+          A company can be financially very safe but still be a boring, slow-growing business. Think of a utility company — safe as a bank, but it won't 10x your money. The Multi-Bagger Score checks for explosive growth potential separately from financial safety.
+        </Callout>
+      )}
+    </section>
+  );
+}
+
+// ─── Section 5c: Megatrend Tags ───────────────────────────────────────────────
+
+const megatrends = [
+  { tag: "Defence & Aerospace",            emoji: "🛡️", color: "#4ADE80",  beginner: "India is replacing imported weapons with locally made ones. This is a 10-year policy shift — defence budgets never get cut.",                  expert: "Atmanirbhar Bharat. Indigenisation mandate. 68% defence procurement reserved for domestic. Multi-year order books. HAL, BEL, Solar Industries, Data Patterns." },
+  { tag: "Electric Vehicles & Clean Energy", emoji: "⚡", color: "#FBBF24",  beginner: "The world is switching from petrol to electric. Every battery, charger, and EV component company benefits from this shift.",                 expert: "Global EV penetration < 15% — massive runway. Battery materials (lithium, LFP), charging infrastructure, green hydrogen. PLI schemes in India for ACC batteries." },
+  { tag: "Digital Payments & Fintech",     emoji: "💳", color: "#60A5FA",  beginner: "Cash is becoming digital worldwide. Payment gateways, lending apps, and digital wallets are replacing banks and cash.",                        expert: "UPI volumes $2T+ annually. BNPL, neobanks, embedded finance. Regulatory tailwind from RBI digital push. TAM: $20T+ globally." },
+  { tag: "Healthcare & Diagnostics",       emoji: "💊", color: "#F87171",  beginner: "India makes medicines for the whole world cheaply. Healthcare demand always grows — people always need medicine.",                             expert: "India generic pharma = $25B export opportunity. US drug approval tailwind. China API substitute demand. Diagnostic expansion post-COVID." },
+  { tag: "China+1 Manufacturing",          emoji: "🏭", color: "#FB923C",  beginner: "Global companies are moving factories from China to India. This is the biggest manufacturing shift in 30 years — and it's just starting.",      expert: "PLI schemes across 14 sectors. FDI inflows to India manufacturing. Electronics, textiles, chemicals, pharma API — all seeing order relocation from China." },
+  { tag: "Global IT & AI Services",        emoji: "💻", color: "#A78BFA",  beginner: "Indian IT companies write software for the whole world. AI is now creating a new wave of demand for tech services.",                           expert: "India IT export $250B+ by 2026. GenAI demand driving cloud migration, data engineering, managed services uplift. USD tailwind for NSE IT exporters." },
+  { tag: "India Infrastructure",           emoji: "🏗️", color: "#34D399",  beginner: "India is building highways, airports, metro systems, and power grids at record speed. Every company involved benefits for 10+ years.",          expert: "NIP: ₹111 lakh crore infrastructure pipeline. HAM highway model. Smart Cities Mission. T&D capex for power grid upgrades. Cement, steel, capital goods beneficiaries." },
+  { tag: "India Consumption",              emoji: "🛒", color: "#FBBF24",  beginner: "India's middle class is growing and spending more. FMCG, retail, food, beverages — everything grows when 1.4 billion people earn more.",        expert: "Premiumisation trend. Rural demand recovery. E-commerce penetration sub-10% in Tier 2/3 cities — massive headroom. Staples and discretionary both benefit." },
+  { tag: "Specialty Chemicals",            emoji: "🧪", color: "#60A5FA",  beginner: "Specialty chemicals are the ingredients that go into almost everything — phones, medicines, paint, fertilisers. India is becoming the global supplier.",  expert: "China+1 driving agrochemical, fluorochemical, and CDMO API sourcing to India. High-margin niche products with sticky customer relationships." },
+  { tag: "Financial Services",             emoji: "🏦", color: "#4ADE80",  beginner: "Banks, insurance, and investment companies grow when the economy grows. India's financial sector is still underpenetrated compared to developed markets.", expert: "Insurance penetration India: ~4% vs 12%+ in developed markets. NBFC credit to MSMEs. Mutual fund SIP flows record high. Rate cut cycle = re-rating catalyst." },
+  { tag: "Energy Transition",              emoji: "🌱", color: "#34D399",  beginner: "The world is switching from coal and oil to solar, wind, and green energy. India has committed to 500GW of renewable energy by 2030.",           expert: "India 500GW renewable target by 2030. Solar manufacturing PLI. Green hydrogen mission. Power transmission capex to carry renewables to grid. NTPC, Adani Green, CESC." },
+];
+
+function MegatrendSection({ mode }: SectionProps) {
+  const [active, setActive] = useState(0);
+  return (
+    <section id="megatrend" className="scroll-mt-20">
+      <SectionTitle icon={<Globe className="h-7 w-7" />}>Megatrend Tags</SectionTitle>
+
+      {mode === "beginner" ? (
+        <div className="space-y-4">
+          <BeginnerBadge />
+          <Callout emoji="🌊" title="What is a megatrend?" color="blue">
+            A megatrend is a massive, multi-decade shift that reshapes entire industries — like the internet in the 90s, or smartphones in the 2000s. Investing in companies riding a megatrend is like surfing: even average swimmers look great on a big wave.
+          </Callout>
+          <p className="text-muted-foreground leading-relaxed">
+            Fortress automatically assigns every stock a megatrend tag using the company's business description and industry. No manual work — the engine reads what the company does and classifies it. Click any megatrend below to understand what it is and why it matters.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <ExpertBadge />
+          <p className="text-muted-foreground leading-relaxed mt-3">
+            Auto-classified via NLP keyword matching on yfinance fields: <code className="text-xs bg-white/10 px-1 rounded">longBusinessSummary</code> + <code className="text-xs bg-white/10 px-1 rounded">industry</code> + <code className="text-xs bg-white/10 px-1 rounded">sector</code>. Priority-ordered rules (first match wins). 11 megatrends defined in <code className="text-xs bg-white/10 px-1 rounded">MEGATREND_RULES</code> in engine.py. ~85% accuracy on single-business companies. Diversified conglomerates get the primary segment tag. Fallback: sector-level classification → "Diversified".
+          </p>
+        </div>
+      )}
+
+      {/* Tag pills */}
+      <div className="flex flex-wrap gap-2 mt-5 mb-6">
+        {megatrends.map((m, i) => (
+          <button
+            key={m.tag}
+            onClick={() => setActive(i)}
+            className={cn(
+              "text-xs px-3 py-1.5 rounded-full border transition-all flex items-center gap-1.5",
+              active === i ? "text-white bg-primary/20 border-primary" : "border-white/20 text-muted-foreground hover:border-white/40"
+            )}
+          >
+            <span>{m.emoji}</span>
+            <span>{m.tag}</span>
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={active}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl">{megatrends[active].emoji}</span>
+                <span className="font-bold text-base" style={{ color: megatrends[active].color }}>
+                  {megatrends[active].tag}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {mode === "beginner" ? megatrends[active].beginner : megatrends[active].expert}
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </AnimatePresence>
+
+      {mode === "expert" && (
+        <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-muted-foreground space-y-1">
+          <p><strong className="text-white">Classification priority:</strong> Defence → EV/Energy → Fintech → Healthcare → China+1 → IT/AI → Infrastructure → Consumption → Specialty Chem → Financial Services → Energy Transition</p>
+          <p><strong className="text-white">Override logic:</strong> If a defence company also does chemicals, it gets tagged Defence (higher priority). Sector-level fallback covers remaining cases.</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 // ─── Section 6: What Fortress Is NOT ─────────────────────────────────────────
 
 function WhatIsNot() {
@@ -717,6 +962,12 @@ const terms = [
   { term: "Stop-Loss", category: "Risk", beginner: "A rule you set before buying: 'If this stock falls 15%, I sell automatically, no questions asked.' It protects you from turning a small mistake into a disaster.", expert: "Pre-defined exit trigger. Fortress Balanced mode: −15% trailing. Aggressive mode: −8% hard stop. Conservative mode: no stop-loss (thesis-based exit only)." },
   { term: "FCF Yield", category: "Valuation", beginner: "What percentage of the company's market value it generates in free cash every year. FCF Yield of 6% means for every ₹100 you invest, the company generates ₹6 of real cash annually.", expert: "FCF ÷ Market Cap. Preferred over dividend yield for total cash return assessment. > 5% = strong. 2–5% = decent. < 2% = growth-priced or capital-intensive. Added to L1 in Fortress v2." },
   { term: "EV/EBITDA", category: "Valuation", beginner: "A way to compare how expensive a company is vs how much money it actually makes from its core business. Cheaper than P/E because it removes the effect of debt and taxes.", expert: "Enterprise Value ÷ Earnings Before Interest, Tax, Depreciation & Amortisation. Preferred for capital-intensive sectors. Removes capital structure distortion. Fortress uses for sector-relative valuation in GEM Score." },
+  { term: "Dividend", category: "Corporate Actions", beginner: "A share of the company's profits paid directly to you as a shareholder in cash. If you own 100 shares and the dividend is ₹5/share, ₹500 lands in your account — no selling required. Think of it as the company paying you rent for owning it.", expert: "Cash distribution from retained earnings. Dividend Yield = Annual DPS ÷ Current Price. Sustainable = FCF covers dividend 1.5x+. High yield + low FCF coverage = dividend trap risk. Fortress tracks dividendRate from yfinance. Rising dividend over 5 years = management confidence signal." },
+  { term: "Bonus Issue", category: "Corporate Actions", beginner: "The company gives you free extra shares. If you have 100 shares and it announces a 1:1 bonus, you now have 200 shares. The price halves automatically — so your total value is the same. But it signals that management believes the stock is worth more.", expert: "Corporate action converting retained earnings into paid-up equity capital. Ratio e.g. 1:1 (100% bonus), 2:1 (200% bonus). Price adjusts proportionally on ex-date — no net wealth change at issuance. Positive signal: management has surplus retained earnings and wants to reward/improve liquidity. Fortress auto-detects via yfinance .actions." },
+  { term: "Stock Split", category: "Corporate Actions", beginner: "One share becomes multiple shares. A 2:1 split means your 1 share becomes 2, but the price halves. Like breaking a ₹100 note into two ₹50 notes — same value, more accessible.", expert: "Subdivision of existing shares without changing paid-up capital. Typically done when share price becomes too high for retail participation. Common ratios: 2:1, 5:1, 10:1. No fundamental impact. Improves stock liquidity and retail accessibility. Fortress auto-detects via yfinance .actions. Historically positive market reaction (improved retail access, management confidence signal)." },
+  { term: "Multi-Bagger", category: "Strategy", beginner: "A stock that multiplies your money — 2x is a double-bagger (2 bags of money from 1), 10x is a ten-bagger. The term was coined by Peter Lynch, who turned the Fidelity Magellan Fund into the best-performing fund in history by finding these early.", expert: "Term from Peter Lynch's 'One Up on Wall Street'. Structural prerequisites: large TAM with low penetration, high ROCE with high reinvestment rate, operating leverage (margins expanding with scale), discovery gap (P/E below sector), small/mid cap stage. Fortress MB Score (0–100) quantifies all 5 automatically." },
+  { term: "Megatrend", category: "Strategy", beginner: "A massive, decades-long shift that reshapes entire industries. The internet was a megatrend. EVs are a megatrend. India's defence indigenisation is a megatrend. Companies riding a megatrend get market tailwind even if they're average businesses.", expert: "Structural demand driver with 10–30 year horizon. Not cyclical. Not dependent on individual company execution. Fortress auto-classifies stocks into 11 megatrend buckets via NLP on yfinance business summary + industry + sector fields. Used for display and filtering — does not affect 5-layer or GEM scores directly." },
+  { term: "Debt Trajectory", category: "Finance", beginner: "Is the company's debt going up or coming down over the last 3 years? A company whose debt is falling every year is getting healthier — that change in direction often triggers a re-rating (the stock price catches up to the improving reality).", expert: "3-year D/E direction from balance_sheet (most recent 3 annual columns). Falling 3yr = +8 trajectory pts, partial = +5, stable = +2, rising = 0. Integrated as 10% modifier in L1 v3. Key insight: D/E of 0.9 falling from 3.0 is a buy signal. D/E of 0.9 rising from 0.2 is a warning. Same number, opposite story." },
 ];
 
 function KeyTerms({ mode }: SectionProps) {
@@ -801,9 +1052,11 @@ function FAQ() {
 const navItems = [
   { id: "what-is-fortress", label: "What is Fortress?", icon: Shield },
   { id: "five-layers", label: "5-Layer Engine", icon: Cpu },
+  { id: "multibagger", label: "Multi-Bagger Score", icon: TrendingUp },
+  { id: "megatrend", label: "Megatrend Tags", icon: Globe },
   { id: "gem-score", label: "GEM Score", icon: Star },
   { id: "sovereign-alpha", label: "Sovereign Alpha", icon: Brain },
-  { id: "market-weather", label: "Market Weather", icon: Globe },
+  { id: "market-weather", label: "Market Weather", icon: BarChart2 },
   { id: "not-fortress", label: "What We Don't Do", icon: AlertTriangle },
   { id: "key-terms", label: "Key Terms", icon: BookOpen },
   { id: "faq", label: "FAQ", icon: Info },
@@ -924,6 +1177,8 @@ export default function IntelligencePage() {
               >
                 <WhatIsFortress mode={mode} />
                 <FiveLayerEngine mode={mode} />
+                <MultiBaggerScore mode={mode} />
+                <MegatrendSection mode={mode} />
                 <GemScore mode={mode} />
                 <SovereignAlpha mode={mode} />
                 <MarketWeather mode={mode} />
