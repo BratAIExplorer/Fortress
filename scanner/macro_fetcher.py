@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 Fortress Market Pulse Fetcher
-Fetches macro indicators via a single batched yfinance download call.
-Single batch = one HTTP request = far less likely to be rate-limited.
+Handles yfinance 1.x MultiIndex column structure changes.
 """
 
 import json
@@ -12,8 +11,9 @@ from datetime import date
 
 try:
     import yfinance as yf
+    import pandas as pd
 except ImportError:
-    print(json.dumps({"error": "yfinance not installed"}))
+    print(json.dumps({"error": "yfinance/pandas not installed"}))
     sys.exit(1)
 
 TICKER_MAP = {
@@ -31,45 +31,85 @@ SYMBOLS = list(TICKER_MAP.values())
 KEY_BY_SYMBOL = {v: k for k, v in TICKER_MAP.items()}
 
 
-def fetch_all(retries: int = 3, delay: int = 10) -> dict[str, float | None]:
-    """Download all tickers in one batch request. Retries on rate-limit."""
+def last_close(series: pd.Series) -> float | None:
+    s = series.dropna()
+    return round(float(s.iloc[-1]), 4) if not s.empty else None
+
+
+def extract_batch(raw: pd.DataFrame) -> dict[str, float | None]:
+    """Handle both (Price, Ticker) and (Ticker, Price) MultiIndex layouts."""
+    result: dict[str, float | None] = {}
+
+    if not isinstance(raw.columns, pd.MultiIndex):
+        # Single ticker — shouldn't happen with multiple inputs
+        return {key: None for key in TICKER_MAP}
+
+    level0 = list(raw.columns.get_level_values(0).unique())
+    level1 = list(raw.columns.get_level_values(1).unique())
+
+    # Determine which axis holds the price field and which holds the ticker
+    close_variants = ["Close", "close", "Adj Close"]
+
+    if any(c in level0 for c in close_variants):
+        # Layout: (Price, Ticker) — standard yfinance < 1.x
+        close_col = next(c for c in close_variants if c in level0)
+        for symbol, key in KEY_BY_SYMBOL.items():
+            try:
+                result[key] = last_close(raw[close_col][symbol])
+            except Exception:
+                result[key] = None
+
+    elif any(c in level1 for c in close_variants):
+        # Layout: (Ticker, Price) — yfinance 1.x default
+        close_col = next(c for c in close_variants if c in level1)
+        for symbol, key in KEY_BY_SYMBOL.items():
+            try:
+                result[key] = last_close(raw[symbol][close_col])
+            except Exception:
+                result[key] = None
+    else:
+        sys.stderr.write(f"[macro_fetcher] unknown column layout: {raw.columns[:6].tolist()}\n")
+        result = {key: None for key in TICKER_MAP}
+
+    return result
+
+
+def fetch_individual(symbol: str) -> float | None:
+    """Fallback: single ticker fetch."""
+    try:
+        hist = yf.Ticker(symbol).history(period="5d")
+        if not hist.empty:
+            return last_close(hist["Close"])
+    except Exception as e:
+        sys.stderr.write(f"[macro_fetcher] individual {symbol}: {e}\n")
+    return None
+
+
+def fetch_all(retries: int = 2, delay: int = 8) -> dict[str, float | None]:
     for attempt in range(retries):
         try:
-            # Single batch download — one HTTPS request for all tickers
             raw = yf.download(
                 tickers=SYMBOLS,
                 period="5d",
                 group_by="ticker",
                 auto_adjust=True,
                 progress=False,
-                threads=False,   # sequential to avoid hammering the API
+                threads=False,
             )
-
-            result: dict[str, float | None] = {}
-            for symbol, key in KEY_BY_SYMBOL.items():
-                try:
-                    # Multi-ticker download nests columns as (field, ticker)
-                    if hasattr(raw.columns, "levels"):
-                        prices = raw["Close"][symbol].dropna()
-                    else:
-                        # Single ticker fallback (shouldn't happen with multiple tickers)
-                        prices = raw["Close"].dropna()
-
-                    result[key] = round(float(prices.iloc[-1]), 4) if not prices.empty else None
-                except Exception as e:
-                    sys.stderr.write(f"[macro_fetcher] parse error {symbol}: {e}\n")
-                    result[key] = None
-
-            return result
-
+            if not raw.empty:
+                result = extract_batch(raw)
+                # Fill any remaining nulls with individual fetches
+                for symbol, key in KEY_BY_SYMBOL.items():
+                    if result.get(key) is None:
+                        result[key] = fetch_individual(symbol)
+                return result
         except Exception as e:
-            msg = str(e)
-            sys.stderr.write(f"[macro_fetcher] attempt {attempt + 1} failed: {msg}\n")
+            sys.stderr.write(f"[macro_fetcher] batch attempt {attempt + 1}: {e}\n")
             if attempt < retries - 1:
-                time.sleep(delay * (attempt + 1))
+                time.sleep(delay)
 
-    # All retries failed — return nulls gracefully
-    return {key: None for key in TICKER_MAP}
+    # Fallback: all individual
+    return {key: fetch_individual(symbol) for symbol, key in KEY_BY_SYMBOL.items()}
 
 
 def main():
