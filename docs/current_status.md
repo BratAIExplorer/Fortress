@@ -1,6 +1,25 @@
 # Current Status — March 25, 2026
 
-## Today's Session — Engine Hardening + Sovereign Alpha Bootstrap
+## Session 2 — Live Scanner Tab Fix + Deployment Stabilisation
+
+### What Was Fixed
+4. **Live scanner results not appearing in V5 Extension tabs** — Sub-₹20, Penny, and 52W Lows
+   tabs showed only curated stocks after scan completion, even after hard refresh. Root cause:
+   `getLiveScanStocksByCategory()` and `getBestScan()` in `actions.ts` used Drizzle's relational
+   query API (`db.query.scans.findFirst`) which silently fails in the Next.js standalone
+   production build when no `relations()` are defined in the schema. Fixed by converting both
+   functions to use `db.select().from(schema.scans)` (the standard query builder API used
+   everywhere else). All four live query functions now work: `getLiveSub20Stocks`,
+   `getLivePennyStocks`, `getLive52WLowStocks`, `getLiveF30Stocks`/`getLiveF30Candidates`.
+
+5. **Deployment infrastructure** — `ecosystem.config.js` had wrong paths (`/opt/fortress/app/`
+   instead of `/opt/fortress/`). `deploy-vps.sh` referenced `.env` instead of `.env.local`.
+   Both corrected. PM2 process renamed from `fortress` to `fortress-app` running from
+   standalone build. Standard deploy command: `cd /opt/fortress && bash scripts/deploy-vps.sh`.
+
+---
+
+## Session 1 — Engine Hardening + Sovereign Alpha Bootstrap
 
 ### What Was Fixed
 1. **Scan reliability** — 86% failure rate (6/7 scans stuck/crashed). Root cause: no timeout

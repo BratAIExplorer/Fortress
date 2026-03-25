@@ -55,15 +55,22 @@ export async function getV5LowStocks(): Promise<V5Stock[]> {
 
 ### getLiveSub20Stocks() / getLive52WLowStocks() / getLivePennyStocks()
 
+⚠️ **Important:** Use `db.select()` to query the `scans` table here, NOT `db.query.scans.findFirst()`.
+Drizzle's relational query API silently fails in the Next.js standalone production build when no
+`relations()` are defined in schema.ts. All scan lookups in server actions must use the standard
+query builder (`db.select().from(schema.scans)`).
+
 ```typescript
 async function getLiveScanStocksByCategory(
   category: "SUB20" | "PENNY" | "52W_LOW"
 ): Promise<V5Stock[]> {
-  // 1. Find latest completed scan
-  const lastScan = await db.query.scans.findFirst({
-    where: eq(schema.scans.status, "COMPLETED"),
-    orderBy: [desc(schema.scans.runAt)],
-  });
+  // 1. Find latest completed scan (use db.select, NOT db.query — see note above)
+  const [lastScan] = await db
+    .select()
+    .from(schema.scans)
+    .where(eq(schema.scans.status, "COMPLETED"))
+    .orderBy(desc(schema.scans.runAt))
+    .limit(1);
   if (!lastScan) return [];
 
   // 2. Query scan results for this scan + category

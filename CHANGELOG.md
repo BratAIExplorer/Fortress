@@ -1,5 +1,19 @@
 # Fortress Intelligence — Changelog
 
+## 2026-03-25 (Live Scanner Fix + Deployment Stabilisation)
+
+### Fixed
+- **Live scanner tabs blank after scan** — Sub-₹20, Penny, and 52W Lows tabs in V5 Extension
+  showed only curated stocks despite scan data existing in DB. Root cause: `db.query.scans.findFirst()`
+  (Drizzle relational API) silently fails in standalone production build without `relations()` defined.
+  Converted `getLiveScanStocksByCategory()` and `getBestScan()` to `db.select()` query builder.
+  All four live query functions now work correctly.
+- **Deployment paths** — `ecosystem.config.js` pointed to `/opt/fortress/app/` (wrong).
+  Corrected to `/opt/fortress/`. `deploy-vps.sh` referenced `.env` instead of `.env.local`. Fixed.
+  PM2 process is now `fortress-app` running from the standalone build.
+
+---
+
 ## 2026-03-25 (Live Scanner Bridge)
 
 ### Added

@@ -19,7 +19,7 @@ fallbacks. No paid sources until alpha is empirically proven at 90-day cycle. It
 ## 🏗️ Architecture
 
 **Vertical Sandbox** approach:
-- **Process Isolation (PM2)**: App process named `fortress`, managed by `/opt/fortress/ecosystem.config.js`.
+- **Process Isolation (PM2)**: App process named `fortress-app`, managed by `/opt/fortress/ecosystem.config.js`.
 - **Dependency Isolation**: Next.js `standalone` output in `next.config.ts`.
 - **Port**: App runs on **port 3000** (`srv1327289`, Hostinger).
 - **Reverse Proxy**: Nginx with SSL (Let's Encrypt).
@@ -34,7 +34,7 @@ fallbacks. No paid sources until alpha is empirically proven at 90-day cycle. It
 | Server | `srv1327289` (Hostinger VPS) |
 | App path | `/opt/fortress/` |
 | Git remote | `https://github.com/BratAIExplorer/Fortress.git` (branch: `main`) |
-| PM2 process | `fortress` (id 0), `npm start` |
+| PM2 process | `fortress-app`, standalone build via `ecosystem.config.js` |
 | Database | PostgreSQL — `fortress_user` @ `localhost:5432/fortress` |
 | Env file | `/opt/fortress/.env.local` (NOT in git) |
 | Node | v20.20.0 |
@@ -256,13 +256,10 @@ export const config = { matcher: ["/admin/:path*"] }
 
 ### VPS Deploy Script
 ```bash
-cd /opt/fortress
-git pull origin main
-npm ci
-npm run build
-pm2 restart fortress --update-env || pm2 start npm --name "fortress" -- start
-pm2 save
+cd /opt/fortress && bash scripts/deploy-vps.sh
 ```
+
+The script handles: git pull → npm install → build → copy assets + .env.local → pm2 reload.
 
 ---
 
@@ -353,7 +350,7 @@ GlossaryRiskMode     — Conservative/Balanced/Aggressive rules
 
 ```bash
 # Manual VPS update
-cd /opt/fortress && git pull origin main && npm ci && npm run build && pm2 restart fortress --update-env && pm2 save
+cd /opt/fortress && bash scripts/deploy-vps.sh
 
 # Schema changes (ALWAYS prefix DATABASE_URL)
 DATABASE_URL=postgresql://fortress_user:PASSWORD@localhost:5432/fortress npm run drizzle:push
