@@ -3,14 +3,12 @@ module.exports = {
         {
             name: "fortress-app",
             script: "server.js",
-            cwd: "/opt/fortress/app/.next/standalone",
+            cwd: "/opt/fortress/.next/standalone",
             env: {
                 NODE_ENV: "production",
                 PORT: 3000,
-                // The env_file should ideally load these, but we'll try an alternative
-                // strategy if it keeps failing.
             },
-            env_file: "/opt/fortress/app/.env",
+            env_file: "/opt/fortress/.env.local",
             // Optimization
             instances: 1, // Start with 1 instance to save RAM on VPS
             exec_mode: "fork",

@@ -32,7 +32,7 @@ mkdir -p .next/standalone/public
 echo "📋 Copying fresh assets..."
 cp -r .next/static .next/standalone/.next/
 cp -r public .next/standalone/
-cp .env .next/standalone/
+cp .env.local .next/standalone/.env.local
 
 # 6. Restart PM2
 echo "🔄 Reloading Server..."
