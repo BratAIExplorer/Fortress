@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2, Table2, Scale } from "lucide-react";
@@ -19,6 +20,7 @@ interface ScanResult {
 type ScannerView = "summary" | "results";
 
 export function V5MarketScanner() {
+    const router = useRouter();
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [scanStatus, setScanStatus] = useState("");
@@ -119,6 +121,9 @@ export function V5MarketScanner() {
                         setLastScanResult(data);
                         setIsScanning(false);
                         toast.success("Market scan completed successfully!");
+                        // Refresh server component data so 52W Low, Sub-₹20,
+                        // and Penny tabs pick up the new scan results immediately.
+                        router.refresh();
                     } else if (data.type === "error") {
                         throw new Error(data.message);
                     }
