@@ -182,7 +182,7 @@ export function V5MarketScanner() {
                             </p>
                         </div>
                     </div>
-                    <ScanResultsTable scanId={lastScanResult?.scanId} />
+                    <ScanResultsTable key={lastScanResult?.scanId ?? "latest"} scanId={lastScanResult?.scanId} />
                 </div>
             )}
 
