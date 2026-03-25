@@ -116,7 +116,7 @@ export default function GuidePage() {
                     </p>
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs text-purple-300">
                         <Sparkles className="h-3.5 w-3.5" />
-                        Engine v2.0 — 6-Layer Scoring now live
+                        Engine v3 — Multi-Bagger Score + Coffee Can Mode live
                     </div>
                 </div>
 
@@ -170,8 +170,8 @@ export default function GuidePage() {
                         />
                         <Step
                             num={3}
-                            title="Go to V5 Extension → Scanner tab"
-                            description="This is where the 5-layer engine runs. Click 'Run Full Scan' to start scanning all 2,000+ NSE stocks. The scan takes 20–40 minutes. You can close the tab — it runs on the server."
+                            title="Go to V5 Extension → Intelligent Scanner tab"
+                            description="Click 'Run Full Scan' to scan all 2,000+ NSE stocks. Takes 20–40 minutes — runs on the server, safe to close. Once done, the 52W Lows, Penny, and Sub-₹20 tabs auto-populate with live scanner results alongside curated picks."
                             href="/v5-extension"
                             linkLabel="Open Scanner"
                         />
@@ -220,14 +220,14 @@ export default function GuidePage() {
                     <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-5">
                         <div className="flex items-center gap-2 mb-3">
                             <Sparkles className="h-4 w-4 text-purple-400" />
-                            <span className="font-bold text-sm text-purple-300">What's new in Engine v2.0</span>
+                            <span className="font-bold text-sm text-purple-300">What's new in Engine v3</span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
                             {[
-                                { label: "L2 upgraded", desc: "Now compares margins vs sector median — not just absolute thresholds" },
-                                { label: "L3 extended", desc: "3-band momentum: 3M + 6M + 1Y vs Nifty 50 (was 3M only)" },
-                                { label: "L5 rebuilt", desc: "Uses real promoter holding + FII conviction data, not a D/E proxy" },
-                                { label: "L6 new", desc: "Valuation bubble gate — eliminates P/E > 100 with no growth to justify it" },
+                                { label: "Multi-Bagger Score", desc: "Separate 0–100 score for multi-bagger potential: FCF yield, PEG, operating leverage, discovery gap" },
+                                { label: "Coffee Can Mode", desc: "Identifies 4+ year consistent compounders: 10%+ revenue CAGR and ROCE > 15% every year" },
+                                { label: "L5 rebuilt", desc: "Governance proxy: D/E < 1.0, positive operating cash flow, and debt trajectory over 3 years" },
+                                { label: "Live Scanner Tabs", desc: "52W Lows, Penny, and Sub-₹20 tabs now auto-populate from scan results alongside curated picks" },
                             ].map(item => (
                                 <div key={item.label} className="flex gap-2">
                                     <CheckCircle2 className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
@@ -268,7 +268,7 @@ export default function GuidePage() {
                         <LayerRow
                             id="L5 · 15pts" label="Governance" icon={Users} color="bg-rose-600"
                             plain="Are the right people owning and watching this company?"
-                            detail="Rebuilt in v2 with real ownership data. Checks: (A) Promoter/insider holding % — founders with 50%+ stake have maximum skin in the game. (B) Institutional/FII holding — global institutions do deep due diligence before investing; their presence validates quality. (C) Short interest — professional short sellers betting against a stock is a red flag. (D) Debt trajectory — management returning capital not loading it up. Manpasand, DHFL, and Yes Bank all passed L1-L4 before their collapses. L5 is why this matters."
+                            detail="A governance quality proxy using three signals available from public data: (A) Debt-to-equity below 1.0 — management not overleveraging the business. (B) Positive operating cash flow — the business is genuinely generating cash, not just accounting profits. (C) Debt trajectory over 3 years — is debt falling (healthy), stable, or rising (red flag)? Manpasand, DHFL, and Yes Bank all passed L1-L4 before their collapses. L5 catches the pattern of deteriorating governance early through balance sheet behaviour."
                         />
                         <LayerRow
                             id="L6 · 5pts" label="Valuation Gate" icon={Filter} color="bg-slate-600"
