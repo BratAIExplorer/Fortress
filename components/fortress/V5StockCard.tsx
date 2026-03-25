@@ -5,7 +5,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { TrendingDown, Target, Zap, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingDown, Target, Zap, ChevronDown, ChevronUp, RadioTower } from "lucide-react";
 import { V5Stock } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +28,11 @@ export function V5StockCard({ stock }: { stock: V5Stock }) {
                             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stock.name}</p>
                         </div>
                         <div className="flex flex-col items-end gap-1">
+                            {stock.isLivePick && (
+                                <Badge className="font-mono text-[9px] h-4 px-1.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 gap-1">
+                                    <RadioTower className="h-2.5 w-2.5" /> Live Scan
+                                </Badge>
+                            )}
                             <Badge variant={stock.quality_score >= 80 ? "default" : "outline"} className="font-mono text-xs">
                                 QS: {stock.quality_score}
                             </Badge>
@@ -44,7 +49,9 @@ export function V5StockCard({ stock }: { stock: V5Stock }) {
                         </div>
                         <div className="flex flex-col text-right">
                             <span className="text-muted-foreground uppercase text-[9px]">52W Drop</span>
-                            <span className="font-bold text-destructive text-xs">{stock.drop52w}%</span>
+                            <span className="font-bold text-destructive text-xs">
+                                {stock.drop52w ? `${stock.drop52w}%` : "–"}
+                            </span>
                         </div>
                     </div>
 
@@ -53,6 +60,14 @@ export function V5StockCard({ stock }: { stock: V5Stock }) {
                         {showDetail ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                         <span className="text-[9px] uppercase tracking-widest ml-1">{showDetail ? "Hide Analysis" : "Show Analysis"}</span>
                     </div>
+
+                    {/* Live Scan metrics row */}
+                    {stock.isLivePick && stock.mbScore != null && (
+                        <div className="flex items-center justify-between text-[10px] border border-emerald-500/20 bg-emerald-500/5 rounded-sm px-2 py-1.5">
+                            <span className="text-muted-foreground uppercase tracking-wide">MB Score</span>
+                            <span className="font-bold text-emerald-400">{stock.mbScore} · {stock.mbTier}</span>
+                        </div>
+                    )}
 
                     {/* Content Section (Auto-expand on desktop hover OR mobile toggle) */}
                     <div className={cn(

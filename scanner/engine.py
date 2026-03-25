@@ -779,42 +779,124 @@ def calculate_l1(info, market="NSE", max_pts=25, debt_trajectory: dict | None = 
     return min(int(score), max_pts)   # Hard cap at max_pts
 
 def calculate_l2(info, max_pts=20):
-    """L2: Pricing Power (Margins)"""
-    score = 0
-    gm = info.get('grossMargins', 0)
-    om = info.get('operatingMargins', 0)
-    
-    gm_wt = max_pts * 0.5
-    om_wt = max_pts * 0.5
+    """L2: Pricing Power — absolute margins + sector-relative comparison.
 
-    if gm > 0.30: score += gm_wt
-    elif gm > 0.20: score += (gm_wt / 2)
-    
-    if om > 0.15: score += om_wt
-    elif om > 0.10: score += (om_wt / 2)
-    
+    v2: Added sector-relative margin premium scoring.
+    A company with margins ABOVE its sector median has genuine pricing power,
+    not just a favourable absolute threshold crossing.
+
+    Weights: Gross Margin absolute (40%) + Operating Margin absolute (35%) +
+             Sector-relative premium (25%)
+    """
+    score = 0
+    gm = info.get('grossMargins', 0) or 0
+    om = info.get('operatingMargins', 0) or 0
+    industry = info.get('industry', '') or ''
+
+    # Approximate sector gross margin medians (NSE/BSE universe)
+    SECTOR_GM_MEDIAN: dict[str, float] = {
+        "Software—Application": 0.72, "Information Technology Services": 0.30,
+        "Drug Manufacturers—General": 0.55, "Drug Manufacturers—Specialty & Generic": 0.50,
+        "Biotechnology": 0.65, "Diagnostics & Research": 0.52,
+        "Consumer Defensive": 0.38, "Consumer Cyclical": 0.30,
+        "Banks": 0.0,            # NIM model — skip gross margin
+        "Financial Services": 0.0,
+        "Insurance": 0.0,
+        "Specialty Chemicals": 0.42, "Basic Materials": 0.25,
+        "Specialty Industrial Machinery": 0.32,
+        "Aerospace & Defense": 0.22,
+        "Oil & Gas E&P": 0.35,
+        "Telecom Services": 0.45,
+        "Auto Manufacturers": 0.15, "Auto Parts": 0.20,
+        "Utilities—Renewable": 0.60,
+        "Real Estate—Development": 0.28,
+        "default": 0.30,
+    }
+    sector_gm = SECTOR_GM_MEDIAN.get(industry, SECTOR_GM_MEDIAN["default"])
+    is_financial = industry in ("Banks", "Financial Services", "Insurance")
+
+    gm_wt = max_pts * 0.40
+    om_wt = max_pts * 0.35
+    sp_wt = max_pts * 0.25   # Sector-premium weight
+
+    # ── Absolute Gross Margin ─────────────────────────────────────────────
+    if gm > 0.40:   score += gm_wt
+    elif gm > 0.25: score += gm_wt * 0.60
+    elif gm > 0.15: score += gm_wt * 0.30
+
+    # ── Absolute Operating Margin ─────────────────────────────────────────
+    if om > 0.20:   score += om_wt
+    elif om > 0.12: score += om_wt * 0.60
+    elif om > 0.06: score += om_wt * 0.30
+
+    # ── Sector-Relative Premium ───────────────────────────────────────────
+    if not is_financial and sector_gm > 0 and gm > 0:
+        premium = (gm - sector_gm) / sector_gm
+        if premium > 0.30:   score += sp_wt       # 30%+ above sector — dominant
+        elif premium > 0.10: score += sp_wt * 0.6  # Meaningfully above sector
+        elif premium > 0:    score += sp_wt * 0.3  # At or slightly above
+        # Below sector median: 0 — no genuine pricing power premium
+    elif is_financial:
+        # For banks/NBFCs: operating margin > 25% = strong NIM business
+        if om > 0.25:   score += sp_wt
+        elif om > 0.15: score += sp_wt * 0.5
+
     return int(score)
 
-def calculate_l3(ticker, hist, benchmark_hist, max_pts=15):
-    """L3: Macro Tailwind — compare stock return vs market benchmark"""
-    if hist.empty or len(hist) < 60:
+def calculate_l3(ticker, hist, benchmark_hist, max_pts=10):
+    """L3: Relative Strength — multi-band momentum vs Nifty 50.
+
+    v2: Extended from 3M-only to 3M + 6M + 1Y momentum bands.
+    A stock outperforming consistently across all three horizons is in a
+    genuine structural trend, not a short-term noise spike.
+
+    Band weights: 3M (40%) + 6M (35%) + 1Y (25%)
+    Note: hist must cover 1 year (fetched as period='1y' in scan_stock).
+    """
+    if hist is None or hist.empty or len(hist) < 55:
         return 0
-    
-    stock_return = (hist['Close'].iloc[-1] / hist['Close'].iloc[0]) - 1
-    
-    if benchmark_hist is None or benchmark_hist.empty:
-        # Fallback: simple positive return check
-        return int(max_pts * 0.67) if stock_return > 0 else 0
 
-    bench_return = (benchmark_hist['Close'].iloc[-1] / benchmark_hist['Close'].iloc[0]) - 1
+    close = hist['Close']
 
-    if stock_return > bench_return * 1.1:   # Outperforming by 10%+
-        return max_pts
-    elif stock_return > bench_return:        # Outperforming
-        return int(max_pts * 0.67)
-    elif stock_return > 0:                   # Positive but underperforming
-        return int(max_pts * 0.33)
-    return 0
+    def band_return(series, days):
+        n = len(series)
+        if n < days:
+            return (series.iloc[-1] / series.iloc[0]) - 1  # Use all available data
+        return (series.iloc[-1] / series.iloc[-days]) - 1
+
+    def bench_band(bench, days):
+        if bench is None or bench.empty:
+            return None
+        n = len(bench)
+        if n < days:
+            return (bench['Close'].iloc[-1] / bench['Close'].iloc[0]) - 1
+        return (bench['Close'].iloc[-1] / bench['Close'].iloc[-days]) - 1
+
+    r3m = band_return(close, 63)
+    r6m = band_return(close, 126)
+    r1y = band_return(close, 252)
+
+    b3m = bench_band(benchmark_hist, 63)
+    b6m = bench_band(benchmark_hist, 126)
+    b1y = bench_band(benchmark_hist, 252)
+
+    def band_score(sr, br, weight):
+        """Score one band: full/partial/minimal based on relative outperformance."""
+        if sr is None:
+            return 0
+        if br is None:
+            return weight if sr > 0 else 0
+        if sr > br * 1.10:  return weight          # Outperforming by 10%+
+        elif sr > br:        return weight * 0.67   # Outperforming
+        elif sr > 0:         return weight * 0.33   # Positive but lagging
+        return 0
+
+    score = (
+        band_score(r3m, b3m, max_pts * 0.40) +
+        band_score(r6m, b6m, max_pts * 0.35) +
+        band_score(r1y, b1y, max_pts * 0.25)
+    )
+    return int(score)
 
 def calculate_l4(info, max_pts=25):
     """L4: Growth Visibility (Revenue CAGR, Earnings CAGR, PEG Ratio)
@@ -1039,6 +1121,119 @@ def calculate_multibagger_score(info: dict, market_key: str = "NSE",
     }
 
 
+def calculate_l5_governance(info, debt_traj, max_pts=15):
+    """L5: Governance & Ownership Quality — v2.
+
+    v1 used D/E + OCF as a financial health proxy (mislabelled as governance).
+    v2 uses ACTUAL yfinance ownership signals:
+
+      A. Insider/Promoter Holding (35%) — skin in the game
+         heldPercentInsiders ≥ 50%: founder-led, fully committed
+         High promoter holding = long-term aligned, less likely to loot
+
+      B. Institutional Validation (27%) — FII + DII conviction
+         heldPercentInstitutions ≥ 25%: sophisticated money did the work
+         FII/DII presence means global/domestic analysis confirmed quality
+
+      C. Short Interest Guard (20%) — red flag detector
+         Low shortRatio = no professional short thesis against the stock
+         High short ratio (>5) = smart money suspects governance issues
+
+      D. Debt Trajectory Integrity (18%) — management capital discipline
+         Falling D/E = management not over-leveraging; returning capital
+
+    Why this matters: Manpasand, DHFL, Café Coffee Day all passed L1-L4.
+    They all failed on ownership and governance signals.
+    """
+    score = 0
+
+    # ── A: Insider/Promoter Holding (0–5.25 pts) ─────────────────────────
+    insider_pct = info.get('heldPercentInsiders', None)
+    if insider_pct is not None:
+        if insider_pct >= 0.50:    score += max_pts * 0.35   # Founder-led
+        elif insider_pct >= 0.35:  score += max_pts * 0.22   # Meaningful stake
+        elif insider_pct >= 0.20:  score += max_pts * 0.12   # Low but present
+        # < 20%: management barely owns the company
+    else:
+        score += max_pts * 0.12   # Data unavailable — partial credit only
+
+    # ── B: Institutional Validation (0–4.05 pts) ─────────────────────────
+    inst_pct = info.get('heldPercentInstitutions', None)
+    if inst_pct is not None:
+        if inst_pct >= 0.25:    score += max_pts * 0.27   # Strong FII/DII conviction
+        elif inst_pct >= 0.12:  score += max_pts * 0.17   # Decent institutional coverage
+        elif inst_pct >= 0.05:  score += max_pts * 0.08   # Lightly covered
+        # < 5%: undiscovered or deliberately avoided
+    else:
+        score += max_pts * 0.10   # Partial credit for data gap
+
+    # ── C: Short Interest Guard (0–3.0 pts) ──────────────────────────────
+    short_ratio = info.get('shortRatio', None)
+    if short_ratio is not None:
+        if short_ratio < 2.0:    score += max_pts * 0.20   # Clean — no short thesis
+        elif short_ratio < 5.0:  score += max_pts * 0.10   # Some concern
+        # > 5: significant short pressure — 0 pts
+    else:
+        # Indian stocks rarely report short ratio — give partial credit
+        score += max_pts * 0.15
+
+    # ── D: Debt Trajectory Integrity (0–2.70 pts) ────────────────────────
+    direction = debt_traj.get('de_direction', 'unknown') if debt_traj else 'unknown'
+    if direction == 'falling':  score += max_pts * 0.18
+    elif direction == 'stable': score += max_pts * 0.09
+
+    return int(score)
+
+
+def calculate_l6(info, max_pts=5):
+    """L6: Valuation Bubble Gate — v1.
+
+    A light filter that eliminates stocks in obvious bubble territory.
+    This is NOT a value screen — we are NOT hunting for cheap stocks.
+    Coffee Can multi-baggers legitimately trade at 30–60x earnings.
+
+    This layer only zeros out:
+    - P/E > 100 with earnings growth < 25% (unjustified multiple expansion)
+    - EV/EBITDA > 60 with earnings growth < 20% (enterprise value bubble)
+
+    A quality growth stock at 45x P/E with 30% earnings growth PASSES.
+    A mid-cap at 150x P/E with 5% growth FAILS (gets hard zero).
+    """
+    trailing_pe     = info.get('trailingPE', 0) or 0
+    forward_pe      = info.get('forwardPE', 0) or 0
+    ev_ebitda       = info.get('enterpriseToEbitda', 0) or 0
+    earnings_growth = info.get('earningsGrowth', 0) or 0
+    price_to_sales  = info.get('priceToSalesTrailing12Months', 0) or 0
+
+    pe = trailing_pe if trailing_pe > 0 else forward_pe
+
+    # ── Hard disqualifier: bubble territory ──────────────────────────────
+    is_bubble = False
+    if pe > 100 and earnings_growth < 0.25:
+        is_bubble = True
+    if ev_ebitda > 60 and earnings_growth < 0.20:
+        is_bubble = True
+
+    if is_bubble:
+        return 0   # Hard zero — kills total score for genuine bubbles
+
+    # ── Reasonable valuation scoring ─────────────────────────────────────
+    if pe <= 0:
+        # No P/E data (loss-making or data gap)
+        if 0 < price_to_sales <= 15:
+            return int(max_pts * 0.60)   # P/S available and sane
+        return int(max_pts * 0.50)       # Total data gap — partial credit
+    elif pe <= 30:
+        return max_pts                   # Value/moderate growth — full points
+    elif pe <= 50:
+        return int(max_pts * 0.80)       # Growth territory — still fine
+    elif pe <= 80:
+        return int(max_pts * 0.50)       # High premium — half points
+    elif pe <= 100:
+        return int(max_pts * 0.20)       # Near-bubble — minimal
+    else:
+        return int(max_pts * 0.10)       # High PE but growth justifies it (passed bubble check)
+
 
 def get_fcf_from_cashflow(cashflow):
     """FCF = Operating Cash Flow - CapEx. Returns None if either is missing."""
@@ -1103,7 +1298,7 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
     try:
         ticker = yf.Ticker(symbol)
         info   = ticker.info
-        hist   = ticker.history(period="3mo")
+        hist   = ticker.history(period="1y")   # 1Y for multi-band L3 momentum
 
         # ── Historical data (fetched once, reused across all scorers) ─────────
         # Wrapped individually so a failure on one doesn't kill the entire scan.
@@ -1138,21 +1333,12 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
         l2 = calculate_l2(info, max_pts=weights['l2'])
         l3 = calculate_l3(symbol, hist, benchmark_hist, max_pts=weights['l3'])
         l4 = calculate_l4(info, max_pts=weights['l4'])
-        # L5: Basic governance proxy using available yfinance data
-        # Full Trendlyne integration planned — this uses observable signals only
-        def calculate_l5_basic(info, debt_traj, max_pts):
-            score = 0
-            de_raw = info.get('debtToEquity', 999)
-            de = de_raw / 100 if market_key == 'NSE' and de_raw > 5 else de_raw
-            if de < 1.0:                              score += max_pts * 0.35
-            elif de < 2.0:                            score += max_pts * 0.15
-            if info.get('operatingCashflow', 0) > 0:  score += max_pts * 0.35
-            if debt_traj.get('de_direction') == 'falling': score += max_pts * 0.30
-            elif debt_traj.get('de_direction') == 'stable': score += max_pts * 0.15
-            return int(score)
-        l5 = calculate_l5_basic(info, debt_traj, weights['l5'])
+        # L5: Governance & Ownership Quality (v2 — real yfinance ownership signals)
+        l5 = calculate_l5_governance(info, debt_traj, max_pts=weights['l5'])
+        # L6: Valuation Bubble Gate (v1 — eliminates extreme P/E bubbles only)
+        l6 = calculate_l6(info, max_pts=weights.get('l6', 5))
 
-        total_score = l1 + l2 + l3 + l4 + l5
+        total_score = l1 + l2 + l3 + l4 + l5 + l6
         price = info.get('currentPrice', 0) or info.get('regularMarketPrice', 0)
 
         # ── Transparency metrics (P0) ─────────────────────────────────────────
@@ -1179,8 +1365,8 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
             "price":    price,
             "currency": adapter.currency,
 
-            # 5-Layer scores
-            "l1": l1, "l2": l2, "l3": l3, "l4": l4, "l5": l5,
+            # 5-Layer scores (+ L6 valuation gate)
+            "l1": l1, "l2": l2, "l3": l3, "l4": l4, "l5": l5, "l6": l6,
             "total_score": total_score,
             "category":    category,
 
@@ -1222,7 +1408,7 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--market", default="NSE", choices=["NSE", "US", "HKEX"])
-    parser.add_argument("--weights", default='{"l1":25,"l2":20,"l3":15,"l4":25,"l5":15}')
+    parser.add_argument("--weights", default='{"l1":25,"l2":20,"l3":10,"l4":25,"l5":15,"l6":5}')
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--mode", default="standard", choices=["standard", "coffeecan"],
                         help="coffeecan: only output stocks with cc_score >= 60 (Strong or Classic)")
@@ -1248,11 +1434,11 @@ def main():
     total = len(tickers)
     print(json.dumps({"type": "start", "total": total}))
     
-    # Pre-fetch benchmark history for L3
+    # Pre-fetch benchmark history for L3 (1Y for multi-band momentum scoring)
     try:
         bench = yf.Ticker(adapter.benchmark_ticker)
-        benchmark_hist = bench.history(period="3mo")
-    except:
+        benchmark_hist = bench.history(period="1y")
+    except Exception:
         benchmark_hist = None
 
     results_count = 0

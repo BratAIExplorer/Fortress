@@ -1,5 +1,29 @@
 # Fortress Intelligence — Changelog
 
+## 2026-03-25 (Live Scanner Bridge)
+
+### Added
+- **Live Scanner UI Bridge**: All V5 Extension tabs (52W Lows, Qualified Penny, Sub-₹20 Spec) now display live scanner results alongside curated data.
+  - New `V5Stock` fields: `isLivePick?: boolean`, `mbScore?: number`, `mbTier?: string`
+  - New `ScannerCandidate` interface for Fortress 30 scanner candidates
+  - New helpers: `getLiveSub20Stocks()`, `getLive52WLowStocks()`, `getLivePennyStocks()`, `getLiveF30Candidates(limit)`
+  - Private helper `getLiveScanStocksByCategory(category)` fetches from latest completed scan, queries `scan_results` table
+
+- **V5 Extension Tabs**: SplitStockGrid component now renders curated and scanner-detected stocks in separate labeled sections
+  - Curated: amber label, sorted first
+  - Scanner Detected: emerald label, deduplicated by symbol, sorted after
+  - Live picks show green "Live Scan" badge with RadioTower icon
+  - MB Score row displayed for live picks
+  - Missing `drop52w` shows "–" instead of "0%"
+
+- **Fortress 30 Page**: New "Scanner Candidates" section below curated grid
+  - Fetches up to 10 candidates via `getLiveF30Candidates(10)`
+  - Excludes symbols already in curated stocks table
+  - Only visible if candidates exist
+  - Uses new `ScannerCandidateCard` component (compact cards with symbol, price, MB tier, score, megatrend, FCF yield, debt direction)
+
+---
+
 ## 2026-03-25
 
 ### Fixed

@@ -1,9 +1,9 @@
 "use server";
 
 import { db, schema } from "@/lib/db/client";
-import { eq, ilike, sql } from "drizzle-orm";
+import { eq, ilike, sql, desc, and, notInArray } from "drizzle-orm";
 import { v5LowStocks, v5PennyStocks, v5SubTenStocks, mockStocks, v5TopMutualFunds, v5TopIndexFunds, v5TopFortressPicks, glossaryData } from "@/lib/mock-data";
-import { V5Stock, MutualFund, IndexFund, TopPick, Glossary } from "@/lib/types";
+import { V5Stock, MutualFund, IndexFund, TopPick, Glossary, ScannerCandidate } from "@/lib/types";
 import { concepts as seedConcepts } from "@/lib/seed-concepts";
 import { Stock, StockWithThesis, Concept } from "@/lib/types";
 
@@ -251,6 +251,77 @@ export async function getV5SubTenStocks(): Promise<V5Stock[]> {
     return v5SubTenStocks as V5Stock[];
 }
 
+async function getLiveScanStocksByCategory(category: "SUB20" | "PENNY" | "52W_LOW"): Promise<V5Stock[]> {
+    const lastScan = await db.query.scans.findFirst({
+        where: eq(schema.scans.status, "COMPLETED"),
+        orderBy: [desc(schema.scans.runAt)],
+    });
+    if (!lastScan) return [];
+
+    const results = await db
+        .select()
+        .from(schema.scanResults)
+        .where(
+            and(
+                eq(schema.scanResults.scanId, lastScan.id),
+                eq(schema.scanResults.category, category)
+            )
+        )
+        .orderBy(desc(schema.scanResults.mbScore));
+
+    return results.map(r => ({
+        id: r.id,
+        symbol: r.symbol,
+        name: r.symbol,
+        sector: r.megatrendTag || "Scanner Pick",
+        current_price: Number(r.priceAtScan) || 0,
+        quality_score: r.totalScore || 0,
+        market_cap_crores: 0,
+        megatrend: r.megatrendTag ? [r.megatrendTag] : [],
+        is_active: true,
+        tag: r.mbTier || "SCANNER",
+        risk: "HIGH",
+        drop52w: 0,
+        moat: r.megatrendTag || "Scanner Pick",
+        ocf: "–",
+        l1: r.l1Pass ? 1 : 0,
+        l2: r.l2Pass ? 1 : 0,
+        l3: r.l3Pass ? 1 : 0,
+        l4: r.l4Pass ? 1 : 0,
+        l5: r.l5Pass ? 1 : 0,
+        mbScore: r.mbScore ?? undefined,
+        mbTier: r.mbTier ?? undefined,
+        isLivePick: true,
+    }));
+}
+
+export async function getLiveSub20Stocks(): Promise<V5Stock[]> {
+    try {
+        return await getLiveScanStocksByCategory("SUB20");
+    } catch (error) {
+        console.error("Error fetching live SUB20 stocks:", error);
+        return [];
+    }
+}
+
+export async function getLive52WLowStocks(): Promise<V5Stock[]> {
+    try {
+        return await getLiveScanStocksByCategory("52W_LOW");
+    } catch (error) {
+        console.error("Error fetching live 52W Low stocks:", error);
+        return [];
+    }
+}
+
+export async function getLivePennyStocks(): Promise<V5Stock[]> {
+    try {
+        return await getLiveScanStocksByCategory("PENNY");
+    } catch (error) {
+        console.error("Error fetching live Penny stocks:", error);
+        return [];
+    }
+}
+
 export async function getV5TopMutualFunds(): Promise<MutualFund[]> {
     // For now returning mock as we haven't added these to DB yet
     return v5TopMutualFunds;
@@ -266,6 +337,49 @@ export async function getV5TopFortressPicks(): Promise<TopPick[]> {
 
 export async function getGlossaryData(): Promise<Glossary> {
     return glossaryData;
+}
+
+export async function getLiveF30Candidates(limit = 10): Promise<ScannerCandidate[]> {
+    try {
+        const lastScan = await db.query.scans.findFirst({
+            where: eq(schema.scans.status, "COMPLETED"),
+            orderBy: [desc(schema.scans.runAt)],
+        });
+        if (!lastScan) return [];
+
+        // Get all symbols already in the curated stocks table
+        const curatedRows = await db.select({ symbol: schema.stocks.symbol }).from(schema.stocks);
+        const curatedSymbols = curatedRows.map(r => r.symbol);
+
+        const conditions = [eq(schema.scanResults.scanId, lastScan.id)];
+        if (curatedSymbols.length > 0) {
+            conditions.push(notInArray(schema.scanResults.symbol, curatedSymbols));
+        }
+
+        const results = await db
+            .select()
+            .from(schema.scanResults)
+            .where(and(...conditions))
+            .orderBy(desc(schema.scanResults.mbScore))
+            .limit(limit);
+
+        return results.map(r => ({
+            id: r.id,
+            symbol: r.symbol,
+            price: Number(r.priceAtScan) || 0,
+            mbScore: r.mbScore ?? 0,
+            mbTier: r.mbTier ?? "–",
+            totalScore: r.totalScore ?? 0,
+            megatrend: r.megatrendTag ?? "",
+            megatrendEmoji: r.megatrendEmoji ?? "",
+            fcfYieldPct: r.fcfYieldPct != null ? Number(r.fcfYieldPct) : null,
+            deDirection: r.deDirection ?? null,
+            marginDirection: r.marginDirection ?? null,
+        }));
+    } catch (error) {
+        console.error("Error fetching live F30 candidates:", error);
+        return [];
+    }
 }
 
 export async function seedV5Stocks(): Promise<{ success: boolean; inserted: number }> {

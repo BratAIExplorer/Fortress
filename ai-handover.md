@@ -89,6 +89,42 @@ DATABASE_URL=postgresql://fortress_user:PASSWORD@localhost:5432/fortress npm run
 
 ---
 
+## 🔌 Live Scanner Integration (Added March 25, 2026)
+
+Three major changes enable live scanner picks to appear alongside curated data:
+
+### New Data Types
+- **`V5Stock` fields**: Added `isLivePick?: boolean`, `mbScore?: number`, `mbTier?: string` to distinguish scanner results
+- **`ScannerCandidate` interface**: Compact type for Fortress 30 candidates with symbol, price, MB tier, score, megatrend, FCF yield, debt direction
+
+### Query Layer (app/actions.ts)
+New private helper `getLiveScanStocksByCategory(category)` queries `scan_results` table:
+- `getLiveSub20Stocks()` — `category = 'SUB20'`
+- `getLive52WLowStocks()` — `category = '52W_LOW'`
+- `getLivePennyStocks()` — `category = 'PENNY'`
+- `getLiveF30Candidates(limit)` — all results ordered by `mbScore DESC`, excluding symbols already in `stocks` table
+
+### UI Layer
+
+**V5 Extension Tabs (3 specialized views)**
+- Each tab (52W Lows, Qualified Penny, Sub-₹20 Spec) now fetches curated + live in parallel
+- `SplitStockGrid` component renders two labeled sections: "Curated" (amber) and "Scanner Detected" (emerald)
+- Live picks appended after curated (deduplicated by symbol)
+- `V5StockCard`: Shows green "Live Scan" badge with RadioTower icon when `isLivePick = true`; displays MB Score row for live picks; shows "–" instead of "0%" for missing `drop52w`
+
+**Fortress 30 Page**
+- Fetches `getLiveF30Candidates(10)` alongside curated `getStocks()`
+- Shows curated Fortress 30 grid as before
+- Below: "Scanner Candidates" section with `ScannerCandidateCard` grid (only visible if candidates exist)
+- Candidates labeled "Scanner Detected · No Editorial Review" to clarify unreviewed status
+
+**ScannerCandidateCard Component** (NEW)
+- Compact card for Fortress 30 candidates
+- Shows: symbol, price, MB tier badge, MB score, megatrend with emoji, FCF yield, debt direction icon
+- Green border (`emerald-500/20`) and hover effects to match theme
+
+---
+
 ## 🧠 Two Scoring Systems (Important — Do Not Confuse)
 
 Fortress has two scoring systems that coexist and serve different purposes:

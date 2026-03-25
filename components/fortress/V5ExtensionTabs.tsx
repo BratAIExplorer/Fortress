@@ -10,6 +10,48 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingDown, Coins, Zap, Star, Info, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+function SplitStockGrid({ stocks }: { stocks: V5Stock[] }) {
+    const curated = stocks.filter(s => !s.isLivePick);
+    const live = stocks.filter(s => s.isLivePick);
+
+    return (
+        <div className="space-y-10">
+            {curated.length > 0 && (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-amber-500">Curated</span>
+                        <div className="flex-1 h-px bg-white/10" />
+                        <span className="text-[10px] text-muted-foreground">{curated.length} picks</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {curated.map((stock) => (
+                            <V5StockCard key={stock.symbol} stock={stock} />
+                        ))}
+                    </div>
+                </div>
+            )}
+            {live.length > 0 && (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Scanner Detected</span>
+                        <div className="flex-1 h-px bg-white/10" />
+                        <span className="text-[10px] text-muted-foreground">{live.length} new picks</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">Auto-detected by the live scanner. No editorial review yet.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {live.map((stock) => (
+                            <V5StockCard key={stock.symbol} stock={stock} />
+                        ))}
+                    </div>
+                </div>
+            )}
+            {curated.length === 0 && live.length === 0 && (
+                <p className="text-sm text-muted-foreground">No stocks found. Run a scan to populate this list.</p>
+            )}
+        </div>
+    );
+}
+
 interface V5ExtensionTabsProps {
     lowStocks: V5Stock[];
     pennyStocks: V5Stock[];
@@ -64,7 +106,11 @@ export function V5ExtensionTabs({
                 <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                     <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-amber-500" />
-                        Curated Scan
+                        Curated
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                        Live Scanner
                     </div>
                     <div className="border-l border-white/10 pl-4">
                         Reviewed: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -73,27 +119,15 @@ export function V5ExtensionTabs({
             </div>
 
             <TabsContent value="lows" className="mt-0 outline-none">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {lowStocks.map((stock: V5Stock) => (
-                        <V5StockCard key={stock.symbol} stock={stock} />
-                    ))}
-                </div>
+                <SplitStockGrid stocks={lowStocks} />
             </TabsContent>
 
             <TabsContent value="penny" className="mt-0 outline-none">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {pennyStocks.map((stock: V5Stock) => (
-                        <V5StockCard key={stock.symbol} stock={stock} />
-                    ))}
-                </div>
+                <SplitStockGrid stocks={pennyStocks} />
             </TabsContent>
 
             <TabsContent value="speculative" className="mt-0 outline-none">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {subTenStocks.map((stock: V5Stock) => (
-                        <V5StockCard key={stock.symbol} stock={stock} />
-                    ))}
-                </div>
+                <SplitStockGrid stocks={subTenStocks} />
                 <div className="mt-12 p-6 rounded-xl border border-destructive/20 bg-destructive/5 max-w-3xl">
                     <h4 className="text-destructive font-bold flex items-center gap-2 mb-2 uppercase text-xs tracking-widest">
                         Extreme High Risk Disclaimer

@@ -8,7 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
     Shield, Search, BookOpen, TrendingUp, BarChart3, Activity,
     CheckCircle2, ArrowRight, Star, Coffee, Globe, Zap, Target,
-    ChevronDown, ChevronUp, AlertTriangle
+    ChevronDown, ChevronUp, AlertTriangle, Users, Filter, MessageSquare,
+    Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -110,9 +111,13 @@ export default function GuidePage() {
                         India's most rigorous stock research platform — built for serious long-term investors
                         who think in decades, not days.
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground">
                         You're part of a small group of early beta testers. Here's everything you need to know.
                     </p>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs text-purple-300">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Engine v2.0 — 6-Layer Scoring now live
+                    </div>
                 </div>
 
                 {/* What can you do */}
@@ -195,8 +200,8 @@ export default function GuidePage() {
                 {/* Score tiers */}
                 <section className="space-y-4">
                     <div>
-                        <h2 className="text-xl font-bold font-serif">Understanding the Multi-Bagger Score</h2>
-                        <p className="text-sm text-muted-foreground mt-1">Every stock gets a score from 0–100 across 5 layers. Only scores above 60 appear in results.</p>
+                        <h2 className="text-xl font-bold font-serif">Understanding the Score</h2>
+                        <p className="text-sm text-muted-foreground mt-1">Every stock scores 0–100 across 6 layers (L1+L2+L3+L4+L5+L6). Only scores above 60 appear in results.</p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <TierCard emoji="🚀" tier="Rocket" range="80–100" color="#4ADE80"
@@ -210,37 +215,65 @@ export default function GuidePage() {
                     </div>
                 </section>
 
-                {/* 5 Layers */}
+                {/* What's New */}
+                <section className="space-y-4">
+                    <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-5">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Sparkles className="h-4 w-4 text-purple-400" />
+                            <span className="font-bold text-sm text-purple-300">What's new in Engine v2.0</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                            {[
+                                { label: "L2 upgraded", desc: "Now compares margins vs sector median — not just absolute thresholds" },
+                                { label: "L3 extended", desc: "3-band momentum: 3M + 6M + 1Y vs Nifty 50 (was 3M only)" },
+                                { label: "L5 rebuilt", desc: "Uses real promoter holding + FII conviction data, not a D/E proxy" },
+                                { label: "L6 new", desc: "Valuation bubble gate — eliminates P/E > 100 with no growth to justify it" },
+                            ].map(item => (
+                                <div key={item.label} className="flex gap-2">
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
+                                    <span><span className="text-white font-medium">{item.label}:</span> {item.desc}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* 6 Layers */}
                 <section className="space-y-4">
                     <div>
-                        <h2 className="text-xl font-bold font-serif">The 5 Layers — Plain English</h2>
-                        <p className="text-sm text-muted-foreground mt-1">Click each layer to see what it actually checks.</p>
+                        <h2 className="text-xl font-bold font-serif">The 6-Layer Framework — Plain English</h2>
+                        <p className="text-sm text-muted-foreground mt-1">Click each layer to see what it actually checks. Scores above 60/100 pass the Fortress threshold.</p>
                     </div>
                     <div className="space-y-2">
                         <LayerRow
-                            id="L1" label="Protection" icon={Shield} color="bg-emerald-600"
+                            id="L1 · 25pts" label="Protection" icon={Shield} color="bg-emerald-600"
                             plain="Is the company's debt under control?"
-                            detail="Checks if the company has manageable debt-to-equity ratio, is generating positive cash flow from operations, and whether debt is rising or falling over time. High debt = fails this layer."
+                            detail="Checks debt-to-equity ratio, whether operating cash flow is positive, and whether debt is rising or falling over 3 years. Also checks ROCE (Return on Capital Employed) and FCF yield. High debt + negative cash flow = fails this layer. This is the hardest filter — no debt-laden company passes."
                         />
                         <LayerRow
-                            id="L2" label="Pricing Power" icon={BarChart3} color="bg-blue-600"
-                            plain="Is it profitable enough to sustain itself?"
-                            detail="Looks at Return on Capital Employed (ROCE), operating margins, and whether margins are expanding or contracting. A company that can charge what it wants is a durable business."
+                            id="L2 · 20pts" label="Pricing Power" icon={BarChart3} color="bg-blue-600"
+                            plain="Can this company charge what it wants?"
+                            detail="Upgraded in v2: scores on absolute gross margin, absolute operating margin, AND whether margins are above the sector median. A company 30%+ above its sector peers in gross margins has genuine pricing power — it can raise prices without losing customers. Banks/NBFCs use a separate operating margin model."
                         />
                         <LayerRow
-                            id="L3" label="Relative Strength" icon={Activity} color="bg-amber-600"
-                            plain="Is it outperforming the broader market?"
-                            detail="Checks if the stock outperforms the Nifty 50 benchmark over 3 months and whether it belongs to a megatrend sector: Defence, Digital India, EV, Infrastructure, Healthcare, etc."
+                            id="L3 · 10pts" label="Relative Strength" icon={Activity} color="bg-amber-600"
+                            plain="Is the market already rewarding this stock?"
+                            detail="Upgraded in v2: Now checks 3 time horizons — 3-month (40%), 6-month (35%), and 1-year (25%) performance vs Nifty 50. A stock outperforming consistently across all three is in a structural trend, not a short-term blip. Weighted so longer-term outperformance matters more."
                         />
                         <LayerRow
-                            id="L4" label="Growth Engine" icon={TrendingUp} color="bg-purple-600"
+                            id="L4 · 25pts" label="Growth Engine" icon={TrendingUp} color="bg-purple-600"
                             plain="Is revenue and profit actually growing?"
-                            detail="Scores on earnings growth, Free Cash Flow yield, P/E-to-Growth (PEG ratio), and earnings quality (are reported profits backed by real cash?). Growth without cash flow is a red flag."
+                            detail="Scores on revenue growth rate, earnings growth rate, and PEG ratio (P/E ÷ earnings growth). PEG < 0.8 means you're getting growth cheaper than it costs — Peter Lynch's core buy signal. A company growing 30% at P/E 25 (PEG 0.83) is cheaper than a company growing 5% at P/E 20 (PEG 4.0). Growth without cash flow is also flagged."
                         />
                         <LayerRow
-                            id="L5" label="Governance" icon={CheckCircle2} color="bg-rose-600"
-                            plain="Can you trust the management?"
-                            detail="Screens for promoter pledge percentage, audit qualifications, related-party transactions, and basic governance standards. A brilliant business run by bad actors is still a bad investment."
+                            id="L5 · 15pts" label="Governance" icon={Users} color="bg-rose-600"
+                            plain="Are the right people owning and watching this company?"
+                            detail="Rebuilt in v2 with real ownership data. Checks: (A) Promoter/insider holding % — founders with 50%+ stake have maximum skin in the game. (B) Institutional/FII holding — global institutions do deep due diligence before investing; their presence validates quality. (C) Short interest — professional short sellers betting against a stock is a red flag. (D) Debt trajectory — management returning capital not loading it up. Manpasand, DHFL, and Yes Bank all passed L1-L4 before their collapses. L5 is why this matters."
+                        />
+                        <LayerRow
+                            id="L6 · 5pts" label="Valuation Gate" icon={Filter} color="bg-slate-600"
+                            plain="Is it priced at bubble levels with no justification?"
+                            detail="New in v2. A light sanity check — not a value screen. Coffee Can stocks legitimately trade at 30–60x earnings. This layer only zeros out genuine bubbles: P/E > 100 with earnings growth under 25%, or EV/EBITDA > 60 with sub-20% growth. A quality growth stock at 45x P/E with 30% growth earns full marks. A mid-cap at 150x P/E growing 5% gets a hard zero."
                         />
                     </div>
                 </section>
@@ -306,6 +339,57 @@ export default function GuidePage() {
                             <div key={i} className="flex gap-3 p-3 rounded-xl border border-white/10 bg-white/5">
                                 <tip.icon className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                                 <p className="text-sm text-muted-foreground">{tip.text}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Beta Feedback */}
+                <section className="space-y-4">
+                    <div>
+                        <h2 className="text-xl font-bold font-serif">Help us improve — Beta Feedback</h2>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            You're using a live research engine. Your feedback directly shapes what gets built next.
+                        </p>
+                    </div>
+                    <Card className="bg-emerald-500/5 border-emerald-500/20">
+                        <CardContent className="p-5 space-y-4">
+                            <div className="flex gap-3">
+                                <MessageSquare className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+                                <div>
+                                    <h3 className="font-bold text-white mb-2">What we want to know from you</h3>
+                                    <div className="space-y-2 text-sm text-muted-foreground">
+                                        {[
+                                            "Do scan results match companies you already know are high quality?",
+                                            "Does the L5 Governance score feel accurate for Indian stocks you follow?",
+                                            "Are there stocks that should score higher (or lower) than they do?",
+                                            "What's the #1 data point missing that would make this more useful?",
+                                            "Would you use this before making an actual investment decision?",
+                                        ].map((q, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <span className="text-emerald-400 font-bold shrink-0">{i + 1}.</span>
+                                                <span>{q}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="border-t border-white/10 pt-3 text-xs text-muted-foreground">
+                                Send feedback to the team directly via WhatsApp or email. Every response is read and discussed.
+                                Your experience as an NRI investor is the product spec.
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        {[
+                            { emoji: "🐛", label: "Bug found", desc: "Score looks wrong or data is obviously incorrect" },
+                            { emoji: "💡", label: "Feature idea", desc: "Something you wish the scanner checked or showed" },
+                            { emoji: "✅", label: "Validation", desc: "A stock scored high and it turned out to be right" },
+                        ].map(item => (
+                            <div key={item.label} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                                <div className="text-xl mb-1">{item.emoji}</div>
+                                <div className="font-semibold text-white text-xs mb-0.5">{item.label}</div>
+                                <div className="text-muted-foreground leading-relaxed">{item.desc}</div>
                             </div>
                         ))}
                     </div>

@@ -101,7 +101,7 @@ function WhatIsFortress({ mode }: SectionProps) {
             Imagine you want to buy a phone but you don&apos;t know which one is actually good vs which one just has a nice ad. Fortress is like having a very experienced engineer friend who looks inside every phone and tells you honestly — <strong className="text-white">this one is built to last, this one will break in 6 months.</strong>
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Instead of phones, we do this for companies listed on the stock market. We run every company through a <strong className="text-white">5-question quality test</strong>, give them a score, and flag the ones that actually deserve your attention — not the ones with the loudest news.
+            Instead of phones, we do this for companies listed on the stock market. We run every company through a <strong className="text-white">6-layer quality engine</strong>, give them a score out of 100, and flag the ones that actually deserve your attention — not the ones with the loudest news.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
             {[
@@ -123,7 +123,7 @@ function WhatIsFortress({ mode }: SectionProps) {
         <div className="space-y-5">
           <ExpertBadge />
           <p className="text-muted-foreground leading-relaxed mt-3">
-            Fortress Intelligence is a rules-based stock intelligence platform built for Indian retail investors. It combines a <strong className="text-white">quantitative 5-layer scoring engine</strong> (Python, yfinance), a <strong className="text-white">4-criteria GEM Score system</strong> (AI-assisted discovery), and a <strong className="text-white">self-learning performance tracker</strong> (Sovereign Alpha) that measures prediction accuracy at 30/60/90-day intervals and adjusts scoring weights accordingly.
+            Fortress Intelligence is a rules-based stock intelligence platform built for NRI and Indian long-term investors. It combines a <strong className="text-white">quantitative 6-layer scoring engine v2</strong> (Python, yfinance), a <strong className="text-white">4-criteria GEM Score system</strong> (AI-assisted discovery), and a <strong className="text-white">self-learning performance tracker</strong> (Sovereign Alpha) that measures prediction accuracy vs Nifty 50 at 30/90/180-day intervals.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             Markets covered: <strong className="text-white">NSE (India), NYSE/NASDAQ (US), HKEX (Hong Kong)</strong>. The system is not SEBI-registered and makes no investment recommendations — it publishes frameworks and scored data for educational use.
@@ -131,9 +131,9 @@ function WhatIsFortress({ mode }: SectionProps) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Markets", value: "3 (NSE, US, HKEX)" },
-              { label: "Scoring Layers", value: "5 automated + 1 manual" },
+              { label: "Scoring Layers", value: "6 fully automated" },
               { label: "GEM Criteria", value: "4 (dynamic weights)" },
-              { label: "Tracking cycles", value: "30d / 60d / 90d" },
+              { label: "Tracking cycles", value: "30d / 90d / 180d / 1yr" },
             ].map(s => (
               <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
                 <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
@@ -147,7 +147,7 @@ function WhatIsFortress({ mode }: SectionProps) {
   );
 }
 
-// ─── Section 2: The 5-Layer Engine ───────────────────────────────────────────
+// ─── Section 2: The 6-Layer Engine ───────────────────────────────────────────
 
 const layers = [
   {
@@ -188,22 +188,23 @@ const layers = [
     label: "L2 — Pricing Power",
     beginner: {
       question: "Can this company charge more tomorrow and keep its customers?",
-      analogy: "Fevicol can raise prices — there's no real alternative. A rice seller cannot — you'll just buy from the next stall.",
+      analogy: "Fevicol can raise prices — there's no real alternative. A rice seller cannot — you'll just buy from the next stall. But we now also check: is Fevicol's margin better than other adhesive companies? That's real pricing power.",
       whatWeCheck: [
-        "How much profit does it make on every ₹100 of sales? (Gross margin)",
-        "After all expenses, how much is left? (Operating margin)",
-        "Are those margins growing or shrinking over time?",
+        "How much profit does it make on every ₹100 of sales? (Gross margin — absolute)",
+        "After all expenses, how much is left? (Operating margin — absolute)",
+        "Are its margins above the sector average? (Sector-relative premium — new in v2)",
       ],
-      passExample: "Nestle, Asian Paints — 40–60% gross margins. Premium pricing is accepted.",
-      failExample: "Steel, cement companies — commodity businesses where price is set by the market.",
+      passExample: "Nestle — 55%+ gross margins, well above the FMCG sector median of 38%. Genuine pricing power.",
+      failExample: "A steel company at 18% gross margin — below sector median. Price is set by global commodity markets.",
     },
     expert: {
       metrics: [
-        { name: "Gross Margins", threshold: "> 30% full pts | 20–30% half pts", note: "grossMargins from yfinance" },
-        { name: "Operating Margins", threshold: "> 15% full pts | 10–15% half pts", note: "operatingMargins from yfinance" },
+        { name: "Gross Margin (absolute)", threshold: "> 40% full | 25–40% × 0.6 | 15–25% × 0.3", note: "grossMargins from yfinance" },
+        { name: "Operating Margin (absolute)", threshold: "> 20% full | 12–20% × 0.6 | 6–12% × 0.3", note: "operatingMargins from yfinance" },
+        { name: "Sector-Relative Premium (new)", threshold: "> 30% above sector full | 10–30% × 0.6 | > 0% × 0.3", note: "Gross margin vs SECTOR_GM_MEDIAN lookup. Banks/NBFCs use operating margin instead" },
       ],
       maxPts: 20,
-      weight: "50% Gross Margin | 50% Operating Margin",
+      weight: "40% Gross Margin | 35% Operating Margin | 25% Sector-Relative Premium",
     },
   },
   {
@@ -212,21 +213,24 @@ const layers = [
     color: "#A78BFA",
     label: "L3 — Relative Strength",
     beginner: {
-      question: "Is this stock outrunning the broader market?",
-      analogy: "Cycling uphill against the wind is hard even for a great cyclist. L3 checks if this stock is actually beating the market index — if it can't outperform when conditions are neutral, that's a warning sign.",
+      question: "Is the market consistently rewarding this stock across multiple timeframes?",
+      analogy: "One good month could be luck. Beating the Nifty 50 for 3 months, 6 months AND a year is a structural trend. L3 v2 now checks all three — a stock that outperforms consistently across all timeframes is in a genuine uptrend.",
       whatWeCheck: [
-        "Has the stock outperformed its country's main index over 3 months?",
-        "Is it beating the Nifty 50 (India), S&P 500 (US), or Hang Seng (HK)?",
+        "Has the stock outperformed Nifty 50 over 3 months? (40% weight)",
+        "Has it outperformed over 6 months? (35% weight)",
+        "Has it outperformed over 1 full year? (25% weight)",
       ],
-      passExample: "A defence company when government is increasing defence budget — sector tailwind.",
-      failExample: "An IT company when USD/INR is unfavourable and US clients cutting budgets.",
+      passExample: "A defence stock that has beaten Nifty 50 for 3M, 6M, and 1Y — structural institutional accumulation.",
+      failExample: "A stock that spiked 20% in one month but is flat/negative over 6M and 1Y — a noise spike, not a trend.",
     },
     expert: {
       metrics: [
-        { name: "Relative Return (3-month)", threshold: "> benchmark × 1.1 = full | > benchmark = 2/3 pts | > 0 = 1/3 pts | ≤ 0 = zero", note: "Stock return vs NSE/S&P/HSI benchmark" },
+        { name: "3M Relative Return (40%)", threshold: "> bench×1.1 = full | > bench = 2/3 | > 0 = 1/3 | ≤ 0 = zero", note: "63 trading days" },
+        { name: "6M Relative Return (35%)", threshold: "> bench×1.1 = full | > bench = 2/3 | > 0 = 1/3 | ≤ 0 = zero", note: "126 trading days" },
+        { name: "1Y Relative Return (25%)", threshold: "> bench×1.1 = full | > bench = 2/3 | > 0 = 1/3 | ≤ 0 = zero", note: "252 trading days" },
       ],
-      maxPts: 15,
-      weight: "100% relative return vs market benchmark (3-month window)",
+      maxPts: 10,
+      weight: "40% 3M momentum | 35% 6M momentum | 25% 1Y momentum — all vs market benchmark",
     },
   },
   {
@@ -259,25 +263,57 @@ const layers = [
     id: "L5",
     icon: "🏛️",
     color: "#FB923C",
-    label: "L5 — Governance Quality",
+    label: "L5 — Governance & Ownership",
     beginner: {
-      question: "Would you trust this management with your wallet?",
-      analogy: "You'd lend money to a friend who always pays back, never to one who keeps borrowing and disappearing. L5 is the management character check.",
+      question: "Are the right people owning — and watching — this company?",
+      analogy: "Imagine you're investing in a business with a partner. You'd want to know: does the founder have most of their own money in it? Are respected investors backing it? Is anyone actively betting against it? That's what L5 checks — rebuilt with real data in v2.",
       whatWeCheck: [
-        "Does the promoter (founder/owner) own a large % of the company?",
-        "Have they pledged their shares as loan collateral? (Red flag)",
-        "Has the auditor raised any concerns?",
-        "Is there any history of fraud or regulatory action?",
+        "Does the promoter/founder own 35–50%+ of the company? (Skin in the game)",
+        "Are FII/DII institutions invested? (Smart money validation — they do deep research)",
+        "Is anyone actively shorting the stock? (Professional short sellers = red flag)",
+        "Is management's debt trajectory responsible? (Capital discipline signal)",
       ],
-      passExample: "Tata group — transparent, consistent, promoter-accountable.",
-      failExample: "A company where promoter pledged 60% of shares and auditor quit mid-year.",
+      passExample: "A founder-led company with 55% promoter holding, 20% FII holding, and low short interest — maximum alignment.",
+      failExample: "A company where promoters hold 8%, FII has been exiting, and short ratio is 8+ — smart money is leaving.",
     },
     expert: {
       metrics: [
-        { name: "Status", threshold: "Currently a manual input (0–15 pts)", note: "Automated in next sprint: NSE shareholding pattern API for promoter % and pledge %" },
+        { name: "Insider/Promoter Holding (35%)", threshold: "≥ 50% full | 35–50% × 0.63 | 20–35% × 0.34", note: "heldPercentInsiders from yfinance" },
+        { name: "Institutional/FII Holding (27%)", threshold: "≥ 25% full | 12–25% × 0.63 | 5–12% × 0.30", note: "heldPercentInstitutions from yfinance" },
+        { name: "Short Interest Guard (20%)", threshold: "shortRatio < 2 = full | 2–5 = half | > 5 = zero", note: "Partial credit given if data unavailable (Indian stocks)" },
+        { name: "Debt Trajectory (18%)", threshold: "D/E falling = full | stable = half | rising = zero", note: "3-year direction from balance sheet" },
       ],
       maxPts: 15,
-      weight: "Manual override — becomes automated L6 Promoter Conviction module in Sprint 3",
+      weight: "35% Promoter Holding | 27% Institutional Conviction | 20% Short Guard | 18% Debt Trajectory",
+    },
+  },
+  {
+    id: "L6",
+    icon: "🔍",
+    color: "#94A3B8",
+    label: "L6 — Valuation Gate",
+    beginner: {
+      question: "Is this stock priced at insane levels with nothing to justify it?",
+      analogy: "Paying ₹10,000 for a samosa is not investing — it's a bubble. But paying ₹200 for a samosa from a famous cart with a 2-hour queue? That's justified premium. L6 only catches the ₹10,000 samosas.",
+      whatWeCheck: [
+        "Is the P/E ratio above 100 with earnings growth below 25%? (Bubble check)",
+        "Is EV/EBITDA above 60 with low growth? (Enterprise value sanity check)",
+        "Note: High-quality growth stocks at 30–60x P/E are NOT penalised here",
+      ],
+      passExample: "A pharma stock at 45x P/E with 28% earnings growth — high multiple, but growth justifies it. Full marks.",
+      failExample: "A mid-cap at 180x P/E growing at 4% — P/E bubble with no growth to justify it. Hard zero.",
+    },
+    expert: {
+      metrics: [
+        { name: "Bubble Disqualifier", threshold: "PE > 100 AND earningsGrowth < 25% → hard zero | EV/EBITDA > 60 AND growth < 20% → hard zero", note: "Returns 0 — can drop a stock below 60 threshold" },
+        { name: "PE ≤ 30", threshold: "Full 5 pts", note: "Value / reasonable growth" },
+        { name: "PE 31–50", threshold: "4 pts (×0.8)", note: "Growth territory — fair" },
+        { name: "PE 51–80", threshold: "2.5 pts (×0.5)", note: "Premium growth — half points" },
+        { name: "PE 81–100", threshold: "1 pt (×0.2)", note: "Near-bubble zone" },
+        { name: "No PE (loss-making)", threshold: "P/S < 15 → 3 pts | else 2.5 pts", note: "Pre-profitability companies" },
+      ],
+      maxPts: 5,
+      weight: "Valuation sanity gate — not a value investing filter. Quality growth at 40–60x still scores well.",
     },
   },
 ];
@@ -287,20 +323,31 @@ function FiveLayerEngine({ mode }: SectionProps) {
 
   return (
     <section id="five-layers" className="scroll-mt-20">
-      <SectionTitle icon={<Cpu className="h-7 w-7" />}>The 5-Layer Scoring Engine</SectionTitle>
+      <SectionTitle icon={<Cpu className="h-7 w-7" />}>The 6-Layer Scoring Engine v2</SectionTitle>
 
       {mode === "beginner" ? (
-        <div className="mb-6">
+        <div className="mb-6 space-y-4">
           <BeginnerBadge />
           <p className="text-muted-foreground leading-relaxed mt-3">
-            Every company we scan gets put through <strong className="text-white">5 questions</strong>. Each question is worth points. A company needs at least <strong className="text-white">60 out of 100</strong> to even show up on our radar. Click each layer to see what we&apos;re actually checking.
+            Every company we scan gets put through <strong className="text-white">6 questions</strong>. Each question is worth points. A company needs at least <strong className="text-white">60 out of 100</strong> to even show up on our radar. Click each layer to see what we&apos;re actually checking.
           </p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: "L1", pts: "25pts", color: "#4ADE80" }, { id: "L2", pts: "20pts", color: "#60A5FA" },
+              { id: "L3", pts: "10pts", color: "#A78BFA" }, { id: "L4", pts: "25pts", color: "#FBBF24" },
+              { id: "L5", pts: "15pts", color: "#FB923C" }, { id: "L6", pts: "5pts", color: "#94A3B8" },
+            ].map(l => (
+              <span key={l.id} className="text-xs px-2 py-1 rounded-full border border-white/10 bg-white/5" style={{ color: l.color }}>
+                {l.id} · {l.pts}
+              </span>
+            ))}
+          </div>
         </div>
       ) : (
-        <div className="mb-6">
+        <div className="mb-6 space-y-3">
           <ExpertBadge />
           <p className="text-muted-foreground leading-relaxed mt-3">
-            The engine runs in Python using yfinance data. It scores each stock 0–100 across 5 automated layers. Stocks scoring ≥ 60 are classified by price category; below 60 are marked <code className="text-xs bg-white/10 px-1 rounded">OFFLINE</code>. The engine runs concurrently (ThreadPoolExecutor, 5 workers, batch size 20) with 1-second rate-limit delays.
+            Engine v2 — Python, yfinance data, 6 automated layers. New: L2 sector-relative margins, L3 multi-band momentum (3M+6M+1Y), L5 ownership quality (promoter/FII data), L6 valuation bubble gate. Default weights: L1:25 + L2:20 + L3:10 + L4:25 + L5:15 + L6:5 = 100. Stocks scoring ≥ 60 are classified; below 60 marked <code className="text-xs bg-white/10 px-1 rounded">OFFLINE</code>. ThreadPoolExecutor, 5 workers, batch 20, 1Y history fetch.
           </p>
         </div>
       )}
@@ -1040,7 +1087,7 @@ const terms = [
   { term: "Free Cash Flow (FCF)", category: "Finance", beginner: "The real money left over after running the business AND paying for all maintenance and growth. This is what the company can actually use to pay you dividends, buy back shares, or grow further.", expert: "Operating Cash Flow − Capital Expenditure. Preferred over Net Income for valuation. FCF Yield = FCF ÷ Market Cap. Earnings Quality = FCF ÷ Net Income (> 0.8 = clean)." },
   { term: "PEG Ratio", category: "Valuation", beginner: "Price-to-Earnings relative to how fast the company is growing. A stock at P/E 30 growing 35% (PEG 0.86) is CHEAPER than a stock at P/E 15 growing 5% (PEG 3.0).", expert: "P/E ÷ Earnings Growth Rate (%). Peter Lynch metric. PEG < 1.0 = growth underpriced. PEG > 2.0 = growth fully priced in. Added to L4 in Fortress v2 engine." },
   { term: "Gross Margin", category: "Finance", beginner: "On every ₹100 of sales, how much is left after paying for the product itself. A company with 60% gross margin earns ₹60 before paying staff, rent, or taxes.", expert: "(Revenue − COGS) ÷ Revenue. Proxy for pricing power. Fortress L2 threshold: > 30% for full points. Sustained high gross margins = structural competitive advantage." },
-  { term: "Promoter Holding", category: "Governance", beginner: "What percentage of the company the founders/original owners still own. High promoter holding (> 60%) means they have skin in the game — they win or lose with you.", expert: "Disclosed quarterly via NSE shareholding pattern. Steady or rising promoter % = conviction signal. Falling promoter % = caution. Planned as automated L6 in Sprint 3." },
+  { term: "Promoter Holding", category: "Governance", beginner: "What percentage of the company the founders/original owners still own. High promoter holding (> 50%) means they have skin in the game — they win or lose with you. This is now a core part of L5 scoring.", expert: "heldPercentInsiders from yfinance (maps to promoter + management holding for Indian stocks). L5 v2: ≥ 50% = full points | 35–50% = partial | < 20% = zero. Steady or rising promoter % = conviction signal. Falling promoter % = caution. Note: for precise pledging data, BSE shareholding pattern API integration is planned for v2.1." },
   { term: "Promoter Pledge", category: "Governance", beginner: "When a promoter borrows money and uses their shares as collateral. High pledging (> 30%) means if the stock falls, they're forced to sell — which pushes the price even lower.", expert: "% of promoter-held shares pledged as loan security. Fortress penalty modifier: pledge > 30% = −10 GEM Score points. Pledge reduction = positive signal." },
   { term: "Earnings Quality", category: "Finance", beginner: "Are the profits real? Some companies show profit on paper but never actually generate cash. Earnings Quality checks if the profit becomes real money in the bank.", expert: "FCF ÷ Net Income. > 0.8 = high quality (profits backed by cash). 0.5–0.8 = medium. < 0.5 = red flag (accrual-heavy; Sloan 1996 effect — companies with low earnings quality underperform)." },
   { term: "Institutional Blindspot", category: "GEM Score", beginner: "When big fund managers and analysts haven't discovered a stock yet. When they finally do, they all buy at once — and if you're already in, you benefit from that rush.", expert: "Low institutional ownership (< 15%) + low analyst coverage (< 3 firms). Discovery-gap opportunity. When coverage initiates or institutions file first 13F, re-rating catalyst triggered." },
@@ -1119,9 +1166,10 @@ function KeyTerms({ mode }: SectionProps) {
 
 function FAQ() {
   const faqs = [
-    { q: "How often are scores updated?", a: "The 5-layer engine scores are updated each time a market scan runs (on-demand or scheduled). GEM Scores are generated per discovery session. Sovereign Alpha tracking runs daily via a cron job that fetches current prices for all active predictions." },
+    { q: "How often are scores updated?", a: "The 6-layer engine scores are updated each time a market scan runs (on-demand or triggered from the Scanner tab). Each scan fetches 1 year of price history per stock for multi-band L3 momentum. Sovereign Alpha tracking runs weekly via update_alpha_outcomes.py that compares predictions to current prices and Nifty 50." },
     { q: "Why does Fortress cover NSE, US, and HKEX?", a: "Opportunity doesn't respect borders. NSE is the home market. US markets offer exposure to global tech, pharma, and payment monopolies. HKEX provides access to China-linked businesses at steep discounts to global peers. Each market has a separate benchmark for L3 scoring (Nifty 50, S&P 500, Hang Seng)." },
-    { q: "What is the difference between the 5-Layer score and the GEM Score?", a: "The 5-Layer score measures quality and financial health of a business — is it safe to own? The GEM Score measures discovery opportunity — is it undervalued and about to be found by the market? A company can pass both (best case), pass quality only (hold), or score high on GEM but fail quality (avoid — it's a trap)." },
+    { q: "What is the difference between the 6-Layer score and the GEM Score?", a: "The 6-layer score measures quality and financial health of a business — is it safe to own? The GEM Score measures discovery opportunity — is it undervalued and about to be found by the market? A company can pass both (best case), pass quality only (hold), or score high on GEM but fail quality (avoid — it's a trap)." },
+    { q: "Why did my scan scores change after the v2.0 update?", a: "Three things changed in v2.0: (1) L2 now adds sector-relative margin scoring — companies above sector median get more points. (2) L3 is now multi-band — a stock that was strong 3M but weak 6M/1Y will score lower. (3) L5 now uses actual ownership data — founder-led companies with high promoter holding may score higher, while companies with low insider ownership will score lower. Old and new scores are NOT directly comparable." },
     { q: "Can the scoring weights change over time?", a: "Yes. The Sovereign Alpha learning engine analyses which GEM Score criteria actually predicted 90-day returns. If 'Valuation Edge' consistently identified winners but 'Momentum Divergence' did not, the weights shift accordingly. Every change is logged with the reason and effective date." },
     { q: "What data sources does Fortress use?", a: "Primary: yfinance Python library (Yahoo Finance data) for all financial metrics, historical prices, and benchmarks. Secondary: NSE EQUITY_L.csv for ticker universe (India). NASDAQ FTP for US universe. HKEX Excel list for Hong Kong. All sources are public and free." },
     { q: "Is my money safe if I follow Fortress picks?", a: "Fortress is an educational intelligence tool, not a fund or advisory service. We identify quality companies and explain why they passed our filters. All investment decisions are yours. Past performance of our scoring system does not guarantee future returns. Always invest only what you can afford to hold for 3–5 years." },
@@ -1136,11 +1184,142 @@ function FAQ() {
   );
 }
 
+// ─── Engine Changelog (What's New) ───────────────────────────────────────────
+
+function EngineChangelog() {
+  const changes = [
+    {
+      version: "v2.0 — Engine Upgrade",
+      date: "March 2026",
+      items: [
+        { layer: "L2 Pricing Power", type: "upgrade", desc: "Added sector-relative margin premium scoring. Now checks if margins are above sector median — not just absolute thresholds. A company 30%+ above its sector peers earns maximum pricing power points." },
+        { layer: "L3 Relative Strength", type: "upgrade", desc: "Extended from 3-month only to multi-band: 3M (40%) + 6M (35%) + 1Y (25%). Consistent outperformance across all three horizons = structural trend, not noise." },
+        { layer: "L5 Governance", type: "rebuild", desc: "Fully rebuilt. Now uses real ownership data: promoter/insider holding %, FII/institutional holding %, short interest ratio, and debt trajectory. The previous version used D/E as a governance proxy — this is the real thing." },
+        { layer: "L6 Valuation Gate", type: "new", desc: "New layer (5 pts). Eliminates stocks in genuine bubble territory: P/E > 100 with growth < 25%, or EV/EBITDA > 60 with growth < 20%. Quality growth stocks at 30–60x P/E are NOT penalised." },
+        { layer: "Weights", type: "change", desc: "Default weights updated: L1:25 + L2:20 + L3:10 + L4:25 + L5:15 + L6:5 = 100. L3 reduced from 15 to 10 (momentum is confirmation, not thesis). L6 new allocation." },
+      ],
+    },
+  ];
+
+  const typeColors: Record<string, string> = {
+    upgrade: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+    rebuild: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    new:     "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    change:  "bg-purple-500/20 text-purple-300 border-purple-500/30",
+  };
+
+  return (
+    <section id="changelog" className="scroll-mt-20">
+      <SectionTitle icon={<Zap className="h-7 w-7" />}>What&apos;s New — Engine v2.0</SectionTitle>
+      <div className="space-y-4">
+        {changes.map(c => (
+          <div key={c.version} className="border border-white/10 rounded-xl overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 bg-white/5 border-b border-white/10">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="font-bold text-sm text-white">{c.version}</span>
+              <span className="text-xs text-muted-foreground ml-auto">{c.date}</span>
+            </div>
+            <div className="divide-y divide-white/5">
+              {c.items.map(item => (
+                <div key={item.layer} className="flex gap-3 p-4">
+                  <div className="shrink-0 pt-0.5">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${typeColors[item.type]}`}>
+                      {item.type}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white mb-1">{item.layer}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        <Callout emoji="⚠️" title="Impact on existing scores" color="amber">
+          Stocks scanned before v2.0 used the old L5 proxy and no L6. Scores from previous scans are NOT comparable to v2.0 scores. Run a fresh scan to get accurate v2.0 results. The L5 rebuild in particular can change governance scores significantly — positively for founder-led companies, negatively for those with low insider ownership.
+        </Callout>
+      </div>
+    </section>
+  );
+}
+
+// ─── Beta Feedback Section ────────────────────────────────────────────────────
+
+function BetaFeedback() {
+  return (
+    <section id="beta-feedback" className="scroll-mt-20">
+      <SectionTitle icon={<Star className="h-7 w-7 text-amber-400" />}>Beta Feedback — Help Us Build This</SectionTitle>
+
+      <div className="space-y-5">
+        <Callout emoji="🧪" title="You are the product specification" color="amber">
+          Fortress is being built specifically for NRI long-term investors. Your real-world feedback — what works, what feels wrong, what's missing — is more valuable than any internal test. Every response is read by the team.
+        </Callout>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[
+            {
+              emoji: "🎯",
+              title: "Does L5 feel right to you?",
+              desc: "We rebuilt L5 with promoter holding + FII data. For the Indian stocks you follow closely, does the governance score match your real-world assessment? Tell us if it gets it wrong.",
+            },
+            {
+              emoji: "📊",
+              title: "Are the tier thresholds right?",
+              desc: "Rocket (80+), Launcher (65-79), Builder (60-64). Do the stocks you'd genuinely consider land in the right tiers? Or is the threshold too loose/strict?",
+            },
+            {
+              emoji: "🔍",
+              title: "What's the #1 missing signal?",
+              desc: "Promoter pledging data isn't in yfinance. Neither is management commentary accuracy or dividend history quality. What would you add if you could?",
+            },
+            {
+              emoji: "💼",
+              title: "Would you use this before investing?",
+              desc: "The real test: have you used a Fortress scan result to validate (or reject) an investment thesis you already had? Did it add value or tell you something you already knew?",
+            },
+          ].map(q => (
+            <Card key={q.title} className="bg-white/5 border-white/10">
+              <CardContent className="p-4">
+                <div className="text-2xl mb-2">{q.emoji}</div>
+                <p className="font-bold text-sm text-white mb-1">{q.title}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{q.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <p className="text-xs font-bold text-white mb-2">Things that are intentionally NOT in v2.0 (yet)</p>
+          <div className="space-y-1 text-xs text-muted-foreground">
+            {[
+              "BSE shareholding pattern API for actual promoter pledging % — currently proxied by short interest",
+              "Management guidance accuracy tracking (did they hit their stated revenue targets?)",
+              "Dividend consistency as a separate L5 signal",
+              "Related-party transaction flag from annual reports",
+              "Chatbot / natural language query interface",
+            ].map((item, i) => (
+              <div key={i} className="flex gap-2">
+                <span className="text-primary">→</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 border-t border-white/10 pt-3">
+            Tell us which of these matters most to you — that determines the priority for v2.1.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Sidebar Navigation ───────────────────────────────────────────────────────
 
 const navItems = [
   { id: "what-is-fortress", label: "What is Fortress?", icon: Shield },
-  { id: "five-layers", label: "5-Layer Engine", icon: Cpu },
+  { id: "changelog", label: "What's New v2.0", icon: Zap },
+  { id: "five-layers", label: "6-Layer Engine", icon: Cpu },
   { id: "multibagger", label: "Multi-Bagger Score", icon: TrendingUp },
   { id: "coffee-can", label: "Coffee Can Mode", icon: BookOpen },
   { id: "megatrend", label: "Megatrend Tags", icon: Globe },
@@ -1149,6 +1328,7 @@ const navItems = [
   { id: "market-weather", label: "Market Weather", icon: BarChart2 },
   { id: "not-fortress", label: "What We Don't Do", icon: AlertTriangle },
   { id: "key-terms", label: "Key Terms", icon: BookOpen },
+  { id: "beta-feedback", label: "Beta Feedback", icon: Star },
   { id: "faq", label: "FAQ", icon: Info },
 ];
 
@@ -1266,6 +1446,7 @@ export default function IntelligencePage() {
                 className="space-y-20"
               >
                 <WhatIsFortress mode={mode} />
+                <EngineChangelog />
                 <FiveLayerEngine mode={mode} />
                 <MultiBaggerScore mode={mode} />
                 <CoffeeCanSection mode={mode} />
@@ -1275,6 +1456,7 @@ export default function IntelligencePage() {
                 <MarketWeather mode={mode} />
                 <WhatIsNot />
                 <KeyTerms mode={mode} />
+                <BetaFeedback />
                 <FAQ />
               </motion.div>
             </AnimatePresence>

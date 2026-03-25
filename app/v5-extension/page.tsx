@@ -1,14 +1,30 @@
-import { getV5LowStocks, getV5PennyStocks, getV5SubTenStocks, getV5TopMutualFunds, getV5TopIndexFunds, getV5TopFortressPicks, getGlossaryData } from "@/app/actions";
+import { getV5LowStocks, getV5PennyStocks, getV5SubTenStocks, getLiveSub20Stocks, getLive52WLowStocks, getLivePennyStocks, getV5TopMutualFunds, getV5TopIndexFunds, getV5TopFortressPicks, getGlossaryData } from "@/app/actions";
 import { V5ExtensionTabs } from "@/components/fortress/V5ExtensionTabs";
 import { Navbar } from "@/components/fortress/Navbar";
 
 export const dynamic = "force-dynamic";
 
 export default async function V5ExtensionPage() {
-    const lowStocks = await getV5LowStocks();
-    const pennyStocks = await getV5PennyStocks();
-    const subTenStocks = await getV5SubTenStocks();
-    const topMF = await getV5TopMutualFunds();
+    const [
+        curatedLowStocks, liveLowStocks,
+        curatedPennyStocks, livePennyStocks,
+        curatedSubTenStocks, liveSub20Stocks,
+        topMF,
+    ] = await Promise.all([
+        getV5LowStocks(), getLive52WLowStocks(),
+        getV5PennyStocks(), getLivePennyStocks(),
+        getV5SubTenStocks(), getLiveSub20Stocks(),
+        getV5TopMutualFunds(),
+    ]);
+
+    const mergeWithLive = (curated: typeof curatedLowStocks, live: typeof liveLowStocks) => {
+        const curatedSymbols = new Set(curated.map(s => s.symbol));
+        return [...curated, ...live.filter(s => !curatedSymbols.has(s.symbol))];
+    };
+
+    const lowStocks = mergeWithLive(curatedLowStocks, liveLowStocks);
+    const pennyStocks = mergeWithLive(curatedPennyStocks, livePennyStocks);
+    const subTenStocks = mergeWithLive(curatedSubTenStocks, liveSub20Stocks);
     const topIndex = await getV5TopIndexFunds();
     const topPicks = await getV5TopFortressPicks();
     const glossary = await getGlossaryData();

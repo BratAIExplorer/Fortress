@@ -71,6 +71,9 @@ export interface V5Stock extends Stock {
     l3: number;
     l4: number;
     l5: number;
+    isLivePick?: boolean;
+    mbScore?: number;
+    mbTier?: string;
 }
 
 export interface Collection {
@@ -117,6 +120,20 @@ export interface IndexFund {
     tracks: string;
     why: string;
     cagr5y: number;
+}
+
+export interface ScannerCandidate {
+    id: string;
+    symbol: string;
+    price: number;
+    mbScore: number;
+    mbTier: string;
+    totalScore: number;
+    megatrend: string;
+    megatrendEmoji: string;
+    fcfYieldPct: number | null;
+    deDirection: string | null;
+    marginDirection: string | null;
 }
 
 export interface TopPick {
