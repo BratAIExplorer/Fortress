@@ -63,6 +63,30 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `A ${market} scan is already in progress` }, { status: 409 });
     }
 
+    // 2a. Cooldown: prevent manual scans within 4 hours of the last completed scan
+    if (!isCron) {
+        const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 hours
+        const lastCompleted = await db.query.scans.findFirst({
+            where: and(
+                eq(schema.scans.status, "COMPLETED"),
+                eq(schema.scans.market, market)
+            ),
+            orderBy: [desc(schema.scans.runAt)],
+        });
+        if (lastCompleted?.runAt) {
+            const elapsed = Date.now() - new Date(lastCompleted.runAt).getTime();
+            if (elapsed < COOLDOWN_MS) {
+                const remainingMs = COOLDOWN_MS - elapsed;
+                const remainingMinutes = Math.ceil(remainingMs / 60000);
+                const nextAllowedAt = new Date(Date.now() + remainingMs).toISOString();
+                return NextResponse.json(
+                    { error: `Scan cooldown active. yfinance needs time to reset rate limits.`, cooldownMinutes: remainingMinutes, nextAllowedAt },
+                    { status: 429 }
+                );
+            }
+        }
+    }
+
     // 2. Initialize new scan in DB
     const [scan] = await db.insert(schema.scans).values({
         status: "RUNNING",

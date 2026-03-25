@@ -26,6 +26,7 @@ export function V5MarketScanner() {
     const [scanStatus, setScanStatus] = useState("");
     const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
     const [view, setView] = useState<ScannerView>("summary");
+    const [cooldown, setCooldown] = useState<{ minutes: number; nextAllowedAt: string } | null>(null);
 
     // 1. Sync with server state on mount
     useEffect(() => {
@@ -38,18 +39,27 @@ export function V5MarketScanner() {
                     setIsScanning(true);
                     setScanStatus(`Resuming active scan... (${data.currentCount} analysed)`);
                     if (data.progress) setScanProgress(data.progress);
-
-                    // Start SSE listener to pick up the stream
                     connectToSSE();
                 } else if (data.status === "COMPLETED") {
-                    // Load last results for deltas
                     setLastScanResult({
                         type: "complete",
                         scanId: data.id,
-                        newCount: data.totalScanned || 0, // Simplified fallback
+                        newCount: data.totalScanned || 0,
                         droppedCount: 0,
                         deltas: {}
                     });
+                    // Check if we're still in cooldown from this scan
+                    const COOLDOWN_MS = 4 * 60 * 60 * 1000;
+                    if (data.runAt) {
+                        const elapsed = Date.now() - new Date(data.runAt).getTime();
+                        if (elapsed < COOLDOWN_MS) {
+                            const remainingMs = COOLDOWN_MS - elapsed;
+                            setCooldown({
+                                minutes: Math.ceil(remainingMs / 60000),
+                                nextAllowedAt: new Date(Date.now() + remainingMs).toISOString()
+                            });
+                        }
+                    }
                 }
             } catch (e) {
                 console.error("Failed to check scan status", e);
@@ -78,6 +88,13 @@ export function V5MarketScanner() {
                         toast.success("Background scan finished. Refresh to see totals.");
                     }
                 }, 5000);
+                return;
+            }
+            if (response.status === 429) {
+                const body = await response.json().catch(() => ({}));
+                setCooldown({ minutes: body.cooldownMinutes ?? 240, nextAllowedAt: body.nextAllowedAt });
+                setIsScanning(false);
+                toast.error(`Scan cooldown: ${body.cooldownMinutes ?? "~240"} min remaining. yfinance needs time to reset.`);
                 return;
             }
             if (!response.ok) {
@@ -225,14 +242,14 @@ export function V5MarketScanner() {
                         <Button
                             size="lg"
                             onClick={runFullScan}
-                            disabled={isScanning}
+                            disabled={isScanning || !!cooldown}
                             className={cn(
                                 "font-bold h-12 px-8 transition-all shrink-0",
-                                isScanning ? "bg-white/5 text-slate-400" : "bg-emerald-500 hover:bg-emerald-600 text-black border-0"
+                                (isScanning || cooldown) ? "bg-white/5 text-slate-400" : "bg-emerald-500 hover:bg-emerald-600 text-black border-0"
                             )}
                         >
                             {isScanning ? <RefreshCw className="h-5 w-5 mr-2 animate-spin" /> : <Activity className="h-5 w-5 mr-2" />}
-                            {isScanning ? "Scan in Progress..." : "Run Full Scan"}
+                            {isScanning ? "Scan in Progress..." : cooldown ? `Cooldown — ${cooldown.minutes}m remaining` : "Run Full Scan"}
                         </Button>
                     </div>
                 </CardHeader>

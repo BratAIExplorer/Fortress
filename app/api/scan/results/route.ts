@@ -1,25 +1,63 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db/client";
-import { eq, desc, and, isNotNull } from "drizzle-orm";
+import { eq, desc, and, ne, isNotNull } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
+// Minimum non-OFFLINE results for a scan to be considered healthy.
+const MIN_GOOD_RESULTS = 50;
+
+async function countNonOffline(scanId: string): Promise<number> {
+    const rows = await db
+        .select({ id: schema.scanResults.id })
+        .from(schema.scanResults)
+        .where(and(
+            eq(schema.scanResults.scanId, scanId),
+            ne(schema.scanResults.category, "OFFLINE")
+        ));
+    return rows.length;
+}
+
 // GET /api/scan/results?scanId=<id>&sort=mb_score|total_score&tier=Rocket&megatrend=Defence
-// Returns scan results for a specific scan (or most recent) with all engine v3 fields.
+// Returns scan results for a specific scan (or most recent good one) with all engine v3 fields.
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
 
     // Resolve which scan to fetch
     let scanId = searchParams.get("scanId");
+    let degraded = false;
+    let requestedScanId: string | null = scanId;
+
     if (!scanId) {
-        const lastScan = await db.query.scans.findFirst({
+        // Walk back through completed scans to find the most recent one with good data
+        const completedScans = await db.query.scans.findMany({
             where: eq(schema.scans.status, "COMPLETED"),
             orderBy: [desc(schema.scans.runAt)],
+            limit: 10,
         });
-        if (!lastScan) {
-            return NextResponse.json({ results: [], scanId: null, total: 0 });
+        if (!completedScans.length) {
+            return NextResponse.json({ results: [], scanId: null, total: 0, degraded: false });
         }
-        scanId = lastScan.id;
+        // Find the first scan with enough non-OFFLINE results
+        for (const scan of completedScans) {
+            const goodCount = await countNonOffline(scan.id);
+            if (goodCount >= MIN_GOOD_RESULTS) {
+                scanId = scan.id;
+                // Mark as degraded if we skipped over more recent scans to get here
+                if (scan.id !== completedScans[0].id) {
+                    degraded = true;
+                }
+                break;
+            }
+        }
+        // Fallback: nothing healthy found — just use the most recent
+        if (!scanId) {
+            scanId = completedScans[0].id;
+        }
+    } else {
+        // Explicit scanId requested — still report quality
+        const goodCount = await countNonOffline(scanId);
+        if (goodCount < MIN_GOOD_RESULTS) degraded = true;
     }
 
     const sort = searchParams.get("sort") ?? "mb_score";
@@ -60,6 +98,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
         scanId,
+        requestedScanId,
+        degraded,
         results: rows.map(r => ({
             symbol: r.symbol,
             price: r.priceAtScan,
