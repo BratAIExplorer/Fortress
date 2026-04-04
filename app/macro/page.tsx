@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/fortress/Navbar";
+import { ClarityPanel } from "@/components/fortress/ClarityPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Minus, RefreshCw, Lock } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, RefreshCw, Lock, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -163,8 +164,11 @@ export default function MacroPage() {
     const [snapshots, setSnapshots] = useState<MacroSnapshot[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [generating, setGenerating] = useState(false);
     const [secret, setSecret] = useState("");
     const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
+    const [generateMsg, setGenerateMsg] = useState<string | null>(null);
+    const [clarityKey, setClarityKey] = useState(0); // increment to force ClarityPanel reload
 
     const loadSnapshots = () => {
         setLoading(true);
@@ -175,6 +179,29 @@ export default function MacroPage() {
     };
 
     useEffect(() => { loadSnapshots(); }, []);
+
+    const triggerGenerate = async () => {
+        if (!secret) return;
+        setGenerating(true);
+        setGenerateMsg(null);
+        try {
+            const res = await fetch("/api/intelligence/generate", {
+                method: "POST",
+                headers: { "x-cron-secret": secret },
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setGenerateMsg("Clarity report generated.");
+                setClarityKey(k => k + 1);
+            } else {
+                setGenerateMsg(data.error ?? "Generation failed.");
+            }
+        } catch {
+            setGenerateMsg("Network error.");
+        } finally {
+            setGenerating(false);
+        }
+    };
 
     const triggerRefresh = async () => {
         if (!secret) return;
@@ -247,12 +274,27 @@ export default function MacroPage() {
                             disabled={refreshing || !secret}
                             className="h-8 px-4 text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0 shrink-0"
                         >
-                            {refreshing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Fetch Now"}
+                            {refreshing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Fetch Data"}
+                        </Button>
+                        <Button
+                            size="sm"
+                            onClick={triggerGenerate}
+                            disabled={generating || !secret}
+                            className="h-8 px-4 text-xs bg-blue-600 hover:bg-blue-700 text-white border-0 shrink-0"
+                        >
+                            {generating ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : (
+                                <><Brain className="h-3.5 w-3.5 mr-1" />Generate Clarity</>
+                            )}
                         </Button>
                     </div>
                     {refreshMsg && (
                         <p className={cn("text-xs mt-2", refreshMsg.includes("success") ? "text-emerald-400" : "text-red-400")}>
                             {refreshMsg}
+                        </p>
+                    )}
+                    {generateMsg && (
+                        <p className={cn("text-xs mt-1", generateMsg.includes("generated") ? "text-blue-400" : "text-red-400")}>
+                            {generateMsg}
                         </p>
                     )}
                 </div>
@@ -292,6 +334,11 @@ export default function MacroPage() {
                             ))}
                         </div>
                     </div>
+                )}
+
+                {/* Intelligence Clarity Report */}
+                {!loading && (
+                    <ClarityPanel key={clarityKey} />
                 )}
 
                 {/* History table */}

@@ -48,6 +48,7 @@ export const scans = pgTable("scans", {
     triggeredBy: text("triggered_by"), // 'MANUAL' | 'CRON'
     market: text("market").notNull().default("NSE"), // 'NSE' | 'US' | 'HKEX'
     errorMessage: text("error_message"),
+    goodResultsCount: integer("good_results_count"), // non-OFFLINE results; <50 = degraded scan
 });
 
 // 1c. SCANRESULTS TABLE (Deep Snapshots)
@@ -238,4 +239,16 @@ export const macroSnapshots = pgTable("macro_snapshots", {
     cboeVix: numeric("cboe_vix"),
     indiaVix: numeric("india_vix"),
     fetchedAt: timestamp("fetched_at", { withTimezone: true }).defaultNow(),
+});
+
+// 14. INTELLIGENCE_REPORTS — Clarity framework output per macro snapshot
+export const intelligenceReports = pgTable("intelligence_reports", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    snapshotId: uuid("snapshot_id").references(() => macroSnapshots.id),
+    snapshotDate: date("snapshot_date").notNull(),
+    signals: jsonb("signals").notNull(),           // SignalEvaluation[]
+    sectorImpacts: jsonb("sector_impacts").notNull(), // SectorImpact[]
+    environment: jsonb("environment").notNull(),    // EnvironmentFactor[]
+    summary: text("summary"),
+    generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
 });
