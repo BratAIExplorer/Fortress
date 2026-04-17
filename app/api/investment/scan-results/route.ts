@@ -1,39 +1,24 @@
 import { NextResponse } from "next/server";
 import { generatePortfolioRecommendation } from "../../../../lib/portfolio/recommendation-engine";
 import { saveGenieSession, saveRecommendations } from "../../../../lib/portfolio/db-helpers";
+import { fetchMacroSnapshot, fetchMarketIntelligence } from "../../../../lib/portfolio/yfinance";
 import { randomUUID } from "crypto";
 
 export async function POST(req: Request) {
   try {
     const input = await req.json();
     
-    // MOCK DATA
-    const macroMock = {
-      vixIndex: { current: 18, trend: "stable", interpretation: "low volatility" },
-      goldPrice: { current: 2000, dayChange: 0.5, interpretation: "steady" },
-      oilPrice: { current: 75, dayChange: -1, interpretation: "easing" },
-      inflationRate: { current: 3.5, trend: "falling", interpretation: "cooling" },
-      currencyStrength: { USD: 104, INR: 83, interpretation: "steady" },
-      bondYields: { UST10Y: 4.1, UST2Y: 4.5, spread: -0.4, interpretation: "inverted" },
-      riskAssessment: "low"
-    };
+    // Real Data Fetch
+    const macroSnapshot = await fetchMacroSnapshot();
+    const intelligenceData = await fetchMarketIntelligence("US"); // Default US for form input
 
-    const intelligenceMock = {
-      momentum: { score: 65, interpretation: "positive", detail: "60% above 50-day" },
-      breadth: { advance_decline_ratio: 1.6, highlow_ratio: 1.2, interpretation: "broad rally" },
-      sentiment: { putcall_ratio: 0.8, vix_term_structure: "contango", retail_positioning: "net_long", institutional_flow: "buying", confidence: 80 },
-      sectorRotation: { leadingSector: "tech", laggingSector: "utilities", trend: "into_growth" },
-      technicalSignals: { rsi: 60, macd: "bullish_cross", supportResistance: { support: 21000, resistance: 22000 } },
-      overallSignal: { rating: "buy", confidence: 75, nextKeyLevel: 22000, riskRewardRatio: 1.5 }
-    };
-
-    const recommendation = await generatePortfolioRecommendation(input, macroMock, intelligenceMock);
+    const recommendation = await generatePortfolioRecommendation(input, macroSnapshot, intelligenceData);
     
     let sessionId = randomUUID();
     let session;
     
     try {
-        session = await saveGenieSession({ ...input, macro: macroMock }, recommendation.recommendation);
+        session = await saveGenieSession({ ...input, macro: macroSnapshot }, recommendation.recommendation);
         sessionId = session?.id || sessionId;
         await saveRecommendations(sessionId, recommendation.topPicks);
     } catch(e) {

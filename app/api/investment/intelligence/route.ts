@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fetchMarketIntelligence } from "../../../../lib/portfolio/yfinance";
 
 export async function GET(req: Request) {
   try {
@@ -12,16 +13,9 @@ export async function GET(req: Request) {
         }, { status: 400 });
     }
 
-    return NextResponse.json({
-      timestamp: new Date().toISOString(),
-      market,
-      momentum: { score: 68, interpretation: "positive", detail: "65% of stocks above 50-day MA" },
-      breadth: { advance_decline_ratio: 1.4, highlow_ratio: 1.1, interpretation: "broad rally" },
-      sentiment: { putcall_ratio: 0.85, vix_term_structure: "contango", retail_positioning: "net_long", institutional_flow: "buying" },
-      sectorRotation: { leadingSector: "tech", laggingSector: "utilities", trend: "into_growth" },
-      technicalSignals: { rsi: 62, macd: "bullish_cross", supportResistance: { support: 21500, resistance: 22200 } },
-      overallSignal: { rating: "buy", confidence: 75, nextKeyLevel: 22200, riskRewardRatio: 1.8 }
-    }, { 
+    const data = await fetchMarketIntelligence(market);
+
+    return NextResponse.json(data, { 
       status: 200,
       headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400' }
     });
