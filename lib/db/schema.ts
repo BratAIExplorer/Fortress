@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, numeric, integer, boolean, timestamp, date, primaryKey, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, numeric, integer, boolean, timestamp, date, primaryKey, jsonb, varchar, smallint, index } from "drizzle-orm/pg-core";
 
 // 1. STOCKS TABLE (The Core Reference)
 export const stocks = pgTable("stocks", {
@@ -252,3 +252,103 @@ export const intelligenceReports = pgTable("intelligence_reports", {
     summary: text("summary"),
     generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
 });
+
+// ─── INVESTMENT GENIE LAYER ───────────────────────────────────────────────────
+
+export const investmentsGenieSessions = pgTable("investments_genie_sessions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  
+  riskTolerance: varchar("risk_tolerance", { length: 20 }).notNull(),
+  investmentHorizon: varchar("investment_horizon", { length: 20 }).notNull(),
+  sectorPreferences: text("sector_preferences").array().default([]),
+  cashPosition: numeric("cash_position", { precision: 10, scale: 2 }).default("0"),
+  currentExposure: jsonb("current_exposure").default('{"stocks": 0, "bonds": 0, "cash": 100, "alternatives": 0}'),
+  
+  recommendedAllocation: jsonb("recommended_allocation").notNull(),
+  confidenceScore: smallint("confidence_score").default(50),
+  rationale: text("rationale"),
+  
+  sessionStatus: varchar("session_status", { length: 20 }).default("completed"),
+  macroContextSnapshot: jsonb("macro_context_snapshot"),
+  
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  
+  userId: varchar("user_id", { length: 36 }),
+}, (table) => ({
+  userIndex: index("idx_genie_sessions_user").on(table.userId),
+}));
+
+export const investmentsGenieRecommendations = pgTable("investments_genie_recommendations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => investmentsGenieSessions.id, { onDelete: "cascade" }),
+  
+  symbol: varchar("symbol", { length: 20 }).notNull(),
+  market: varchar("market", { length: 10 }).notNull(),
+  sector: varchar("sector", { length: 30 }),
+  companyName: varchar("company_name", { length: 100 }),
+  
+  allocationPercent: numeric("allocation_percent", { precision: 5, scale: 2 }).notNull(),
+  pickScore: numeric("pick_score", { precision: 5, scale: 2 }).default("0"),
+  riskScore: numeric("risk_score", { precision: 5, scale: 2 }).default("0"),
+  reasoning: text("reasoning"),
+  entryPrice: numeric("entry_price", { precision: 12, scale: 2 }),
+  
+  isActual: boolean("is_actual").default(false),
+  actualEntryPrice: numeric("actual_entry_price", { precision: 12, scale: 2 }),
+  actualQuantity: numeric("actual_quantity", { precision: 12, scale: 4 }),
+  exitPrice: numeric("exit_price", { precision: 12, scale: 2 }),
+  exitDate: date("exit_date"),
+  
+  pickStatus: varchar("pick_status", { length: 20 }).default("pending"),
+  profitLoss: numeric("profit_loss", { precision: 12, scale: 2 }),
+  profitLossPercent: numeric("profit_loss_percent", { precision: 5, scale: 2 }),
+  
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  sessionIdx: index("idx_genie_recs_session").on(table.sessionId),
+  symbolIdx: index("idx_genie_recs_symbol").on(table.symbol),
+}));
+
+export const investmentsGenieWatchlists = pgTable("investments_genie_watchlists", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  symbol: varchar("symbol", { length: 20 }).notNull(),
+  market: varchar("market", { length: 10 }).notNull(),
+  addedAt: timestamp("added_at", { withTimezone: true }).defaultNow(),
+  alertPriceTarget: numeric("alert_price_target", { precision: 12, scale: 2 }),
+  alertStopLoss: numeric("alert_stop_loss", { precision: 12, scale: 2 }),
+  notes: text("notes"),
+}, (table) => ({
+  userIdx: index("idx_genie_watchlist_user").on(table.userId),
+}));
+
+export const investmentsGenieFeedback = pgTable("investments_genie_feedback", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => investmentsGenieSessions.id, { onDelete: "cascade" }),
+  recommendationId: uuid("recommendation_id").references(() => investmentsGenieRecommendations.id, { onDelete: "cascade" }),
+  feedbackType: varchar("feedback_type", { length: 20 }).notNull(),
+  rating: smallint("rating"),
+  comment: text("comment"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  sessionIdx: index("idx_genie_feedback_session").on(table.sessionId),
+}));
+
+export const investmentsGeniePerformance = pgTable("investments_genie_performance", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  totalSessions: integer("total_sessions").default(0),
+  totalRecommendations: integer("total_recommendations").default(0),
+  executedRecommendations: integer("executed_recommendations").default(0),
+  averageReturn: numeric("average_return", { precision: 5, scale: 2 }).default("0"),
+  winRate: numeric("win_rate", { precision: 5, scale: 2 }).default("0"),
+  bestPick: varchar("best_pick", { length: 20 }),
+  worstPick: varchar("worst_pick", { length: 20 }),
+  performanceByMarket: jsonb("performance_by_market").default('{"NSE": 0, "US": 0, "HK": 0}'),
+  performanceBySector: jsonb("performance_by_sector").default('{}'),
+  performance30d: numeric("performance_30d", { precision: 5, scale: 2 }).default("0"),
+  performance90d: numeric("performance_90d", { precision: 5, scale: 2 }).default("0"),
+  lastUpdated: timestamp("last_updated", { withTimezone: true }).defaultNow(),
+});
+

@@ -4,12 +4,59 @@ import ta
 import time
 import json
 import os
+import pickle
 import requests
 import io
 import concurrent.futures
 import argparse
 from datetime import datetime, timedelta
+from pathlib import Path
 from abc import ABC, abstractmethod
+
+# ─── DISK CACHE ────────────────────────────────────────────────────────────────
+# Caches raw yfinance responses for 8 hours so repeated scans within the same
+# trading day use consistent underlying data and avoid Yahoo rate-limiting.
+
+class _DiskCache:
+    TTL = timedelta(hours=8)
+    DIR = Path("/tmp/fortress_scan_cache")
+
+    def __init__(self):
+        self.DIR.mkdir(parents=True, exist_ok=True)
+
+    def _path(self, key: str) -> Path:
+        safe = key.replace("/", "_").replace(".", "_").replace("^", "")
+        return self.DIR / f"{safe}.pkl"
+
+    def get(self, key: str):
+        p = self._path(key)
+        if not p.exists():
+            return None
+        try:
+            age = datetime.now() - datetime.fromtimestamp(p.stat().st_mtime)
+            if age > self.TTL:
+                p.unlink(missing_ok=True)
+                return None
+            with open(p, "rb") as f:
+                return pickle.load(f)
+        except Exception:
+            return None
+
+    def set(self, key: str, value) -> None:
+        if value is None:
+            return
+        # Don't cache empty dicts or empty DataFrames — likely a throttled response
+        if isinstance(value, dict) and len(value) == 0:
+            return
+        if isinstance(value, pd.DataFrame) and value.empty:
+            return
+        try:
+            with open(self._path(key), "wb") as f:
+                pickle.dump(value, f)
+        except Exception:
+            pass  # Cache write failures are non-fatal
+
+_cache = _DiskCache()
 
 # ─── MARKET ADAPTERS ───────────────────────────────────────────────────────────
 
@@ -1297,22 +1344,41 @@ def get_roce_from_statements(income_stmt, balance_sheet):
 def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
     try:
         ticker = yf.Ticker(symbol)
-        info   = ticker.info
-        hist   = ticker.history(period="1y")   # 1Y for multi-band L3 momentum
+
+        # ── Cache-aware fetches ───────────────────────────────────────────────
+        info = _cache.get(f"{symbol}_info")
+        if info is None:
+            info = ticker.info
+            _cache.set(f"{symbol}_info", info)
+
+        hist = _cache.get(f"{symbol}_hist")
+        if hist is None:
+            hist = ticker.history(period="1y")   # 1Y for multi-band L3 momentum
+            _cache.set(f"{symbol}_hist", hist)
 
         # ── Historical data (fetched once, reused across all scorers) ─────────
         # Wrapped individually so a failure on one doesn't kill the entire scan.
         try:
-            balance_sheet = ticker.balance_sheet
+            balance_sheet = _cache.get(f"{symbol}_bs")
+            if balance_sheet is None:
+                balance_sheet = ticker.balance_sheet
+                _cache.set(f"{symbol}_bs", balance_sheet)
         except Exception:
             balance_sheet = None
 
         try:
-            income_stmt = ticker.income_stmt
+            income_stmt = _cache.get(f"{symbol}_is")
+            if income_stmt is None:
+                income_stmt = ticker.income_stmt
+                _cache.set(f"{symbol}_is", income_stmt)
         except Exception:
             income_stmt = None
+
         try:
-            cashflow = ticker.cashflow
+            cashflow = _cache.get(f"{symbol}_cf")
+            if cashflow is None:
+                cashflow = ticker.cashflow
+                _cache.set(f"{symbol}_cf", cashflow)
         except Exception:
             cashflow = None
 
@@ -1436,8 +1502,12 @@ def main():
     
     # Pre-fetch benchmark history for L3 (1Y for multi-band momentum scoring)
     try:
-        bench = yf.Ticker(adapter.benchmark_ticker)
-        benchmark_hist = bench.history(period="1y")
+        bench_key = f"bench_{adapter.benchmark_ticker}_hist"
+        benchmark_hist = _cache.get(bench_key)
+        if benchmark_hist is None:
+            bench = yf.Ticker(adapter.benchmark_ticker)
+            benchmark_hist = bench.history(period="1y")
+            _cache.set(bench_key, benchmark_hist)
     except Exception:
         benchmark_hist = None
 

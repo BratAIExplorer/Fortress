@@ -1,7 +1,7 @@
 "use server";
 
 import { db, schema } from "@/lib/db/client";
-import { eq, ilike, sql, desc, and, notInArray } from "drizzle-orm";
+import { eq, ilike, sql, desc, and, notInArray, gte, ne } from "drizzle-orm";
 import { v5LowStocks, v5PennyStocks, v5SubTenStocks, mockStocks, v5TopMutualFunds, v5TopIndexFunds, v5TopFortressPicks, glossaryData } from "@/lib/mock-data";
 import { V5Stock, MutualFund, IndexFund, TopPick, Glossary, ScannerCandidate } from "@/lib/types";
 import { concepts as seedConcepts } from "@/lib/seed-concepts";
@@ -252,10 +252,12 @@ export async function getV5SubTenStocks(): Promise<V5Stock[]> {
 }
 
 async function getLiveScanStocksByCategory(category: "SUB20" | "PENNY" | "52W_LOW"): Promise<V5Stock[]> {
-    const lastScan = await db.query.scans.findFirst({
-        where: eq(schema.scans.status, "COMPLETED"),
-        orderBy: [desc(schema.scans.runAt)],
-    });
+    const [lastScan] = await db
+        .select()
+        .from(schema.scans)
+        .where(eq(schema.scans.status, "COMPLETED"))
+        .orderBy(desc(schema.scans.runAt))
+        .limit(1);
     if (!lastScan) return [];
 
     const results = await db
@@ -339,43 +341,86 @@ export async function getGlossaryData(): Promise<Glossary> {
     return glossaryData;
 }
 
-export async function getLiveF30Candidates(limit = 10): Promise<ScannerCandidate[]> {
+const MIN_GOOD_RESULTS = 50;
+
+async function getBestScan() {
+    const [good] = await db
+        .select()
+        .from(schema.scans)
+        .where(and(
+            eq(schema.scans.status, "COMPLETED"),
+            gte(schema.scans.goodResultsCount, MIN_GOOD_RESULTS)
+        ))
+        .orderBy(desc(schema.scans.runAt))
+        .limit(1);
+    if (good) return good;
+    // Fallback: most recent completed regardless of quality
+    const [fallback] = await db
+        .select()
+        .from(schema.scans)
+        .where(eq(schema.scans.status, "COMPLETED"))
+        .orderBy(desc(schema.scans.runAt))
+        .limit(1);
+    return fallback ?? null;
+}
+
+function mapToCandidate(r: typeof schema.scanResults.$inferSelect): ScannerCandidate {
+    return {
+        id: r.id,
+        symbol: r.symbol,
+        price: Number(r.priceAtScan) || 0,
+        mbScore: r.mbScore ?? 0,
+        mbTier: r.mbTier ?? "–",
+        totalScore: r.totalScore ?? 0,
+        megatrend: r.megatrendTag ?? "",
+        megatrendEmoji: r.megatrendEmoji ?? "",
+        fcfYieldPct: r.fcfYieldPct != null ? Number(r.fcfYieldPct) : null,
+        deDirection: r.deDirection ?? null,
+        marginDirection: r.marginDirection ?? null,
+    };
+}
+
+/** Top N stocks from the best scan, ranked by mb_score. Used as the live Fortress 30. */
+export async function getLiveF30Stocks(limit = 30): Promise<ScannerCandidate[]> {
     try {
-        const lastScan = await db.query.scans.findFirst({
-            where: eq(schema.scans.status, "COMPLETED"),
-            orderBy: [desc(schema.scans.runAt)],
-        });
-        if (!lastScan) return [];
-
-        // Get all symbols already in the curated stocks table
-        const curatedRows = await db.select({ symbol: schema.stocks.symbol }).from(schema.stocks);
-        const curatedSymbols = curatedRows.map(r => r.symbol);
-
-        const conditions = [eq(schema.scanResults.scanId, lastScan.id)];
-        if (curatedSymbols.length > 0) {
-            conditions.push(notInArray(schema.scanResults.symbol, curatedSymbols));
-        }
+        const scan = await getBestScan();
+        if (!scan) return [];
 
         const results = await db
             .select()
             .from(schema.scanResults)
-            .where(and(...conditions))
+            .where(and(
+                eq(schema.scanResults.scanId, scan.id),
+                ne(schema.scanResults.category, "OFFLINE")
+            ))
             .orderBy(desc(schema.scanResults.mbScore))
             .limit(limit);
 
-        return results.map(r => ({
-            id: r.id,
-            symbol: r.symbol,
-            price: Number(r.priceAtScan) || 0,
-            mbScore: r.mbScore ?? 0,
-            mbTier: r.mbTier ?? "–",
-            totalScore: r.totalScore ?? 0,
-            megatrend: r.megatrendTag ?? "",
-            megatrendEmoji: r.megatrendEmoji ?? "",
-            fcfYieldPct: r.fcfYieldPct != null ? Number(r.fcfYieldPct) : null,
-            deDirection: r.deDirection ?? null,
-            marginDirection: r.marginDirection ?? null,
-        }));
+        return results.map(mapToCandidate);
+    } catch (error) {
+        console.error("Error fetching live F30 stocks:", error);
+        return [];
+    }
+}
+
+/** Stocks ranked 31–40 from the best scan — shown as candidates below the main grid. */
+export async function getLiveF30Candidates(limit = 10): Promise<ScannerCandidate[]> {
+    try {
+        const scan = await getBestScan();
+        if (!scan) return [];
+
+        const results = await db
+            .select()
+            .from(schema.scanResults)
+            .where(and(
+                eq(schema.scanResults.scanId, scan.id),
+                ne(schema.scanResults.category, "OFFLINE")
+            ))
+            .orderBy(desc(schema.scanResults.mbScore))
+            .limit(limit)
+            .offset(30);
+
+        return results.map(mapToCandidate);
     } catch (error) {
         console.error("Error fetching live F30 candidates:", error);
         return [];

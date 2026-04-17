@@ -22,7 +22,7 @@ describe("API Query Functions", () => {
         results: [{ symbol: "RELIANCE", totalScore: 85, mbTier: "Launcher", mbScore: 90, priceAtScan: 2900, sector: "Energy", market: "NSE" }]
       };
       
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: true,
         json: async () => mockData
       });
@@ -34,7 +34,7 @@ describe("API Query Functions", () => {
     });
 
     it("handles fallback if API fails", async () => {
-      (global.fetch as any).mockResolvedValueOnce({ ok: false, status: 500 });
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: false, status: 500 });
       const res = await queryScanResults(["US"]);
       expect(res.totalStocks).toBe(0);
       expect(res.results.length).toBe(0);
@@ -58,7 +58,7 @@ describe("API Query Functions", () => {
         }
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: true,
         json: async () => mockData
       });
@@ -72,7 +72,7 @@ describe("API Query Functions", () => {
     });
 
     it("handles fallback gracefully", async () => {
-      (global.fetch as any).mockRejectedValueOnce(new Error("Network Error"));
+      (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("Network Error"));
       const res = await queryMacroSnapshot();
       expect(res.vixState).toBe("normal");
       expect(res.snapshot.nifty50).toBe(0);
@@ -87,7 +87,7 @@ describe("API Query Functions", () => {
         ]
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: true,
         json: async () => mockData
       });
@@ -100,7 +100,7 @@ describe("API Query Functions", () => {
     });
 
     it("handles empty arrays and errors gracefully", async () => {
-      (global.fetch as any).mockResolvedValueOnce({ ok: false, status: 404 });
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: false, status: 404 });
       const res = await queryIntelligence();
       expect(res).toEqual([]);
     });

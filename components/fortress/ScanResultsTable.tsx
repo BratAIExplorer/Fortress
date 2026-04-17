@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import { ArrowUpDown, ArrowDown, RefreshCw, AlertTriangle } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -88,6 +88,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
     const [tierFilter, setTierFilter] = useState("All");
     const [ccTierFilter, setCcTierFilter] = useState("All");
     const [categoryFilter, setCategoryFilter] = useState("All");
+    const [degraded, setDegraded] = useState(false);
 
     const fetchResults = useCallback(async () => {
         setLoading(true);
@@ -103,6 +104,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
             const data = await res.json();
             setRows(data.results);
             setTotal(data.total);
+            setDegraded(data.degraded ?? false);
         } catch (e) {
             console.error(e);
         } finally {
@@ -123,6 +125,13 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
 
     return (
         <div className="space-y-4">
+            {/* Degraded scan warning */}
+            {degraded && (
+                <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    <span>Latest scan had insufficient data (rate-limited). Showing last good scan instead.</span>
+                </div>
+            )}
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-3">
                 {/* Tier filter */}

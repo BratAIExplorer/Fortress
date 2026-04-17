@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { spawn } from "child_process";
 import { db, schema } from "@/lib/db/client";
-import { eq, and, desc, notInArray } from "drizzle-orm";
+import { eq, and, desc, notInArray, ne, count } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
 
 // Keep only the most recent N completed scans per market to prevent unbounded growth.
@@ -181,11 +181,22 @@ export async function POST(req: NextRequest) {
                                 score: stockData.total_score
                             });
                         } else if (message.type === "complete") {
+                            // Count non-OFFLINE results to determine scan health
+                            const [goodRow] = await db
+                                .select({ n: count() })
+                                .from(schema.scanResults)
+                                .where(and(
+                                    eq(schema.scanResults.scanId, scan.id),
+                                    ne(schema.scanResults.category, "OFFLINE")
+                                ));
+                            const goodResultsCount = goodRow?.n ?? 0;
+
                             await db.update(schema.scans)
                                 .set({
                                     status: "COMPLETED",
                                     totalScanned: message.count,
-                                    durationMs: Date.now() - scan.runAt!.getTime()
+                                    durationMs: Date.now() - scan.runAt!.getTime(),
+                                    goodResultsCount,
                                 })
                                 .where(eq(schema.scans.id, scan.id));
 
