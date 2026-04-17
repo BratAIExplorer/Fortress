@@ -108,13 +108,13 @@ export async function fetchMarketIntelligence(market: string) {
   if (market === 'NSE') indexTicker = '^NSEI';
   
   try {
-    const hist = await yahooFinance.historical(indexTicker, { period1: '2023-01-01' });
-    const recentPrices = hist.slice(-30).map(d => d.close);
+    const hist = await yahooFinance.historical(indexTicker, { period1: '2023-01-01' }) as any;
+    const recentPrices = (hist || []).slice(-30).map((d: any) => d.close);
     const rsi = calculateRSI(recentPrices, 14);
     
     const latestPrice = recentPrices[recentPrices.length - 1];
     const prevPrice = recentPrices[recentPrices.length - 2];
-    const ma50 = hist.slice(-50).map(d => d.close).reduce((a,b)=>a+b,0)/50;
+    const ma50 = (hist || []).slice(-50).map((d: any) => d.close).reduce((a: number, b: number) => a + b, 0) / 50;
 
     const momentumScore = latestPrice > ma50 ? 65 : 40;
     const rsiInterp = rsi > 70 ? 'overbought' : (rsi < 30 ? 'oversold' : 'neutral');

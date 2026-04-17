@@ -13,10 +13,10 @@ export async function POST(req: Request) {
     const intelligenceData = await fetchMarketIntelligence("US"); // Default US for form input
 
     const recommendation = await generatePortfolioRecommendation(input, macroSnapshot, intelligenceData);
-    
-    let sessionId = randomUUID();
+
+    let sessionId: string = randomUUID().toString();
     let session;
-    
+
     try {
         session = await saveGenieSession({ ...input, macro: macroSnapshot }, recommendation.recommendation);
         sessionId = session?.id || sessionId;

@@ -1,5 +1,5 @@
 import { investmentsGenieSessions, investmentsGenieRecommendations, investmentsGeniePerformance } from "../db/schema";
-import { db } from "../db/drizzle"; // Assuming db instance is exported from there or similar
+import { db } from "../db/client";
 
 export async function saveGenieSession(input: any, recommendation: any) {
   const result = await db.insert(investmentsGenieSessions).values({
