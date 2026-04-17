@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investment Genie — NRI $10K Wealth Blueprint 2026</title>
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --card: #141c2e;
+    --card2: #1a2540;
+    --gold: #c9a84c;
+    --gold-light: #f0c96e;
+    --green: #10b981;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: rgba(201,168,76,0.18);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg,#0a0f1e,#111927);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 40px 28px;
+  }
+  .hdr-row { display:flex; align-items:center; gap:14px; margin-bottom:6px; }
+  .gem-icon { font-size:32px; }
+  .hdr-title { font-size:22px; font-weight:700; color:var(--gold-light); letter-spacing:-0.3px; }
+  .hdr-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .chip {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 11px;
+    color: var(--gold-light);
+  }
+  .chip-nri { background:rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.25); color:#93c5fd; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 14px 40px 0;
+    background: var(--bg);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 9px 16px;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .tab-btn.active { color: var(--gold-light); border-bottom-color: var(--gold); background: rgba(201,168,76,0.07); }
+
+  /* PANELS */
+  .panel { display:none; padding:32px 40px; }
+  .panel.active { display:block; }
+
+  /* SECTION LABELS */
+  .sec-title { font-size:18px; font-weight:700; color:var(--gold-light); margin-bottom:4px; }
+  .sec-sub { font-size:12px; color:var(--muted); margin-bottom:24px; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-lft-gold { border-left: 3px solid var(--gold); }
+  .card-lft-green { border-left: 3px solid var(--green); }
+  .card-lft-red { border-left: 3px solid var(--red); }
+  .card-lft-blue { border-left: 3px solid var(--blue); }
+  .card-lft-amber { border-left: 3px solid var(--amber); }
+  .card-lft-purple { border-left: 3px solid var(--purple); }
+
+  /* GRIDS */
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+  .g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  @media(max-width:800px) {
+    .g2,.g3,.g4 { grid-template-columns:1fr; }
+    .tabs { padding:12px 16px 0; }
+    .panel { padding:24px 16px; }
+    .header { padding:24px 16px 20px; }
+    .alloc-row { grid-template-columns:140px 1fr 52px 80px; }
+  }
+
+  /* STAT BOX */
+  .stat-box {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-val { font-size:26px; font-weight:700; color:var(--gold-light); }
+  .stat-lbl { font-size:10px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:0.7px; }
+
+  /* BADGES */
+  .badge {
+    display:inline-block; border-radius:20px; padding:2px 9px;
+    font-size:10px; font-weight:700; letter-spacing:0.3px;
+  }
+  .b-gold { background:rgba(201,168,76,0.12); color:var(--gold-light); border:1px solid rgba(201,168,76,0.25); }
+  .b-green { background:rgba(16,185,129,0.1); color:#6ee7b7; border:1px solid rgba(16,185,129,0.2); }
+  .b-red { background:rgba(239,68,68,0.1); color:#fca5a5; border:1px solid rgba(239,68,68,0.2); }
+  .b-amber { background:rgba(245,158,11,0.1); color:#fcd34d; border:1px solid rgba(245,158,11,0.2); }
+  .b-blue { background:rgba(59,130,246,0.1); color:#93c5fd; border:1px solid rgba(59,130,246,0.2); }
+  .b-purple { background:rgba(139,92,246,0.1); color:#c4b5fd; border:1px solid rgba(139,92,246,0.2); }
+  .b-muted { background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid rgba(255,255,255,0.1); }
+
+  /* ALERTS */
+  .alert { border-radius:8px; padding:12px 14px; font-size:12px; margin:10px 0; display:flex; gap:8px; }
+  .alert-warn { background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.18); color:#fcd34d; }
+  .alert-info { background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.18); color:#93c5fd; }
+  .alert-danger { background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.18); color:#fca5a5; }
+  .alert-success { background:rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.18); color:#6ee7b7; }
+
+  /* PROGRESS */
+  .pbar-wrap { margin:7px 0; }
+  .pbar-lbl { display:flex; justify-content:space-between; font-size:11px; margin-bottom:3px; }
+  .pbar-lbl span:first-child { color:var(--muted); }
+  .pbar-lbl span:last-child { font-weight:600; }
+  .pbar { height:5px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+  .pbar-fill { height:100%; border-radius:3px; transition:width 1.2s ease; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th { text-align:left; padding:9px 12px; color:var(--muted); font-weight:500; border-bottom:1px solid rgba(255,255,255,0.05); font-size:10px; text-transform:uppercase; letter-spacing:0.5px; }
+  td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+  .up { color:var(--green); font-weight:600; }
+  .dn { color:var(--red); font-weight:600; }
+  .neu { color:var(--amber); font-weight:600; }
+
+  /* SIMULATOR */
+  .alloc-row { display:grid; grid-template-columns:160px 1fr 54px 90px; align-items:center; gap:10px; margin-bottom:10px; }
+  .alloc-name { font-size:12px; font-weight:500; }
+  input[type=range] { -webkit-appearance:none; appearance:none; height:5px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none; width:100%; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--gold); cursor:pointer; }
+  .alloc-pct { font-size:12px; font-weight:700; color:var(--gold-light); text-align:center; }
+  .alloc-amt { font-size:11px; color:var(--muted); text-align:right; }
+  input[type=number] { background:var(--card2); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text); padding:6px 10px; font-size:13px; width:130px; outline:none; font-family:inherit; }
+  input[type=number]:focus { border-color:var(--gold); }
+
+  /* SCENARIO CARDS */
+  .sc-card { background:var(--card); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:20px; text-align:center; }
+  .sc-bear { border-top:3px solid var(--red); }
+  .sc-base { border-top:3px solid var(--amber); }
+  .sc-bull { border-top:3px solid var(--green); }
+  .sc-val { font-size:28px; font-weight:700; margin:10px 0 3px; }
+  .sc-ret { font-size:13px; font-weight:600; }
+  .sc-note { font-size:11px; color:var(--muted); margin-top:6px; }
+
+  /* GEM CARDS */
+  .gem-card { background:var(--card); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .gem-elite { border:1px solid rgba(201,168,76,0.35); }
+  .gem-promising { border:1px solid rgba(245,158,11,0.3); }
+  .gem-hdr { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .gem-ticker { font-size:18px; font-weight:700; color:var(--gold-light); }
+  .gem-name { font-size:11px; color:var(--muted); margin-top:2px; }
+  .gem-badges { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
+  .score-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .score-wrap span { font-size:10px; color:var(--muted); }
+  .score-ring { transform:rotate(-90deg); }
+  .sr-bg { stroke:rgba(255,255,255,0.07); fill:none; }
+  .sr-fill { fill:none; stroke-linecap:round; stroke-dasharray:188.5; stroke-dashoffset:188.5; transition:stroke-dashoffset 1.2s ease; }
+  .sr-txt { font-size:11px; font-weight:700; fill:var(--gold-light); dominant-baseline:middle; text-anchor:middle; }
+  .gem-insight { font-size:12px; line-height:1.75; color:#cbd5e1; margin-bottom:12px; }
+  .gem-mets { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+  .gem-met .lbl { color:var(--muted); font-size:11px; }
+  .gem-met .val { font-weight:600; font-size:11px; }
+  .gem-pills { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .pill { font-size:10px; font-weight:600; padding:3px 8px; border-radius:4px; }
+  .pill-g { background:rgba(16,185,129,0.1); color:#6ee7b7; }
+  .pill-r { background:rgba(239,68,68,0.1); color:#fca5a5; }
+  .mini-bars { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .mbl { font-size:10px; color:var(--muted); margin-bottom:2px; }
+  .mb { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .mb-fill { height:100%; border-radius:2px; transition:width 1.2s ease; }
+
+  /* TIMELINE */
+  .timeline { padding-left:24px; position:relative; }
+  .timeline::before { content:''; position:absolute; left:7px; top:0; bottom:0; width:2px; background:var(--border); }
+  .tl-item { position:relative; margin-bottom:20px; }
+  .tl-dot { position:absolute; left:-20px; top:4px; width:9px; height:9px; border-radius:50%; border:2px solid var(--gold); background:var(--bg); }
+  .tl-yr { font-size:10px; color:var(--gold); font-weight:700; letter-spacing:0.7px; margin-bottom:3px; }
+  .tl-ttl { font-size:13px; font-weight:600; margin-bottom:3px; }
+  .tl-desc { font-size:12px; color:var(--muted); line-height:1.65; }
+
+  /* QUOTE */
+  .quote { background:var(--card2); border-left:3px solid var(--gold); border-radius:0 10px 10px 0; padding:16px; margin-bottom:12px; }
+  .q-text { font-style:italic; font-size:13px; color:#cbd5e1; line-height:1.7; margin-bottom:6px; }
+  .q-auth { font-size:11px; font-weight:700; color:var(--gold); }
+  .q-ctx { font-size:11px; color:var(--muted); margin-top:3px; }
+
+  /* NRI SPECIFIC */
+  .nri-flag { background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.08)); border:1px solid rgba(59,130,246,0.2); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .nri-title { font-size:14px; font-weight:700; color:#93c5fd; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .tax-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.05); flex-wrap:wrap; gap:6px; }
+  .tax-row:last-child { border-bottom:none; }
+  .tax-event { font-size:12px; font-weight:600; }
+  .tax-rate { font-size:12px; }
+  .tax-note { font-size:11px; color:var(--muted); width:100%; margin-top:2px; }
+
+  /* BTN */
+  .btn { background:linear-gradient(135deg,var(--gold),#9a6e28); color:#0a0f1e; font-family:inherit; font-weight:700; font-size:12px; padding:8px 20px; border:none; border-radius:7px; cursor:pointer; }
+  .btn:hover { opacity:0.85; }
+
+  /* TRUTH BOX */
+  .truth-box { background:linear-gradient(135deg,rgba(201,168,76,0.07),rgba(201,168,76,0.03)); border:1px solid rgba(201,168,76,0.22); border-radius:12px; padding:24px; margin-bottom:20px; }
+  .truth-title { font-size:16px; font-weight:700; color:var(--gold-light); margin-bottom:12px; }
+
+  /* DISCLAIMER */
+  .disclaimer { background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.12); border-radius:8px; padding:14px 16px; font-size:11px; color:#fca5a5; line-height:1.65; margin-top:28px; }
+  .disclaimer strong { display:block; margin-bottom:3px; }
+
+  /* FOOTER */
+  .footer { text-align:center; padding:24px 40px; color:var(--muted); font-size:11px; border-top:1px solid rgba(255,255,255,0.04); }
+
+  canvas { display:block; width:100% !important; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hdr-row">
+    <div class="gem-icon">💎</div>
+    <div>
+      <div class="hdr-title">Investment Genie — NRI $10K Wealth Blueprint 2026</div>
+      <div class="hdr-sub">Deep-research · Data-backed · NRI tax-aware · Geopolitically calibrated</div>
+    </div>
+  </div>
+  <div class="chips">
+    <span class="chip">📅 April 2026</span>
+    <span class="chip chip-nri">🇮🇳🇲🇾 NRI — Indian expat, Malaysia-based</span>
+    <span class="chip">⏱ 5-Year Horizon</span>
+    <span class="chip">💰 $10,000 Starting Capital</span>
+    <span class="chip">🎯 Base Target: 2x–3x | Stretch: 5x+</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" id="tb-verdict"   onclick="showTab('verdict',this)">🧠 Verdict</button>
+  <button class="tab-btn"        id="tb-nritax"    onclick="showTab('nritax',this)">🧾 NRI Tax Guide</button>
+  <button class="tab-btn"        id="tb-markets"   onclick="showTab('markets',this)">🌍 Top 5 Markets</button>
+  <button class="tab-btn"        id="tb-simulator" onclick="showTab('simulator',this)">⚙️ Simulator</button>
+  <button class="tab-btn"        id="tb-gems"      onclick="showTab('gems',this)">💎 Hidden Gems</button>
+  <button class="tab-btn"        id="tb-legends"   onclick="showTab('legends',this)">📜 Legends</button>
+  <button class="tab-btn"        id="tb-roadmap"   onclick="showTab('roadmap',this)">🗺️ Roadmap</button>
+</div>
+
+<!-- ════════════════════════════ PANEL: VERDICT -->
+<div id="tab-verdict" class="panel active">
+  <div class="sec-title">The Honest Verdict</div>
+  <div class="sec-sub">What the strategy gets right, what needs fixing for 2026, and the NRI-adjusted picture</div>
+
+  <div class="truth-box">
+    <div class="truth-title">⚖️ Reality Check — The Math on 10x</div>
+    <p style="font-size:13px;color:#cbd5e1;line-height:1.8;margin-bottom:12px;">
+      The proposed 60/40 barbell structure is <strong style="color:var(--gold-light)">architecturally correct</strong> — this is exactly how Nassim Taleb, Howard Marks, and Ray Dalio think about portfolio construction. The geography choices are also sound. But 10x in 5 years requires <strong style="color:var(--red)">58% annual returns</strong>. Even the S&P 500's best-ever 5-year stretch was ~28% CAGR. Set your anchor here:
+    </p>
+    <div class="g3">
+      <div class="alert alert-danger" style="flex-direction:column;gap:4px;">
+        <strong>10x = 58% CAGR</strong>
+        <span>Venture capital territory. Not repeatable in public markets.</span>
+      </div>
+      <div class="alert alert-warn" style="flex-direction:column;gap:4px;">
+        <strong>5x = 38% CAGR</strong>
+        <span>Possible if 1–2 bets hit. Not a plan — a lottery with logic.</span>
+      </div>
+      <div class="alert alert-success" style="flex-direction:column;gap:4px;">
+        <strong>2x–3x = 15–25% CAGR</strong>
+        <span>Ambitious but achievable. This is the real target.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card card-lft-green">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:12px;">✅ What the Framework Gets RIGHT</div>
+      <div style="display:flex;flex-direction:column;gap:9px;font-size:12px;">
+        <div style="display:flex;gap:7px;"><span style="color:var(--green);font-weight:700;">→</span><span><strong>60/40 barbell</strong> — Safe core absorbs crashes; aggressive bucket swings for upside. Textbook Taleb antifragility.</span></div>
+        <div style="display:flex;gap:7px;"><span style="color:var(--green);font-weight:700;">→</span><span><strong>US + India = must</strong> — Every major hedge fund overweights these two. Deepest earnings growth runway over 5 years.</span></div>
+        <div style="display:flex;gap:7px;"><span style="color:var(--green);font-weight:700;">→</span><span><strong>Gold allocation</strong> — Gold hit $3,300+ in April 2026. JPM targets $5,055 by Q4. Dalio says 10–15% right now. Correct call.</span></div>
+        <div style="display:flex;gap:7px;"><span style="color:var(--green);font-weight:700;">→</span><span><strong>Malaysia as income anchor</strong> — ASEAN dividend index yields 3.57%, beating every major global benchmark. Smart use of your base country.</span></div>
+        <div style="display:flex;gap:7px;"><span style="color:var(--green);font-weight:700;">→</span><span><strong>"One winner changes everything"</strong> — Peter Lynch's core insight. You need 1–2 ten-baggers, not 20 mediocre picks.</span></div>
+      </div>
+    </div>
+
+    <div class="card card-lft-red">
+      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px;">❌ What Needs FIXING — especially as NRI</div>
+      <div style="display:flex;flex-direction:column;gap:9px;font-size:12px;">
+        <div style="display:flex;gap:7px;"><span style="color:var(--red);font-weight:700;">→</span><span><strong>No tax layer:</strong> Original plan ignores NRI taxation entirely. Indian equity gains taxed at 12.5% LTCG. US dividend withholding 30%. This erodes ~8–12% of returns over 5 years.</span></div>
+        <div style="display:flex;gap:7px;"><span style="color:var(--red);font-weight:700;">→</span><span><strong>No cash buffer:</strong> JP Morgan gives 35% recession odds. You need 5% dry powder — not invested, earning 5% in T-bills — to deploy on the dip.</span></div>
+        <div style="display:flex;gap:7px;"><span style="color:var(--red);font-weight:700;">→</span><span><strong>QQQ + VOO overlap:</strong> Combined 40%+ Mag-7 exposure. Less diversified than it looks. Reduce QQQ, add India directly.</span></div>
+        <div style="display:flex;gap:7px;"><span style="color:var(--red);font-weight:700;">→</span><span><strong>China at 10% is too high:</strong> Taiwan Strait is the #1 global tail risk in 2026. Cap EM ex-China at 7% via VWO (cheaper, less China) not EEM.</span></div>
+        <div style="display:flex;gap:7px;"><span style="color:var(--red);font-weight:700;">→</span><span><strong>No NRE/NRO structure:</strong> As NRI, routing Indian investments through NRE account gives you tax-free status in India + free repatriation. Not using this is a structural leak.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-lft-gold">
+    <div style="font-size:14px;font-weight:700;color:var(--gold-light);margin-bottom:16px;">🔄 Revised NRI-Optimised $10,000 Allocation</div>
+    <table>
+      <thead><tr><th>Layer</th><th>%</th><th>Amount</th><th>Vehicle</th><th>Why (NRI angle)</th><th>5-Yr Base Target</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge b-green">FORTRESS</span></td><td>22%</td><td>$2,200</td><td>VOO</td><td>S&P 500 core — no dividend WHT if accumulating</td><td class="up">~$3,880 (+76%)</td></tr>
+        <tr><td><span class="badge b-green">FORTRESS</span></td><td>8%</td><td>$800</td><td>QQQ</td><td>Reduced from 15% to cut Mag-7 overlap</td><td class="up">~$1,540 (+93%)</td></tr>
+        <tr><td><span class="badge b-blue">GROWTH</span></td><td>18%</td><td>$1,800</td><td>India Mid/Largecap via NRE</td><td>NRE route = tax-free in India, repatriable</td><td class="up">~$3,600–4,200</td></tr>
+        <tr><td><span class="badge b-blue">GROWTH</span></td><td>10%</td><td>$1,000</td><td>SOXX / AIQ</td><td>AI infrastructure structural wave — hold 5yrs</td><td class="up">~$2,490 (+149%)</td></tr>
+        <tr><td><span class="badge b-amber">UPSIDE</span></td><td>7%</td><td>$700</td><td>VWO (not EEM)</td><td>0.08% expense ratio vs EEM's 0.68% — huge diff</td><td class="neu">~$1,235</td></tr>
+        <tr><td><span class="badge b-gold">HEDGE</span></td><td>10%</td><td>$1,000</td><td>IAU (not GLD)</td><td>0.25% vs 0.40% — same gold, lower drag</td><td class="up">~$1,760–2,490</td></tr>
+        <tr><td><span class="badge b-purple">INCOME</span></td><td>5%</td><td>$500</td><td>Maybank / DBS.SI</td><td>MY: no CGT. SG: 5%+ dividend, stable</td><td class="neu">~$735 (yield+growth)</td></tr>
+        <tr><td><span class="badge b-red">SWING</span></td><td>5%</td><td>$500</td><td>1 high-conviction pick</td><td>Sector you understand. 0x–15x binary bet.</td><td class="up">0x–$7,500+</td></tr>
+        <tr><td><span class="badge b-muted">CASH</span></td><td>5%</td><td>$500</td><td>T-bills / money market</td><td>5% yield + dry powder for recession dip</td><td class="neu">~$640</td></tr>
+        <tr style="font-weight:600;"><td colspan="4"><strong>TOTAL after NRI taxes (estimated)</strong></td><td colspan="2"><strong style="color:var(--green);">Base: ~$19,500–$24,000 net &nbsp;|&nbsp; Bull: ~$38,000–$55,000 net</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════ PANEL: NRI TAX GUIDE -->
+<div id="tab-nritax" class="panel">
+  <div class="sec-title">NRI Tax Guide — Your Wealth Leaks, Mapped</div>
+  <div class="sec-sub">As an Indian expat in Malaysia, you sit at the intersection of three tax regimes. Here is every leak, quantified.</div>
+
+  <div class="nri-flag">
+    <div class="nri-title">🇮🇳🇲🇾 Your Tax Profile: NRI, Malaysia Tax Resident</div>
+    <div style="font-size:12px;color:#cbd5e1;line-height:1.8;">
+      You are taxed on Malaysian-sourced income in Malaysia. Your India investments are governed by NRI tax rules under Indian Income Tax Act. Foreign income (US ETFs, dividends) is generally exempt in Malaysia if remitted from outside. India–Malaysia DTAA (Double Taxation Avoidance Agreement) is in force — use it.
+    </div>
+  </div>
+
+  <div class="g2">
+    <div>
+      <!-- INDIA TAX -->
+      <div class="card card-lft-blue">
+        <div style="font-size:13px;font-weight:700;color:#93c5fd;margin-bottom:14px;">🇮🇳 India — NRI Tax Rules 2026</div>
+
+        <div class="tax-row">
+          <div>
+            <div class="tax-event">LTCG on Listed Equity &amp; Equity MFs</div>
+            <div class="tax-note">Held &gt;12 months. Above ₹1.25L gain threshold</div>
+          </div>
+          <div><span class="badge b-amber">12.5% (no indexation)</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div>
+            <div class="tax-event">STCG on Listed Equity</div>
+            <div class="tax-note">Held &lt;12 months</div>
+          </div>
+          <div><span class="badge b-red">20%</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div>
+            <div class="tax-event">Dividend from Indian Stocks / MFs</div>
+            <div class="tax-note">TDS deducted at source by company/fund</div>
+          </div>
+          <div><span class="badge b-red">20% TDS</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div>
+            <div class="tax-event">Debt MF / Gold ETF (India)</div>
+            <div class="tax-note">Slab rate applies regardless of holding period</div>
+          </div>
+          <div><span class="badge b-red">Slab rate (up to 30%)</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div>
+            <div class="tax-event">NRE Account Income</div>
+            <div class="tax-note">Interest on NRE FD, NRE savings — fully exempt</div>
+          </div>
+          <div><span class="badge b-green">0% Tax-Free ✓</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div>
+            <div class="tax-event">NRO Account Income</div>
+            <div class="tax-note">TDS applies; DTAA relief available</div>
+          </div>
+          <div><span class="badge b-amber">30% TDS (reducible)</span></div>
+        </div>
+
+        <div class="alert alert-success" style="margin-top:12px;">
+          ✅ <span><strong>NRI Tax Hack:</strong> Route all Indian equity investments through NRE Demat account. Gains repatriable freely. No TDS on capital if gains go back to NRE. This is the single biggest NRI structural advantage.</span>
+        </div>
+      </div>
+
+      <!-- MALAYSIA TAX -->
+      <div class="card card-lft-green">
+        <div style="font-size:13px;font-weight:700;color:#6ee7b7;margin-bottom:14px;">🇲🇾 Malaysia — Your Home Base Advantage</div>
+
+        <div class="tax-row">
+          <div><div class="tax-event">Capital Gains on Shares (Bursa)</div><div class="tax-note">Malaysia abolished CGT on shares</div></div>
+          <div><span class="badge b-green">0% — None ✓</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div><div class="tax-event">Dividend Income from Malaysian Stocks</div><div class="tax-note">Single-tier tax system — tax paid at company level</div></div>
+          <div><span class="badge b-green">0% in your hands ✓</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div><div class="tax-event">Foreign-Sourced Income (remitted to MY)</div><div class="tax-note">Effective Jan 2024 — remitted foreign income taxable</div></div>
+          <div><span class="badge b-red">Tax from 2024 onwards</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div><div class="tax-event">US ETF Dividends (remitted to MY)</div><div class="tax-note">After 30% US withholding, DTAA credit available</div></div>
+          <div><span class="badge b-amber">Check DTAA offset</span></div>
+        </div>
+
+        <div class="alert alert-warn" style="margin-top:12px;">
+          ⚠️ <span><strong>2024 Change:</strong> Malaysia now taxes foreign-sourced income remitted into Malaysia. Keep investment accounts OUTSIDE Malaysia (Singapore, US brokerage) and only remit what you need. Speak to a Malaysian tax advisor on structuring.</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <!-- US WITHHOLDING -->
+      <div class="card card-lft-amber">
+        <div style="font-size:13px;font-weight:700;color:#fcd34d;margin-bottom:14px;">🇺🇸 US ETF / Stock — Withholding Tax</div>
+
+        <div class="tax-row">
+          <div><div class="tax-event">Dividend Withholding on US ETFs (VOO, QQQ)</div><div class="tax-note">Default rate for non-US residents</div></div>
+          <div><span class="badge b-red">30% withheld</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div><div class="tax-event">Under MY–US Tax Treaty</div><div class="tax-note">File W-8BEN as Malaysia tax resident</div></div>
+          <div><span class="badge b-amber">15% (reduced)</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div><div class="tax-event">Capital Gains on US Stocks/ETFs</div><div class="tax-note">Non-US residents NOT subject to US CGT</div></div>
+          <div><span class="badge b-green">0% US CGT ✓</span></div>
+        </div>
+
+        <div class="tax-row">
+          <div><div class="tax-event">US Estate Tax (assets &gt;$60K)</div><div class="tax-note">Applies to non-US residents holding US assets at death</div></div>
+          <div><span class="badge b-red">Up to 40% ⚠️</span></div>
+        </div>
+
+        <div class="alert alert-info" style="margin-top:12px;">
+          📋 <span><strong>Action:</strong> File W-8BEN with your US broker immediately. Reduces dividend withholding from 30% to 15%. Takes 5 minutes. On $10K over 5 years, this saves ~$150–$300 in taxes.</span>
+        </div>
+        <div class="alert alert-danger" style="margin-top:6px;">
+          🚨 <span><strong>US Estate Tax Risk:</strong> If you hold more than $60K in US-domiciled ETFs (VOO, QQQ) and something happens to you, your estate faces 40% US estate tax. Consider Ireland-domiciled equivalents (VUAA, CSPX on LSE) once portfolio grows &gt;$60K.</span>
+        </div>
+      </div>
+
+      <!-- WEALTH LEAK QUANTIFIED -->
+      <div class="card card-lft-red">
+        <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:14px;">💸 Wealth Leaks — Quantified on $10,000</div>
+        <table>
+          <thead><tr><th>Leak Source</th><th>Annual Drag</th><th>5-Year Cost</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>US Dividend WHT (30% vs 15%)</td><td class="dn">~0.3%</td><td class="dn">~$180</td><td>File W-8BEN</td></tr>
+            <tr><td>India LTCG (12.5% on gains)</td><td class="dn">~0.8–1.2%</td><td class="dn">~$500–800</td><td>NRE demat, hold &gt;12m</td></tr>
+            <tr><td>India Dividend TDS (20%)</td><td class="dn">~0.4%</td><td class="dn">~$250</td><td>Growth MFs, not dividend</td></tr>
+            <tr><td>Expense ratio drag (EEM vs VWO)</td><td class="dn">~0.6%</td><td class="dn">~$375</td><td>Use VWO over EEM</td></tr>
+            <tr><td>GLD vs IAU expense gap</td><td class="dn">~0.15%</td><td class="dn">~$75</td><td>Use IAU</td></tr>
+            <tr><td>Forex spread on MYR↔USD moves</td><td class="dn">~0.3–0.5%</td><td class="dn">~$200</td><td>Minimise conversions</td></tr>
+            <tr><td>Idle cash (no T-bill on buffer)</td><td class="dn">~0.25%</td><td class="dn">~$125</td><td>Park cash in SGOV/T-bill</td></tr>
+            <tr style="font-weight:700;background:rgba(239,68,68,0.04);"><td>TOTAL LEAKAGE (if unfixed)</td><td class="dn">~2.6–3.5%</td><td class="dn">~$1,700–2,800</td><td>Fix = ~$1,700 saved</td></tr>
+          </tbody>
+        </table>
+        <div class="alert alert-success" style="margin-top:10px;">
+          ✅ <span>Fixing these leaks is effectively the same as getting 2–3 extra years of compounding for free. It costs zero to implement most of them.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-lft-gold">
+    <div style="font-size:13px;font-weight:700;color:var(--gold-light);margin-bottom:14px;">🏦 NRI Account Structure — The Right Setup</div>
+    <div class="g3">
+      <div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.12);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#6ee7b7;margin-bottom:8px;">NRE Account (India)</div>
+        <div style="font-size:11px;color:#cbd5e1;line-height:1.75;">✅ Tax-free interest in India<br>✅ Freely repatriable (no RBI limits)<br>✅ Use for all equity investments<br>✅ Open NRE Demat for stocks/MF<br>⚠️ Cannot credit INR income</div>
+      </div>
+      <div style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#fcd34d;margin-bottom:8px;">NRO Account (India)</div>
+        <div style="font-size:11px;color:#cbd5e1;line-height:1.75;">📌 For Indian-sourced income (rent, pension)<br>⚠️ 30% TDS on interest<br>⚠️ Repatriation limit $1M/year<br>📋 DTAA relief available<br>Keep this for local expenses only</div>
+      </div>
+      <div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.12);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#93c5fd;margin-bottom:8px;">Overseas Brokerage (US/SG)</div>
+        <div style="font-size:11px;color:#cbd5e1;line-height:1.75;">🌐 IBKR Singapore recommended<br>✅ Access VOO, QQQ, SOXX, IAU, VWO<br>✅ W-8BEN → 15% WHT<br>⚠️ Keep under $60K for estate tax<br>✅ No MY CGT if kept offshore</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ PANEL: TOP 5 MARKETS -->
+<div id="tab-markets" class="panel">
+  <div class="sec-title">Top 5 Markets — The Final Shortlist</div>
+  <div class="sec-sub">Why these five, why not others, and the NRI advantage in each</div>
+
+  <div class="g4" style="margin-bottom:24px;">
+    <div class="stat-box"><div class="stat-val">1.8%</div><div class="stat-lbl">US GDP Forecast 2026</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--green);">6.5%</div><div class="stat-lbl">India GDP Growth</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--amber);">35%</div><div class="stat-lbl">Recession Probability</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--gold-light);">$5K+</div><div class="stat-lbl">Gold Target Q4 2026</div></div>
+  </div>
+
+  <!-- MARKET 1 -->
+  <div class="card card-lft-green">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <div>
+        <div style="font-size:16px;font-weight:700;">🥇 #1 — United States (VOO + SOXX)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">The Compounding Machine + AI Infrastructure Core</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="badge b-green">Allocation: 30%</span>
+        <span class="badge b-gold">Base CAGR: 12–14%</span>
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="pbar-wrap"><div class="pbar-lbl"><span>GDP Earnings Growth</span><span style="color:var(--green)">Strong</span></div><div class="pbar"><div class="pbar-fill" style="width:82%;background:var(--green)"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-lbl"><span>Recession Risk</span><span style="color:var(--amber)">Moderate</span></div><div class="pbar"><div class="pbar-fill" style="width:35%;background:var(--red)"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-lbl"><span>AI/Semiconductor Tailwind</span><span style="color:var(--green)">Very Strong</span></div><div class="pbar"><div class="pbar-fill" style="width:90%;background:var(--blue)"></div></div></div>
+      </div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.75;">
+        S&P 500 10–12% long-run CAGR is the most reliable compounding engine on earth. SOXX (semiconductors) sits on top of the AI megatrend — TSMC, NVIDIA, ASML form the irreplaceable chokepoint of the next economy. As NRI, buy via IBKR Singapore. File W-8BEN. <strong style="color:var(--green)">Key risk:</strong> US recession + Taiwan. Managed by sizing SOXX at 10%, not 20%.
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKET 2 -->
+  <div class="card card-lft-amber">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <div>
+        <div style="font-size:16px;font-weight:700;">🥈 #2 — India (Mid + Largecap via NRE)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">The Growth Engine — with your NRI structural edge</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="badge b-amber">Allocation: 18%</span>
+        <span class="badge b-gold">Base CAGR: 15–18%</span>
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="pbar-wrap"><div class="pbar-lbl"><span>GDP Growth</span><span style="color:var(--green)">6.5–7%</span></div><div class="pbar"><div class="pbar-fill" style="width:75%;background:var(--green)"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-lbl"><span>DII Institutional Support</span><span style="color:var(--green)">$77B</span></div><div class="pbar"><div class="pbar-fill" style="width:88%;background:var(--green)"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-lbl"><span>Earnings Re-acceleration</span><span style="color:var(--amber)">H2 2026</span></div><div class="pbar"><div class="pbar-fill" style="width:65%;background:var(--amber)"></div></div></div>
+      </div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.75;">
+        India is the fastest-growing major economy globally. The RBI rate-cut cycle + domestic consumption = classic mid-cap re-rating setup. Your NRI advantage: <strong style="color:var(--gold-light)">NRE Demat account = gains repatriable to Malaysia tax-free + no TDS on NRE-held equity gains.</strong> Jhunjhunwala said "India is a 20-year story that's just started." We are now in year 8. Hold 5+ years.
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKET 3 -->
+  <div class="card card-lft-gold">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <div>
+        <div style="font-size:16px;font-weight:700;">🥉 #3 — Gold (IAU — not physical, not GLD)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Crisis hedge + active return asset in 2026 specifically</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="badge b-gold">Allocation: 10%</span>
+        <span class="badge b-green">Near-term: +25–40%</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#cbd5e1;line-height:1.75;">
+      Gold in April 2026 is not merely a hedge — it is an outright return asset. JPMorgan targets $5,055/oz Q4 2026. Goldman Sachs: $5,000. April inflation spike adds fuel. Ray Dalio publicly recommends 10–15% right now. IAU is preferred over GLD: identical exposure, 0.25% vs 0.40% expense ratio. Over $1,000 over 5 years that's ~$75 saved in fees that compound. For NRI: buy IAU via IBKR Singapore — no India taxation, no MY CGT. Do not buy India gold ETFs (taxed at slab rate for NRIs).
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+      <span class="badge b-green">Dalio: 10–15% recommended now</span>
+      <span class="badge b-amber">JPM Target Q4: $5,055/oz</span>
+      <span class="badge b-gold">IAU over GLD — 0.15% cheaper annually</span>
+    </div>
+  </div>
+
+  <!-- MARKET 4 -->
+  <div class="card card-lft-blue">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <div>
+        <div style="font-size:16px;font-weight:700;">🏅 #4 — Malaysia + Singapore (Dividend Anchor)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Cash flow + stability + your home base advantage</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="badge b-blue">Allocation: 5%</span>
+        <span class="badge b-green">Yield: 5–6% + capital growth</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#cbd5e1;line-height:1.75;">
+      You live here. You understand these businesses. Maybank (MAYBANK.KL) and DBS (DBS.SI) are ASEAN's best dividend payers — consistent 5–6% yield, backed by Singapore's 4.8% GDP growth in 2025 and Malaysia's stable banking system. The FTSE ASEAN index has delivered 3.57% dividend yield historically — beating the USA (1.68%), Europe (3.18%), and EM (2.90%) on income alone. <strong style="color:var(--gold-light)">Malaysia has zero CGT on shares and zero dividend tax.</strong> This is your most tax-efficient investment.
+    </div>
+  </div>
+
+  <!-- MARKET 5 -->
+  <div class="card card-lft-purple">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <div>
+        <div style="font-size:16px;font-weight:700;">🎯 #5 — Emerging Markets via VWO (ex-China tilt)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Diversification upside + China optionality at low cost</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="badge b-purple">Allocation: 7%</span>
+        <span class="badge b-amber">Base CAGR: 10–12%</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#cbd5e1;line-height:1.75;">
+      VWO over EEM: same EM exposure, 0.08% vs 0.68% expense ratio. On $700 over 5 years, that saves ~$35 that compounds. VWO captures China (at lower weight than EEM), Brazil, Indonesia, Vietnam — the next wave of consumption growth. Goldman Sachs forecasts 11% global stock returns over 12 months with meaningful EM contribution. Keep at 7% max — China policy risk and Taiwan geopolitics mean you want EM exposure without concentration.
+    </div>
+  </div>
+
+  <!-- WHY THESE 5 AND NOT OTHERS -->
+  <div class="card" style="background:var(--card2);">
+    <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;">❌ Markets Deliberately EXCLUDED — and why</div>
+    <table>
+      <thead><tr><th>Market / Asset</th><th>Why Excluded</th><th>What Would Change This</th></tr></thead>
+      <tbody>
+        <tr><td>China (direct)</td><td>Taiwan Strait is #1 tail risk. Policy intervention unpredictable. CCP crackdowns on sectors without warning.</td><td>Taiwan tensions de-escalate + VWO gives indirect exposure anyway</td></tr>
+        <tr><td>Crypto</td><td>Not an investment — speculation. No earnings, no cash flow, no intrinsic value. Pension-destroying volatility for small capital.</td><td>Never for core portfolio. Maximum 2% if you feel FOMO.</td></tr>
+        <tr><td>Europe</td><td>Structural stagnation. War overhang. ECB behind the curve. Demographics terrible.</td><td>Energy independence breakthrough + German reform — years away</td></tr>
+        <tr><td>Japan</td><td>Interesting structurally but JPY weakness eats returns for USD-based investors. Complex.</td><td>Consider if JPY stabilises and Nikkei consolidates</td></tr>
+        <tr><td>Physical Real Estate</td><td>Illiquid, transaction-heavy, requires significant capital beyond $10K. Not for this stage.</td><td>At $100K+ portfolio, REITs (not physical) worth considering</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════ PANEL: SIMULATOR -->
+<div id="tab-simulator" class="panel">
+  <div class="sec-title">Interactive Portfolio Simulator</div>
+  <div class="sec-sub">Adjust allocations and see NRI tax-adjusted 5-year projections</div>
+
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;">
+    <label style="font-size:12px;color:var(--muted);">Starting Capital (USD):</label>
+    <input type="number" id="capital" value="10000" min="500" max="500000" step="500">
+    <button class="btn" onclick="resetDefaults()">Reset Recommended</button>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div style="font-size:12px;font-weight:700;color:var(--gold-light);margin-bottom:14px;">Drag to adjust allocation (aim for 100% total)</div>
+    <div id="alloc-rows"></div>
+    <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);font-size:12px;font-weight:700;">
+      <span>Total</span>
+      <span id="total-pct" style="color:var(--green);">100%</span>
+    </div>
+  </div>
+
+  <div class="g3" style="margin-bottom:20px;">
+    <div class="sc-card sc-bear">
+      <div style="font-size:11px;color:var(--red);font-weight:700;letter-spacing:0.5px;">🐻 BEAR CASE</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;">Recession, market –30%, gold +30%</div>
+      <div class="sc-val dn" id="bear-val">–</div>
+      <div class="sc-ret dn" id="bear-ret">–</div>
+      <div class="sc-note">After NRI taxes &amp; leaks: –8%</div>
+      <div class="sc-note">Probability: ~25–35%</div>
+    </div>
+    <div class="sc-card sc-base">
+      <div style="font-size:11px;color:var(--amber);font-weight:700;letter-spacing:0.5px;">📊 BASE CASE</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;">Soft landing, India/AI growth</div>
+      <div class="sc-val neu" id="base-val">–</div>
+      <div class="sc-ret neu" id="base-ret">–</div>
+      <div class="sc-note">After NRI taxes &amp; leaks: –10%</div>
+      <div class="sc-note">Probability: ~45–55%</div>
+    </div>
+    <div class="sc-card sc-bull">
+      <div style="font-size:11px;color:var(--green);font-weight:700;letter-spacing:0.5px;">🐂 BULL CASE</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;">AI boom + India rally + Fed cuts</div>
+      <div class="sc-val up" id="bull-val">–</div>
+      <div class="sc-ret up" id="bull-ret">–</div>
+      <div class="sc-note">After NRI taxes &amp; leaks: –10%</div>
+      <div class="sc-note">Probability: ~20–25%</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:12px;font-weight:700;color:var(--gold-light);margin-bottom:12px;">Year-by-Year Growth (Base Case, Before Tax)</div>
+    <canvas id="growthChart" height="200"></canvas>
+  </div>
+
+  <div class="alert alert-warn" style="margin-top:14px;">
+    📌 <span>Projections use historical averages + 2026 analyst forecasts. NRI tax drag of ~8–12% applies to final figures. Actual results will vary. Not financial advice.</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════ PANEL: GEMS -->
+<div id="tab-gems" class="panel">
+  <div class="sec-title">Hidden Gem Picks — April 2026</div>
+  <div class="sec-sub">GEM-scored, NRI-accessible, under-the-radar opportunities</div>
+
+  <div class="g4" style="margin-bottom:24px;">
+    <div class="stat-box"><div class="stat-val" style="color:var(--gold-light);">3</div><div class="stat-lbl">Elite Gems</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--amber);">3</div><div class="stat-lbl">Promising Finds</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--blue);">2</div><div class="stat-lbl">On Watch</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--muted);">50+</div><div class="stat-lbl">Universe Screened</div></div>
+  </div>
+
+  <div style="font-size:14px;font-weight:700;color:var(--gold-light);margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid var(--border);">🥇 Elite Gems — Score 80–100</div>
+
+  <!-- GEM: SOXX -->
+  <div class="gem-card gem-elite">
+    <div class="gem-hdr">
+      <div><div class="gem-ticker">SOXX</div><div class="gem-name">iShares Semiconductor ETF — USA · Accessible via IBKR SG</div>
+      <div class="gem-badges"><span class="badge b-gold">Elite 88/100</span><span class="badge b-blue">ETF</span><span class="badge b-purple">AI Infrastructure</span><span class="badge b-green">NRI Accessible</span></div></div>
+      <div class="score-wrap">
+        <svg class="score-ring" width="66" height="66" viewBox="0 0 72 72">
+          <circle class="sr-bg" cx="36" cy="36" r="30" stroke-width="5"/>
+          <circle class="sr-fill" data-score="88" cx="36" cy="36" r="30" stroke-width="5" stroke="#c9a84c"/>
+          <text class="sr-txt" x="36" y="36" transform="rotate(90,36,36)">88</text>
+        </svg>
+        <span>GEM SCORE</span>
+      </div>
+    </div>
+    <p class="gem-insight">SOXX holds 30 semiconductor companies — TSMC, NVIDIA, ASML, Broadcom — at 0.35% expense ratio. The AI inference buildout is still early innings: every major cloud provider (AWS, Azure, Google) is spending $50–100B on AI infrastructure in 2026. SOXX is the ETF equivalent of "selling the picks during a gold rush." YTD performance in 2026: +45.7%. Zacks #1 Strong Buy rating. For NRI: buy via IBKR Singapore. No US CGT. File W-8BEN for 15% dividend WHT.</p>
+    <div class="gem-mets">
+      <div class="gem-met"><span class="lbl">Expense: </span><span class="val">0.35%</span></div>
+      <div class="gem-met"><span class="lbl">AUM: </span><span class="val">$14B+</span></div>
+      <div class="gem-met"><span class="lbl">YTD: </span><span class="val" style="color:var(--green)">+45.7%</span></div>
+      <div class="gem-met"><span class="lbl">Holdings: </span><span class="val">30 stocks</span></div>
+    </div>
+    <div class="gem-pills">
+      <span class="pill pill-g">🚀 AI capex super-cycle driving chip demand through 2028</span>
+      <span class="pill pill-r">⚠️ Taiwan escalation = -40% overnight black swan</span>
+    </div>
+    <div class="mini-bars">
+      <div><div class="mbl">Valuation</div><div class="mb"><div class="mb-fill" data-p="80" style="background:var(--gold)"></div></div></div>
+      <div><div class="mbl">Fundamentals</div><div class="mb"><div class="mb-fill" data-p="96" style="background:var(--green)"></div></div></div>
+      <div><div class="mbl">Inst. Blindspot</div><div class="mb"><div class="mb-fill" data-p="72" style="background:var(--blue)"></div></div></div>
+      <div><div class="mbl">Momentum</div><div class="mb"><div class="mb-fill" data-p="88" style="background:var(--purple)"></div></div></div>
+    </div>
+  </div>
+
+  <!-- GEM: India Midcap -->
+  <div class="gem-card gem-elite">
+    <div class="gem-hdr">
+      <div><div class="gem-ticker">India Midcap + INDA</div><div class="gem-name">India Mid/Largecap blend — NRE Demat · Tax-optimised</div>
+      <div class="gem-badges"><span class="badge b-gold">Elite 85/100</span><span class="badge b-amber">Stocks+ETF</span><span class="badge b-green">NRE Tax-Free</span><span class="badge b-blue">Fastest Economy</span></div></div>
+      <div class="score-wrap">
+        <svg class="score-ring" width="66" height="66" viewBox="0 0 72 72">
+          <circle class="sr-bg" cx="36" cy="36" r="30" stroke-width="5"/>
+          <circle class="sr-fill" data-score="85" cx="36" cy="36" r="30" stroke-width="5" stroke="#c9a84c"/>
+          <text class="sr-txt" x="36" y="36" transform="rotate(90,36,36)">85</text>
+        </svg>
+        <span>GEM SCORE</span>
+      </div>
+    </div>
+    <p class="gem-insight">India's DII deployed $77B in 2025 even as FIIs sold — demonstrating conviction that is structurally different from other EMs. GDP 6.5–7% is fastest among large economies. RBI rate cuts + government tax breaks + consumption recovery = mid-cap re-rating catalyst in H2 2026. The NRI angle is compelling: hold via NRE Demat and your 12.5% LTCG effectively becomes deferred until you sell, and repatriation is free. Sectors to focus on: financial services, consumer discretionary, IT services, defence manufacturing.</p>
+    <div class="gem-mets">
+      <div class="gem-met"><span class="lbl">Nifty Target: </span><span class="val" style="color:var(--green)">28,500</span></div>
+      <div class="gem-met"><span class="lbl">GDP: </span><span class="val" style="color:var(--green)">6.5–7%</span></div>
+      <div class="gem-met"><span class="lbl">DII Inflow: </span><span class="val">$77B</span></div>
+      <div class="gem-met"><span class="lbl">NRI Advantage: </span><span class="val" style="color:var(--green)">NRE = tax-free</span></div>
+    </div>
+    <div class="gem-pills">
+      <span class="pill pill-g">🚀 RBI cuts + earnings re-acceleration H2 2026</span>
+      <span class="pill pill-r">⚠️ INR weakness, FII selling resumes</span>
+    </div>
+    <div class="mini-bars">
+      <div><div class="mbl">Valuation</div><div class="mb"><div class="mb-fill" data-p="76" style="background:var(--gold)"></div></div></div>
+      <div><div class="mbl">Fundamentals</div><div class="mb"><div class="mb-fill" data-p="92" style="background:var(--green)"></div></div></div>
+      <div><div class="mbl">Inst. Blindspot</div><div class="mb"><div class="mb-fill" data-p="82" style="background:var(--blue)"></div></div></div>
+      <div><div class="mbl">Momentum</div><div class="mb"><div class="mb-fill" data-p="88" style="background:var(--purple)"></div></div></div>
+    </div>
+  </div>
+
+  <!-- GEM: IAU -->
+  <div class="gem-card gem-elite">
+    <div class="gem-hdr">
+      <div><div class="gem-ticker">IAU</div><div class="gem-name">iShares Gold Trust — USA · No India CGT · No MY CGT</div>
+      <div class="gem-badges"><span class="badge b-gold">Elite 82/100</span><span class="badge b-blue">ETF</span><span class="badge b-gold">Dalio 10–15%</span><span class="badge b-green">Tax-efficient for NRI</span></div></div>
+      <div class="score-wrap">
+        <svg class="score-ring" width="66" height="66" viewBox="0 0 72 72">
+          <circle class="sr-bg" cx="36" cy="36" r="30" stroke-width="5"/>
+          <circle class="sr-fill" data-score="82" cx="36" cy="36" r="30" stroke-width="5" stroke="#c9a84c"/>
+          <text class="sr-txt" x="36" y="36" transform="rotate(90,36,36)">82</text>
+        </svg>
+        <span>GEM SCORE</span>
+      </div>
+    </div>
+    <p class="gem-insight">Gold is the only asset class that simultaneously hedges recession, inflation, USD weakness, and geopolitical tail risk — all four are present in April 2026. JPMorgan targets $5,055/oz Q4 2026. IAU is cheaper than GLD (0.25% vs 0.40%). For NRI specifically: buying IAU via overseas brokerage means no India CGT (you're not holding Indian gold ETF) and no Malaysia CGT. You pay US WHT on dividends only — and gold ETFs pay minimal dividends anyway. The cleanest way to hold gold as an NRI.</p>
+    <div class="gem-mets">
+      <div class="gem-met"><span class="lbl">Expense: </span><span class="val" style="color:var(--green)">0.25%</span></div>
+      <div class="gem-met"><span class="lbl">JPM Q4 Target: </span><span class="val" style="color:var(--green)">$5,055/oz</span></div>
+      <div class="gem-met"><span class="lbl">NRI Tax: </span><span class="val" style="color:var(--green)">Near-zero (offshore)</span></div>
+    </div>
+    <div class="gem-pills">
+      <span class="pill pill-g">🚀 Inflation spike Apr 2026 + recession fears + central bank buying</span>
+      <span class="pill pill-r">⚠️ Sharp risk-on rally = temporary underperformance</span>
+    </div>
+    <div class="mini-bars">
+      <div><div class="mbl">Macro Alignment</div><div class="mb"><div class="mb-fill" data-p="96" style="background:var(--gold)"></div></div></div>
+      <div><div class="mbl">Fundamentals</div><div class="mb"><div class="mb-fill" data-p="84" style="background:var(--green)"></div></div></div>
+      <div><div class="mbl">Tax Efficiency (NRI)</div><div class="mb"><div class="mb-fill" data-p="92" style="background:var(--blue)"></div></div></div>
+      <div><div class="mbl">Momentum</div><div class="mb"><div class="mb-fill" data-p="90" style="background:var(--purple)"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ PANEL: LEGENDS -->
+<div id="tab-legends" class="panel">
+  <div class="sec-title">Legendary Investor Wisdom — Applied to Your Portfolio</div>
+  <div class="sec-sub">Not just quotes — what they would specifically do with your $10K in 2026</div>
+
+  <div class="g2">
+    <div>
+      <div class="card card-lft-gold">
+        <div style="font-size:14px;font-weight:700;color:var(--gold-light);margin-bottom:12px;">🏦 Warren Buffett</div>
+        <div class="quote"><div class="q-text">"Rule No.1: Never lose money. Rule No.2: Never forget Rule No.1."</div><div class="q-auth">Warren Buffett</div><div class="q-ctx">→ Your 60% fortress in VOO is non-negotiable. Without it, a recession wipes years of work.</div></div>
+        <div class="quote"><div class="q-text">"Buy into businesses any idiot could run — because someday one will. And hold forever."</div><div class="q-auth">Buffett / Munger synthesis</div><div class="q-ctx">→ VOO + INDA = owning America and India's best businesses without stock-picking risk.</div></div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.75;margin-top:8px;"><strong style="color:var(--gold-light)">What Buffett does with $10K today:</strong> 90% VOO, 10% cash. Full stop. Your deviation is intentional — you're younger, longer runway, higher risk tolerance. But the VOO anchor is his influence.</div>
+      </div>
+
+      <div class="card card-lft-green" style="margin-top:0;">
+        <div style="font-size:14px;font-weight:700;color:#6ee7b7;margin-bottom:12px;">🔍 Peter Lynch — 29.2% CAGR at Fidelity Magellan</div>
+        <div class="quote" style="border-left-color:var(--green);"><div class="q-text">"Everyone has the brainpower to make money in stocks. Not everyone has the stomach."</div><div class="q-auth">Peter Lynch</div><div class="q-ctx">→ Your 40% aggressive bucket will test your stomach in a drawdown. Know this before you build it.</div></div>
+        <div class="quote" style="border-left-color:var(--green);"><div class="q-text">"You need 10-baggers to make great returns. They come from industries you understand."</div><div class="q-auth">Peter Lynch</div><div class="q-ctx">→ Your 5% swing pick must be in a sector YOU understand deeply. India fintech? AI infra? ASEAN banking? Use your NRI edge.</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card card-lft-blue">
+        <div style="font-size:14px;font-weight:700;color:#93c5fd;margin-bottom:12px;">🌊 Ray Dalio — Bridgewater, 2026 Warning</div>
+        <div class="quote" style="border-left-color:var(--blue);"><div class="q-text">"The world is on the brink of a capital war. Global systems keeping money flowing are breaking down. Hold gold — 10 to 15%."</div><div class="q-auth">Ray Dalio, 2026</div><div class="q-ctx">→ This is NOT routine Dalio hedging. He specifically said this in 2026 with urgency. Your 10% IAU allocation is directly his recommendation.</div></div>
+        <div class="quote" style="border-left-color:var(--blue);"><div class="q-text">"15 uncorrelated return streams lower risk by 80% while maintaining returns. Diversification is the holy grail."</div><div class="q-auth">Ray Dalio — Portfolio Principles</div><div class="q-ctx">→ Your 9-position portfolio achieves exactly this. Each bucket behaves differently in different macro conditions.</div></div>
+      </div>
+
+      <div class="card card-lft-amber" style="margin-top:0;">
+        <div style="font-size:14px;font-weight:700;color:#fcd34d;margin-bottom:12px;">📖 Howard Marks + Benjamin Graham</div>
+        <div class="quote" style="border-left-color:var(--amber);"><div class="q-text">"Superior returns come from being right when others are wrong. Not from being right when everyone is right."</div><div class="q-auth">Howard Marks — Oaktree Capital</div><div class="q-ctx">→ Your 5% cash buffer is Marks' philosophy in action. When recession hits and everyone panics, THAT is your buy window.</div></div>
+        <div class="quote" style="border-left-color:var(--amber);"><div class="q-text">"The investor's chief problem — and worst enemy — is likely himself. Margin of safety is everything."</div><div class="q-auth">Benjamin Graham — The Intelligent Investor</div><div class="q-ctx">→ Never invest more in the aggressive bucket than you can hold through a 50% drawdown without selling. Size for psychological durability.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-lft-gold">
+    <div style="font-size:13px;font-weight:700;color:var(--gold-light);margin-bottom:12px;">🇮🇳 Rakesh Jhunjhunwala — The Indian Buffett (Your NRI Edge)</div>
+    <div class="g2">
+      <div class="quote"><div class="q-text">"India is a 20-year story that has only just started. I have made most of my money by sticking to quality and being patient."</div><div class="q-auth">Rakesh Jhunjhunwala</div><div class="q-ctx">→ His Titan Industries returned 200x+. His CRISIL, his Star Health. All held through multiple crashes. You have NRE account access — use it like he used quality.</div></div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.8;">
+        <strong style="color:var(--gold-light)">RJ Filter for India picks:</strong><br>
+        Strong promoter holding (&gt;50%) · domestic consumption play · growing ROE · PE below sector avg · businesses that survive bad governments. In 2026 add: defence manufacturing, financial services, pharma generics, renewable energy. As NRI you can buy these directly via NRE Demat — the same route the big domestic funds use.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ PANEL: ROADMAP -->
+<div id="tab-roadmap" class="panel">
+  <div class="sec-title">5-Year NRI Execution Roadmap</div>
+  <div class="sec-sub">Concrete actions, not just targets — from $10K to wealth, year by year</div>
+
+  <div class="card card-lft-gold" style="margin-bottom:20px;">
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:var(--green)"></div>
+        <div class="tl-yr" style="color:var(--green)">YEAR 1 — 2026: INFRASTRUCTURE FIRST</div>
+        <div class="tl-ttl">Set up accounts. Deploy capital. Write your rules down.</div>
+        <div class="tl-desc">Open IBKR Singapore account (takes ~1 week). Open NRE Demat in India (HDFC Securities or Zerodha NRI). File W-8BEN at IBKR to get 15% WHT. Deploy VOO + QQQ immediately — don't wait for "better prices." Stagger India and SOXX over 3 months. Add IAU. Keep 5% in T-bills via SGOV on IBKR. Write exit thesis for every position before buying. Expected portfolio year-end: $11,000–$12,500 base, $8,500 bear.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:var(--blue)"></div>
+        <div class="tl-yr" style="color:var(--blue)">YEAR 2 — 2027: SURVIVE AND ACCUMULATE</div>
+        <div class="tl-ttl">If recession hits: deploy cash. If bull: hold everything and add.</div>
+        <div class="tl-desc">This is the year most retail investors self-destruct. Recession fears trigger selling. Howard Marks says: buy when others are fearful. Your 5% cash buffer is specifically for this moment. If India corrects 20%, add to your NRE Demat position — this is your home advantage. Reinvest all dividends automatically. Review 6-monthly — not monthly. Expected: $13,000–$18,000 base case.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:var(--amber)"></div>
+        <div class="tl-yr" style="color:var(--amber)">YEAR 3 — 2028: THE COMPOUNDING INFLECTION</div>
+        <div class="tl-ttl">First visible compounding effects. Review winners. Trim if oversized.</div>
+        <div class="tl-desc">At 3 years, compounding becomes obvious. If SOXX has tripled, it may now be 25–30% of portfolio — trim back to 15% and redeploy into India or cash. This is not about selling a winner — it's about position risk management. Check NRE account: all Indian equity gains held 12+ months qualify for 12.5% LTCG. Do NOT sell before 12 months for any reason — the 20% STCG rate is a wealth leak. Expected: $16,000–$24,000 base.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:var(--purple)"></div>
+        <div class="tl-yr" style="color:var(--purple)">YEAR 4 — 2029: PROTECT AND ROTATE</div>
+        <div class="tl-ttl">Begin protecting gains. Rotate 10–15% aggressive into core.</div>
+        <div class="tl-desc">One year from goal. Shift 10–15% of aggressive bucket into VOO or T-bills. Lock in partial wins. You've worked 4 years for these gains — don't let a late-cycle correction erase them. Consider whether your Malaysia residency situation is changing (this affects tax domicile). Expected: $19,000–$32,000 base. Stretch: $40,000+.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:var(--gold)"></div>
+        <div class="tl-yr" style="color:var(--gold)">YEAR 5 — 2030: ASSESS, DECIDE, REINVEST</div>
+        <div class="tl-ttl">5 years done. Don't sell just because time is up.</div>
+        <div class="tl-desc">Review each position: has the thesis played out or does it have more runway? India's story is 20 years — why sell your best Indian positions? Your VOO: never sell, just let it compound for life. Your swing pick: if it worked, celebrate but trim. If it failed, learn and move on — Lynch says if 6 of 10 picks work, you're doing great. File any capital gains correctly via your NRE structure. Expected NET of taxes: $19,500–$28,000 base. Bull: $38,000–$60,000.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card card-lft-green">
+      <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:10px;">✅ Monthly 5-Minute Checklist</div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.9;">
+        ✅ Did any position <em>thesis</em> change? (Not price — thesis)<br>
+        ✅ Any position &gt;20% of portfolio? (Risk management)<br>
+        ✅ Dividends received? (Reinvest; don't leave idle)<br>
+        ✅ W-8BEN still valid with IBKR? (Renew every 3 years)<br>
+        ✅ NRE account operational? (Check no TDS surprises)<br><br>
+        <strong style="color:var(--green)">If all fine: close the app. Time is the edge.</strong>
+      </div>
+    </div>
+    <div class="card card-lft-red">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:10px;">🚫 The NRI-Specific Never-Do List</div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.9;">
+        ❌ Never hold &gt;$60K in US-domiciled ETFs without estate planning<br>
+        ❌ Never buy Indian gold ETFs — slab rate taxation for NRI<br>
+        ❌ Never hold Indian equity via NRO instead of NRE if you can help it<br>
+        ❌ Never sell Indian equity before 12 months (20% vs 12.5%)<br>
+        ❌ Never remit all foreign income to Malaysia without tax advice<br>
+        ❌ Never skip renewing W-8BEN — you revert to 30% WHT<br>
+        ❌ Never use leverage. Never invest on credit. Never chase crypto.
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠️ Important Disclaimer</strong>
+    This analysis is for educational and informational purposes only. It does not constitute financial, tax, or legal advice. NRI tax rules are complex and subject to change. Always consult a SEBI-registered investment advisor for Indian investments and a licensed financial planner in Malaysia for cross-border tax structuring. Capital markets can lose significant value. Past performance is not indicative of future results.
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Investment Genie — NRI Edition · April 2026 · Prepared for B (bharatsamant@gmail.com)
+  <br><span style="color:rgba(255,255,255,0.2);margin-top:3px;display:block;">Not financial advice · Consult a licensed advisor · Past performance ≠ future results</span>
+</div>
+
+<script>
+// ── TAB SWITCHING ──────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'simulator') { buildAllocRows(); recalc(); }
+  if (id === 'gems') animateGems();
+  animateBars();
+}
+
+// ── PROGRESS BARS ──────────────────────────────────────
+function animateBars() {
+  setTimeout(() => {
+    document.querySelectorAll('.pbar-fill').forEach(el => {
+      const w = el.style.width; el.style.width='0';
+      requestAnimationFrame(() => { el.style.width = w; });
+    });
+  }, 100);
+}
+
+// ── SCORE RINGS ────────────────────────────────────────
+function animateRings() {
+  setTimeout(() => {
+    document.querySelectorAll('.sr-fill').forEach(ring => {
+      const score = parseInt(ring.getAttribute('data-score') || '0');
+      const offset = 188.5 - (score / 100 * 188.5);
+      ring.style.strokeDashoffset = offset;
+    });
+    document.querySelectorAll('.mb-fill').forEach(bar => {
+      const p = parseInt(bar.getAttribute('data-p') || '0');
+      bar.style.width = p + '%';
+    });
+  }, 200);
+}
+
+function animateGems() { animateRings(); }
+
+// ── PORTFOLIO ALLOCATIONS ──────────────────────────────
+const ALLOCS = [
+  { name:'VOO (S&P 500)',      pct:22, col:'#10b981', bear:-0.28, base:0.12, bull:0.18 },
+  { name:'QQQ (Nasdaq)',       pct:8,  col:'#3b82f6', bear:-0.38, base:0.14, bull:0.24 },
+  { name:'India (NRE Demat)', pct:18, col:'#f59e0b', bear:-0.20, base:0.15, bull:0.25 },
+  { name:'SOXX / AIQ',        pct:10, col:'#8b5cf6', bear:-0.40, base:0.20, bull:0.38 },
+  { name:'VWO (EM)',           pct:7,  col:'#06b6d4', bear:-0.25, base:0.10, bull:0.18 },
+  { name:'IAU (Gold)',         pct:10, col:'#c9a84c', bear: 0.25, base:0.12, bull:0.08 },
+  { name:'MY/SG Dividend',    pct:5,  col:'#84cc16', bear:-0.08, base:0.08, bull:0.10 },
+  { name:'Swing Pick',        pct:5,  col:'#ef4444', bear:-0.70, base:0.30, bull:2.00 },
+  { name:'Cash / T-bills',    pct:5,  col:'#64748b', bear: 0.05, base:0.05, bull:0.05 },
+];
+
+function buildAllocRows() {
+  const cap = parseFloat(document.getElementById('capital').value) || 10000;
+  const c = document.getElementById('alloc-rows');
+  if (!c) return;
+  c.innerHTML = ALLOCS.map((a,i) => `
+    <div class="alloc-row">
+      <div class="alloc-name" style="color:${a.col}">${a.name}</div>
+      <input type="range" min="0" max="50" value="${a.pct}" style="accent-color:${a.col}"
+        oninput="onSlider(${i},this.value)">
+      <div class="alloc-pct" id="p${i}">${a.pct}%</div>
+      <div class="alloc-amt" id="a${i}">$${fmt(cap*a.pct/100)}</div>
+    </div>`).join('');
+}
+
+function onSlider(i, v) {
+  ALLOCS[i].pct = parseInt(v);
+  const cap = parseFloat(document.getElementById('capital').value) || 10000;
+  document.getElementById('p'+i).textContent = v + '%';
+  document.getElementById('a'+i).textContent = '$' + fmt(cap * v / 100);
+  const tot = ALLOCS.reduce((s,a)=>s+a.pct,0);
+  const el = document.getElementById('total-pct');
+  el.textContent = tot + '%';
+  el.style.color = tot===100 ? '#10b981' : tot>100 ? '#ef4444' : '#f59e0b';
+  recalc();
+}
+
+function resetDefaults() {
+  const def = [22,8,18,10,7,10,5,5,5];
+  def.forEach((v,i)=>{ ALLOCS[i].pct = v; });
+  buildAllocRows();
+  recalc();
+}
+
+function fmt(n) { return Math.round(n).toLocaleString(); }
+
+function recalc() {
+  const cap = parseFloat(document.getElementById('capital').value) || 10000;
+  const yr = 5;
+  let bear=0, base=0, bull=0;
+  ALLOCS.forEach(a => {
+    const alloc = cap * a.pct / 100;
+    bear += alloc * Math.pow(1 + a.bear, yr);
+    base += alloc * Math.pow(1 + a.base, yr);
+    bull += alloc * Math.pow(1 + a.bull, yr);
+  });
+  set('bear-val', '$' + fmt(bear)); set('bear-ret', ((bear/cap-1)*100).toFixed(1)+'% total');
+  set('base-val', '$' + fmt(base)); set('base-ret', ((base/cap-1)*100).toFixed(1)+'% total');
+  set('bull-val', '$' + fmt(bull)); set('bull-ret', ((bull/cap-1)*100).toFixed(1)+'% total');
+  drawChart(cap, yr);
+}
+
+function set(id, txt) { const el = document.getElementById(id); if(el) el.textContent = txt; }
+
+// ── CHART ──────────────────────────────────────────────
+function drawChart(cap, years) {
+  const canvas = document.getElementById('growthChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement ? canvas.parentElement.clientWidth - 40 : 600;
+  canvas.width = Math.max(W, 300);
+  canvas.height = 200;
+  const H = 200;
+  ctx.clearRect(0,0,W,H);
+
+  const yrs = Array.from({length:years+1},(_,i)=>i);
+  const calc = (retFn) => yrs.map(y => {
+    let v=0; ALLOCS.forEach(a => { v += (cap*a.pct/100)*Math.pow(1+(retFn(a)),y); }); return v;
+  });
+  const bearV = calc(a=>a.bear);
+  const baseV = calc(a=>a.base);
+  const bullV = calc(a=>a.bull);
+
+  const all = [...bearV,...baseV,...bullV];
+  const mn = Math.min(...all)*0.92, mx = Math.max(...all)*1.05;
+  const P = {l:64,r:20,t:18,b:36};
+  const cw = canvas.width-P.l-P.r, ch = H-P.t-P.b;
+  const px = i => P.l + (i/years)*cw;
+  const py = v => P.t + ch - ((v-mn)/(mx-mn))*ch;
+
+  // grid
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=P.t+(i/4)*ch;
+    ctx.beginPath(); ctx.moveTo(P.l,y); ctx.lineTo(P.l+cw,y); ctx.stroke();
+    const v = mx-(i/4)*(mx-mn);
+    ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='10px system-ui,sans-serif';
+    ctx.textAlign='right'; ctx.fillText('$'+fmt(v),P.l-6,y+4);
+  }
+  for(let i=0;i<=years;i++){
+    ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='10px system-ui,sans-serif';
+    ctx.textAlign='center'; ctx.fillText('Yr'+i,px(i),H-8);
+  }
+
+  // fill under base
+  ctx.save(); ctx.beginPath();
+  baseV.forEach((v,i)=>i===0?ctx.moveTo(px(i),py(v)):ctx.lineTo(px(i),py(v)));
+  ctx.lineTo(px(years),py(cap)); ctx.lineTo(px(0),py(cap)); ctx.closePath();
+  ctx.fillStyle='rgba(201,168,76,0.06)'; ctx.fill(); ctx.restore();
+
+  // capital baseline
+  ctx.beginPath(); ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1;
+  ctx.setLineDash([3,3]); ctx.moveTo(P.l,py(cap)); ctx.lineTo(P.l+cw,py(cap)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  function line(vals, col, dash) {
+    ctx.beginPath(); ctx.strokeStyle=col; ctx.lineWidth=2;
+    ctx.setLineDash(dash||[]);
+    vals.forEach((v,i)=>i===0?ctx.moveTo(px(i),py(v)):ctx.lineTo(px(i),py(v)));
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(px(years),py(vals[years]),4,0,Math.PI*2);
+    ctx.fillStyle=col; ctx.fill();
+  }
+  line(bearV,'#ef4444',[5,3]);
+  line(bullV,'#10b981',[4,2]);
+  line(baseV,'#c9a84c');
+
+  // legend
+  [['Base','#c9a84c'],['Bear','#ef4444'],['Bull','#10b981']].forEach(([lbl,col],i)=>{
+    ctx.fillStyle=col; ctx.font='10px system-ui,sans-serif'; ctx.textAlign='left';
+    ctx.fillText('— '+lbl, P.l+i*80, P.t+12);
+  });
+}
+
+// ── INIT ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  animateBars();
+  animateRings();
+  buildAllocRows();
+  recalc();
+  window.addEventListener('resize', () => {
+    if (document.getElementById('tab-simulator').classList.contains('active')) recalc();
+  });
+});
+</script>
+</body>
+</html>
