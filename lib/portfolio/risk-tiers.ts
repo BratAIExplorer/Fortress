@@ -16,7 +16,7 @@ export const riskTiers: Record<string, RiskTier> = {
     alternatives: 0,
     maxVIX: 25,
     pickCount: 5,
-    vixAdjustment: -10
+    vixAdjustment: 10
   },
   balanced: {
     equityAllocation: 60,
@@ -25,7 +25,7 @@ export const riskTiers: Record<string, RiskTier> = {
     alternatives: 0,
     maxVIX: 30,
     pickCount: 8,
-    vixAdjustment: -5
+    vixAdjustment: 5
   },
   aggressive: {
     equityAllocation: 80,
