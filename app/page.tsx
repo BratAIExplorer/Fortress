@@ -14,6 +14,14 @@ export default function Home() {
       {/* Navbar */}
       <Navbar />
 
+      {/* Compliance Disclaimer Banner */}
+      <div className="bg-amber-50 border-b border-amber-200 py-3 px-4">
+        <div className="max-w-4xl mx-auto text-center text-sm text-amber-900">
+          <strong>Important Disclosure:</strong> Fortress Intelligence is not a financial advisor. This platform provides analysis and research tools for educational purposes only.
+          Please consult a licensed financial advisor before making investment decisions. Past performance does not guarantee future results.
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="relative flex flex-col items-center justify-center pt-24 pb-32 px-4 text-center space-y-8 overflow-hidden">
 

@@ -189,7 +189,7 @@ export function ClarityPanel({ className }: ClarityPanelProps) {
         </div>
         <div className="text-right shrink-0">
           <p className="text-xs text-muted-foreground">Snapshot</p>
-          <p className="text-sm font-medium text-white">{formatDate(report.snapshotDate)}</p>
+          <p className="text-sm font-medium text-white">{formatDate(report.generatedAt ?? report.snapshotDate)}</p>
         </div>
       </div>
 

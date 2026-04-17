@@ -1,5 +1,5 @@
 # Fortress Intelligence: Senior AI Handover & Infrastructure Blueprint
-**Last updated: March 25, 2026**
+**Last updated: April 18, 2026**
 
 ---
 
@@ -13,6 +13,26 @@ research at scale), pattern recognition (Sovereign Alpha), and discipline enforc
 
 **Data Source Policy (March 2026):** Free-first. yfinance with statement-level FCF/ROCE
 fallbacks. No paid sources until alpha is empirically proven at 90-day cycle. It finds hidden gems across Stocks, ETFs, and Mutual Funds using a self-learning prediction system that improves accuracy with every 90-day scan cycle. The infrastructure goal is **Zero-Interference Hosting** — scale to multiple products on a single VPS with institutional-grade isolation.
+
+---
+
+## 🛡️ April 2026 Beta Audit & Remediation
+
+Conducted a priority audit to resolve functional and visual blockers before public beta.
+
+### 1. The "Contrast Trap" (CRITICAL)
+- **Problem**: Future agents were adding `bg-white` cards to the dark-themed app. Since global `text-foreground` is light-colored, text became invisible (light-on-white).
+- **Remedy**: **NEVER use `bg-white`**. Always use `bg-card`, `bg-background`, or `bg-secondary`. Use HSL variables from `globals.css`.
+- **Enforcement**: Mandatory check in `InvestmentGenieForm.tsx` and `AllocationResult.tsx`.
+
+### 2. Route Coverage
+- **Problem**: `/stocks` was 404. Navigation intended to show a listing of all tracked equities.
+- **Fixed**: Created `app/stocks/page.tsx` as a root listing fetched from PostgreSQL.
+
+### 3. Investment Genie Reliability
+- **Problem**: Form submission failing due to non-existent UI component imports and missing accessibility labels.
+- **Fixed**: Rewrote form using standard accessible elements; added `aria-label` for Playwright E2E compatibility.
+- **Verification**: 13/13 E2E tests passing.
 
 ---
 
@@ -319,6 +339,7 @@ GlossaryRiskMode     — Conservative/Balanced/Aggressive rules
 - [x] Query efficiency: `getRandomWisdom` O(1)
 - [x] CI: Native SSH client replaces `appleboy/ssh-action`
 - [x] Infrastructure: Nginx reverse proxy + SSL live
+- [x] **Audit Fixes (April 2026)**: /stocks listing page, Investment Genie contrast/E2E
 
 ### Infrastructure
 - [x] VPS git repo initialized at `/opt/fortress`

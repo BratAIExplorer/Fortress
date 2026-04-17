@@ -20,7 +20,7 @@ const mockUserProfile: UserProfile = {
   age: 35,
   amount: 15000,
   horizon: "20yr",
-  countries: ["India", "US"],
+  countries: ["India", "United States"],
   riskAppetite: 50,
   experience: "intermediate",
   incomeStability: "stable",
@@ -358,7 +358,7 @@ describe("allocatePortfolio", () => {
   it("should include India stocks only if India in countries", () => {
     const usOnlyProfile: UserProfile = {
       ...mockUserProfile,
-      countries: ["US"],
+      countries: ["United States"],
     };
 
     const result = allocatePortfolio(
@@ -657,7 +657,7 @@ describe("allocatePortfolio edge cases", () => {
   it("should handle all countries combination", () => {
     const allCountriesProfile: UserProfile = {
       ...mockUserProfile,
-      countries: ["India", "US", "Malaysia", "Singapore", "ETFs"],
+      countries: ["India", "United States", "Malaysia", "Singapore", "ETFs"],
     };
 
     const result = allocatePortfolio(

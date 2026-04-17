@@ -35,7 +35,7 @@ async function triggerScanner() {
 
       res.on("end", () => {
         const timestamp = new Date().toISOString();
-        if (res.statusCode === 200 || res.statusCode === 201) {
+        if (res.statusCode === 200 || res.statusCode === 201 || res.statusCode === 202) {
           console.log(
             `[${timestamp}] ✅ Scanner job triggered successfully (Status: ${res.statusCode})`
           );

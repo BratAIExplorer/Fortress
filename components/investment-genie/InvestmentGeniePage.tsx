@@ -51,21 +51,33 @@ export default function InvestmentGeniePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4">
+    <div className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Compliance Disclaimer */}
+        <div className="mb-8 bg-red-950/30 border border-red-500/20 rounded-xl p-4 backdrop-blur-sm">
+          <div className="text-red-400 font-bold mb-2 flex items-center gap-2">
+            <span>⚠️</span> Important Disclaimer
+          </div>
+          <p className="text-red-200/80 text-sm leading-relaxed">
+            <strong>This is not financial advice.</strong> Investment Genie provides analysis and suggestions for research purposes only.
+            You must consult a licensed financial advisor before making any investment decisions.
+            Investing in stocks carries risk of loss. Past performance does not guarantee future results. You assume full responsibility for your investment decisions.
+          </p>
+        </div>
+
         {/* Header */}
         <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-4xl font-bold font-serif text-white mb-3 tracking-tight">
             💎 Investment Genie
           </h1>
-          <p className="text-lg text-slate-300">
+          <p className="text-lg text-muted-foreground font-light">
             Personalized portfolio allocation for NRI investors
           </p>
         </div>
 
         {/* Main content */}
         {!allocation ? (
-          <div className="bg-white rounded-lg shadow-xl p-8">
+          <div className="bg-card/50 backdrop-blur-md border border-white/5 rounded-2xl shadow-2xl p-8">
             <InvestmentGenieForm onSubmit={handleFormSubmit} />
           </div>
         ) : (
@@ -75,42 +87,45 @@ export default function InvestmentGeniePage() {
               profile={userProfile!}
             />
             <div className="flex justify-center">
-              <button
+              <Button
                 onClick={handleReset}
-                className="px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white rounded-lg font-semibold transition"
+                variant="outline"
+                size="lg"
+                className="px-8 border-white/10 hover:bg-white/5"
               >
                 Generate New Allocation
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
         {/* Loading state */}
         {loading && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-8 text-center">
-              <div className="w-12 h-12 border-4 border-slate-300 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-lg font-semibold text-slate-700">
-                Analyzing markets & generating allocation...
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-card border border-white/10 rounded-2xl p-10 text-center shadow-2xl">
+              <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-6" />
+              <p className="text-xl font-bold text-white mb-2">
+                Analyzing Market Pulse...
               </p>
-              <p className="text-sm text-slate-500 mt-2">This takes 1-2 seconds</p>
+              <p className="text-muted-foreground">Triangulating signals & generating allocation</p>
             </div>
           </div>
         )}
 
         {/* Error state */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="text-red-800 font-semibold mb-2">
-              ⚠️ Error generating allocation
+          <div className="bg-red-950/40 border border-red-500/30 rounded-xl p-6 mb-8">
+            <div className="text-red-400 font-bold mb-2 flex items-center gap-2">
+              <span>⚠️</span> Error generating allocation
             </div>
-            <p className="text-red-700 text-sm mb-4">{error}</p>
-            <button
+            <p className="text-red-200/70 text-sm mb-6">{error}</p>
+            <Button
               onClick={handleReset}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition"
+              variant="destructive"
+              className="font-bold"
             >
               Try Again
-            </button>
+            </Button>
           </div>
         )}
       </div>

@@ -41,7 +41,7 @@ const mockRecommendation = {
 
 test.describe("Investment Genie Full Journey", () => {
   test("form renders all fields", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Check all fields are visible
     expect(await page.locator("text=Age").isVisible()).toBeTruthy();
@@ -54,7 +54,7 @@ test.describe("Investment Genie Full Journey", () => {
   });
 
   test("validates required fields before submission", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Try submitting without selecting a country
     await page.click('button:has-text("Generate Portfolio")');
@@ -64,7 +64,7 @@ test.describe("Investment Genie Full Journey", () => {
   });
 
   test("can select multiple countries", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Select India and US
     await page.click('label:has-text("India")');
@@ -76,11 +76,11 @@ test.describe("Investment Genie Full Journey", () => {
 
   test("displays recommendation after submission", async ({ page, context }) => {
     // Mock API responses
-    await context.route("**/api/investment/scan-results", (route) => {
+    await context.route("**/api/**", (route) => {
       route.abort("aborted");
     });
 
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Select country and submit
     await page.click('label:has-text("India")');
@@ -92,7 +92,7 @@ test.describe("Investment Genie Full Journey", () => {
   });
 
   test("can adjust risk appetite slider", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Check initial value
     const riskSlider = page.locator('input[type="range"][aria-label*="Risk"]');
@@ -106,7 +106,7 @@ test.describe("Investment Genie Full Journey", () => {
   });
 
   test("form can be reset", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Fill form
     await page.click('label:has-text("India")');
@@ -127,19 +127,19 @@ test.describe("Investment Genie Full Journey", () => {
     context,
   }) => {
     // Route to mock successful response
-    await context.route("**/api/investment/**", (route) => {
-      if (route.request().url().includes("scan-results")) {
+    await context.route("**/api/**", (route) => {
+      if (route.request().url().includes("scan/results")) {
         route.fulfill({
           status: 200,
           contentType: "application/json",
           body: JSON.stringify(mockRecommendation),
         });
       } else {
-        route.continue();
+        route.abort("aborted");
       }
     });
 
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Submit form
     await page.click('label:has-text("India")');
@@ -152,19 +152,19 @@ test.describe("Investment Genie Full Journey", () => {
   });
 
   test("displays top picks with allocation", async ({ page, context }) => {
-    await context.route("**/api/investment/**", (route) => {
-      if (route.request().url().includes("scan-results")) {
+    await context.route("**/api/**", (route) => {
+      if (route.request().url().includes("scan/results")) {
         route.fulfill({
           status: 200,
           contentType: "application/json",
           body: JSON.stringify(mockRecommendation),
         });
       } else {
-        route.continue();
+        route.abort("aborted");
       }
     });
 
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Submit form
     await page.click('label:has-text("India")');
@@ -177,19 +177,19 @@ test.describe("Investment Genie Full Journey", () => {
   });
 
   test("can add picks to watchlist", async ({ page, context }) => {
-    await context.route("**/api/investment/**", (route) => {
-      if (route.request().url().includes("scan-results")) {
+    await context.route("**/api/**", (route) => {
+      if (route.request().url().includes("scan/results")) {
         route.fulfill({
           status: 200,
           contentType: "application/json",
           body: JSON.stringify(mockRecommendation),
         });
       } else {
-        route.continue();
+        route.abort("aborted");
       }
     });
 
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Submit form
     await page.click('label:has-text("India")');
@@ -208,19 +208,19 @@ test.describe("Investment Genie Full Journey", () => {
   test("can export recommendation", async ({ page, context }) => {
     let downloadPromise: Promise<any> | null = null;
 
-    await context.route("**/api/investment/**", (route) => {
-      if (route.request().url().includes("scan-results")) {
+    await context.route("**/api/**", (route) => {
+      if (route.request().url().includes("scan/results")) {
         route.fulfill({
           status: 200,
           contentType: "application/json",
           body: JSON.stringify(mockRecommendation),
         });
       } else {
-        route.continue();
+        route.abort("aborted");
       }
     });
 
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Submit form
     await page.click('label:has-text("India")');
@@ -240,11 +240,11 @@ test.describe("Investment Genie Full Journey", () => {
   });
 
   test("handles network errors gracefully", async ({ page, context }) => {
-    await context.route("**/api/investment/**", (route) => {
+    await context.route("**/api/**", (route) => {
       route.abort("failed");
     });
 
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Submit form
     await page.click('label:has-text("India")');
@@ -263,7 +263,7 @@ test.describe("Investment Genie Full Journey", () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Form should be visible and usable on mobile
     expect(await page.locator("form").isVisible()).toBeTruthy();
@@ -275,8 +275,8 @@ test.describe("Investment Genie Full Journey", () => {
   test("session persistence across page reload", async ({ page, context }) => {
     const sessionId = "persist-session-123";
 
-    await context.route("**/api/investment/**", (route) => {
-      if (route.request().url().includes("scan-results")) {
+    await context.route("**/api/**", (route) => {
+      if (route.request().url().includes("scan/results")) {
         route.fulfill({
           status: 200,
           contentType: "application/json",
@@ -286,11 +286,11 @@ test.describe("Investment Genie Full Journey", () => {
           }),
         });
       } else {
-        route.continue();
+        route.abort("aborted");
       }
     });
 
-    await page.goto("/");
+    await page.goto("/investment-genie");
 
     // Submit form
     await page.click('label:has-text("India")');

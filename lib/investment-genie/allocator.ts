@@ -471,7 +471,7 @@ function buildTaxOptimization(profile: UserProfile): {
   }
 
   // W-8BEN: Reduce US dividend withholding tax
-  if (profile.countries.includes("US")) {
+  if (profile.countries.includes("United States")) {
     optimization.w8ben =
       "File Form W-8BEN with your US broker (15% vs 30% dividend withholding tax). Save 15% on dividends.";
   }

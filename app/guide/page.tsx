@@ -258,7 +258,7 @@ export default function GuidePage() {
                         <LayerRow
                             id="L3 · 10pts" label="Relative Strength" icon={Activity} color="bg-amber-600"
                             plain="Is the market already rewarding this stock?"
-                            detail="Upgraded in v2: Now checks 3 time horizons — 3-month (40%), 6-month (35%), and 1-year (25%) performance vs Nifty 50. A stock outperforming consistently across all three is in a structural trend, not a short-term blip. Weighted so longer-term outperformance matters more."
+                            detail="Upgraded in v2: Now checks 3 historical time horizons — 3-month (40%), 6-month (35%), and 1-year (25%) performance vs Nifty 50. A stock that has outperformed consistently across all three periods is in a structural trend, not a short-term blip. Weighted so longer-term outperformance matters more. Past performance does not guarantee future results."
                         />
                         <LayerRow
                             id="L4 · 25pts" label="Growth Engine" icon={TrendingUp} color="bg-purple-600"

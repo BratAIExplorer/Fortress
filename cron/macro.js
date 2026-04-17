@@ -15,7 +15,7 @@ async function triggerMacro() {
     const options = {
       hostname: "localhost",
       port: 3000,
-      path: "/api/macro/refresh",
+      path: "/api/macro",
       method: "POST",
       headers: {
         "Content-Type": "application/json",

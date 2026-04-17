@@ -213,12 +213,12 @@ const layers = [
     color: "#A78BFA",
     label: "L3 — Relative Strength",
     beginner: {
-      question: "Is the market consistently rewarding this stock across multiple timeframes?",
-      analogy: "One good month could be luck. Beating the Nifty 50 for 3 months, 6 months AND a year is a structural trend. L3 v2 now checks all three — a stock that outperforms consistently across all timeframes is in a genuine uptrend.",
+      question: "Is the market consistently rewarding this stock across multiple historical timeframes?",
+      analogy: "One good month could be luck. Historically beating the Nifty 50 for 3 months, 6 months AND a year can indicate a structural trend. L3 v2 now checks all three — a stock that has outperformed consistently across all timeframes may indicate a genuine uptrend, though past performance does not guarantee future results.",
       whatWeCheck: [
-        "Has the stock outperformed Nifty 50 over 3 months? (40% weight)",
-        "Has it outperformed over 6 months? (35% weight)",
-        "Has it outperformed over 1 full year? (25% weight)",
+        "Has the stock historically outperformed Nifty 50 over the past 3 months? (40% weight)",
+        "Has it outperformed over the past 6 months? (35% weight)",
+        "Has it outperformed over the past 1 full year? (25% weight)",
       ],
       passExample: "A defence stock that has beaten Nifty 50 for 3M, 6M, and 1Y — structural institutional accumulation.",
       failExample: "A stock that spiked 20% in one month but is flat/negative over 6M and 1Y — a noise spike, not a trend.",
@@ -1193,7 +1193,7 @@ function EngineChangelog() {
       date: "March 2026",
       items: [
         { layer: "L2 Pricing Power", type: "upgrade", desc: "Added sector-relative margin premium scoring. Now checks if margins are above sector median — not just absolute thresholds. A company 30%+ above its sector peers earns maximum pricing power points." },
-        { layer: "L3 Relative Strength", type: "upgrade", desc: "Extended from 3-month only to multi-band: 3M (40%) + 6M (35%) + 1Y (25%). Consistent outperformance across all three horizons = structural trend, not noise." },
+        { layer: "L3 Relative Strength", type: "upgrade", desc: "Extended from 3-month only to multi-band: 3M (40%) + 6M (35%) + 1Y (25%). Historical consistent outperformance across all three horizons may indicate a structural trend, not noise. Past performance does not guarantee future results." },
         { layer: "L5 Governance", type: "rebuild", desc: "Fully rebuilt. Now uses real ownership data: promoter/insider holding %, FII/institutional holding %, short interest ratio, and debt trajectory. The previous version used D/E as a governance proxy — this is the real thing." },
         { layer: "L6 Valuation Gate", type: "new", desc: "New layer (5 pts). Eliminates stocks in genuine bubble territory: P/E > 100 with growth < 25%, or EV/EBITDA > 60 with growth < 20%. Quality growth stocks at 30–60x P/E are NOT penalised." },
         { layer: "Weights", type: "change", desc: "Default weights updated: L1:25 + L2:20 + L3:10 + L4:25 + L5:15 + L6:5 = 100. L3 reduced from 15 to 10 (momentum is confirmation, not thesis). L6 new allocation." },
@@ -1342,7 +1342,7 @@ export default function IntelligencePage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-16 pb-12 px-4 text-center overflow-hidden border-b border-white/10">
+      <section className="relative pt-8 pb-12 px-4 text-center overflow-hidden border-b border-white/10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/8 blur-[100px] rounded-full -z-10" />
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <Badge variant="secondary" className="mb-4">Intelligence Layer</Badge>
@@ -1382,6 +1382,16 @@ export default function IntelligencePage() {
           </div>
         </motion.div>
       </section>
+
+      {/* Compliance Disclaimer */}
+      <div className="bg-red-50/10 border-b border-red-500/20 px-4 py-3 flex items-center justify-center">
+        <div className="max-w-3xl text-center text-xs text-red-200">
+          <strong>⚠️ Important Disclaimer:</strong> This is educational content only, not financial advice.
+          Fortress Intelligence is not a financial advisor or investment service.
+          You must consult a licensed financial advisor before making investment decisions.
+          Past performance does not guarantee future results.
+        </div>
+      </div>
 
       {/* Share Bar */}
       <div className="bg-primary/10 border-b border-primary/20 px-4 py-2.5 flex items-center justify-center gap-3 flex-wrap">

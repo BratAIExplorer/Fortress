@@ -12,14 +12,21 @@
 **Data Source Policy:** Free-first. yfinance with statement-level fallbacks for FCF/ROCE.
 Paid sources (Trendlyne, Kite Connect) only after alpha is empirically proven.
 
+**Theme Drift Policy:** ALL components MUST follow the Dark Luxury theme (Navy/Gold).
+- **CRITICAL**: Do NOT use `bg-white` or `text-black`. These cause invisible text in our HSL-variable theme.
+- **Reference**: Use `bg-card`, `bg-background`, `text-foreground`, and `text-muted-foreground`.
+- **Validation**: Every new page must be checked for "Contrast Traps" (light text/bg on light bg/text).
+
 ---
 
 Sovereign Wealth Intelligence Engine for NRI investors. Finds hidden gems across Stocks, ETFs, and Mutual Funds using a self-learning, multi-market prediction system that improves accuracy with every 90-day scan cycle.
 
-## 🚀 Production Status: Sovereign Alpha — Data Collection Started
-As of March 25, 2026: 215 NSE predictions recorded at Nifty 22,912. First 90-day alpha measurement due June 2026.
-
-**Engine fixes applied March 25:** Timeout guard (was 86% failure rate), FCF/ROCE calculated from statements (was null for ~90% NSE stocks), sanity-checked against Asian Paints, Tata Elxsi, Vodafone Idea, Suzlon.
+## 🚀 Production Status: Sovereign Alpha — Public Beta Live
+As of April 18, 2026: **E2E Audit Completed.**
+- ✅ Investment Genie functional & verified (13/13 tests)
+- ✅ /stocks coverage listing live
+- ✅ Dark-theme drift corrected (Premium Dark Institutional styling)
+- ✅ Zero-interference deployment verified
 
 ---
 

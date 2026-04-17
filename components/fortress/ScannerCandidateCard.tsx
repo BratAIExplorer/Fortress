@@ -73,6 +73,12 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
                     <p className="text-[9px] text-emerald-500/60 uppercase tracking-widest font-mono pt-1">
                         Scanner Detected · No Editorial Review
                     </p>
+
+                    <div className="border-t border-white/10 pt-2 mt-2">
+                        <p className="text-[8px] text-muted-foreground">
+                            Not financial advice. Consult an advisor before investing.
+                        </p>
+                    </div>
                 </CardContent>
             </Card>
         </motion.div>
