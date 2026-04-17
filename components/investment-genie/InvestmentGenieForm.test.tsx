@@ -47,7 +47,7 @@ describe("InvestmentGenieForm", () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     const profile = onSubmit.mock.calls[0][0];
-    
+
     expect(profile).toHaveProperty("age", 30);
     expect(profile).toHaveProperty("amount", 1000);
     expect(profile).toHaveProperty("horizon", "5yr");
