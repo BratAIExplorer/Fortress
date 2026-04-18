@@ -9,6 +9,7 @@ import {
   queryIntelligence,
 } from "@/lib/investment-genie/queries";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/fortress/BackButton";
 import { InvestmentGenieForm } from "./InvestmentGenieForm";
 import AllocationResult from "./AllocationResult";
 
@@ -66,14 +67,17 @@ export default function InvestmentGeniePage() {
           </p>
         </div>
 
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold font-serif text-white mb-3 tracking-tight">
-            💎 Investment Genie
-          </h1>
-          <p className="text-lg text-muted-foreground font-light">
-            Personalized portfolio allocation for NRI investors
-          </p>
+        {/* Header with Back Button */}
+        <div className="mb-12">
+          <BackButton fallbackHref="/investment-genie" className="mb-6" />
+          <div className="text-center">
+            <h1 className="text-4xl font-bold font-serif text-white mb-3 tracking-tight">
+              💎 Investment Genie
+            </h1>
+            <p className="text-lg text-muted-foreground font-light">
+              Personalized portfolio allocation for NRI investors
+            </p>
+          </div>
         </div>
 
         {/* Main content */}

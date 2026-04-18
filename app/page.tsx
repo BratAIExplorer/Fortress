@@ -6,13 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ArrowRight, TrendingUp, BookOpen, Database, Brain } from "lucide-react";
 import Link from "next/link";
-import { Navbar } from "@/components/fortress/Navbar";
+import { SignInBenefits } from "@/components/auth/SignInBenefits";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Navbar */}
-      <Navbar />
 
       {/* Compliance Disclaimer Banner */}
       <div className="bg-amber-950/20 border-b border-amber-500/10 py-3 px-4 backdrop-blur-sm">
@@ -114,8 +112,11 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Sign-In Benefits Section */}
+      <SignInBenefits />
+
       {/* Footer */}
-      <footer className="mt-auto border-t py-12 bg-background">
+      <footer className="border-t py-12 bg-background">
         <div className="container px-4 text-center text-muted-foreground text-sm">
           <p>&copy; {new Date().getFullYear()} Fortress Intelligence. All rights reserved.</p>
           <p className="mt-2 text-xs">Not a SEBI registered investment advisor. For educational purposes only.</p>

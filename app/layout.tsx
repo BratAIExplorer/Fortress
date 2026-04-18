@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 
 import { Providers } from "@/components/providers";
+import { Navbar } from "@/components/fortress/Navbar";
+import { Breadcrumb } from "@/components/fortress/Breadcrumb";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -33,9 +35,16 @@ export default function RootLayout({
         )}
       >
         <Providers>
-          <main className="relative flex min-h-screen flex-col">
-            {children}
-          </main>
+          <div className="relative flex min-h-screen flex-col">
+            {/* Global Navigation */}
+            <Navbar />
+            <Breadcrumb />
+
+            {/* Page Content */}
+            <main className="flex-1 w-full">
+              {children}
+            </main>
+          </div>
           <Toaster theme="dark" richColors position="bottom-right" />
         </Providers>
       </body>

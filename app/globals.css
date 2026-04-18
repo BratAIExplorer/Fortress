@@ -79,4 +79,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Account for sticky navigation header (56px navbar + 40px breadcrumb) */
+  main {
+    @apply pt-0;
+  }
+
+  /* Mobile breakpoint - adjust for smaller header */
+  @media (max-width: 640px) {
+    main {
+      @apply pt-0;
+    }
+  }
 }
