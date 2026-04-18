@@ -71,4 +71,4 @@ jobs:
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             "$VPS_USER@$VPS_HOST" \
-            "cd /opt/fortress && bash scripts/deploy-vps.sh"
+            "cd /opt/fortress && git fetch origin main && git reset --hard origin/main && bash scripts/deploy-vps.sh"
