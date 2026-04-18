@@ -2,6 +2,9 @@
 "use client";
 
 import { useEffect } from "react";
+
+// Disable prerendering for this page since it requires a session
+export const dynamic = "force-dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Users, ShieldCheck, AlertTriangle } from "lucide-react";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";

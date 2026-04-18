@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
 export function useOnboarding() {
-  const { data: session } = useSession();
+  const sessionData = useSession();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session?.user) {
+    if (!sessionData || !sessionData.data?.user) {
       setLoading(false);
       return;
     }
 
+    const session = sessionData.data;
     // Check if user has completed onboarding
     const hasSeenOnboarding = (session.user as any).hasSeenOnboarding;
 
@@ -20,7 +21,7 @@ export function useOnboarding() {
     }
 
     setLoading(false);
-  }, [session]);
+  }, [sessionData]);
 
   const completeOnboarding = async () => {
     try {

@@ -8,6 +8,7 @@ import {
   queryMacroSnapshot,
   queryIntelligence,
 } from "@/lib/investment-genie/queries";
+import { Button } from "@/components/ui/button";
 import { InvestmentGenieForm } from "./InvestmentGenieForm";
 import AllocationResult from "./AllocationResult";
 

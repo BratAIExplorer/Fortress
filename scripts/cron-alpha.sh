@@ -4,15 +4,17 @@
 # Prerequisites: Python3, yfinance, requests installed at /opt/fortress/scanner/
 #
 # Usage on VPS:
-#   chmod +x /opt/fortress/scripts/cron-alpha.sh
-#   sudo /opt/fortress/scripts/cron-alpha.sh
+# Usage on VPS:
+#   chmod +x /opt/fortress/fortress-app/scripts/cron-alpha.sh
+#   /opt/fortress/fortress-app/scripts/cron-alpha.sh
 
 set -euo pipefail
 
-FORTRESS_PATH="/opt/fortress"
-VENV_PATH="/opt/fortress/venv"
+FORTRESS_PATH="/opt/fortress/fortress-app"
+VENV_PATH="/opt/fortress/fortress-app/venv"
 LOG_PATH="/var/log/fortress-alpha-tracker.log"
 PYTHON_SCRIPT="$FORTRESS_PATH/scanner/price_tracker.py"
+ENV_FILE="$FORTRESS_PATH/.env.local"
 
 echo "=== Fortress Alpha Cron Setup ==="
 
@@ -35,10 +37,13 @@ chmod 644 "$LOG_PATH"
 chmod +x "$PYTHON_SCRIPT"
 
 # 5. Read required secrets from .env.local
-ENV_FILE="$FORTRESS_PATH/.env.local"
 if [ ! -f "$ENV_FILE" ]; then
-    echo "ERROR: $ENV_FILE not found. Cannot read ADMIN_SECRET."
-    exit 1
+    echo "ERROR: $ENV_FILE not found. Trying parent directory..."
+    ENV_FILE="/opt/fortress/.env.local"
+    if [ ! -f "$ENV_FILE" ]; then
+        echo "ERROR: .env.local not found in app or parent directory."
+        exit 1
+    fi
 fi
 
 ADMIN_SECRET=$(grep "^ADMIN_SECRET=" "$ENV_FILE" | cut -d '=' -f2-)
