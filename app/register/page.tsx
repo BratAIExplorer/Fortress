@@ -12,6 +12,7 @@ import {
   ConsentState,
 } from "@/components/auth/PrivacyConsent";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -134,6 +135,23 @@ export default function RegisterPage() {
           <CardDescription>Create your investment command center account.</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="space-y-4">
+            <GoogleSignInButton
+              variant="default"
+              text="Sign up with Google"
+              onError={(error) => setError(error)}
+            />
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-primary/10" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card/50 px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md">

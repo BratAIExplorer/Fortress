@@ -1,12 +1,19 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+import Google from "next-auth/providers/google"
 import { db } from "@/lib/db";
 import { authUser } from "@/lib/db/schema/auth";
+import { privacyConsent } from "@/lib/db/schema/consent";
 import { eq } from "drizzle-orm";
 import { compare } from "bcryptjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
+        Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: true,
+        }),
         Credentials({
             name: "Fortress Credentials",
             credentials: {
@@ -62,25 +69,69 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }),
     ],
     callbacks: {
-        async jwt({ token, user, trigger, session }) {
+        async jwt({ token, user, trigger, session, account }) {
             if (user) {
                 token.id = user.id;
                 token.isAdmin = (user as any).isAdmin;
                 token.hasSeenOnboarding = (user as any).hasSeenOnboarding;
+                token.provider = account?.provider;
             }
-            
+
+            // Handle first-time OAuth signup: create user record if it doesn't exist
+            if (account?.provider && user?.email && !token.id) {
+                try {
+                    // Check if user exists
+                    const existingUser = await db
+                        .select()
+                        .from(authUser)
+                        .where(eq(authUser.email, user.email))
+                        .limit(1);
+
+                    if (!existingUser.length) {
+                        // Create new OAuth user (no password hash needed)
+                        const newUser = await db.insert(authUser).values({
+                            email: user.email,
+                            name: user.name || user.email.split("@")[0],
+                            password: null, // OAuth users have no password
+                            isAdmin: false,
+                            hasSeenOnboarding: false,
+                        }).returning();
+
+                        if (newUser.length > 0) {
+                            token.id = newUser[0].id;
+
+                            // Auto-create consent record for OAuth user
+                            // OAuth users implicitly consent to privacy when signing up
+                            await db.insert(privacyConsent).values({
+                                userId: newUser[0].id,
+                                dataCollection: true,
+                                feedbackUsage: true,
+                                emailNotifications: false,
+                                consentVersion: "1.0-oauth",
+                            }).catch(() => {
+                                // Non-blocking if consent insert fails
+                                console.error("Failed to create consent for OAuth user");
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error("OAuth user creation error:", error);
+                }
+            }
+
             // Allow dynamic session updates (e.g. after onboarding)
             if (trigger === "update" && session) {
                 token.hasSeenOnboarding = session.hasSeenOnboarding;
             }
-            
+
             return token;
         },
         async session({ session, token }) {
             if (token && session.user) {
                 (session.user as any).id = token.id;
-                (session.user as any).isAdmin = token.isAdmin;
-                (session.user as any).hasSeenOnboarding = token.hasSeenOnboarding;
+                (session.user as any).isAdmin = token.isAdmin || false;
+                (session.user as any).hasSeenOnboarding = token.hasSeenOnboarding || false;
+                (session.user as any).provider = token.provider;
             }
             return session;
         },

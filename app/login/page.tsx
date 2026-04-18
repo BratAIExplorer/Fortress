@@ -2,14 +2,13 @@
 "use client";
 
 import { useState } from "react";
-// We'll use a direct form submission for now as NextAuth v5 handles it well via server actions or redirects
-// But for simplicity in a "Gemini" context, I'll use the browser's native redirect or a sign-in function if available.
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield } from "lucide-react";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 export default function LoginPage() {
     const [username, setUsername] = useState("");
@@ -70,6 +69,23 @@ export default function LoginPage() {
                     <CardDescription>Access your investment command center</CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <div className="space-y-4">
+                        <GoogleSignInButton
+                            variant="default"
+                            text="Sign in with Google"
+                            onError={(error) => setError(error)}
+                        />
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-primary/10" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-card/50 px-2 text-muted-foreground">Or</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {error && (
                             <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md">
