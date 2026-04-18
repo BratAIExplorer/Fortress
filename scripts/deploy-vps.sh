@@ -13,7 +13,7 @@ git reset --hard origin/main
 
 # 2. Install dependencies
 echo "📚 Installing dependencies..."
-npm install
+npm install --legacy-peer-deps
 
 # 3. Build the Next.js app
 echo "🏗️ Building application..."
