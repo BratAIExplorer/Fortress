@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+import { useSession } from "next-auth/react";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface MacroSnapshot {
@@ -230,6 +232,9 @@ export default function MacroPage() {
     const previous = snapshots[1] ?? null;
     const history = snapshots.slice(1);
 
+    const { data: session } = useSession();
+    const isAdmin = (session?.user as any)?.isAdmin;
+
     return (
         <div className="min-h-screen bg-background text-foreground">
             <Navbar />
@@ -255,49 +260,51 @@ export default function MacroPage() {
                 </div>
 
                 {/* Admin refresh panel */}
-                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manual Refresh (Admin)</span>
+                {isAdmin && (
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manual Refresh (Admin)</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <Input
+                                type="password"
+                                placeholder="Enter CRON_SECRET to refresh data"
+                                value={secret}
+                                onChange={e => setSecret(e.target.value)}
+                                className="h-8 text-sm bg-white/5 border-white/10 flex-1"
+                            />
+                            <Button
+                                size="sm"
+                                onClick={triggerRefresh}
+                                disabled={refreshing || !secret}
+                                className="h-8 px-4 text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0 shrink-0"
+                            >
+                                {refreshing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Fetch Data"}
+                            </Button>
+                            <Button
+                                size="sm"
+                                onClick={triggerGenerate}
+                                disabled={generating || !secret}
+                                className="h-8 px-4 text-xs bg-blue-600 hover:bg-blue-700 text-white border-0 shrink-0"
+                            >
+                                {generating ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : (
+                                    <><Brain className="h-3.5 w-3.5 mr-1" />Generate Clarity</>
+                                )}
+                            </Button>
+                        </div>
+                        {refreshMsg && (
+                            <p className={cn("text-xs mt-2", refreshMsg.includes("success") ? "text-emerald-400" : "text-red-400")}>
+                                {refreshMsg}
+                            </p>
+                        )}
+                        {generateMsg && (
+                            <p className={cn("text-xs mt-1", generateMsg.includes("generated") ? "text-blue-400" : "text-red-400")}>
+                                {generateMsg}
+                            </p>
+                        )}
                     </div>
-                    <div className="flex gap-2">
-                        <Input
-                            type="password"
-                            placeholder="Enter CRON_SECRET to refresh data"
-                            value={secret}
-                            onChange={e => setSecret(e.target.value)}
-                            className="h-8 text-sm bg-white/5 border-white/10 flex-1"
-                        />
-                        <Button
-                            size="sm"
-                            onClick={triggerRefresh}
-                            disabled={refreshing || !secret}
-                            className="h-8 px-4 text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0 shrink-0"
-                        >
-                            {refreshing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Fetch Data"}
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={triggerGenerate}
-                            disabled={generating || !secret}
-                            className="h-8 px-4 text-xs bg-blue-600 hover:bg-blue-700 text-white border-0 shrink-0"
-                        >
-                            {generating ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : (
-                                <><Brain className="h-3.5 w-3.5 mr-1" />Generate Clarity</>
-                            )}
-                        </Button>
-                    </div>
-                    {refreshMsg && (
-                        <p className={cn("text-xs mt-2", refreshMsg.includes("success") ? "text-emerald-400" : "text-red-400")}>
-                            {refreshMsg}
-                        </p>
-                    )}
-                    {generateMsg && (
-                        <p className={cn("text-xs mt-1", generateMsg.includes("generated") ? "text-blue-400" : "text-red-400")}>
-                            {generateMsg}
-                        </p>
-                    )}
-                </div>
+                )}
 
                 {/* Loading */}
                 {loading && (

@@ -111,12 +111,11 @@ export default function GuidePage() {
                         India's most rigorous stock research platform — built for serious long-term investors
                         who think in decades, not days.
                     </p>
-                            <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                         You're part of a small group of early beta testers. Here's everything you need to know.
                     </p>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs text-purple-300">
-                        <Sparkles className="h-3.5 w-3.5" />
-                        Engine v3 — Multi-Bagger Score + Coffee Can Mode live
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
+                        <Zap className="h-4 w-4" /> Sovereign Alpha + Investment Genie Live — Spring 2026
                     </div>
                 </div>
 
@@ -126,19 +125,19 @@ export default function GuidePage() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
                             {
-                                icon: Shield, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20",
-                                title: "Fortress 30",
-                                desc: "30 hand-picked, institutionally-vetted Indian stocks. Updated periodically by our research team."
+                                icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20",
+                                title: "Investment Genie",
+                                desc: "Cluster-based portfolio allocation. Tell us your risk, get a diversified plan in seconds."
+                            },
+                            {
+                                icon: Brain, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20",
+                                title: "Sovereign Alpha",
+                                desc: "Performance tracking system that measures engine accuracy vs benchmarks in real-time."
                             },
                             {
                                 icon: Search, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20",
-                                title: "Live Scanner",
-                                desc: "Screen 2,000+ NSE stocks through 5 financial quality layers. Runs automatically every weekday."
-                            },
-                            {
-                                icon: BookOpen, color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20",
-                                title: "Intelligence",
-                                desc: "Learn the methodology in plain English. Understand what every score and term actually means."
+                                title: "Intelligent Scanner",
+                                desc: "Screen 2,000+ NSE stocks through 6 financial quality layers. Runs every weekday."
                             },
                         ].map(item => (
                             <Card key={item.title} className={cn("border", item.bg)}>

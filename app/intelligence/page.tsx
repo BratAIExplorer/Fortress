@@ -719,6 +719,132 @@ function MarketWeather({ mode }: SectionProps) {
   );
 }
 
+// ─── Section 5a: Investment Genie ───────────────────────────────────────────
+
+function InvestmentGenieSection({ mode }: SectionProps) {
+    return (
+        <section id="investment-genie" className="scroll-mt-20">
+            <SectionTitle icon={<Sparkles className="h-7 w-7" />}>Investment Genie — Portfolio Engineering</SectionTitle>
+            {mode === "beginner" ? (
+                <div className="space-y-5">
+                    <BeginnerBadge />
+                    <Callout emoji="🧞" title="The idea in one sentence" color="purple">
+                        Instead of trying to find the one perfect stock, Genie looks for a perfect <strong>mix</strong> of stocks that fits your specific level of patience and risk tolerance.
+                    </Callout>
+                    <p className="text-muted-foreground leading-relaxed">
+                        Genie uses a method called <strong>Cluster-Based Allocation</strong>. It divides high-quality stocks into four groups (clusters) and builds you a balanced map based on how much risk you can handle.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {[
+                            { title: "Defensive Cluster", desc: "Stable, boring, low-debt companies. Your portfolio's anchor during a storm." },
+                            { title: "Growth Cluster", desc: "Companies growing fast. They might be volatile, but they drive long-term returns." },
+                            { title: "Value Cluster", desc: "Genuinely good companies that the market has temporarily mispriced or ignored." },
+                            { title: "Megatrend Cluster", desc: "Companies riding a 10-year wave (Defence, Green Energy, Infrastructure)." },
+                        ].map(c => (
+                            <div key={c.title} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                                <p className="font-bold text-sm mb-1">{c.title}</p>
+                                <p className="text-xs text-muted-foreground">{c.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="space-y-5">
+                    <ExpertBadge />
+                    <p className="text-muted-foreground leading-relaxed">
+                        Genie implements a <strong>constrained optimisation framework</strong>. It doesn&apos;t just pick stocks; it solves for an asset mix across four distinct risk-adjusted clusters:
+                    </p>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-xs">
+                            <thead>
+                                <tr className="border-b border-white/10">
+                                    <th className="text-left text-muted-foreground py-2 pr-6 font-medium">Cluster</th>
+                                    <th className="text-left text-muted-foreground py-2 font-medium">Quant Logic</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {[
+                                    ["Defensive (Anchor)", "Low Vol (Beta < 0.8) + High Interest Coverage (> 10x) + Stable Margin history."],
+                                    ["Aggressive (Alpha)", "Earnings Momentum (YoY > 25%) + PEG Growth < 0.9 + High OCF conversion."],
+                                    ["Cyclical (Trend)", "Sector Relative Strength (L3 v2) > 80 + Macro signal alignment + Positive India VIX delta."],
+                                    ["Special (Small-Cap)", "Market Cap < $500M + Insider buying > 1% O/S + Revenue discovery gap."],
+                                ].map(([k, v]) => (
+                                    <tr key={k} className="border-b border-white/5">
+                                        <td className="py-2 pr-6 font-mono text-primary text-[11px]">{k}</td>
+                                        <td className="py-2 text-muted-foreground">{v}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <Callout emoji="📐" title="NRI Advantage" color="blue">
+                        Genie is specifically tuned for NRI investors who want a hands-off, rigorous Indian exposure without needing to monitor the Nifty every day.
+                    </Callout>
+                </div>
+            )}
+        </section>
+    );
+}
+
+// ─── Section 5b: Data Integrity ───────────────────────────────────────────
+
+function DataSourcesSection({ mode }: SectionProps) {
+    return (
+        <section id="data-sources" className="scroll-mt-20 border-t border-white/10 pt-20">
+            <SectionTitle icon={<Shield className="h-7 w-7" />}>Data Integrity & Transparency</SectionTitle>
+            <p className="text-muted-foreground mb-8">Where does our data come from? No magic, just clean engineering.</p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <Card className="bg-white/5 border-white/10">
+                    <CardContent className="p-5">
+                        <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                            <Globe className="h-5 w-5 text-blue-400" />
+                            Primary Engines
+                        </h3>
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs font-bold text-primary uppercase mb-1">Stock Financials (NSE / US)</p>
+                                <p className="text-sm text-muted-foreground">Yahoo Finance API (yfinance) + Alpha Vantage. We fetch full income statements, balance sheets, and cash flows to run L1–L6 layers.</p>
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-primary uppercase mb-1">Macro Indicators</p>
+                                <p className="text-sm text-muted-foreground">FRED (St. Louis Fed) + RBI public data feeds for indices, yields, and commodity prices.</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-white/5 border-white/10">
+                    <CardContent className="p-5">
+                        <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                            <Zap className="h-5 w-5 text-emerald-400" />
+                            Update Frequency
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="flex gap-3">
+                                <div className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono h-fit">Daily</div>
+                                <div className="text-sm text-muted-foreground">Full market scans, prices, volumes, and technical momentum (L3).</div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-mono h-fit">Weekly</div>
+                                <div className="text-sm text-muted-foreground">Macro snapshots, sector traffic lights, and Investment Genie recalibration.</div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-mono h-fit">Quarterly</div>
+                                <div className="text-sm text-muted-foreground">Full Sovereign Alpha learning reports (90-day cycles) and weight adjustments.</div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+            
+            <Callout emoji="🔍" title="NRI Disclaimer" color="amber">
+                Our US market data focuses on ADRs and large-cap tech. For HKEX, data is fetched via secondary providers and may have a 15-min delay.
+            </Callout>
+        </section>
+    );
+}
+
 // ─── Section 5b: Multi-Bagger Score ──────────────────────────────────────────
 
 const mbComponents = [
@@ -1324,8 +1450,10 @@ const navItems = [
   { id: "coffee-can", label: "Coffee Can Mode", icon: BookOpen },
   { id: "megatrend", label: "Megatrend Tags", icon: Globe },
   { id: "gem-score", label: "GEM Score", icon: Star },
+  { id: "investment-genie", label: "Investment Genie", icon: Sparkles },
   { id: "sovereign-alpha", label: "Sovereign Alpha", icon: Brain },
-  { id: "market-weather", label: "Market Weather", icon: BarChart2 },
+  { id: "market-weather", label: "Market Pulse", icon: Globe },
+  { id: "data-sources", label: "Data Integrity", icon: Shield },
   { id: "not-fortress", label: "What We Don't Do", icon: AlertTriangle },
   { id: "key-terms", label: "Key Terms", icon: BookOpen },
   { id: "beta-feedback", label: "Beta Feedback", icon: Star },
@@ -1462,8 +1590,10 @@ export default function IntelligencePage() {
                 <CoffeeCanSection mode={mode} />
                 <MegatrendSection mode={mode} />
                 <GemScore mode={mode} />
+                <InvestmentGenieSection mode={mode} />
                 <SovereignAlpha mode={mode} />
                 <MarketWeather mode={mode} />
+                <DataSourcesSection mode={mode} />
                 <WhatIsNot />
                 <KeyTerms mode={mode} />
                 <BetaFeedback />

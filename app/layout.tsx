@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 
+import { Providers } from "@/components/providers";
+
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
@@ -30,10 +32,12 @@ export default function RootLayout({
           ibmPlexMono.variable
         )}
       >
-        <main className="relative flex min-h-screen flex-col">
-          {children}
-        </main>
-        <Toaster theme="dark" richColors position="bottom-right" />
+        <Providers>
+          <main className="relative flex min-h-screen flex-col">
+            {children}
+          </main>
+          <Toaster theme="dark" richColors position="bottom-right" />
+        </Providers>
       </body>
     </html>
   );

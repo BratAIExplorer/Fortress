@@ -7,6 +7,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useSession } from "next-auth/react";
+
 interface NavbarProps {
     title?: string;
     subtitle?: string;
@@ -25,6 +27,8 @@ export function Navbar({
     containerClassName
 }: NavbarProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const { data: session } = useSession();
+    const isAdmin = (session?.user as any)?.isAdmin;
 
     return (
         <header className={cn(
@@ -39,7 +43,6 @@ export function Navbar({
                         {subtitle && <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-1 block">{subtitle}</span>}
                     </div>
                 </Link>
-
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex items-center gap-4">
                     {showLinks && (
@@ -65,12 +68,14 @@ export function Navbar({
                                     Market Pulse
                                 </Link>
                             </Button>
-                            <Button variant="ghost" size="sm" asChild>
-                                <Link href="/alpha" className="text-sm flex items-center gap-1.5 text-purple-400 hover:text-purple-300">
-                                    <Target className="h-3.5 w-3.5" />
-                                    Sovereign Alpha
-                                </Link>
-                            </Button>
+                            {isAdmin && (
+                                <Button variant="ghost" size="sm" asChild>
+                                    <Link href="/alpha" className="text-sm flex items-center gap-1.5 text-purple-400 hover:text-purple-300">
+                                        <Target className="h-3.5 w-3.5" />
+                                        Sovereign Alpha
+                                    </Link>
+                                </Button>
+                            )}
                             <Button variant="ghost" size="sm" asChild>
                                 <Link href="/guide" className="text-sm flex items-center gap-1.5">
                                     <BookMarked className="h-3.5 w-3.5 text-primary" />
@@ -152,14 +157,16 @@ export function Navbar({
                                     <Globe className="h-4 w-4 text-primary" />
                                     Market Pulse
                                 </Link>
-                                <Link
-                                    href="/alpha"
-                                    onClick={() => setIsOpen(false)}
-                                    className="text-lg font-medium hover:text-purple-400 text-purple-400 transition-colors py-2 border-b border-border/50 flex items-center gap-2"
-                                >
-                                    <Target className="h-4 w-4" />
-                                    Sovereign Alpha
-                                </Link>
+                                {isAdmin && (
+                                    <Link
+                                        href="/alpha"
+                                        onClick={() => setIsOpen(false)}
+                                        className="text-lg font-medium hover:text-purple-400 text-purple-400 transition-colors py-2 border-b border-border/50 flex items-center gap-2"
+                                    >
+                                        <Target className="h-4 w-4" />
+                                        Sovereign Alpha
+                                    </Link>
+                                )}
                                 <Link
                                     href="/guide"
                                     onClick={() => setIsOpen(false)}
