@@ -34,8 +34,8 @@ cp -r .next/static .next/standalone/.next/
 cp -r public .next/standalone/
 cp .env.local .next/standalone/.env.local
 
-# 6. Restart PM2
+# 6. Restart PM2 (using ecosystem.config.js)
 echo "🔄 Reloading Server..."
-pm2 reload fortress-app --update-env
+npm run deploy:reload
 
 echo "✅ Deployment Complete! App is live."
