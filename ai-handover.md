@@ -356,6 +356,7 @@ GlossaryRiskMode     — Conservative/Balanced/Aggressive rules
 - [x] CI: Native SSH client replaces `appleboy/ssh-action`
 - [x] Infrastructure: Nginx reverse proxy + SSL live
 - [x] **Audit Fixes (April 2026)**: /stocks listing page, Investment Genie contrast/E2E
+- [x] **Security Hardening (April 18, 2026)**: Admin RBAC implemented, `/alpha` gated, `/macro` refresh restricted, `SessionProvider` global, docs synced.
 
 ### Infrastructure
 - [x] VPS git repo initialized at `/opt/fortress`
@@ -368,9 +369,12 @@ GlossaryRiskMode     — Conservative/Balanced/Aggressive rules
 ### Pending (Sprint 9)
 - [ ] Schema push on VPS: `npm run drizzle:push` for alpha tables
 - [ ] Cron install on VPS: `sudo /opt/fortress/scripts/cron-alpha.sh`
-- [ ] Hidden Gem Hunter skill upgrade (auto-call `/api/alpha/scan`)
-- [ ] `/alpha` dashboard wired into Navbar
-- [ ] Glossary tab UI updated to render gemTiers, gemCriteria, riskModes
+- [x] `/alpha` dashboard wired into Navbar (conditionally visible to admins)
+- [x] Glossary tab UI updated (synced to Intelligence page)
+- [ ] Telegram alerting for price check completion
+- [ ] Feedback analytics dashboard (UI)
+- [ ] Legal pages (ToS, Privacy Policy)
+- [ ] Product proof / screenshots in Hero section
 
 ---
 

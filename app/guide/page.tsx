@@ -9,7 +9,7 @@ import {
     Shield, Search, BookOpen, TrendingUp, BarChart3, Activity,
     CheckCircle2, ArrowRight, Star, Coffee, Globe, Zap, Target,
     ChevronDown, ChevronUp, AlertTriangle, Users, Filter, MessageSquare,
-    Sparkles
+    Sparkles, Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

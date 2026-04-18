@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Shield, Zap, TrendingUp, BookOpen, Brain, Target, AlertTriangle,
   ChevronDown, ChevronUp, ExternalLink, CheckCircle, XCircle,
-  BarChart2, Users, Lock, Globe, Cpu, Star, Info
+  BarChart2, Users, Lock, Globe, Cpu, Star, Info, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

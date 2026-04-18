@@ -1,5 +1,25 @@
 # Fortress Intelligence — Changelog
 
+## 2026-04-18 (Admin Security Hardening & Beta Launch Sync)
+
+### Added
+- **Admin Access Control**: Implemented role-based access control (RBAC) across the UI.
+  - **Sovereign Alpha Dashboard**: Navigation link in Navbar is now hidden for non-admin users.
+  - **Manual Refresh (Admin)**: The admin control panel on the `/macro` page is now gated by a server-side session check.
+- **Documentation Expansion**:
+  - **Investment Genie Breakdown**: Added a comprehensive technical explanation of the cluster-based allocation methodology.
+  - **Data Integrity / Sources**: Added a dedicated section clarifying data origins (yfinance, FRED, RBI) and update frequencies.
+- **Improved UI Messaging**: Updated the `/guide` page to prominently feature Sovereign Alpha and Investment Genie as "Live" for the beta launch.
+
+### Security
+- **NextAuth Integration**: Configured the root layout with `SessionProvider` to enable global session awareness.
+- **Secrets Management**: Verified and documented administrative secrets (`ADMIN_SECRET`, `CRON_SECRET`) for production use.
+
+### Fixed
+- **Navbar Links**: Removed "unauthorized" links for public users to reduce noise and improve security posturing.
+
+---
+
 ## 2026-03-25 (Live Scanner Fix + Deployment Stabilisation)
 
 ### Fixed
