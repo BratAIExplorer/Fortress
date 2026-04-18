@@ -400,7 +400,7 @@ curl "http://localhost:3000/api/seed?target=v5"
 curl -H "x-admin-secret: YOUR_SECRET" http://localhost:3000/api/alpha/dashboard
 
 # Cron (install once after first deploy)
-sudo /opt/fortress/scripts/cron-alpha.sh
+sudo /opt/fortress/fortress-app/scripts/cron-alpha.sh
 
 # Monitor
 pm2 status
