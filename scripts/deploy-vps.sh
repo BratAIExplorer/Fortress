@@ -6,9 +6,10 @@ set -e
 
 echo "🚀 Starting Deployment..."
 
-# 1. Pull latest code
-echo "📦 Pulling latest changes..."
-git pull origin main
+# 1. Update code
+echo "📦 Updating code from repository..."
+git fetch origin main
+git reset --hard origin/main
 
 # 2. Install dependencies
 echo "📚 Installing dependencies..."
