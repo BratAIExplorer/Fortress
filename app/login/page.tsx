@@ -5,6 +5,7 @@ import { useState } from "react";
 // We'll use a direct form submission for now as NextAuth v5 handles it well via server actions or redirects
 // But for simplicity in a "Gemini" context, I'll use the browser's native redirect or a sign-in function if available.
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

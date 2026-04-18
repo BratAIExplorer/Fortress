@@ -70,6 +70,15 @@ AUTH_SECRET=your-32-char-random-string
 ```
 ⚠️ Not in git. Recreate manually if VPS is rebuilt before starting the app.
 
+### 🚀 Deploying Database Changes (April 18)
+After pushing changes to `main`:
+1. **SSH to VPS**: `ssh user@srv1327289.hostinger.com`
+2. **Pull latest**: `cd /opt/fortress/fortress-app && git pull`
+3. **Run Migrations**: 
+   - Option A (Sync): `npx drizzle-kit push` (Uses `.env.local`)
+   - Option B (SQL): `psql $DATABASE_URL -f drizzle/0001_breezy_psylocke.sql`
+4. **Restart App**: `npm run deploy:reload` (PM2 reload)
+
 ---
 
 ## 🗄️ Database Schema (Drizzle ORM + PostgreSQL)
@@ -97,6 +106,13 @@ Schema file: `lib/db/schema.ts`
 | `alpha_overrides` | Manual context tags — excluded from learning penalty |
 | `alpha_insights` | Learning reports: criteria performance, weight recommendations |
 | `alpha_weight_history` | Audit trail of all scoring weight changes |
+
+### User & Interaction Tables (Added April 18, 2026)
+| Table | Purpose |
+|---|---|
+| `auth_user` | User records, passwords, admin flags, and onboarding status |
+| `password_reset_requests` | Secure 15-min tokens for self-service password recovery |
+| `feedback` | Bug reports, suggestions, and validation feedback with admin review tracking |
 
 ### v5 Columns on `stocks` Table
 `v5_category`, `tag`, `risk`, `industry`, `drop_52w`, `moat`, `l1`–`l5`, `why_down`, `why_buy`, `penny_why`, `multi_bagger_case`, `killer_risk`, `fortress_note`, `ocf`
