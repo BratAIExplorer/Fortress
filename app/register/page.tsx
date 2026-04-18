@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, CheckCircle } from "lucide-react";
+import {
+  PrivacyConsent,
+  ConsentState,
+} from "@/components/auth/PrivacyConsent";
+import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,6 +19,11 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
+  });
+  const [consents, setConsents] = useState<ConsentState>({
+    dataCollection: false,
+    feedbackUsage: false,
+    emailNotifications: false,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,6 +52,13 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!consents.dataCollection || !consents.feedbackUsage) {
+      setError(
+        "You must agree to data collection and feedback usage to create an account"
+      );
+      return;
+    }
+
     const passwordError = validatePassword(formData.password);
     if (passwordError) {
       setError(passwordError);
@@ -62,6 +79,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
+          consents,
         }),
       });
 
@@ -145,7 +163,10 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 required
               />
-              <p className="text-xs text-muted-foreground">8-128 characters</p>
+              <PasswordStrengthMeter
+                password={formData.password}
+                showRequirements={true}
+              />
             </div>
 
             <div className="space-y-2">
@@ -157,6 +178,14 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 required
+              />
+            </div>
+
+            <div className="border-t pt-6">
+              <PrivacyConsent
+                onConsent={setConsents}
+                showTitle={false}
+                compact={true}
               />
             </div>
 

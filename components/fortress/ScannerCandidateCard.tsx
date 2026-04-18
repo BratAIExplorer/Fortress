@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RadioTower, TrendingDown, TrendingUp, Minus } from "lucide-react";
@@ -25,8 +26,9 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
     const tierColor = TIER_COLORS[candidate.mbTier] ?? "text-muted-foreground border-white/20 bg-white/5";
 
     return (
-        <motion.div whileHover={{ y: -4 }} className="group h-full">
-            <Card className="h-full overflow-hidden border-emerald-500/20 bg-card/50 backdrop-blur transition-all hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/5">
+        <Link href={`/stocks/${candidate.symbol.toLowerCase()}`}>
+            <motion.div whileHover={{ y: -4 }} className="group h-full">
+                <Card className="h-full overflow-hidden border-emerald-500/20 bg-card/50 backdrop-blur transition-all hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/5">
                 <CardHeader className="p-4 pb-2">
                     <div className="flex items-start justify-between gap-2">
                         <div>
@@ -81,6 +83,7 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
                     </div>
                 </CardContent>
             </Card>
-        </motion.div>
+            </motion.div>
+        </Link>
     );
 }

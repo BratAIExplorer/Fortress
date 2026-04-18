@@ -60,10 +60,16 @@ export async function POST(req: NextRequest) {
     const newFeedback = result[0];
 
     // Send email alert (non-blocking)
+    const alertEmail = process.env.ALERT_EMAIL;
+    if (!alertEmail) {
+      console.warn("ALERT_EMAIL not configured, skipping email notification");
+    }
+
     try {
-      await sendEmailAlert({
-        to: "bharatsamant@gmail.com",
-        subject: `[Fortress Feedback] ${body.type.toUpperCase()} from ${session.user.name || session.user.email}`,
+      if (alertEmail) {
+        await sendEmailAlert({
+          to: alertEmail,
+          subject: `[Fortress Feedback] ${body.type.toUpperCase()} from ${session.user.name || session.user.email}`,
         body: `
           <h2>New Feedback Submission</h2>
           <p><strong>Type:</strong> ${body.type}</p>
@@ -79,7 +85,8 @@ export async function POST(req: NextRequest) {
             Review in Admin Dashboard
           </a></p>
         `,
-      });
+        });
+      }
     } catch (emailError) {
       console.error("Email alert failed (non-blocking):", emailError);
       // Don't fail the request if email fails

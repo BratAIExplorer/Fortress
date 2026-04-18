@@ -43,13 +43,14 @@ export default function AllocationResult({
       </div>
 
       {/* Allocation Layers */}
+      {allocation.layers && Object.keys(allocation.layers).length > 0 ? (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="h-px flex-grow bg-white/10" />
           <h3 className="text-xl font-bold font-serif text-white/90">Curated Portfolio Layers</h3>
           <div className="h-px flex-grow bg-white/10" />
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {Object.values(allocation.layers).map((layer) => (
             <div
@@ -107,9 +108,15 @@ export default function AllocationResult({
           ))}
         </div>
       </div>
+      ) : (
+        <div className="bg-red-950/30 border border-red-500/30 rounded-xl p-8 text-center">
+          <p className="text-red-200/80 font-medium mb-4">Unable to generate allocation layers.</p>
+          <p className="text-red-200/60 text-sm">The portfolio allocation engine encountered an error. Please try again with different parameters.</p>
+        </div>
+      )}
 
       {/* Market Signals */}
-      {allocation.signals.length > 0 && (
+      {allocation.signals && allocation.signals.length > 0 && (
         <div className="space-y-6">
           <h3 className="text-xl font-bold font-serif text-white/90">Institutional Intelligence Signals</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -135,6 +142,7 @@ export default function AllocationResult({
       )}
 
       {/* Return Projections */}
+      {allocation.projectedReturns && (
       <div className="space-y-6">
         <h3 className="text-xl font-bold font-serif text-white/90">90-Day Sovereign Projections</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -172,14 +180,16 @@ export default function AllocationResult({
           </div>
         </div>
       </div>
+      )}
 
       {/* Sovereign Optimization Cards */}
+      {allocation.taxOptimization && (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
           { title: "NRE Account", value: allocation.taxOptimization.nreDemat, icon: "🏦" },
           { title: "W-8BEN", value: allocation.taxOptimization.w8ben, icon: "📄" },
           { title: "Strategy", value: allocation.taxOptimization.savings, icon: "💡" }
-        ].map((item, i) => (
+        ].filter(item => item.value).map((item, i) => (
           <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-6">
             <div className="text-2xl mb-4">{item.icon}</div>
             <h4 className="text-sm font-bold text-white mb-2">{item.title}</h4>
@@ -187,6 +197,7 @@ export default function AllocationResult({
           </div>
         ))}
       </div>
+      )}
 
       {/* Compliance Footer */}
       <div className="bg-amber-950/20 border border-amber-500/10 rounded-2xl p-6 text-center">

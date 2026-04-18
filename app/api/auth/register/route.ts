@@ -1,17 +1,25 @@
 import { db } from "@/lib/db";
 import { authUser } from "@/lib/db/schema/auth";
+import { privacyConsent } from "@/lib/db/schema/consent";
 import { eq } from "drizzle-orm";
 import { hash } from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name } = await req.json();
+    const { email, password, name, consents } = await req.json();
 
     // Basic validation
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    if (!consents?.dataCollection || !consents?.feedbackUsage) {
+      return NextResponse.json(
+        { error: "You must agree to data collection and feedback usage" },
         { status: 400 }
       );
     }
@@ -42,8 +50,8 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await hash(password, 12);
 
-    // Create user
-    const result = await db
+    // Create user and consent records in transaction
+    const userResult = await db
       .insert(authUser)
       .values({
         email: normalizedEmail,
@@ -54,16 +62,29 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
-    const newUser = result[0];
+    const newUser = userResult[0];
+
+    // Store consent preferences
+    try {
+      await db.insert(privacyConsent).values({
+        userId: newUser.id,
+        dataCollection: consents.dataCollection,
+        feedbackUsage: consents.feedbackUsage,
+        emailNotifications: consents.emailNotifications || false,
+      });
+    } catch (consentError) {
+      console.error("Failed to store consent:", consentError);
+      // Don't fail registration if consent storage fails
+    }
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = newUser;
 
     return NextResponse.json(
-      { 
-        success: true, 
+      {
+        success: true,
         user: userWithoutPassword,
-        message: "Account created successfully" 
+        message: "Account created successfully"
       },
       { status: 201 }
     );

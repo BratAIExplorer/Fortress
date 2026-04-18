@@ -10,6 +10,11 @@
   - **Investment Genie Breakdown**: Added a comprehensive technical explanation of the cluster-based allocation methodology.
   - **Data Integrity / Sources**: Added a dedicated section clarifying data origins (yfinance, FRED, RBI) and update frequencies.
 - **Improved UI Messaging**: Updated the `/guide` page to prominently feature Sovereign Alpha and Investment Genie as "Live" for the beta launch.
+- **Analytics & Social Proof**:
+  - **Live Tracking**: Implemented specialized page-view tracking middleware with rate limiting (100 req/min).
+  - **Live Activity API**: Created administrative endpoint for real-time traffic analysis.
+  - **Social Proof Widget**: Added an animated, glassmorphic live activity indicator on the homepage to build user FOMO.
+  - **Admin Analytics Dashboard**: Enhanced the `/admin` overview with live users online and trending pages metrics.
 
 ### Security
 - **NextAuth Integration**: Configured the root layout with `SessionProvider` to enable global session awareness.

@@ -14,12 +14,14 @@ The Fortress Intelligence platform has been successfully hardened and synchroniz
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **Admin RBAC** | Navbar links to `/alpha` hidden for non-admins | ✅ DONE |
-| **Gated Refresh** | Admin Manual Refresh on `/macro` restricted to session owners | ✅ DONE |
-| **NextAuth Bridge** | Integrated `SessionProvider` globally in `layout.tsx` | ✅ DONE |
-| **Guide Page v2** | Updated `/guide` hero and feature list for launch | ✅ DONE |
-| **Intelligence v2** | Added "Genie Technicals" and "Data Integrity" sections | ✅ DONE |
-| **Secrets Audit** | Verified `ADMIN_SECRET` and `CRON_SECRET` | ✅ DONE |
+| **Admin RBAC**       | Navbar links to `/alpha` hidden for non-admins               | ✅ DONE |
+| **Gated Refresh**    | Admin Manual Refresh on `/macro` restricted to session owners| ✅ DONE |
+| **Guide Page v2**    | Updated `/guide` hero and feature list for launch            | ✅ DONE |
+| **Intelligence v2**  | Added "Genie Technicals" and "Data Integrity" sections       | ✅ DONE |
+| **Analytics System** | Page-view tracking and rate-limited API implemented          | ✅ DONE |
+| **Social Proof**     | Real-time live activity widget added to homepage             | ✅ DONE |
+| **Admin Analytics**  | Live dashboard with trending pages and online users          | ✅ DONE |
+| **Secrets Audit**    | Verified `ADMIN_SECRET` and `CRON_SECRET`                    | ✅ DONE |
 
 ---
 
@@ -53,9 +55,7 @@ The Fortress Intelligence platform has been successfully hardened and synchroniz
     * Run `bash deploy.sh` on the Hostinger VPS to synchronize these UI/Sec changes.
 2. **Alerting System**:
     * Implement Telegram alerting for price check completion.
-3. **Feedback Analytics**:
-    * Wire the feedback table into the Alpha Dashboard for admin review.
-4. **Legal Pages**:
+3. **Legal Pages**:
     * Finalize the placeholder legal content (Terms of Service, Privacy Policy).
 
 ---

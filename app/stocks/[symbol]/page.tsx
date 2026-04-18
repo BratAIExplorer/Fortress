@@ -47,6 +47,26 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
                     <div className="lg:col-span-2 space-y-8">
                         <WhyBox stock={stock} />
 
+                        {/* Fallback: If no thesis, show quality score explanation */}
+                        {!stock.thesis && (
+                            <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
+                                <h3 className="text-lg font-bold font-serif mb-3 text-primary">Why This Stock?</h3>
+                                <p className="text-muted-foreground leading-relaxed mb-4">
+                                    This stock qualified for the Fortress 30 list based on multi-layer fundamental analysis. Our screening methodology evaluates quality, valuation, growth, financial strength, and macro-adjusted signals.
+                                </p>
+                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                    <div>
+                                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Quality Score</p>
+                                        <p className="text-2xl font-bold text-primary">{stock.quality_score}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Sector</p>
+                                        <p className="text-lg font-semibold text-white">{stock.sector}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <section>
                             <h3 className="text-lg font-bold font-serif mb-4">Investment Logic</h3>
                             <div className="prose prose-invert max-w-none text-muted-foreground leading-relaxed">

@@ -20,6 +20,23 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+
+        // Client-side validation
+        if (!username || !password) {
+            setError("Please enter both email and password");
+            return;
+        }
+
+        if (!username.includes("@")) {
+            setError("Please enter a valid email address");
+            return;
+        }
+
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters");
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -31,10 +48,10 @@ export default function LoginPage() {
             }) as { error?: string } | undefined;
 
             if (result?.error) {
-                setError("Invalid credentials");
+                setError("Email or password is incorrect. Please try again or reset your password.");
             }
         } catch {
-            setError("Something went wrong");
+            setError("Something went wrong. Please try again in a moment.");
         } finally {
             setLoading(false);
         }
@@ -49,8 +66,8 @@ export default function LoginPage() {
                             <Shield className="h-8 w-8 text-primary" />
                         </div>
                     </div>
-                    <CardTitle className="text-2xl font-serif font-bold">Fortress Intelligence</CardTitle>
-                    <CardDescription>Enter your credentials to access the command center.</CardDescription>
+                    <CardTitle className="text-2xl font-serif font-bold">Sign In to Fortress</CardTitle>
+                    <CardDescription>Access your investment command center</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -60,12 +77,12 @@ export default function LoginPage() {
                             </div>
                         )}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Username</label>
+                            <label className="text-sm font-medium">Email Address</label>
                             <Input
-                                type="text"
+                                type="email"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                placeholder="Admin ID"
+                                placeholder="you@example.com"
                                 required
                             />
                         </div>
