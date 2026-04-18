@@ -73,7 +73,7 @@ AUTH_SECRET=your-32-char-random-string
 ### 🚀 Deploying Database Changes (April 18)
 After pushing changes to `main`:
 1. **SSH to VPS**: `ssh user@srv1327289.hostinger.com`
-2. **Pull latest**: `cd /opt/fortress/fortress-app && git pull`
+2. **Pull latest**: `cd /opt/fortress && git pull`
 3. **Run Migrations**: 
    - Option A (Sync): `npx drizzle-kit push` (Uses `.env.local`)
    - Option B (SQL): `psql $DATABASE_URL -f drizzle/0001_breezy_psylocke.sql`

@@ -73,4 +73,4 @@ jobs:
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             "$VPS_USER@$VPS_HOST" \
-            'cd /opt/fortress/fortress-app && git fetch origin main && git reset --hard origin/main && npm ci && npx drizzle-kit push && npm run build && (pm2 reload fortress --update-env || pm2 start npm --name "fortress" -- start) && pm2 save'
+            'cd /opt/fortress && git fetch origin main && git reset --hard origin/main && npm ci && npx drizzle-kit push && npm run build && (pm2 reload fortress --update-env || pm2 start npm --name "fortress" -- start) && pm2 save'
