@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git reset *)",
+      "Bash(npm install *)",
+      "Bash(time npm *)",
+      "Bash(npm run *)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__read_console_messages",
+      "mcp__Claude_in_Chrome__read_page",
+      "mcp__Claude_in_Chrome__javascript_tool",
+      "Bash(npm test *)",
+      "mcp__2b21f81d-3b5f-46f9-b897-896655bfd82f__whoami",
+      "mcp__2b21f81d-3b5f-46f9-b897-896655bfd82f__create_new_file",
+      "Bash(grep -E \"\\\\.\\(tsx|ts|css\\)$\")",
+      "mcp__2b21f81d-3b5f-46f9-b897-896655bfd82f__use_figma",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'docs: complete frontend verification - dark theme, responsive, auth gating *)",
+      "Bash(git push *)",
+      "Bash(gh pr create --title 'fix: frontend verification and responsive design polish' --body ' *)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s http://localhost:3000/fortress-30)",
+      "Bash(find C:/Antigravity/Fortress/fortress-app -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) -exec grep -l \"allocatePortfolio\" {} \\\\;)",
+      "Bash(git commit -m ' *)",
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "Bash(npm list *)",
+      "Bash(pkill -f \"node.*next\")"
+    ]
+  }
+}
