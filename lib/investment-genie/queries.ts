@@ -72,7 +72,13 @@ export async function queryIntelligence(): Promise<Signal[]> {
         throw new Error("HTTP error " + res.status);
     }
     const data = await res.json();
-    return (data.signals || data || []) as Signal[];
+
+    if (!data.report) {
+      return [];
+    }
+
+    const signals = data.report.signals || [];
+    return (Array.isArray(signals) ? signals : []) as Signal[];
   } catch (error) {
     console.error("error fetching intelligence", error);
     return [];
