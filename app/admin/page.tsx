@@ -1,12 +1,27 @@
 
 "use client";
 
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Users, ShieldCheck, AlertTriangle } from "lucide-react";
+import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 export default function AdminDashboardPage() {
+    const { showOnboarding, loading, completeOnboarding } = useOnboarding();
+
+    if (loading) {
+        return <div className="space-y-6"><p>Loading...</p></div>;
+    }
+
     return (
-        <div className="space-y-6">
+        <>
+            <OnboardingModal
+                isOpen={showOnboarding}
+                onClose={() => {}}
+                onComplete={completeOnboarding}
+            />
+            <div className="space-y-6">
             <h1 className="text-3xl font-bold font-serif tracking-tight">Overview</h1>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -54,7 +69,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </>
     );
 }
 

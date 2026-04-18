@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, CheckCircle } from "lucide-react";
 
 export default function RegisterPage() {
@@ -119,9 +118,9 @@ export default function RegisterPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md">
+                {error}
+              </div>
             )}
 
             <div className="space-y-2">
