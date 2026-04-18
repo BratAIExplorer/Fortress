@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, Brain, Globe, BookMarked } from "lucide-react";
+import { Shield, Menu, X, Brain, Globe, BookMarked, Target } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -60,6 +60,12 @@ export function Navbar({
                                 <Link href="/macro" className="text-sm flex items-center gap-1.5">
                                     <Globe className="h-3.5 w-3.5 text-primary" />
                                     Market Pulse
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link href="/alpha" className="text-sm flex items-center gap-1.5 text-purple-400 hover:text-purple-300">
+                                    <Target className="h-3.5 w-3.5" />
+                                    Sovereign Alpha
                                 </Link>
                             </Button>
                             <Button variant="ghost" size="sm" asChild>
@@ -135,6 +141,14 @@ export function Navbar({
                                 >
                                     <Globe className="h-4 w-4 text-primary" />
                                     Market Pulse
+                                </Link>
+                                <Link
+                                    href="/alpha"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-lg font-medium hover:text-purple-400 text-purple-400 transition-colors py-2 border-b border-border/50 flex items-center gap-2"
+                                >
+                                    <Target className="h-4 w-4" />
+                                    Sovereign Alpha
                                 </Link>
                                 <Link
                                     href="/guide"

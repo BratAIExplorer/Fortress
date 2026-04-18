@@ -83,6 +83,20 @@ export default function LoginPage() {
                             {loading ? "Authenticating..." : "Login to Fortress"}
                         </Button>
                     </form>
+
+                    <div className="mt-6 space-y-3 text-sm text-center text-muted-foreground">
+                        <div>
+                            <Link href="/forgot-password" className="text-primary hover:underline">
+                                Forgot your password?
+                            </Link>
+                        </div>
+                        <div>
+                            Don't have an account?{" "}
+                            <Link href="/register" className="text-primary hover:underline">
+                                Create one
+                            </Link>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
         </div>

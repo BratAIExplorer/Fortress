@@ -4,7 +4,7 @@
 import { Glossary } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { Tag, ShieldAlert, Layers, RefreshCcw } from "lucide-react";
+import { Tag, ShieldAlert, Layers, RefreshCcw, Diamond, Scale, Target } from "lucide-react";
 
 interface V5GlossaryProps {
     data: Glossary;
@@ -77,6 +77,107 @@ export function V5Glossary({ data }: V5GlossaryProps) {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Sovereign Alpha GEM SCORE Details */}
+            <div className="pt-8 border-t border-white/10 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* GEM Tiers */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Diamond className="h-5 w-5 text-blue-400" />
+                            <h2 className="text-xl font-bold text-white uppercase tracking-tight">GEM Tiers</h2>
+                        </div>
+                        <div className="space-y-3">
+                            {data.gemTiers?.map((tier) => (
+                                <Card key={tier.tier} className="bg-white/5 border-white/10">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-xl">{tier.emoji}</span>
+                                            <span className="font-bold text-sm tracking-wide" style={{ color: tier.color }}>{tier.tier}</span>
+                                            <span className="text-[10px] font-mono text-muted-foreground bg-white/10 px-1.5 py-0.5 rounded">{tier.scoreRange}</span>
+                                        </div>
+                                        <p className="text-[11px] text-slate-300 mb-2 leading-relaxed">{tier.plain}</p>
+                                        <div className="text-[10px] space-y-1">
+                                            <div><span className="text-muted-foreground uppercase font-bold mr-1">Action:</span> <span className="text-white font-medium">{tier.action}</span></div>
+                                            <div><span className="text-muted-foreground uppercase font-bold mr-1">Freq:</span> <span className="text-slate-300">{tier.frequency}</span></div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Risk Modes */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Scale className="h-5 w-5 text-amber-500" />
+                            <h2 className="text-xl font-bold text-white uppercase tracking-tight">Risk Modes</h2>
+                        </div>
+                        <div className="space-y-3">
+                            {data.riskModes?.map((mode) => (
+                                <Card key={mode.mode} className="bg-white/5 border-white/10">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-xl">{mode.emoji}</span>
+                                            <span className="font-bold text-sm tracking-wide" style={{ color: mode.color }}>{mode.mode}</span>
+                                        </div>
+                                        <p className="text-[11px] text-slate-300 mb-3 leading-relaxed">{mode.plain}</p>
+                                        <div className="text-[10px] space-y-2">
+                                            <div><span className="text-muted-foreground uppercase font-bold mr-1">Tiers:</span> <span className="text-white font-medium">{mode.tiers.join(", ")}</span></div>
+                                            <div><span className="text-muted-foreground uppercase font-bold mr-1">Limits:</span> <span className="text-slate-300">Max {mode.maxPicks} picks ({mode.stopLoss})</span></div>
+                                            <ul className="list-disc pl-4 mt-1 text-slate-400 space-y-0.5">
+                                                {mode.rules.map((rule, i) => (
+                                                    <li key={i}>{rule}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* GEM Criteria */}
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Target className="h-5 w-5 text-indigo-400" />
+                        <h2 className="text-xl font-bold text-white uppercase tracking-tight">GEM Score Criteria</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {data.gemCriteria?.map((crit) => (
+                            <Card key={crit.name} className="bg-white/5 border-white/10">
+                                <CardContent className="p-4">
+                                    <div className="flex flex-col mb-3">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xl">{crit.icon}</span>
+                                                <span className="font-bold text-sm tracking-wide" style={{ color: crit.color }}>{crit.name}</span>
+                                            </div>
+                                            <span className="text-[10px] font-mono text-muted-foreground bg-white/10 px-2 py-0.5 rounded">{crit.weight}pts</span>
+                                        </div>
+                                        <p className="text-[11px] text-slate-300 leading-relaxed mt-1">{crit.plain}</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3 text-[10px] border-t border-white/10 pt-3">
+                                        <div>
+                                            <div className="text-emerald-400 uppercase font-bold mb-1.5 flex items-center gap-1">Signals <span className="text-emerald-500 text-lg leading-none">+</span></div>
+                                            <ul className="space-y-1 text-slate-300">
+                                                {crit.signals.map((sig, i) => <li key={i} className="flex gap-1.5"><span className="text-emerald-500 mt-[1px]">✓</span><span>{sig}</span></li>)}
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <div className="text-rose-400 uppercase font-bold mb-1.5 flex items-center gap-1">Red Flags <span className="text-rose-500 text-lg leading-none">-</span></div>
+                                            <ul className="space-y-1 text-slate-300">
+                                                {crit.redFlags.map((flag, i) => <li key={i} className="flex gap-1.5"><span className="text-rose-500 mt-[1px]">✕</span><span>{flag}</span></li>)}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 </div>
             </div>
