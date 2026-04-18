@@ -5,7 +5,14 @@ import { sql, desc, gte } from "drizzle-orm";
 
 let cache: { data: any; timestamp: number } | null = null;
 
-export async function GET() {
+export async function GET(req: Request) {
+  const adminSecret = process.env.ADMIN_SECRET;
+  const providedSecret = req.headers.get("x-admin-secret");
+
+  if (adminSecret && providedSecret !== adminSecret) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const now = Date.now();
   if (cache && now - cache.timestamp < 15000) {
     return NextResponse.json(cache.data);
