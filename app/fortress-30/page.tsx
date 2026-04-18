@@ -44,9 +44,9 @@ export default async function Fortress30Page() {
                     </div>
 
                     {/* Compliance Disclaimer */}
-                    <div className="mb-8 bg-amber-50 border-l-4 border-amber-400 p-4 rounded">
-                        <p className="text-sm text-amber-900">
-                            <strong>Important Disclaimer:</strong> This ranking is for educational and research purposes only.
+                    <div className="mb-8 bg-amber-950/20 border-l-4 border-amber-500/50 p-6 rounded-2xl backdrop-blur-sm">
+                        <p className="text-sm text-amber-200/80 leading-relaxed font-medium">
+                            <strong className="text-amber-400">Important Disclaimer:</strong> This ranking is for educational and research purposes only.
                             It is not financial advice. Past performance does not guarantee future results.
                             Please consult a licensed financial advisor before making investment decisions.
                             You assume full responsibility for your investment decisions.

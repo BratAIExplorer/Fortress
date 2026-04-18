@@ -352,3 +352,6 @@ export const investmentsGeniePerformance = pgTable("investments_genie_performanc
   lastUpdated: timestamp("last_updated", { withTimezone: true }).defaultNow(),
 });
 
+// Modular Schema Exports
+export * from "./schema/auth";
+export * from "./schema/feedback";
