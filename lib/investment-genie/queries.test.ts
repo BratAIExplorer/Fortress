@@ -82,9 +82,11 @@ describe("API Query Functions", () => {
   describe("queryIntelligence", () => {
     it("returns Signal[] type", async () => {
       const mockData = {
-        signals: [
-          { name: "Global trend", direction: "bullish", impactLevel: "high", affectedSectors: [] }
-        ]
+        report: {
+          signals: [
+            { name: "Global trend", direction: "bullish", impactLevel: "high", affectedSectors: [] }
+          ]
+        }
       };
 
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
