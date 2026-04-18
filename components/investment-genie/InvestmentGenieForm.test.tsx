@@ -6,13 +6,14 @@ import { InvestmentGenieForm } from "./InvestmentGenieForm";
 afterEach(cleanup);
 
 describe("InvestmentGenieForm", () => {
-  it("renders all 7 fields", () => {
+  it("renders all form fields", () => {
     render(<InvestmentGenieForm />);
     expect(screen.getByLabelText(/Age/i)).toBeTruthy();
     expect(screen.getByLabelText(/Investment Amount/i)).toBeTruthy();
     expect(screen.getByLabelText(/Time Horizon/i)).toBeTruthy();
     expect(screen.getByText(/Investment Experience/i)).toBeTruthy();
     expect(screen.getByText(/Geographic Focus/i)).toBeTruthy();
+    expect(screen.getByText(/Investment Vehicle Types/i)).toBeTruthy();
     expect(screen.getByLabelText(/Risk Appetite/i)).toBeTruthy();
     expect(screen.getByText(/Income Stability/i)).toBeTruthy();
   });
@@ -30,6 +31,7 @@ describe("InvestmentGenieForm", () => {
 
     expect(screen.getByText(/Minimum investment is \$100/i)).toBeTruthy();
     expect(screen.getByText(/Select at least one geographic focus/i)).toBeTruthy();
+    expect(screen.getByText(/Select at least one investment vehicle type/i)).toBeTruthy();
   });
 
   it("exports UserProfile with correct types on submit", async () => {
@@ -40,6 +42,10 @@ describe("InvestmentGenieForm", () => {
     // Select a country
     const indiaCheckbox = screen.getByRole("checkbox", { name: /India/i });
     await user.click(indiaCheckbox);
+
+    // Select a vehicle type
+    const stocksCheckbox = screen.getByRole("checkbox", { name: /Stocks/i });
+    await user.click(stocksCheckbox);
 
     // Submit
     const submitBtn = screen.getByRole("button", { name: /generate portfolio/i });
@@ -53,6 +59,7 @@ describe("InvestmentGenieForm", () => {
     expect(profile).toHaveProperty("horizon", "5yr");
     expect(profile).toHaveProperty("experience", "intermediate");
     expect(profile.countries).toContain("India");
+    expect(profile.vehicles).toContain("Stocks");
     expect(profile).toHaveProperty("riskAppetite", 50);
     expect(profile).toHaveProperty("incomeStability", "stable");
   });

@@ -21,6 +21,7 @@ const mockUserProfile: UserProfile = {
   amount: 15000,
   horizon: "20yr",
   countries: ["India", "United States"],
+  vehicles: ["Stocks", "ETFs"],
   riskAppetite: 50,
   experience: "intermediate",
   incomeStability: "stable",
@@ -657,7 +658,8 @@ describe("allocatePortfolio edge cases", () => {
   it("should handle all countries combination", () => {
     const allCountriesProfile: UserProfile = {
       ...mockUserProfile,
-      countries: ["India", "United States", "Malaysia", "Singapore", "ETFs"],
+      countries: ["India", "United States", "Malaysia", "Singapore"],
+      vehicles: ["Stocks", "Mutual Funds", "ETFs"],
     };
 
     const result = allocatePortfolio(

@@ -7,7 +7,28 @@ export async function queryScanResults(markets: string[]): Promise<ScanData> {
     if (!res.ok) {
         throw new Error("HTTP error " + res.status);
     }
-    return await res.json() as ScanData;
+    const data = await res.json();
+
+    return {
+      scanDate: new Date(data.scanDate) || new Date(),
+      market: data.market || markets.join(","),
+      totalStocks: data.total || 0,
+      results: (data.results || []).map((r: any) => ({
+        symbol: r.symbol,
+        totalScore: r.total_score,
+        mbTier: r.mb_tier,
+        mbScore: r.mb_score,
+        priceAtScan: r.price,
+        sector: r.sector || "Unknown",
+        market: r.market,
+        l1Pass: r.l1,
+        l2Pass: r.l2,
+        l3Pass: r.l3,
+        l4Pass: r.l4,
+        l5Pass: r.l5,
+        l6Pass: r.l6,
+      }))
+    };
   } catch (error) {
     console.error("error fetching scan results", error);
     return {

@@ -12,6 +12,7 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
   const [horizon, setHorizon] = useState<UserProfile["horizon"]>("5yr");
   const [experience, setExperience] = useState<UserProfile["experience"]>("intermediate");
   const [countries, setCountries] = useState<UserProfile["countries"]>([]);
+  const [vehicles, setVehicles] = useState<UserProfile["vehicles"]>([]);
   const [riskAppetite, setRiskAppetite] = useState<number>(50);
   const [incomeStability, setIncomeStability] = useState<UserProfile["incomeStability"]>("stable");
 
@@ -25,6 +26,14 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
     }
   };
 
+  const toggleVehicle = (vehicle: UserProfile["vehicles"][number]) => {
+    if (vehicles.includes(vehicle)) {
+      setVehicles(vehicles.filter(v => v !== vehicle));
+    } else {
+      setVehicles([...vehicles, vehicle]);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
@@ -32,6 +41,7 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
     if (age < 18 || age > 70) newErrors.age = "Age must be between 18 and 70";
     if (amount < 100) newErrors.amount = "Minimum investment is $100";
     if (countries.length === 0) newErrors.countries = "Select at least one geographic focus";
+    if (vehicles.length === 0) newErrors.vehicles = "Select at least one investment vehicle type";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -45,10 +55,11 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
       horizon,
       experience,
       countries,
+      vehicles,
       riskAppetite,
       incomeStability,
     };
-    
+
     if (onSubmit) {
       onSubmit(profile);
     }
@@ -148,7 +159,7 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
           <div className="space-y-3">
             <Label>Geographic Focus</Label>
             <div className="grid grid-cols-2 gap-2">
-              {(["India", "United States", "Malaysia", "Singapore", "ETFs"] as const).map(country => (
+              {(["India", "United States", "Malaysia", "Singapore"] as const).map(country => (
                 <label
                   key={country}
                   className={cn(
@@ -158,11 +169,11 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
                       : "bg-white/5 text-white/50 border-white/10 hover:bg-white/10"
                   )}
                 >
-                  <input 
-                    type="checkbox" 
-                    className="hidden" 
-                    checked={countries.includes(country)} 
-                    onChange={() => toggleCountry(country)} 
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={countries.includes(country)}
+                    onChange={() => toggleCountry(country)}
                   />
                   <span className="font-bold">{country}</span>
                   {countries.includes(country) && <span className="ml-2">✓</span>}
@@ -170,6 +181,34 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
               ))}
             </div>
             {errors.countries && <p className="text-destructive text-xs mt-2 font-medium">{errors.countries}</p>}
+          </div>
+
+          {/* Investment Vehicle Types */}
+          <div className="space-y-3">
+            <Label>Investment Vehicle Types</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {(["Stocks", "Mutual Funds", "ETFs"] as const).map(vehicle => (
+                <label
+                  key={vehicle}
+                  className={cn(
+                    "flex items-center justify-between px-3 py-2.5 rounded-xl text-xs border transition-all cursor-pointer",
+                    vehicles.includes(vehicle)
+                      ? "bg-primary/20 text-primary border-primary/50"
+                      : "bg-white/5 text-white/50 border-white/10 hover:bg-white/10"
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={vehicles.includes(vehicle)}
+                    onChange={() => toggleVehicle(vehicle)}
+                  />
+                  <span className="font-bold">{vehicle}</span>
+                  {vehicles.includes(vehicle) && <span className="ml-2">✓</span>}
+                </label>
+              ))}
+            </div>
+            {errors.vehicles && <p className="text-destructive text-xs mt-2 font-medium">{errors.vehicles}</p>}
           </div>
 
           {/* Risk Appetite */}
