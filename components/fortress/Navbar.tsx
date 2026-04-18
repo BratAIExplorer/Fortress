@@ -48,6 +48,9 @@ export function Navbar({
                                 <Link href="/fortress-30" className="text-sm">Fortress 30</Link>
                             </Button>
                             <Button variant="ghost" size="sm" asChild>
+                                <Link href="/investment-genie" className="text-sm">Investment Genie</Link>
+                            </Button>
+                            <Button variant="ghost" size="sm" asChild>
                                 <Link href="/v5-extension" className="text-sm">V5 Extension</Link>
                             </Button>
                             <Button variant="ghost" size="sm" asChild>
@@ -118,6 +121,13 @@ export function Navbar({
                                     className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50"
                                 >
                                     Fortress 30
+                                </Link>
+                                <Link
+                                    href="/investment-genie"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50"
+                                >
+                                    Investment Genie
                                 </Link>
                                 <Link
                                     href="/v5-extension"
