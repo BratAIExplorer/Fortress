@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useSession } from "next-auth/react";
+import { MarketSelector } from "@/components/ui/MarketSelector";
 
 interface NavbarProps {
     title?: string;
@@ -84,6 +85,7 @@ export function Navbar({
                             </Button>
                         </>
                     )}
+                    {showLinks && <MarketSelector size="sm" />}
                     {rightElement}
                     {!rightElement && showLinks && (
                         <Button variant="default" size="sm" asChild>

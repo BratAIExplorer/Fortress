@@ -5,14 +5,23 @@ import { getLiveF30Stocks, getLiveF30Candidates } from "@/app/actions";
 import { WisdomWidget } from "@/components/learning/WisdomWidget";
 import { ScannerCandidate } from "@/lib/types";
 import { Navbar } from "@/components/fortress/Navbar";
+import { MarketSelector } from "@/components/ui/MarketSelector";
+import { getMarket } from "@/lib/markets/config";
 import { RadioTower, Zap } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
-export default async function Fortress30Page() {
+export default async function Fortress30Page({
+    searchParams,
+}: {
+    searchParams: { market?: string };
+}) {
+    const marketCode = (searchParams.market ?? "NSE").toUpperCase();
+    const marketConfig = getMarket(marketCode);
+
     const [stocks, candidates] = await Promise.all([
-        getLiveF30Stocks(30),
-        getLiveF30Candidates(10),
+        getLiveF30Stocks(30, marketCode),
+        getLiveF30Candidates(10, marketCode),
     ]);
 
     return (
@@ -24,42 +33,48 @@ export default async function Fortress30Page() {
                 />
 
                 <main className="container px-4 sm:px-8 pt-12">
-                    <div className="mb-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                        <div className="lg:col-span-2 text-left">
-                            <div className="flex items-center gap-2 mb-3">
+                    {/* Header */}
+                    <div className="mb-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                        <div className="lg:col-span-2 space-y-4">
+                            <div className="flex items-center gap-2">
                                 <Zap className="h-4 w-4 text-emerald-400" />
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
                                     Live Scanner · Top by MB Score
                                 </span>
                             </div>
-                            <h1 className="text-4xl font-serif font-bold tracking-tight mb-4">The Conviction List</h1>
+                            <h1 className="text-4xl font-serif font-bold tracking-tight">The Conviction List</h1>
                             <p className="text-muted-foreground max-w-2xl">
-                                Top 30 stocks from the latest scan, ranked by Multi-Bagger Score.
-                                Automatically updated every scan cycle — no manual curation.
+                                Top 30 stocks from the latest {marketConfig.flag} {marketConfig.label} scan,
+                                ranked by Multi-Bagger Score. Automatically updated every scan cycle.
+                                Click any stock to see exactly why it was selected.
                             </p>
+                            {/* Market Selector */}
+                            <MarketSelectorServer currentMarket={marketCode} />
                         </div>
                         <div>
                             <WisdomWidget />
                         </div>
                     </div>
 
-                    {/* Compliance Disclaimer */}
+                    {/* Disclaimer */}
                     <div className="mb-8 bg-amber-950/20 border-l-4 border-amber-500/50 p-6 rounded-2xl backdrop-blur-sm">
                         <p className="text-sm text-amber-200/80 leading-relaxed font-medium">
                             <strong className="text-amber-400">Important Disclaimer:</strong> This ranking is for educational and research purposes only.
                             It is not financial advice. Past performance does not guarantee future results.
                             Please consult a licensed financial advisor before making investment decisions.
-                            You assume full responsibility for your investment decisions.
                         </p>
                     </div>
 
-                    {/* Live Fortress 30 */}
+                    {/* Stock Grid */}
                     {stocks.length === 0 ? (
                         <div className="py-24 text-center border border-dashed border-white/10 rounded-xl">
                             <RadioTower className="h-10 w-10 text-slate-600 mx-auto mb-4" />
-                            <h4 className="text-slate-300 font-medium">No scan data yet</h4>
+                            <h4 className="text-slate-300 font-medium">
+                                No {marketConfig.flag} {marketConfig.label} scan data yet
+                            </h4>
                             <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto">
-                                Run a scan from the Intelligent Scanner tab to populate the Fortress 30.
+                                The daily scanner will populate this list automatically.
+                                Check back after market close.
                             </p>
                         </div>
                     ) : (
@@ -70,7 +85,7 @@ export default async function Fortress30Page() {
                         </div>
                     )}
 
-                    {/* Next 10 candidates */}
+                    {/* Candidates (31-40) */}
                     {candidates.length > 0 && (
                         <div className="mt-20 space-y-6">
                             <div className="flex items-center gap-4">
@@ -79,10 +94,13 @@ export default async function Fortress30Page() {
                                     Ranked 31–40
                                 </span>
                                 <div className="flex-1 h-px bg-white/10" />
-                                <span className="text-[10px] text-muted-foreground">{candidates.length} stocks · just outside top 30</span>
+                                <span className="text-[10px] text-muted-foreground">
+                                    {candidates.length} stocks · just outside top 30
+                                </span>
                             </div>
                             <p className="text-xs text-muted-foreground max-w-2xl">
-                                Next highest-scoring stocks below the Fortress 30 cutoff. Watch these for potential promotion next scan.
+                                Next highest-scoring stocks below the Fortress 30 cutoff.
+                                Watch these for potential promotion next scan.
                             </p>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                 {candidates.map((c: ScannerCandidate) => (
@@ -94,5 +112,33 @@ export default async function Fortress30Page() {
                 </main>
             </div>
         </RiskProvider>
+    );
+}
+
+// Server-side link-based market switcher (no JS required, updates URL)
+function MarketSelectorServer({ currentMarket }: { currentMarket: string }) {
+    const markets = [
+        { code: "NSE", flag: "🇮🇳", label: "India" },
+        { code: "US", flag: "🇺🇸", label: "United States" },
+    ];
+    return (
+        <div className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 p-1 gap-1">
+            {markets.map((m) => (
+                <a
+                    key={m.code}
+                    href={`/fortress-30?market=${m.code}`}
+                    className={[
+                        "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
+                        currentMarket === m.code
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-white hover:bg-white/5",
+                    ].join(" ")}
+                >
+                    <span>{m.flag}</span>
+                    <span className="hidden sm:inline">{m.label}</span>
+                    <span className="sm:hidden">{m.code}</span>
+                </a>
+            ))}
+        </div>
     );
 }

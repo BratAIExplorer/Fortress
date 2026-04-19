@@ -12,7 +12,7 @@ export interface UserProfile {
   age: number; // 18-70
   amount: number; // USD, minimum 100
   horizon: "1yr" | "5yr" | "10yr" | "20yr" | "retirement";
-  countries: ("India" | "United States" | "Malaysia" | "Singapore")[];
+  countries: ("India" | "United States")[];
   vehicles: ("Stocks" | "Mutual Funds" | "ETFs")[];
   riskAppetite: number; // 0-100 slider
   experience: "beginner" | "intermediate" | "experienced";

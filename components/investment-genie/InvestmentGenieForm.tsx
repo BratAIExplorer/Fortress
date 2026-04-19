@@ -159,7 +159,7 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
           <div className="space-y-3">
             <Label>Geographic Focus</Label>
             <div className="grid grid-cols-2 gap-2">
-              {(["India", "United States", "Malaysia", "Singapore"] as const).map(country => (
+              {(["India", "United States"] as const).map(country => (
                 <label
                   key={country}
                   className={cn(

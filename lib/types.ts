@@ -126,6 +126,7 @@ export interface ScannerCandidate {
     id: string;
     symbol: string;
     price: number;
+    market: string;
     mbScore: number;
     mbTier: string;
     totalScore: number;
@@ -134,6 +135,17 @@ export interface ScannerCandidate {
     fcfYieldPct: number | null;
     deDirection: string | null;
     marginDirection: string | null;
+    // Transparency: why this stock was selected
+    l1Pass: boolean | null;
+    l2Pass: boolean | null;
+    l3Pass: boolean | null;
+    l4Pass: boolean | null;
+    l5Pass: boolean | null;
+    l6Pass: boolean | null;
+    pegRatio: number | null;
+    ccScore: number | null;
+    ccTier: string | null;
+    scanRunAt: string | null;
 }
 
 export interface TopPick {

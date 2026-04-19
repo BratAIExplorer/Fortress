@@ -27,8 +27,12 @@ export default function InvestmentGeniePage() {
 
     try {
       // Fetch all 3 queries in parallel
+      // Map selected countries to market codes
+      const marketCodes = profile.countries.map(c =>
+        c === "United States" ? "US" : "NSE"
+      );
       const [scanData, macroState, signals] = await Promise.all([
-        queryScanResults(["NSE"]), // India-only for MVP
+        queryScanResults(marketCodes.length ? marketCodes : ["NSE"]),
         queryMacroSnapshot(),
         queryIntelligence(),
       ]);

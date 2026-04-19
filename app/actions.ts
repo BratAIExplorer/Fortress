@@ -343,32 +343,40 @@ export async function getGlossaryData(): Promise<Glossary> {
 
 const MIN_GOOD_RESULTS = 50;
 
-async function getBestScan() {
+async function getBestScan(market = "NSE") {
     const [good] = await db
         .select()
         .from(schema.scans)
         .where(and(
             eq(schema.scans.status, "COMPLETED"),
+            eq(schema.scans.market, market),
             gte(schema.scans.goodResultsCount, MIN_GOOD_RESULTS)
         ))
         .orderBy(desc(schema.scans.runAt))
         .limit(1);
     if (good) return good;
-    // Fallback: most recent completed regardless of quality
+    // Fallback: most recent completed for this market regardless of quality
     const [fallback] = await db
         .select()
         .from(schema.scans)
-        .where(eq(schema.scans.status, "COMPLETED"))
+        .where(and(
+            eq(schema.scans.status, "COMPLETED"),
+            eq(schema.scans.market, market)
+        ))
         .orderBy(desc(schema.scans.runAt))
         .limit(1);
     return fallback ?? null;
 }
 
-function mapToCandidate(r: typeof schema.scanResults.$inferSelect): ScannerCandidate {
+function mapToCandidate(
+    r: typeof schema.scanResults.$inferSelect,
+    scanRunAt?: Date | null
+): ScannerCandidate {
     return {
         id: r.id,
         symbol: r.symbol,
         price: Number(r.priceAtScan) || 0,
+        market: r.market ?? "NSE",
         mbScore: r.mbScore ?? 0,
         mbTier: r.mbTier ?? "–",
         totalScore: r.totalScore ?? 0,
@@ -377,13 +385,23 @@ function mapToCandidate(r: typeof schema.scanResults.$inferSelect): ScannerCandi
         fcfYieldPct: r.fcfYieldPct != null ? Number(r.fcfYieldPct) : null,
         deDirection: r.deDirection ?? null,
         marginDirection: r.marginDirection ?? null,
+        l1Pass: r.l1Pass ?? null,
+        l2Pass: r.l2Pass ?? null,
+        l3Pass: r.l3Pass ?? null,
+        l4Pass: r.l4Pass ?? null,
+        l5Pass: r.l5Pass ?? null,
+        l6Pass: r.l6Pass ?? null,
+        pegRatio: r.pegRatio != null ? Number(r.pegRatio) : null,
+        ccScore: r.ccScore ?? null,
+        ccTier: r.ccTier ?? null,
+        scanRunAt: scanRunAt?.toISOString() ?? null,
     };
 }
 
-/** Top N stocks from the best scan, ranked by mb_score. Used as the live Fortress 30. */
-export async function getLiveF30Stocks(limit = 30): Promise<ScannerCandidate[]> {
+/** Top N stocks from the best scan for a given market, ranked by mb_score. */
+export async function getLiveF30Stocks(limit = 30, market = "NSE"): Promise<ScannerCandidate[]> {
     try {
-        const scan = await getBestScan();
+        const scan = await getBestScan(market);
         if (!scan) return [];
 
         const results = await db
@@ -396,7 +414,7 @@ export async function getLiveF30Stocks(limit = 30): Promise<ScannerCandidate[]> 
             .orderBy(desc(schema.scanResults.mbScore))
             .limit(limit);
 
-        return results.map(mapToCandidate);
+        return results.map(r => mapToCandidate(r, scan.runAt));
     } catch (error) {
         console.error("Error fetching live F30 stocks:", error);
         return [];
@@ -404,9 +422,9 @@ export async function getLiveF30Stocks(limit = 30): Promise<ScannerCandidate[]> 
 }
 
 /** Stocks ranked 31–40 from the best scan — shown as candidates below the main grid. */
-export async function getLiveF30Candidates(limit = 10): Promise<ScannerCandidate[]> {
+export async function getLiveF30Candidates(limit = 10, market = "NSE"): Promise<ScannerCandidate[]> {
     try {
-        const scan = await getBestScan();
+        const scan = await getBestScan(market);
         if (!scan) return [];
 
         const results = await db
@@ -420,7 +438,7 @@ export async function getLiveF30Candidates(limit = 10): Promise<ScannerCandidate
             .limit(limit)
             .offset(30);
 
-        return results.map(mapToCandidate);
+        return results.map(r => mapToCandidate(r, scan.runAt));
     } catch (error) {
         console.error("Error fetching live F30 candidates:", error);
         return [];

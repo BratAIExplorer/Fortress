@@ -72,14 +72,17 @@ export function V5ExtensionTabs({
     glossary
 }: V5ExtensionTabsProps) {
     const [activeTab, setActiveTab] = useState("lows");
+    const [market, setMarket] = useState<"NSE" | "US">("NSE");
+
+    const isUS = market === "US";
 
     const tabs = [
-        { id: "lows", label: "52W Lows", icon: TrendingDown, color: "data-[state=active]:bg-primary" },
-        { id: "penny", label: "Qualified Penny", icon: Coins, color: "data-[state=active]:bg-primary" },
-        { id: "speculative", label: "Sub-₹20 Spec", icon: Zap, color: "data-[state=active]:bg-primary" },
-        { id: "picks", label: "Top Picks & MF", icon: Star, color: "data-[state=active]:bg-amber-500 data-[state=active]:text-black" },
-        { id: "scanner", label: "Intelligent Scanner", icon: Search, color: "data-[state=active]:bg-emerald-600" },
-        { id: "glossary", label: "Glossary", icon: Info, color: "data-[state=active]:bg-cyan-600" },
+        { id: "lows",        label: "52W Lows",           icon: TrendingDown, color: "data-[state=active]:bg-primary" },
+        { id: "penny",       label: "Qualified Penny",     icon: Coins,        color: "data-[state=active]:bg-primary" },
+        { id: "speculative", label: isUS ? "Sub-$2 Spec" : "Sub-₹20 Spec", icon: Zap, color: "data-[state=active]:bg-primary" },
+        { id: "picks",       label: isUS ? "Top Picks & ETFs" : "Top Picks & MF", icon: Star, color: "data-[state=active]:bg-amber-500 data-[state=active]:text-black" },
+        { id: "scanner",     label: "Intelligent Scanner", icon: Search,       color: "data-[state=active]:bg-emerald-600" },
+        { id: "glossary",    label: "Glossary",            icon: Info,         color: "data-[state=active]:bg-cyan-600" },
     ];
 
     return (
@@ -103,7 +106,29 @@ export function V5ExtensionTabs({
                     ))}
                 </TabsList>
 
-                <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                {/* Market Selector */}
+            <div className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 p-1 gap-1">
+                {([
+                    { code: "NSE", flag: "🇮🇳", label: "India" },
+                    { code: "US",  flag: "🇺🇸", label: "US" },
+                ] as const).map(m => (
+                    <button
+                        key={m.code}
+                        onClick={() => setMarket(m.code)}
+                        className={cn(
+                            "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
+                            market === m.code
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-white hover:bg-white/5"
+                        )}
+                    >
+                        <span>{m.flag}</span>
+                        <span>{m.label}</span>
+                    </button>
+                ))}
+            </div>
+
+            <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                     <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-amber-500" />
                         Curated
@@ -133,7 +158,9 @@ export function V5ExtensionTabs({
                         Extreme High Risk Disclaimer
                     </h4>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                        Sub-₹20 stocks are included for educational transparency. These companies have significant structural issues or extreme debt. While multi-bagger potential exists in recovery, the probability of 100% principal loss is high. Not recommended for core portfolios.
+                        {isUS
+                            ? "Sub-$2 stocks are included for educational transparency. These companies carry significant structural risk. Multi-bagger potential exists in recovery scenarios, but probability of full principal loss is high. Not recommended for core portfolios."
+                            : "Sub-₹20 stocks are included for educational transparency. These companies have significant structural issues or extreme debt. While multi-bagger potential exists in recovery, the probability of 100% principal loss is high. Not recommended for core portfolios."}
                     </p>
                 </div>
             </TabsContent>
