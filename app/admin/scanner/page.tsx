@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Navbar } from "@/components/fortress/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,9 +23,19 @@ const MARKETS = [
 ];
 
 export default function AdminScannerPage() {
+    const { data: session } = useSession();
     const [market, setMarket] = useState<string>("NSE");
     const [weights, setWeights] = useState(WEIGHT_PRESETS.balanced);
     const [isScanning, setIsScanning] = useState(false);
+
+    const isAdmin = (session?.user as any)?.isAdmin;
+
+    useEffect(() => {
+        if (session && !isAdmin) {
+            toast.error("Only admins can access the scanner engine.");
+            setTimeout(() => window.location.href = "/admin", 1000);
+        }
+    }, [session, isAdmin]);
 
     const total = weights.l1 + weights.l2 + weights.l3 + weights.l4 + weights.l5 + weights.l6;
     const isValid = total === 100;

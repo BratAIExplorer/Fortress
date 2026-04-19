@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import { describe, it, expect } from "vitest";
 import { generatePortfolioRecommendation, determineHorizon } from "../lib/portfolio/recommendation-engine";
-import { riskTiers } from "../lib/portfolio/risk-tiers";
+import { riskTiers } from "@/lib/portfolio/risk-tiers";
 import { adjustForMacroConditions } from "../lib/portfolio/macro-adjustments";
 
 describe("Portfolio Engine", () => {

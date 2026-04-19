@@ -3,6 +3,7 @@ import { spawn } from "child_process";
 import { db, schema } from "@/lib/db/client";
 import { eq, and, desc, notInArray, ne, count } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
+import { auth } from "@/auth";
 
 const RETENTION_LIMIT = 10;
 
@@ -180,6 +181,16 @@ export async function POST(req: NextRequest) {
 
     const cronSecret = req.headers.get("x-cron-secret");
     const isCron = cronSecret === process.env.CRON_SECRET;
+
+    // Manual scan: require admin session
+    if (!isCron) {
+        const session = await auth();
+        const isAdmin = (session?.user as any)?.isAdmin;
+        if (!isAdmin) {
+            return NextResponse.json({ error: "Unauthorized: Only admins can trigger manual scans" }, { status: 403 });
+        }
+    }
+
     const triggeredBy = isCron ? "CRON" : "MANUAL";
 
     const sum = Object.values(weights).reduce((a: number, b) => a + (b as number), 0);
