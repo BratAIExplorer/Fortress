@@ -14,14 +14,19 @@ interface Concept {
 
 export function WisdomWidget() {
     const [wisdom, setWisdom] = useState<Concept | null>(null);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
-        // Fetch random wisdom from our API (which calls the Server Action)
         fetch('/api/wisdom')
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error(`${res.status}`);
+                return res.json();
+            })
             .then(data => setWisdom(data))
-            .catch(err => console.error("Failed to fetch wisdom", err));
+            .catch(() => setError(true));
     }, []);
+
+    if (error) return null;
 
     if (!wisdom) return (
         <Card className="bg-muted/30 border-dashed animate-pulse h-[180px]">

@@ -3,6 +3,12 @@
 import { useMarket } from "@/context/MarketContext";
 import { MARKET_LIST, MarketCode } from "@/lib/markets/config";
 import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+
+// Pages that use URL-based market routing (param name by path)
+const URL_ROUTED_PAGES: Record<string, string> = {
+  "/fortress-30": "market",
+};
 
 interface MarketSelectorProps {
   className?: string;
@@ -11,6 +17,17 @@ interface MarketSelectorProps {
 
 export function MarketSelector({ className, size = "md" }: MarketSelectorProps) {
   const { market, setMarket } = useMarket();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const urlParam = URL_ROUTED_PAGES[pathname];
+
+  const handleSelect = (code: MarketCode) => {
+    setMarket(code);
+    if (urlParam) {
+      router.push(`${pathname}?${urlParam}=${code}`);
+    }
+  };
 
   return (
     <div
@@ -24,7 +41,7 @@ export function MarketSelector({ className, size = "md" }: MarketSelectorProps) 
       {MARKET_LIST.map((m) => (
         <button
           key={m.code}
-          onClick={() => setMarket(m.code as MarketCode)}
+          onClick={() => handleSelect(m.code as MarketCode)}
           aria-pressed={market === m.code}
           className={cn(
             "flex items-center gap-1.5 rounded-lg font-medium transition-all",

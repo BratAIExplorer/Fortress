@@ -15,7 +15,7 @@ export default async function Fortress30Page({
     searchParams: Promise<{ market?: string }>;
 }) {
     const params = await searchParams;
-    const marketCode = (params.market ?? "NSE").toUpperCase();
+    const marketCode = (params.market ?? "US").toUpperCase();
     const marketConfig = getMarket(marketCode);
 
     const [stocks, candidates] = await Promise.all([
@@ -45,8 +45,6 @@ export default async function Fortress30Page({
                                 ranked by Multi-Bagger Score. Automatically updated every scan cycle.
                                 Click any stock to see exactly why it was selected.
                             </p>
-                            {/* Market Selector */}
-                            <MarketSelectorServer currentMarket={marketCode} />
                         </div>
                         <div>
                             <WisdomWidget />
@@ -112,30 +110,3 @@ export default async function Fortress30Page({
     );
 }
 
-// Server-side link-based market switcher (no JS required, updates URL)
-function MarketSelectorServer({ currentMarket }: { currentMarket: string }) {
-    const markets = [
-        { code: "NSE", flag: "🇮🇳", label: "India" },
-        { code: "US", flag: "🇺🇸", label: "United States" },
-    ];
-    return (
-        <div className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 p-1 gap-1">
-            {markets.map((m) => (
-                <a
-                    key={m.code}
-                    href={`/fortress-30?market=${m.code}`}
-                    className={[
-                        "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
-                        currentMarket === m.code
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-white hover:bg-white/5",
-                    ].join(" ")}
-                >
-                    <span>{m.flag}</span>
-                    <span className="hidden sm:inline">{m.label}</span>
-                    <span className="sm:hidden">{m.code}</span>
-                </a>
-            ))}
-        </div>
-    );
-}
