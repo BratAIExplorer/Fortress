@@ -307,4 +307,43 @@ Before starting B5, confirm:
 
 ---
 
+## Answers from Claude Code
+
+1. **Symbol format:** Store WITHOUT suffix — `HDFC` not `HDFC.NS`, `AAPL` not `AAPL`. The frontend strips `.NS`/`.BO` on display already.
+2. **Minimum good_results_count:** 50 — confirmed in `app/api/scan/results/route.ts:8`
+3. **US sectors:** Use the same sector strings as yfinance returns (Technology, Healthcare, Financial Services, etc.). The frontend renders whatever string is in the DB.
+
+---
+
+## Backlog (Phase 2 — after MVP 1 ships)
+
+### Fallback Data Sources
+yfinance is an unofficial scraper and can be rate-limited or blocked without notice. Design the scanner so data sources are swappable per market.
+
+**Architecture pattern to implement in Phase 2:**
+```python
+SOURCES = {
+    "NSE": ["yfinance", "nsepython", "alpha_vantage"],
+    "US":  ["yfinance", "alpha_vantage", "polygon"],
+}
+
+def fetch_stock_data(ticker, market):
+    for source_name in SOURCES[market]:
+        try:
+            return ADAPTERS[source_name].fetch(ticker)
+        except Exception:
+            continue  # try next source
+    return None  # all failed → mark OFFLINE
+```
+
+**Fallback sources by market:**
+| Market | Primary | Fallback 1 | Fallback 2 |
+|--------|---------|------------|------------|
+| NSE | yfinance | nsepython | Alpha Vantage |
+| US | yfinance | Alpha Vantage | Polygon.io |
+
+**For MVP 1:** Do NOT build the fallback layer yet. Use yfinance only. Wrap all yfinance calls in try/except and mark stocks as OFFLINE on failure. The adapter pattern comes in Phase 2.
+
+---
+
 *Last updated: April 2026 | Claude Code + Antigravity parallel development*
