@@ -16,10 +16,11 @@ npm install --legacy-peer-deps
 echo "🔨 Building (standalone mode)..."
 npm run build
 
-# Required for Next.js standalone: static assets aren't auto-copied
-echo "📋 Copying static assets into standalone..."
+# Required for Next.js standalone: static assets and env aren't auto-copied
+echo "📋 Copying static assets and env into standalone..."
 cp -r .next/static .next/standalone/.next/static
 cp -r public .next/standalone/public 2>/dev/null || true
+cp .env.local .next/standalone/.env.local
 
 echo "🔄 Reloading pm2..."
 chmod +x start.sh
