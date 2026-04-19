@@ -4,8 +4,6 @@ import { ScannerCandidateCard } from "@/components/fortress/ScannerCandidateCard
 import { getLiveF30Stocks, getLiveF30Candidates } from "@/app/actions";
 import { WisdomWidget } from "@/components/learning/WisdomWidget";
 import { ScannerCandidate } from "@/lib/types";
-import { Navbar } from "@/components/fortress/Navbar";
-import { MarketSelector } from "@/components/ui/MarketSelector";
 import { getMarket } from "@/lib/markets/config";
 import { RadioTower, Zap } from "lucide-react";
 
@@ -14,9 +12,10 @@ export const dynamic = 'force-dynamic';
 export default async function Fortress30Page({
     searchParams,
 }: {
-    searchParams: { market?: string };
+    searchParams: Promise<{ market?: string }>;
 }) {
-    const marketCode = (searchParams.market ?? "NSE").toUpperCase();
+    const params = await searchParams;
+    const marketCode = (params.market ?? "NSE").toUpperCase();
     const marketConfig = getMarket(marketCode);
 
     const [stocks, candidates] = await Promise.all([
@@ -27,20 +26,18 @@ export default async function Fortress30Page({
     return (
         <RiskProvider>
             <div className="min-h-screen bg-background pb-20">
-                <Navbar
-                    title="Fortress 30"
-                    rightElement={<RiskToggle />}
-                />
-
                 <main className="container px-4 sm:px-8 pt-12">
                     {/* Header */}
                     <div className="mb-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                         <div className="lg:col-span-2 space-y-4">
-                            <div className="flex items-center gap-2">
-                                <Zap className="h-4 w-4 text-emerald-400" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-                                    Live Scanner · Top by MB Score
-                                </span>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Zap className="h-4 w-4 text-emerald-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                                        Live Scanner · Top by MB Score
+                                    </span>
+                                </div>
+                                <RiskToggle />
                             </div>
                             <h1 className="text-4xl font-serif font-bold tracking-tight">The Conviction List</h1>
                             <p className="text-muted-foreground max-w-2xl">
