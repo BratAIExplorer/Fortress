@@ -6,37 +6,25 @@ set -e
 
 echo "🚀 Starting Deployment..."
 
-# 1. Update code
-echo "📦 Updating code from repository..."
-git fetch origin main
-git reset --hard origin/main
+# 1. Sync Database
+echo "📦 Syncing Database Schema..."
+export $(grep -v '^#' .env.local | xargs)
+npm run drizzle:push || echo "⚠️ Warning: Schema sync failed. Proceeding with build..."
 
-# 2. Install dependencies
-echo "📚 Installing dependencies..."
-npm install --legacy-peer-deps
-
-# 3. Build the Next.js app
+# 2. Build the Next.js app
 echo "🏗️ Building application..."
 npm run build
 
-# 4. Preparing Standalone Directory
-echo "🧹 Preparing standalone assets..."
-# Remove old static assets to prevent conflicts/bloat
-rm -rf .next/standalone/.next/static
-rm -rf .next/standalone/public
-
-# Ensure directories exist
-mkdir -p .next/standalone/.next
+# 3. Map Assets
+echo "📂 Mapping static assets for standalone mode..."
+mkdir -p .next/standalone/.next/static
 mkdir -p .next/standalone/public
-
-# 5. Copy NEW assets (Critical Step)
-echo "📋 Copying fresh assets..."
-cp -r .next/static .next/standalone/.next/
-cp -r public .next/standalone/
+cp -r .next/static/. .next/standalone/.next/static/
+cp -r public/. .next/standalone/public/
 cp .env.local .next/standalone/.env.local
 
-# 6. Restart PM2 (using ecosystem.config.js)
+# 4. Restart PM2 (using ecosystem.config.js)
 echo "🔄 Reloading Server..."
 npm run deploy:reload
 
-echo "✅ Deployment Complete! App is live."
+echo "✅ SUCCESS! App is live."

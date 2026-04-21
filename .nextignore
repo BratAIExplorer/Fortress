@@ -1,0 +1,7 @@
+# Ignore Python scanner assets which cause symlink panics in Turbopack
+fortress-scanner/
+scanner/
+.venv/
+venv/
+node_modules/
+.next/
