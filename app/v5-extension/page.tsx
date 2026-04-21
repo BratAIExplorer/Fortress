@@ -31,12 +31,6 @@ export default async function V5ExtensionPage() {
 
     return (
         <div className="min-h-screen bg-[#050505] text-slate-200 pb-20 selection:bg-primary/30">
-            {/* Navbar */}
-            <Navbar
-                subtitle="Institutional Expansion v5"
-                className="border-white/5 bg-black/60 backdrop-blur-xl"
-            />
-
             <main className="container px-4 sm:px-8 pt-12 max-w-7xl">
                 <div className="mb-12 space-y-4">
                     <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tighter text-white">

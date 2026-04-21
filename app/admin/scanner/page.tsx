@@ -71,8 +71,8 @@ export default function AdminScannerPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-slate-200">
-            <Navbar subtitle="Institutional Command Center" />
+        <div className="min-h-screen bg-[#050505]">
+            {/* Navbar provided by layout */}
 
             <main className="container px-8 pt-12 max-w-5xl mx-auto space-y-12">
                 <header className="space-y-2">

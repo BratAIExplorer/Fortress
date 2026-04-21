@@ -1467,7 +1467,7 @@ export default function IntelligencePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {/* Navbar provided by layout */}
 
       {/* Hero */}
       <section className="relative pt-8 pb-12 px-4 text-center overflow-hidden border-b border-white/10">
@@ -1537,7 +1537,7 @@ export default function IntelligencePage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 container px-4 sm:px-8 py-12">
+      <main className="container mx-auto px-6 py-12 pt-24">
         <div className="flex gap-12">
 
           {/* Sidebar (desktop) */}

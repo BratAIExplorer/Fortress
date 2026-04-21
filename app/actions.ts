@@ -341,7 +341,7 @@ export async function getGlossaryData(): Promise<Glossary> {
     return glossaryData;
 }
 
-const MIN_GOOD_RESULTS = 50;
+const MIN_GOOD_RESULTS = 25;
 
 async function getBestScan(market = "NSE") {
     const [good] = await db

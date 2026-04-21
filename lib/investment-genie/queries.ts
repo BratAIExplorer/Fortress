@@ -2,18 +2,18 @@ import { ScanData, MacroState, Signal, MacroSnapshot } from "./contracts";
 
 export async function queryScanResults(markets: string[]): Promise<ScanData> {
   try {
-    const marketsQuery = markets.join(",");
-    const res = await fetch(`/api/scan/results?markets=${marketsQuery}`);
-    if (!res.ok) {
-        throw new Error("HTTP error " + res.status);
-    }
-    const data = await res.json();
+    const responses = await Promise.all(
+      markets.map(m => fetch(`/api/scan/results?market=${m}`).then(r => r.json()))
+    );
+
+    const mergedResults = responses.flatMap(data => data.results || []);
+    const firstData = responses[0] || {};
 
     return {
-      scanDate: new Date(data.scanDate) || new Date(),
-      market: data.market || markets.join(","),
-      totalStocks: data.total || 0,
-      results: (data.results || []).map((r: any) => ({
+      scanDate: firstData.scanDate ? new Date(firstData.scanDate) : new Date(),
+      market: markets.join(", "),
+      totalStocks: mergedResults.length,
+      results: mergedResults.map((r: any) => ({
         symbol: r.symbol,
         totalScore: r.total_score,
         mbTier: r.mb_tier,
@@ -48,8 +48,20 @@ export async function queryMacroSnapshot(): Promise<MacroState> {
     }
     const data = await res.json();
     
-    // Attempt to extract the snapshot from the response or assume it's the response itself
-    const snapshot: MacroSnapshot = data.snapshot || data; 
+    const rawSnapshot = data.snapshots && data.snapshots.length > 0 ? data.snapshots[0] : (data.snapshot || data);
+    
+    // Map properties to numbers as required by contracts.ts
+    const snapshot: MacroSnapshot = {
+      snapshotDate: rawSnapshot.snapshotDate ? new Date(rawSnapshot.snapshotDate) : new Date(),
+      nifty50: Number(rawSnapshot.nifty50) || 0,
+      bankNifty: Number(rawSnapshot.bankNifty) || 0,
+      usdInr: Number(rawSnapshot.usdInr) || 0,
+      goldUsd: Number(rawSnapshot.goldUsd) || 0,
+      crudeOilUsd: Number(rawSnapshot.crudeOilUsd) || 0,
+      us10yYield: Number(rawSnapshot.us10yYield) || 0,
+      cboeVix: Number(rawSnapshot.cboeVix) || 0,
+      indiaVix: Number(rawSnapshot.indiaVix) || 0,
+    };
     
     // Derived values
     const vixState = snapshot.cboeVix > 30 ? "extreme" : snapshot.cboeVix > 20 ? "elevated" : "normal";

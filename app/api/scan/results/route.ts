@@ -5,7 +5,7 @@ import { eq, desc, and, isNotNull, gte } from "drizzle-orm";
 export const dynamic = "force-dynamic";
 
 // Minimum non-OFFLINE results for a scan to be considered healthy.
-const MIN_GOOD_RESULTS = 50;
+const MIN_GOOD_RESULTS = 25;
 
 // GET /api/scan/results?scanId=<id>&sort=mb_score|total_score|cc_score&tier=Rocket&megatrend=Defence
 // Returns results for the best available scan with all engine v3 fields.
@@ -14,23 +14,26 @@ const MIN_GOOD_RESULTS = 50;
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
 
-    let scanId = searchParams.get("scanId");
-    let degraded = false;
-
+    const market = searchParams.get("market") ?? "NSE";
+    
     if (!scanId) {
-        // Find the most recent healthy scan using the stored goodResultsCount column
+        // Find the most recent healthy scan for the requested market
         const goodScan = await db.query.scans.findFirst({
             where: and(
                 eq(schema.scans.status, "COMPLETED"),
+                eq(schema.scans.market, market),
                 gte(schema.scans.goodResultsCount, MIN_GOOD_RESULTS)
             ),
             orderBy: [desc(schema.scans.runAt)],
         });
 
         if (!goodScan) {
-            // No healthy scan found — fall back to most recent completed scan
+            // No healthy scan found — fall back to most recent completed scan for THIS market
             const fallback = await db.query.scans.findFirst({
-                where: eq(schema.scans.status, "COMPLETED"),
+                where: and(
+                    eq(schema.scans.status, "COMPLETED"),
+                    eq(schema.scans.market, market)
+                ),
                 orderBy: [desc(schema.scans.runAt)],
             });
             if (!fallback) {
@@ -41,7 +44,10 @@ export async function GET(req: NextRequest) {
         } else {
             // Check if there's a more recent (degraded) scan we're skipping over
             const latest = await db.query.scans.findFirst({
-                where: eq(schema.scans.status, "COMPLETED"),
+                where: and(
+                    eq(schema.scans.status, "COMPLETED"),
+                    eq(schema.scans.market, market)
+                ),
                 orderBy: [desc(schema.scans.runAt)],
             });
             degraded = latest ? latest.id !== goodScan.id : false;

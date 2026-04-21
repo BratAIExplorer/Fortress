@@ -11,8 +11,8 @@ export default async function StocksPage() {
     const stocks = await getStocks();
 
     return (
-        <div className="min-h-screen bg-background">
-            <Navbar title="Fortress Stocks" subtitle="Framework Analysis" />
+        <div className="min-h-screen bg-background text-foreground">
+            {/* Navbar is in layout */}
             
             <main className="container px-4 sm:px-8 py-12">
                 <header className="mb-12">

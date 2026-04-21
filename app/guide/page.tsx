@@ -97,7 +97,7 @@ function LayerRow({ id, label, icon: Icon, color, plain, detail }: {
 export default function GuidePage() {
     return (
         <div className="min-h-screen bg-background text-foreground">
-            <Navbar />
+            {/* Navbar provided by layout */}
 
             <main className="container max-w-3xl mx-auto px-4 sm:px-8 py-12 space-y-16">
 

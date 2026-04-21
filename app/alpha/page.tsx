@@ -142,8 +142,8 @@ export default function AlphaDashboard() {
     // ── Auth gate ──────────────────────────────────────────────────────────────
     if (!adminSecret && !loading) {
         return (
-            <div className="flex flex-col min-h-screen">
-                <Navbar />
+            <div className="flex flex-col min-h-screen pt-16">
+                {/* Navbar provided by layout */}
                 <div className="flex flex-1 items-center justify-center px-4">
                     <div className="w-full max-w-sm space-y-6">
                         <div className="text-center">
@@ -181,8 +181,8 @@ export default function AlphaDashboard() {
 
     if (loading) {
         return (
-            <div className="flex flex-col min-h-screen">
-                <Navbar />
+            <div className="flex flex-col min-h-screen pt-16">
+                {/* Navbar provided by layout */}
                 <div className="flex flex-1 items-center justify-center">
                     <div className="flex items-center gap-3 text-muted-foreground">
                         <RefreshCw className="h-5 w-5 animate-spin" />
@@ -195,8 +195,8 @@ export default function AlphaDashboard() {
 
     if (error || !data) {
         return (
-            <div className="flex flex-col min-h-screen">
-                <Navbar />
+            <div className="flex flex-col min-h-screen pt-16">
+                {/* Navbar provided by layout */}
                 <div className="flex flex-1 items-center justify-center text-destructive">
                     {error || "No data"}
                 </div>
@@ -207,8 +207,8 @@ export default function AlphaDashboard() {
     const { summary, performance, model, recentScans } = data;
 
     return (
-        <div className="flex flex-col min-h-screen">
-            <Navbar />
+        <div className="flex flex-col min-h-screen pt-16">
+            {/* Navbar provided by layout */}
 
             <main className="flex-1 container mx-auto px-4 py-8 max-w-7xl space-y-8">
 

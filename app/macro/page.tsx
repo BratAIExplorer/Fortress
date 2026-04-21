@@ -237,8 +237,7 @@ export default function MacroPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground">
-            <Navbar />
-
+            {/* Navbar is provided by layout */}
             <main className="container max-w-6xl mx-auto px-4 sm:px-8 py-12 space-y-12">
 
                 {/* Header */}

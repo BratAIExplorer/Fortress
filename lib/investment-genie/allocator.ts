@@ -370,7 +370,7 @@ function generateSignalActions(
   return signals
     .filter((s) => s.impactLevel !== "low")
     .map((signal) => {
-      const affectedSectors = signal.affectedSectors
+      const affectedSectors = (signal.affectedSectors || [])
         .map((s) => s.sector)
         .join(", ");
 

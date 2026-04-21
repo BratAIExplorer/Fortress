@@ -23,7 +23,13 @@ cp -r .next/static .next/standalone/.next/
 cp -r public .next/standalone/
 cp .env.local .next/standalone/.env.local
 
-# 4. Restart PM2 (using ecosystem.config.js)
+# 4. Sync Nginx Config
+echo "🌐 Syncing Nginx configuration..."
+sudo cp scripts/nginx-fortress.conf /etc/nginx/sites-available/fortress
+sudo ln -sf /etc/nginx/sites-available/fortress /etc/nginx/sites-enabled/
+sudo systemctl reload nginx
+
+# 5. Restart PM2 (using ecosystem.config.js)
 echo "🔄 Reloading Server..."
 npm run deploy:reload
 
