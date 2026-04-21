@@ -1602,7 +1602,7 @@ export default function IntelligencePage() {
             </AnimatePresence>
           </main>
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
       <footer className="border-t py-10 bg-background">
