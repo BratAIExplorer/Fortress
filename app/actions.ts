@@ -209,53 +209,133 @@ function mapV5Row(s: typeof schema.stocks.$inferSelect): V5Stock {
     };
 }
 
-export async function getV5LowStocks(): Promise<V5Stock[]> {
+export async function getV5LowStocks(market: string = "NSE"): Promise<V5Stock[]> {
     try {
         const results = await db
             .select()
             .from(schema.stocks)
-            .where(eq(schema.stocks.v5Category, "low"));
+            .where(
+                and(
+                    eq(schema.stocks.v5Category, "low"),
+                    eq(schema.stocks.isActive, true)
+                )
+            );
 
         if (results.length > 0) return results.map(mapV5Row);
     } catch (error) {
         console.error("Error fetching V5 Low stocks from DB:", error);
     }
-    return v5LowStocks as V5Stock[];
+    return (market === "NSE" ? v5LowStocks : []) as V5Stock[];
 }
 
-export async function getV5PennyStocks(): Promise<V5Stock[]> {
+export async function getV5SubTenStocks(market: string = "NSE") {
     try {
-        const results = await db
-            .select()
+        const results = await db.select()
             .from(schema.stocks)
-            .where(eq(schema.stocks.v5Category, "penny"));
+            .where(
+                and(
+                    eq(schema.stocks.v5Category, "sub_ten"),
+                    eq(schema.stocks.isActive, true)
+                )
+            );
+        
+        const dbStocks: any[] = results.map(s => ({
+            id: s.id,
+            symbol: s.symbol,
+            name: s.name,
+            sector: s.sector,
+            industry: s.industry || "",
+            current_price: Number(s.currentPrice),
+            drop52w: Number(s.drop52w),
+            debt_to_equity: Number(s.debtToEquity),
+            roce_5yr_avg: Number(s.roce5yrAvg),
+            ocf: s.ocf as any,
+            moat: s.moat || "",
+            l1: s.l1 || 0,
+            l2: s.l2 || 0,
+            l3: s.l3 || 0,
+            l4: s.l4 || 0,
+            l5: s.l5 || 0,
+            why_down: s.whyDown || "",
+            why_buy: s.whyBuy || "",
+            tag: s.tag as any,
+            risk: s.risk as any,
+            quality_score: s.qualityScore || 0,
+            is_active: s.isActive || false,
+            megatrend: s.megatrend || [],
+            market_cap_crores: Number(s.marketCapCrores),
+            multi_bagger_case: s.multiBaggerCase || "",
+            killer_risk: s.killerRisk || "",
+            fortress_note: s.fortressNote || ""
+        }));
 
-        if (results.length > 0) return results.map(mapV5Row);
-    } catch (error) {
-        console.error("Error fetching V5 Penny stocks from DB:", error);
+        if (dbStocks.length === 0) {
+            return market === "NSE" ? v5SubTenStocks : [];
+        }
+        return dbStocks;
+    } catch (e) {
+        console.error("Error in getV5SubTenStocks:", e);
+        return market === "NSE" ? v5SubTenStocks : [];
     }
-    return v5PennyStocks as V5Stock[];
 }
 
-export async function getV5SubTenStocks(): Promise<V5Stock[]> {
+export async function getV5PennyStocks(market: string = "NSE") {
     try {
-        const results = await db
-            .select()
+        const results = await db.select()
             .from(schema.stocks)
-            .where(eq(schema.stocks.v5Category, "sub_ten"));
+            .where(
+                and(
+                    eq(schema.stocks.v5Category, "penny"),
+                    eq(schema.stocks.isActive, true)
+                )
+            );
+        
+        const dbStocks: any[] = results.map(s => ({
+            id: s.id,
+            symbol: s.symbol,
+            name: s.name,
+            sector: s.sector,
+            industry: s.industry || "",
+            current_price: Number(s.currentPrice),
+            drop52w: Number(s.drop52w),
+            debt_to_equity: Number(s.debtToEquity),
+            roce_5yr_avg: Number(s.roce5yrAvg),
+            ocf: s.ocf as any,
+            moat: s.moat || "",
+            l1: s.l1 || 0,
+            l2: s.l2 || 0,
+            l3: s.l3 || 0,
+            l4: s.l4 || 0,
+            l5: s.l5 || 0,
+            why_down: s.whyDown || "",
+            why_buy: s.whyBuy || "",
+            tag: s.tag as any,
+            risk: s.risk as any,
+            quality_score: s.qualityScore || 0,
+            is_active: s.isActive || false,
+            megatrend: s.megatrend || [],
+            market_cap_crores: Number(s.marketCapCrores),
+            penny_why: s.pennyWhy || ""
+        }));
 
-        if (results.length > 0) return results.map(mapV5Row);
-    } catch (error) {
-        console.error("Error fetching V5 Sub-Ten stocks from DB:", error);
+        if (dbStocks.length === 0) {
+            return market === "NSE" ? v5PennyStocks : [];
+        }
+        return dbStocks;
+    } catch (e) {
+        console.error("Error in getV5PennyStocks:", e);
+        return market === "NSE" ? v5PennyStocks : [];
     }
-    return v5SubTenStocks as V5Stock[];
 }
 
-async function getLiveScanStocksByCategory(category: "SUB20" | "PENNY" | "52W_LOW"): Promise<V5Stock[]> {
+async function getLiveScanStocksByCategory(category: "SUB20" | "PENNY" | "52W_LOW", market: string = "NSE"): Promise<V5Stock[]> {
     const [lastScan] = await db
         .select()
         .from(schema.scans)
-        .where(eq(schema.scans.status, "COMPLETED"))
+        .where(and(
+            eq(schema.scans.status, "COMPLETED"),
+            eq(schema.scans.market, market)
+        ))
         .orderBy(desc(schema.scans.runAt))
         .limit(1);
     if (!lastScan) return [];
@@ -291,50 +371,54 @@ async function getLiveScanStocksByCategory(category: "SUB20" | "PENNY" | "52W_LO
         l3: r.l3Pass ? 1 : 0,
         l4: r.l4Pass ? 1 : 0,
         l5: r.l5Pass ? 1 : 0,
+        l6: r.l6Pass ? 1 : 0,
         mbScore: r.mbScore ?? undefined,
         mbTier: r.mbTier ?? undefined,
+        fcfYieldPct: r.fcfYieldPct ? Number(r.fcfYieldPct) : undefined,
+        deDirection: r.deDirection ?? undefined,
+        marginDirection: r.marginDirection ?? undefined,
+        pegRatio: r.pegRatio ? Number(r.pegRatio) : undefined,
         isLivePick: true,
     }));
 }
 
-export async function getLiveSub20Stocks(): Promise<V5Stock[]> {
+export async function getLiveSub20Stocks(market: string = "NSE"): Promise<V5Stock[]> {
     try {
-        return await getLiveScanStocksByCategory("SUB20");
+        return await getLiveScanStocksByCategory("SUB20", market);
     } catch (error) {
         console.error("Error fetching live SUB20 stocks:", error);
         return [];
     }
 }
 
-export async function getLive52WLowStocks(): Promise<V5Stock[]> {
+export async function getLive52WLowStocks(market: string = "NSE"): Promise<V5Stock[]> {
     try {
-        return await getLiveScanStocksByCategory("52W_LOW");
+        return await getLiveScanStocksByCategory("52W_LOW", market);
     } catch (error) {
         console.error("Error fetching live 52W Low stocks:", error);
         return [];
     }
 }
 
-export async function getLivePennyStocks(): Promise<V5Stock[]> {
+export async function getLivePennyStocks(market: string = "NSE"): Promise<V5Stock[]> {
     try {
-        return await getLiveScanStocksByCategory("PENNY");
+        return await getLiveScanStocksByCategory("PENNY", market);
     } catch (error) {
         console.error("Error fetching live Penny stocks:", error);
         return [];
     }
 }
 
-export async function getV5TopMutualFunds(): Promise<MutualFund[]> {
-    // For now returning mock as we haven't added these to DB yet
-    return v5TopMutualFunds;
+export async function getV5TopMutualFunds(market: string = "NSE") {
+    return market === "NSE" ? v5TopMutualFunds : [];
 }
 
-export async function getV5TopIndexFunds(): Promise<IndexFund[]> {
-    return v5TopIndexFunds;
+export async function getV5TopIndexFunds(market: string = "NSE") {
+    return market === "NSE" ? v5TopIndexFunds : [];
 }
 
-export async function getV5TopFortressPicks(): Promise<TopPick[]> {
-    return v5TopFortressPicks;
+export async function getV5TopFortressPicks(market: string = "NSE") {
+    return market === "NSE" ? v5TopFortressPicks : [];
 }
 
 export async function getGlossaryData(): Promise<Glossary> {

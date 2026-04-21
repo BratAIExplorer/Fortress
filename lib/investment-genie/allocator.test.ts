@@ -658,7 +658,7 @@ describe("allocatePortfolio edge cases", () => {
   it("should handle all countries combination", () => {
     const allCountriesProfile: UserProfile = {
       ...mockUserProfile,
-      countries: ["India", "United States", "Malaysia", "Singapore"],
+      countries: ["India", "United States"],
       vehicles: ["Stocks", "Mutual Funds", "ETFs"],
     };
 

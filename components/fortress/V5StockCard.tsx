@@ -8,8 +8,48 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { TrendingDown, Target, Zap, ChevronDown, ChevronUp, RadioTower } from "lucide-react";
 import { V5Stock } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/markets/config";
 
-export function V5StockCard({ stock }: { stock: V5Stock }) {
+function generateScannerThesis(stock: V5Stock) {
+    const passes = [stock.l1, stock.l2, stock.l3, stock.l4, stock.l5, stock.l6].filter(v => v === 1).length;
+    const items = [];
+
+    if (stock.mbTier) {
+        items.push(`Detected as a high-potential **${stock.mbTier}** candidate.`);
+    }
+
+    const gateNames = [];
+    if (stock.l1) gateNames.push("Financial Safety");
+    if (stock.l2) gateNames.push("Pricing Power");
+    
+    let gatesText = `Passed **${passes}/6** fundamental quality gates`;
+    if (gateNames.length > 0) {
+        gatesText += ` including ${gateNames.join(" and ")}`;
+    }
+    items.push(gatesText + ".");
+
+    if (stock.fcfYieldPct) {
+        items.push(`Free Cash Flow yield is attractive at **${stock.fcfYieldPct}%**.`);
+    }
+
+    if (stock.pegRatio && stock.pegRatio > 0) {
+        items.push(`Growth-adjusted valuation (PEG) is **${stock.pegRatio.toFixed(2)}**, suggesting undervaluation relative to earnings trajectory.`);
+    }
+
+    if (stock.deDirection === 'falling') {
+        items.push("Demonstrating financial strengthening with a falling debt profile.");
+    }
+
+    if (stock.marginDirection === 'expanding') {
+        items.push("Operational efficiency is improving with expanding profit margins.");
+    }
+
+    if (items.length === 0) return "Selected based on multi-factor fundamental and momentum anomalies.";
+
+    return items.join(" ");
+}
+
+export function V5StockCard({ stock, market = "NSE" }: { stock: V5Stock, market?: string }) {
     const [showDetail, setShowDetail] = useState(false);
 
     return (
@@ -45,7 +85,7 @@ export function V5StockCard({ stock }: { stock: V5Stock }) {
                     <div className="grid grid-cols-2 gap-2 text-[10px] bg-secondary/20 p-2 rounded-sm border border-border/50">
                         <div className="flex flex-col">
                             <span className="text-muted-foreground uppercase text-[9px]">CMP</span>
-                            <span className="font-bold text-white text-xs">₹{stock.current_price}</span>
+                            <span className="font-bold text-white text-xs">{formatPrice(stock.current_price, market)}</span>
                         </div>
                         <div className="flex flex-col text-right">
                             <span className="text-muted-foreground uppercase text-[9px]">52W Drop</span>
@@ -86,14 +126,32 @@ export function V5StockCard({ stock }: { stock: V5Stock }) {
                             </div>
                         )}
 
-                        {stock.why_buy && (
+                        {/* Automated Scanner Thesis or Manual Fortress View */}
+                        {(stock.why_buy || stock.isLivePick) && (
                             <div className="space-y-1.5">
                                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-tight">
-                                    <Target className="h-3 w-3" /> Fortress View
+                                    <Target className="h-3 w-3" /> 
+                                    {stock.isLivePick && !stock.why_buy ? "Scanner Selection Logic" : "Fortress View"}
                                 </div>
                                 <p className="text-[11px] leading-relaxed text-slate-200 font-medium">
-                                    {stock.why_buy}
+                                    {stock.why_buy || generateScannerThesis(stock)}
                                 </p>
+                                {stock.isLivePick && !stock.why_buy && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                        {[
+                                            { label: "L1: Quality", p: stock.l1 },
+                                            { label: "L2: Moat", p: stock.l2 },
+                                            { label: "L3: Macro", p: stock.l3 },
+                                            { label: "L4: Growth", p: stock.l4 },
+                                            { label: "L5: Gov", p: stock.l5 },
+                                            { label: "L6: Mom", p: stock.l6 },
+                                        ].map((layer, i) => layer.p === 1 && (
+                                            <span key={i} className="text-[8px] bg-emerald-500/10 text-emerald-400 px-1 py-0.5 rounded border border-emerald-500/20">
+                                                {layer.label} ✓
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
 

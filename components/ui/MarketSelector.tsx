@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 // Pages that use URL-based market routing (param name by path)
 const URL_ROUTED_PAGES: Record<string, string> = {
   "/fortress-30": "market",
+  "/v5-extension": "market",
 };
 
 interface MarketSelectorProps {

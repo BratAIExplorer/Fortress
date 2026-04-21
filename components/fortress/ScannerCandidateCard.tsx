@@ -60,6 +60,38 @@ function CriterionRow({
     );
 }
 
+function generateCandidateThesis(candidate: ScannerCandidate) {
+    const passes = [
+        candidate.l1Pass, candidate.l2Pass, candidate.l3Pass,
+        candidate.l4Pass, candidate.l5Pass, candidate.l6Pass,
+    ].filter(v => v === true).length;
+
+    const items = [];
+    if (candidate.mbTier && candidate.mbTier !== "Grounded") {
+        items.push(`Qualified as a **${candidate.mbTier}** grade asset.`);
+    }
+
+    const highlights = [];
+    if (candidate.l1Pass) highlights.push("Profitability");
+    if (candidate.l2Pass) highlights.push("Debt Safety");
+    
+    let base = `Met **${passes}/6** internal quality benchmarks`;
+    if (highlights.length > 0) {
+        base += ` including ${highlights.join(" and ")}`;
+    }
+    items.push(base + ".");
+
+    if (candidate.fcfYieldPct && candidate.fcfYieldPct > 0) {
+        items.push(`FCF Yield: **${candidate.fcfYieldPct.toFixed(1)}%**.`);
+    }
+
+    if (candidate.pegRatio && candidate.pegRatio > 0 && candidate.pegRatio < 1.5) {
+        items.push("Valuation appears attractive relative to growth.");
+    }
+
+    return items.join(" ");
+}
+
 export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidate }) {
     const [showWhy, setShowWhy] = useState(false);
     const tierColor = TIER_COLORS[candidate.mbTier] ?? "text-muted-foreground border-white/20 bg-white/5";
@@ -124,6 +156,12 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
                             <span className="text-muted-foreground uppercase">Debt</span>
                             <DirectionIcon direction={candidate.deDirection} />
                         </div>
+                    </div>
+
+                    <div className="space-y-1.5 min-h-[40px]">
+                        <p className="text-[10px] leading-relaxed text-muted-foreground line-clamp-3">
+                            {generateCandidateThesis(candidate)}
+                        </p>
                     </div>
 
                     {/* Why Selected toggle */}

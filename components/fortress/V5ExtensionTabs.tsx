@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingDown, Coins, Zap, Star, Info, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-function SplitStockGrid({ stocks }: { stocks: V5Stock[] }) {
+function SplitStockGrid({ stocks, market = "NSE" }: { stocks: V5Stock[], market?: string }) {
     const curated = stocks.filter(s => !s.isLivePick);
     const live = stocks.filter(s => s.isLivePick);
 
@@ -25,7 +25,7 @@ function SplitStockGrid({ stocks }: { stocks: V5Stock[] }) {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {curated.map((stock) => (
-                            <V5StockCard key={stock.symbol} stock={stock} />
+                            <V5StockCard key={stock.symbol} stock={stock} market={market} />
                         ))}
                     </div>
                 </div>
@@ -40,7 +40,7 @@ function SplitStockGrid({ stocks }: { stocks: V5Stock[] }) {
                     <p className="text-[11px] text-muted-foreground">Auto-detected by the live scanner. No editorial review yet.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {live.map((stock) => (
-                            <V5StockCard key={stock.symbol} stock={stock} />
+                            <V5StockCard key={stock.symbol} stock={stock} market={market} />
                         ))}
                     </div>
                 </div>
@@ -60,6 +60,7 @@ interface V5ExtensionTabsProps {
     topIndex: IndexFund[];
     topPicks: TopPick[];
     glossary: Glossary;
+    market?: string;
 }
 
 export function V5ExtensionTabs({
@@ -69,11 +70,11 @@ export function V5ExtensionTabs({
     topMF,
     topIndex,
     topPicks,
-    glossary
+    glossary,
+    market = "NSE"
 }: V5ExtensionTabsProps) {
     const [activeTab, setActiveTab] = useState("lows");
-    const [market, setMarket] = useState<"NSE" | "US">("NSE");
-
+    
     const isUS = market === "US";
 
     const tabs = [
@@ -106,29 +107,7 @@ export function V5ExtensionTabs({
                     ))}
                 </TabsList>
 
-                {/* Market Selector */}
-            <div className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 p-1 gap-1">
-                {([
-                    { code: "NSE", flag: "🇮🇳", label: "India" },
-                    { code: "US",  flag: "🇺🇸", label: "US" },
-                ] as const).map(m => (
-                    <button
-                        key={m.code}
-                        onClick={() => setMarket(m.code)}
-                        className={cn(
-                            "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
-                            market === m.code
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : "text-muted-foreground hover:text-white hover:bg-white/5"
-                        )}
-                    >
-                        <span>{m.flag}</span>
-                        <span>{m.label}</span>
-                    </button>
-                ))}
-            </div>
-
-            <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                     <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-amber-500" />
                         Curated
@@ -144,15 +123,15 @@ export function V5ExtensionTabs({
             </div>
 
             <TabsContent value="lows" className="mt-0 outline-none">
-                <SplitStockGrid stocks={lowStocks} />
+                <SplitStockGrid stocks={lowStocks} market={market} />
             </TabsContent>
 
             <TabsContent value="penny" className="mt-0 outline-none">
-                <SplitStockGrid stocks={pennyStocks} />
+                <SplitStockGrid stocks={pennyStocks} market={market} />
             </TabsContent>
 
             <TabsContent value="speculative" className="mt-0 outline-none">
-                <SplitStockGrid stocks={subTenStocks} />
+                <SplitStockGrid stocks={subTenStocks} market={market} />
                 <div className="mt-12 p-6 rounded-xl border border-destructive/20 bg-destructive/5 max-w-3xl">
                     <h4 className="text-destructive font-bold flex items-center gap-2 mb-2 uppercase text-xs tracking-widest">
                         Extreme High Risk Disclaimer

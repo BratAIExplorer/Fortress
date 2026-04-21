@@ -4,29 +4,36 @@ import { Navbar } from "@/components/fortress/Navbar";
 
 export const dynamic = "force-dynamic";
 
-export default async function V5ExtensionPage() {
+export default async function V5ExtensionPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ market?: string }>;
+}) {
+    const params = await searchParams;
+    const market = (params.market ?? "NSE").toUpperCase();
+
     const [
         curatedLowStocks, liveLowStocks,
         curatedPennyStocks, livePennyStocks,
         curatedSubTenStocks, liveSub20Stocks,
         topMF,
     ] = await Promise.all([
-        getV5LowStocks(), getLive52WLowStocks(),
-        getV5PennyStocks(), getLivePennyStocks(),
-        getV5SubTenStocks(), getLiveSub20Stocks(),
-        getV5TopMutualFunds(),
+        getV5LowStocks(market), getLive52WLowStocks(market),
+        getV5PennyStocks(market), getLivePennyStocks(market),
+        getV5SubTenStocks(market), getLiveSub20Stocks(market),
+        getV5TopMutualFunds(market),
     ]);
 
-    const mergeWithLive = (curated: typeof curatedLowStocks, live: typeof liveLowStocks) => {
-        const curatedSymbols = new Set(curated.map(s => s.symbol));
-        return [...curated, ...live.filter(s => !curatedSymbols.has(s.symbol))];
+    const mergeWithLive = (curated: any[], live: any[]) => {
+        const curatedSymbols = new Set(curated.map((s: any) => s.symbol));
+        return [...curated, ...live.filter((s: any) => !curatedSymbols.has(s.symbol))];
     };
 
     const lowStocks = mergeWithLive(curatedLowStocks, liveLowStocks);
     const pennyStocks = mergeWithLive(curatedPennyStocks, livePennyStocks);
     const subTenStocks = mergeWithLive(curatedSubTenStocks, liveSub20Stocks);
-    const topIndex = await getV5TopIndexFunds();
-    const topPicks = await getV5TopFortressPicks();
+    const topIndex = await getV5TopIndexFunds(market);
+    const topPicks = await getV5TopFortressPicks(market);
     const glossary = await getGlossaryData();
 
     return (
@@ -49,6 +56,7 @@ export default async function V5ExtensionPage() {
                     topIndex={topIndex}
                     topPicks={topPicks}
                     glossary={glossary}
+                    market={market}
                 />
             </main>
         </div>

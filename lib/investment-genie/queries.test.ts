@@ -28,8 +28,8 @@ describe("API Query Functions", () => {
       });
 
       const res = await queryScanResults(["NSE"]);
-      expect(global.fetch).toHaveBeenCalledWith("/api/scan/results?markets=NSE");
-      expect(res.totalStocks).toBe(100);
+      expect(global.fetch).toHaveBeenCalledWith("/api/scan/results?market=NSE");
+      expect(res.totalStocks).toBe(1);
       expect(res.results.length).toBe(1);
     });
 

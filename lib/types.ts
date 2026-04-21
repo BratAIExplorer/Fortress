@@ -71,9 +71,14 @@ export interface V5Stock extends Stock {
     l3: number;
     l4: number;
     l5: number;
+    l6?: number;
     isLivePick?: boolean;
     mbScore?: number;
     mbTier?: string;
+    fcfYieldPct?: number;
+    deDirection?: string;
+    marginDirection?: string;
+    pegRatio?: number;
 }
 
 export interface Collection {

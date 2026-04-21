@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../app/api/analytics/page-view/route";
 import { db } from "@/lib/db/client";
@@ -9,7 +10,16 @@ vi.mock("@/lib/db/client", () => ({
         returning: vi.fn(() => [{ id: 123 }])
       }))
     }))
+  },
+  schema: {
+    pageViews: {
+      id: { name: 'id' }
+    }
   }
+}));
+
+vi.mock("next/headers", () => ({
+  headers: vi.fn(() => Promise.resolve(new Map([["x-forwarded-for", "1.2.3.4"], ["user-agent", "vitest"]])))
 }));
 
 describe("POST /api/analytics/page-view", () => {
@@ -24,7 +34,7 @@ describe("POST /api/analytics/page-view", () => {
       headers: { "x-forwarded-for": "1.2.3.4" }
     });
 
-    const res = await POST(req);
+    const res = await POST(req as NextRequest);
     const data = await res.json();
 
     expect(res.status).toBe(200);
@@ -36,17 +46,14 @@ describe("POST /api/analytics/page-view", () => {
   it("should respect rate limits", async () => {
     const ip = "5.6.7.8";
     const promises = [];
-    // Resetting for this IP is not possible easily unless we expose the map,
-    // but the map is in the module scope.
-    // In a clean test environment, it should be fine.
     
-    for (let i = 0; i < 110; i++) {
+    for (let i = 0; i < 40; i++) {
       const req = new Request("http://localhost/api/analytics/page-view", {
         method: "POST",
         body: JSON.stringify({ pagePath: "/home" }),
         headers: { "x-forwarded-for": ip }
       });
-      promises.push(POST(req));
+      promises.push(POST(req as NextRequest));
     }
 
     const results = await Promise.all(promises);

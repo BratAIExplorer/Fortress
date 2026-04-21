@@ -69,7 +69,7 @@ export default async function Fortress30Page({
                             </h4>
                             <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto">
                                 The daily scanner will populate this list automatically.
-                                Check back after market close.
+                                Check back after the next scheduled scan.
                             </p>
                         </div>
                     ) : (
