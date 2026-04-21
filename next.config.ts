@@ -3,10 +3,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  experimental: {
-    turbo: {
-      root: __dirname,
-    },
+  // In Next.js 16, turbopack settings have moved to the top level
+  // @ts-ignore - NextConfig type might lag behind new Turbopack keys
+  turbopack: {
+    root: __dirname,
   },
 };
 
