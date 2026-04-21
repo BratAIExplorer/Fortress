@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
 
     const market = searchParams.get("market") ?? "NSE";
+    let scanId = searchParams.get("scanId");
+    let degraded = false;
     
     if (!scanId) {
         // Find the most recent healthy scan for the requested market
