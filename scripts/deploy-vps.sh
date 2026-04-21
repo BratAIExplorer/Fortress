@@ -15,12 +15,12 @@ npm run drizzle:push || echo "⚠️ Warning: Schema sync failed. Proceeding wit
 echo "🏗️ Building application..."
 npm run build
 
-# 3. Map Assets
+# 3. Map Assets (Ensure the server finds static files)
 echo "📂 Mapping static assets for standalone mode..."
-mkdir -p .next/standalone/.next/static
-mkdir -p .next/standalone/public
-cp -r .next/static/. .next/standalone/.next/static/
-cp -r public/. .next/standalone/public/
+# Next.js standalone expects .next/static inside the standalone folder
+mkdir -p .next/standalone/.next
+cp -r .next/static .next/standalone/.next/
+cp -r public .next/standalone/
 cp .env.local .next/standalone/.env.local
 
 # 4. Restart PM2 (using ecosystem.config.js)
