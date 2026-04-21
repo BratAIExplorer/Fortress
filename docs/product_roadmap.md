@@ -61,14 +61,24 @@ The self-learning prediction loop. Every pick tracked. Model gets smarter every 
 
 ---
 
-## 🟡 Sprint 10 — First Data Cycle (Month 2)
+## 🟡 Sprint 10 — First Data Cycle + Genie Research Brief (Month 2)
 
-**Goal:** 30-day tracking data arrives. Validate the system works end-to-end.
+**Goal:** 30-day tracking data arrives. Validate the system works end-to-end. Simultaneously: Investment Genie graduates from calculator to personalised advisor.
 
+### Alpha Tracking
 1. **Telegram Alerting** — Notification when any 30/60/90d check completes. Include: ticker, return %, tier, verdict.
 2. **Prediction Ledger** — Table view of all predictions with their tracking status (pending / checked / 90d complete).
 3. **Apply Weights Button** — One-click to apply the learning engine's weight recommendations.
 4. **Override UI** — Add override buttons to each prediction card ("Market crash", "Thesis broken", etc.).
+
+### Investment Genie Research Brief (parallel track)
+**Backlog card:** `docs/backlog/GENIE_RESEARCH_BRIEF.md`  
+**Owner:** Google Antigravity (frontend) + Claude Code (data layer)
+
+5. **Tax Profiles Data Layer** — `lib/data/tax-profiles.ts` for IN-MY, IN-SG, IN-AE profiles. Government-sourced, vintage-dated. (Claude Code)
+6. **Research Brief UI** — Sections A–F rendered inline after existing Genie output, collapsed by default behind `View Your Research Brief →` CTA. (Google Antigravity)
+7. **Allocation Enhancement** — Each row in the existing allocation table gets a 1-line "why this, for you" string from the mapper. (Claude Code)
+8. **Integration + QA** — End-to-end test: $10K, Indian-Malaysian NRI, balanced risk. Verify all 10 acceptance criteria. (Both)
 
 ---
 

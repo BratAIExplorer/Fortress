@@ -7,15 +7,23 @@ export const dynamic = "force-dynamic";
 
 // GET /api/macro?limit=8 — latest snapshots ordered by date desc
 export async function GET(req: NextRequest) {
-    const limit = Math.min(parseInt(new URL(req.url).searchParams.get("limit") ?? "8"), 52);
+    try {
+        const limit = Math.min(parseInt(new URL(req.url).searchParams.get("limit") ?? "8"), 52);
 
-    const snapshots = await db
-        .select()
-        .from(schema.macroSnapshots)
-        .orderBy(desc(schema.macroSnapshots.snapshotDate))
-        .limit(limit);
+        const snapshots = await db
+            .select()
+            .from(schema.macroSnapshots)
+            .orderBy(desc(schema.macroSnapshots.snapshotDate))
+            .limit(limit);
 
-    return NextResponse.json({ snapshots });
+        return NextResponse.json({ snapshots });
+    } catch (error) {
+        console.error("Failed to fetch macro snapshots:", error);
+        return NextResponse.json({ 
+            snapshots: [], 
+            warning: "Database unreachable. Showing cached or empty results." 
+        });
+    }
 }
 
 // POST /api/macro — fetch fresh macro data (requires x-cron-secret header)

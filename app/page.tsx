@@ -37,7 +37,7 @@ export default function Home() {
         </motion.div>
 
         <motion.h1
-          className="text-4xl sm:text-6xl md:text-7xl font-bold font-serif tracking-tight max-w-4xl text-balance"
+          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-serif tracking-tight max-w-4xl text-balance"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -88,8 +88,8 @@ export default function Home() {
 
       {/* The Problem / Solution Grid */}
       <section className="py-24 bg-muted/30">
-        <div className="container px-4 sm:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="container px-4 md:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
               icon={<Database className="h-10 w-10 text-blue-500" />}
               title="Beyond Screeners"

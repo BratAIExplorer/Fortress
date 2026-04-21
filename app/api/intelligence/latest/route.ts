@@ -20,7 +20,10 @@ export async function GET(): Promise<NextResponse> {
 
     return NextResponse.json({ report: rows[0] });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('Failed to fetch intelligence report:', error);
+    return NextResponse.json({ 
+      report: null, 
+      warning: "Database unreachable. Intelligence report temporarily unavailable." 
+    });
   }
 }

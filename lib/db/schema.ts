@@ -355,3 +355,4 @@ export const investmentsGeniePerformance = pgTable("investments_genie_performanc
 // Modular Schema Exports
 export * from "./schema/auth";
 export * from "./schema/feedback";
+export * from "./schema/analytics";
