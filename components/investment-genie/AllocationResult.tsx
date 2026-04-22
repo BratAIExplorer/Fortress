@@ -2,6 +2,7 @@
 
 import { Allocation, UserProfile } from "@/lib/investment-genie/contracts";
 import { cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/markets/config";
 
 interface AllocationResultProps {
   allocation: Allocation;
@@ -12,6 +13,12 @@ export default function AllocationResult({
   allocation,
   profile,
 }: AllocationResultProps) {
+  // Derive primary market from the user's selected countries.
+  // If India is selected (alone or alongside US), use NSE/INR; otherwise default to US/USD.
+  const primaryMarket = profile.countries.includes("India") && !profile.countries.includes("United States")
+    ? "NSE"
+    : "US";
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
       {/* Summary Header Card */}
@@ -23,7 +30,7 @@ export default function AllocationResult({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
           <div className="space-y-1">
             <p className="text-xs font-medium uppercase tracking-widest text-white/40">Portfolio Value</p>
-            <p className="text-2xl font-bold text-white">${profile.amount.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-white">{formatPrice(profile.amount, primaryMarket)}</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs font-medium uppercase tracking-widest text-white/40">Time Horizon</p>

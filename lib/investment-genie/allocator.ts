@@ -210,6 +210,8 @@ function buildAllocationLayers(
   countries: string[],
   signals: Signal[]
 ): Record<string, AllocationLayer> {
+  // Derive the set of market codes the user has selected (kept as string[] to accept all ScanResult.market values)
+  const selectedMarkets: string[] = countries.map(c => c === "United States" ? "US" : "NSE");
   const layers: Record<string, AllocationLayer> = {};
 
   // FORTRESS: Safe core (US index ETFs)
@@ -255,9 +257,9 @@ function buildAllocationLayers(
     };
   }
 
-  // UPSIDE: Moonshots (Rocket-tier stocks)
+  // UPSIDE: Moonshots (Rocket-tier stocks from user's selected markets only)
   const rocketStocks = investmentUniverse
-    .filter((s) => s.mbTier === "Rocket")
+    .filter((s) => s.mbTier === "Rocket" && selectedMarkets.includes(s.market))
     .slice(0, 3);
   const rocketWeight = rocketStocks.length > 0 ? template.upside / rocketStocks.length : 0;
 

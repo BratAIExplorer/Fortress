@@ -169,7 +169,7 @@ export default function GuidePage() {
                         />
                         <Step
                             num={3}
-                            title="Go to V5 Extension → Intelligent Scanner tab"
+                            title="Go to Deep Value Scanner → Intelligent Scanner tab"
                             description="Click 'Run Full Scan' to scan all 2,000+ NSE stocks. Takes 20–40 minutes — runs on the server, safe to close. Once done, the 52W Lows, Penny, and Sub-₹20 tabs auto-populate with live scanner results alongside curated picks."
                             href="/v5-extension"
                             linkLabel="Open Scanner"

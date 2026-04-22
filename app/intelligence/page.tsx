@@ -11,6 +11,9 @@ import {
   ChevronDown, ChevronUp, ExternalLink, CheckCircle, XCircle,
   BarChart2, Users, Lock, Globe, Cpu, Star, Info, Sparkles
 } from "lucide-react";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -83,6 +86,108 @@ function Accordion({ question, answer }: { question: string; answer: string }) {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── CollapsibleDetail ────────────────────────────────────────────────────────
+// Wraps secondary / technical content behind a "Read more" toggle.
+// In expert mode it is always expanded. In beginner mode it starts collapsed.
+
+interface CollapsibleDetailProps {
+  label?: string;
+  mode: Mode;
+  children: React.ReactNode;
+  alwaysExpanded?: boolean;
+}
+
+function CollapsibleDetail({ label = "Read more", mode, children, alwaysExpanded = false }: CollapsibleDetailProps) {
+  const [open, setOpen] = useState(alwaysExpanded || mode === "expert");
+
+  // Keep in sync if mode switches
+  const effectiveOpen = mode === "expert" ? true : open;
+
+  if (mode === "expert") {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="mt-3">
+      {!effectiveOpen && (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-2 text-xs text-primary/80 hover:text-primary transition-colors"
+        >
+          <ChevronDown className="h-3.5 w-3.5" />
+          {label}
+        </button>
+      )}
+      <AnimatePresence>
+        {effectiveOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            {children}
+            <button
+              onClick={() => setOpen(false)}
+              className="mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-white transition-colors"
+            >
+              <ChevronUp className="h-3.5 w-3.5" />
+              Show less
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── MBScoreTooltip ───────────────────────────────────────────────────────────
+// Inline icon + hover tooltip explaining what "MB" stands for.
+// Used wherever "MB Score" appears as a key metric label.
+
+function MBScoreTooltip() {
+  return (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center gap-1 cursor-help">
+            <span className="text-primary font-bold">MB</span>
+            <Info className="h-3.5 w-3.5 text-primary/60" />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs text-sm leading-relaxed">
+          <strong>MB = Multi-Bagger Score.</strong> Our proprietary algorithm scores each stock&apos;s potential for
+          2x–10x returns using 6 fundamental gates: Runway, Compounding Engine, Operating Leverage,
+          Discovery Gap, Small-Cap Opportunity, and Valuation Gate.
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+// ─── MBScoreBanner ────────────────────────────────────────────────────────────
+// Always-visible beginner-friendly callout at the top of the page in beginner mode.
+
+function MBScoreBanner() {
+  return (
+    <div className="rounded-xl border border-primary/30 bg-primary/8 p-4 flex gap-3 items-start">
+      <TrendingUp className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+      <div>
+        <p className="font-bold text-sm text-white mb-1">
+          What does <MBScoreTooltip /> Score mean?
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          <strong className="text-white">MB Score = Multi-Bagger Score.</strong> Our proprietary algorithm scores each stock&apos;s
+          potential for 2x–10x returns using 6 fundamental gates. A score of 80+ means all conditions
+          for explosive long-term growth are structurally aligned. You&apos;ll see this score on every
+          stock card — hover the <span className="font-mono text-primary">MB</span> icon anywhere for a quick reminder.
+        </p>
+      </div>
     </div>
   );
 }
@@ -1583,20 +1688,57 @@ export default function IntelligencePage() {
                 transition={{ duration: 0.3 }}
                 className="space-y-20"
               >
+                {mode === "beginner" && <MBScoreBanner />}
                 <WhatIsFortress mode={mode} />
-                <EngineChangelog />
+                {mode === "beginner" ? (
+                  <CollapsibleDetail label="What changed in engine v2.0? (technical)" mode={mode}>
+                    <EngineChangelog />
+                  </CollapsibleDetail>
+                ) : (
+                  <EngineChangelog />
+                )}
                 <FiveLayerEngine mode={mode} />
                 <MultiBaggerScore mode={mode} />
-                <CoffeeCanSection mode={mode} />
+                {mode === "beginner" ? (
+                  <CollapsibleDetail label="Coffee Can Mode — advanced strategy" mode={mode}>
+                    <CoffeeCanSection mode={mode} />
+                  </CollapsibleDetail>
+                ) : (
+                  <CoffeeCanSection mode={mode} />
+                )}
                 <MegatrendSection mode={mode} />
                 <GemScore mode={mode} />
-                <InvestmentGenieSection mode={mode} />
-                <SovereignAlpha mode={mode} />
+                {mode === "beginner" ? (
+                  <CollapsibleDetail label="Investment Genie — portfolio engineering (advanced)" mode={mode}>
+                    <InvestmentGenieSection mode={mode} />
+                  </CollapsibleDetail>
+                ) : (
+                  <InvestmentGenieSection mode={mode} />
+                )}
+                {mode === "beginner" ? (
+                  <CollapsibleDetail label="Sovereign Alpha — how Fortress learns from past picks (advanced)" mode={mode}>
+                    <SovereignAlpha mode={mode} />
+                  </CollapsibleDetail>
+                ) : (
+                  <SovereignAlpha mode={mode} />
+                )}
                 <MarketWeather mode={mode} />
-                <DataSourcesSection mode={mode} />
+                {mode === "beginner" ? (
+                  <CollapsibleDetail label="Data sources & update frequency (technical)" mode={mode}>
+                    <DataSourcesSection mode={mode} />
+                  </CollapsibleDetail>
+                ) : (
+                  <DataSourcesSection mode={mode} />
+                )}
                 <WhatIsNot />
                 <KeyTerms mode={mode} />
-                <BetaFeedback />
+                {mode === "beginner" ? (
+                  <CollapsibleDetail label="Beta feedback — help shape what we build next" mode={mode}>
+                    <BetaFeedback />
+                  </CollapsibleDetail>
+                ) : (
+                  <BetaFeedback />
+                )}
                 <FAQ />
               </motion.div>
             </AnimatePresence>

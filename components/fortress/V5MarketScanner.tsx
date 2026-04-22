@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2, Table2, Scale } from "lucide-react";
+import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2, Table2, Scale, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ScanResultsTable } from "@/components/fortress/ScanResultsTable";
@@ -21,6 +22,9 @@ type ScannerView = "summary" | "results";
 
 export function V5MarketScanner() {
     const router = useRouter();
+    const { data: session, status: sessionStatus } = useSession();
+    const isAdmin = (session?.user as { isAdmin?: boolean } | undefined)?.isAdmin ?? false;
+
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [scanStatus, setScanStatus] = useState("");
@@ -154,6 +158,63 @@ export function V5MarketScanner() {
     };
 
     const runFullScan = () => connectToSSE();
+
+    // Non-admin users: show an informational panel instead of a broken scan button
+    if (sessionStatus !== "loading" && !isAdmin) {
+        return (
+            <div className="space-y-8">
+                {/* Legend Section */}
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                    {[
+                        { id: "L1", label: "Protection", icon: Shield, col: "text-emerald-400", desc: "D/E < 0.6 & OCF+" },
+                        { id: "L2", label: "Pricing", icon: BarChart3, col: "text-blue-400", desc: "Margins + ROCE > 20%" },
+                        { id: "L3", label: "Momentum", icon: Activity, col: "text-amber-400", desc: "3M/6M/1Y vs Nifty 50" },
+                        { id: "L4", label: "Growth", icon: TrendingUp, col: "text-purple-400", desc: "EPS & Revenue CAGR" },
+                        { id: "L5", label: "Ownership", icon: CheckCircle2, col: "text-rose-400", desc: "Insider + FII Holding" },
+                        { id: "L6", label: "Valuation", icon: Scale, col: "text-violet-400", desc: "No Bubble — P/E & PEG" },
+                    ].map(layer => (
+                        <Card key={layer.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all cursor-help group">
+                            <CardContent className="p-4 flex flex-col items-center text-center">
+                                <layer.icon className={cn("h-6 w-6 mb-2", layer.col)} />
+                                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">{layer.id}</span>
+                                <h4 className="text-xs font-bold text-white mb-1">{layer.label}</h4>
+                                <p className="text-[9px] text-slate-400 leading-tight opacity-0 group-hover:opacity-100 transition-opacity">{layer.desc}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+
+                <Card className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-white/10 overflow-hidden text-slate-200">
+                    <CardHeader className="p-8 pb-4">
+                        <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                            <ShieldCheck className="h-6 w-6 text-emerald-400" />
+                            BSE/NSE 5-Layer Scanner
+                        </CardTitle>
+                        <p className="text-slate-400 mt-2 max-w-xl text-sm leading-relaxed">
+                            Automated fundamental screening across 2,000+ NSE stocks using 6 proprietary layers.
+                        </p>
+                    </CardHeader>
+                    <CardContent className="p-8 pt-0">
+                        <div className="p-8 rounded-xl border border-white/10 bg-white/3 text-center space-y-4">
+                            <div className="flex justify-center">
+                                <div className="p-4 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                                    <Clock className="h-8 w-8 text-emerald-400" />
+                                </div>
+                            </div>
+                            <h4 className="text-slate-200 font-semibold text-lg">Scanner Runs Automatically</h4>
+                            <p className="text-slate-400 text-sm max-w-md mx-auto leading-relaxed">
+                                The Intelligent Scanner runs on a scheduled basis and refreshes results across all NSE stocks.
+                                Fresh scan results are reflected in the <span className="text-amber-400 font-medium">52W Lows</span>, <span className="text-blue-400 font-medium">Qualified Penny</span>, and <span className="text-amber-400 font-medium">Sub-₹20 Spec</span> tabs above.
+                            </p>
+                            <p className="text-slate-500 text-xs mt-2">
+                                Manual scan triggers are reserved for administrators.
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">

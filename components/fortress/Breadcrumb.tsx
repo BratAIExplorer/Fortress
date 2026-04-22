@@ -14,7 +14,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "/": "Home",
   "/fortress-30": "Fortress 30",
   "/investment-genie": "Investment Genie",
-  "/v5-extension": "V5 Extension",
+  "/v5-extension": "Deep Value Scanner",
   "/intelligence": "Intelligence",
   "/macro": "Market Pulse",
   "/alpha": "Sovereign Alpha",

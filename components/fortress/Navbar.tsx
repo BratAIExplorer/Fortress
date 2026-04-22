@@ -55,7 +55,7 @@ export function Navbar({
                                 <Link href="/investment-genie" className="text-sm">Investment Genie</Link>
                             </Button>
                             <Button variant="ghost" size="sm" asChild>
-                                <Link href="/v5-extension" className="text-sm">V5 Extension</Link>
+                                <Link href="/v5-extension" className="text-sm">Deep Value Scanner</Link>
                             </Button>
                             <Button variant="ghost" size="sm" asChild>
                                 <Link href="/intelligence" className="text-sm flex items-center gap-1.5">
@@ -141,7 +141,7 @@ export function Navbar({
                                     onClick={() => setIsOpen(false)}
                                     className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50"
                                 >
-                                    V5 Extension
+                                    Deep Value Scanner
                                 </Link>
                                 <Link
                                     href="/intelligence"
