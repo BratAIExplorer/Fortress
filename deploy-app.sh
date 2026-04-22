@@ -17,10 +17,23 @@ echo "🔨 Building (standalone mode)..."
 npm run build
 
 # Required for Next.js standalone: static assets and env aren't auto-copied
-echo "📋 Copying static assets and env into standalone..."
-cp -r .next/static .next/standalone/.next/static
-cp -r public .next/standalone/public 2>/dev/null || true
-cp .env.local .next/standalone/.env.local
+echo "📋 Syncing static assets into standalone build..."
+# Find the actual location of server.js inside standalone folder
+SERVER_PATH=$(find .next/standalone -name "server.js" | head -n 1)
+
+if [ -z "$SERVER_PATH" ]; then
+  echo "❌ Error: server.js not found in .next/standalone. Build may have failed or output: 'standalone' is missing."
+  exit 1
+fi
+
+STANDALONE_DIR=$(dirname "$SERVER_PATH")
+echo "📍 Found standalone server at: $SERVER_PATH"
+
+# Copy required assets to the standalone directory
+mkdir -p "$STANDALONE_DIR/.next"
+cp -r .next/static "$STANDALONE_DIR/.next/static"
+cp -r public "$STANDALONE_DIR/public" 2>/dev/null || true
+cp .env.local "$STANDALONE_DIR/.env.local"
 
 echo "🔄 Reloading pm2..."
 chmod +x start.sh
