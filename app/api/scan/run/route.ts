@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
     // Manual scan: require admin session
     if (!isCron) {
         const session = await auth();
-        const isAdmin = (session?.user as any)?.isAdmin;
+        const isAdmin = (session?.user as { isAdmin?: boolean })?.isAdmin;
         if (!isAdmin) {
             return NextResponse.json({ error: "Unauthorized: Only admins can trigger manual scans" }, { status: 403 });
         }

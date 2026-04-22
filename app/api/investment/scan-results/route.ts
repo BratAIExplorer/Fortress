@@ -31,11 +31,12 @@ export async function POST(req: Request) {
         timestamp: new Date().toISOString()
     }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as Error;
     console.error("[Investment Genie]", error);
     return NextResponse.json({
       error: "Portfolio recommendation failed",
-      details: process.env.NODE_ENV === "development" ? error.message : "Internal error",
+      details: process.env.NODE_ENV === "development" ? err.message : "Internal error",
       requestId: randomUUID()
     }, { status: 500 });
   }

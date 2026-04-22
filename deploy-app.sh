@@ -42,4 +42,4 @@ pm2 reload ecosystem.config.js --update-env \
 
 pm2 save
 echo "✅ Deployment complete!"
-pm2 logs fortress --lines 30
+pm2 status fortress

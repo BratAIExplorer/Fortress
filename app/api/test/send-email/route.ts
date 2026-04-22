@@ -6,7 +6,7 @@ export async function GET() {
   try {
     // Require admin authentication
     const session = await auth();
-    if (!session?.user || !(session.user as any).isAdmin) {
+    if (!session?.user || !(session.user as { isAdmin?: boolean })?.isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
