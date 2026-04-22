@@ -30,7 +30,7 @@ export default function AdminDashboardPage() {
                     // Map API keys to frontend interface keys
                     setAnalytics({
                         usersOnline: data.liveUsers || 0,
-                        mostPopular: (data.trendingPages || []).map((p: any) => ({
+                        mostPopular: (data.trendingPages || []).map((p: { pagePath: string; views: number }) => ({
                             pagePath: p.pagePath,
                             count: p.views
                         })),

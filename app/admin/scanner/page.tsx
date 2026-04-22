@@ -28,7 +28,7 @@ export default function AdminScannerPage() {
     const [weights, setWeights] = useState(WEIGHT_PRESETS.balanced);
     const [isScanning, setIsScanning] = useState(false);
 
-    const isAdmin = (session?.user as any)?.isAdmin;
+    const isAdmin = (session?.user as { isAdmin?: boolean })?.isAdmin;
 
     useEffect(() => {
         if (session && !isAdmin) {

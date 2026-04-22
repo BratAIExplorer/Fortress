@@ -239,7 +239,7 @@ export async function getV5SubTenStocks(market: string = "NSE") {
                 )
             );
         
-        const dbStocks: any[] = results.map(s => ({
+        const dbStocks: V5Stock[] = results.map(s => ({
             id: s.id,
             symbol: s.symbol,
             name: s.name,
@@ -249,7 +249,7 @@ export async function getV5SubTenStocks(market: string = "NSE") {
             drop52w: Number(s.drop52w),
             debt_to_equity: Number(s.debtToEquity),
             roce_5yr_avg: Number(s.roce5yrAvg),
-            ocf: s.ocf as any,
+            ocf: (s.ocf as string) || "–",
             moat: s.moat || "",
             l1: s.l1 || 0,
             l2: s.l2 || 0,
@@ -258,8 +258,8 @@ export async function getV5SubTenStocks(market: string = "NSE") {
             l5: s.l5 || 0,
             why_down: s.whyDown || "",
             why_buy: s.whyBuy || "",
-            tag: s.tag as any,
-            risk: s.risk as any,
+            tag: (s.tag as string) || "QUALIFIED",
+            risk: (s.risk as string) || "MEDIUM",
             quality_score: s.qualityScore || 0,
             is_active: s.isActive || false,
             megatrend: s.megatrend || [],
@@ -290,7 +290,7 @@ export async function getV5PennyStocks(market: string = "NSE") {
                 )
             );
         
-        const dbStocks: any[] = results.map(s => ({
+        const dbStocks: V5Stock[] = results.map(s => ({
             id: s.id,
             symbol: s.symbol,
             name: s.name,
@@ -300,7 +300,7 @@ export async function getV5PennyStocks(market: string = "NSE") {
             drop52w: Number(s.drop52w),
             debt_to_equity: Number(s.debtToEquity),
             roce_5yr_avg: Number(s.roce5yrAvg),
-            ocf: s.ocf as any,
+            ocf: (s.ocf as string) || "–",
             moat: s.moat || "",
             l1: s.l1 || 0,
             l2: s.l2 || 0,
@@ -309,8 +309,8 @@ export async function getV5PennyStocks(market: string = "NSE") {
             l5: s.l5 || 0,
             why_down: s.whyDown || "",
             why_buy: s.whyBuy || "",
-            tag: s.tag as any,
-            risk: s.risk as any,
+            tag: (s.tag as string) || "QUALIFIED",
+            risk: (s.risk as string) || "MEDIUM",
             quality_score: s.qualityScore || 0,
             is_active: s.isActive || false,
             megatrend: s.megatrend || [],
