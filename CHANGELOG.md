@@ -1,5 +1,24 @@
 # Fortress Intelligence — Changelog
 
+## [0.4.1] - 2026-04-22 (Phase 1+2 Beta Feedback Redesign)
+
+### Fixed
+- **Investment Genie — India shows US stocks**: Fixed missing market filter in `allocatePortfolio()` upside/Rocket-tier layer. Curated India portfolios no longer include US equities. File: `lib/investment-genie/allocator.ts`
+- **Investment Genie — Currency stays USD when India selected**: Fixed hardcoded `$` in `AllocationResult.tsx` — now uses `formatPrice()` to display ₹ INR when India market selected. File: `components/investment-genie/AllocationResult.tsx`
+- **Intelligent Scanner — silently broken for users**: Scanner showed active button but ran admin-only at API level. Non-admin users now see "Scanner runs automatically — results appear in the tabs above." File: `components/fortress/V5MarketScanner.tsx`
+- **QS / OCF / MB Score tooltips missing**: Added hover tooltips (ⓘ icon) on all stock cards with plain-English definitions of Quality Score, Operating Cash Flow, and Multi-Bagger Score. Files: `components/fortress/V5StockCard.tsx`, `components/fortress/ScannerCandidateCard.tsx`
+
+### Changed
+- **Renamed: V5 Extension → Deep Value Scanner**: All user-facing labels and breadcrumbs updated. URL `/v5-extension` unchanged (backward compat). Files: `Navbar.tsx`, `Breadcrumb.tsx`, `app/page.tsx`, `app/guide/page.tsx`, `app/v5-extension/page.tsx`
+- **Fortress-30 default market**: Changed from `"US"` to `"NSE"` for India-first positioning. File: `app/fortress-30/page.tsx`
+
+### Added
+- **Macro Sentiment Banner on Deep Value Scanner page**: New component `MacroSentimentBanner.tsx` embedded at top of scanner page. Shows Nifty/VIX/USD-INR snapshot + sentiment indicator + link to full `/macro` intelligence. Includes new server action `getLatestMacroSnapshot()` in `app/actions.ts`. Files: `components/fortress/MacroSentimentBanner.tsx` (new), `app/actions.ts` (new function), `app/v5-extension/page.tsx`
+- **Scanner tab criteria descriptions**: Each tab (52W Lows, Qualified Penny, Sub-₹20 Spec, etc.) now shows 1-2 line explanation of its filter logic. File: `components/fortress/V5ExtensionTabs.tsx`
+- **Intelligence page progressive disclosure**: Six technical scoring sections (L1–L5 Criteria, MB Score Engine, etc.) collapsed by default in beginner mode. MB Score section includes new banner explanation. File: `app/intelligence/page.tsx`
+
+---
+
 ## 2026-04-18 (Admin Security Hardening & Beta Launch Sync)
 
 ### Added

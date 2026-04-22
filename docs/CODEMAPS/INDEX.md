@@ -1,7 +1,7 @@
 # Fortress Intelligence — Codemap Index
 
-**Last Updated:** March 25, 2026
-**Focus:** Live Scanner Integration Architecture
+**Last Updated:** April 22, 2026
+**Focus:** Deep Value Scanner with Macro Sentiment & Enhanced Tooltips
 
 ---
 
@@ -14,28 +14,37 @@
 
 ---
 
-## What Changed (March 25, 2026)
+## What Changed (April 22, 2026)
 
-### Feature: Live Scanner UI Bridge
+### Phase 1+2: Beta Feedback Redesign
 
-All three V5 Extension tabs (52W Lows, Qualified Penny, Sub-₹20 Spec) and Fortress 30 page now display live scanner results alongside curated data.
+**Phase 1 — Bug Fixes:**
+- Investment Genie: Fixed India market showing US stocks
+- Investment Genie: Fixed currency display (USD → ₹ INR when India selected)
+- Intelligent Scanner: Fixed UI showing button for non-admin users (now shows "Scanner runs automatically")
+- QS / OCF / MB Score: Added hover tooltips on all stock cards
+
+**Phase 2 — Architecture Changes:**
+- Renamed: V5 Extension → Deep Value Scanner (UI labels only; URL `/v5-extension` unchanged)
+- Added: Macro Sentiment Banner at top of scanner page (NEW component + server action)
+- Added: Scanner tab criteria descriptions (1-2 lines explaining filter logic)
+- Changed: Fortress 30 default market from "US" to "NSE"
+- Added: Intelligence page progressive disclosure (sections collapsed by default)
 
 **Entry Points:**
-- `app/v5-extension/page.tsx` — Fetches curated + live stocks in parallel, merges them
-- `app/fortress-30/page.tsx` — Shows curated Fortress 30 + scanner candidates section
+- `app/v5-extension/page.tsx` — Deep Value Scanner page (fetches curated + live + macro snapshot)
+- `app/fortress-30/page.tsx` — Fortress 30 page (default market = NSE)
 
 **New Components:**
-- `ScannerCandidateCard.tsx` — Compact card for Fortress 30 scanner picks
-- `SplitStockGrid` (internal to V5ExtensionTabs) — Renders curated + live in labeled sections
-
-**New Type:**
-- `ScannerCandidate` interface (lib/types.ts)
+- `MacroSentimentBanner.tsx` — Macro snapshot (Nifty, VIX, USD-INR, sentiment)
 
 **New Query Functions:**
-- `getLiveSub20Stocks()` — Sub-₹20 scanner picks
-- `getLive52WLowStocks()` — 52W low scanner picks
-- `getLivePennyStocks()` — Penny scanner picks
-- `getLiveF30Candidates(limit)` — Fortress 30 candidates
+- `getLatestMacroSnapshot()` — Fetches latest macro data for banner
+
+**Enhanced Components:**
+- `V5StockCard.tsx` — Added tooltip icons for QS, OCF, MB Score
+- `ScannerCandidateCard.tsx` — Added tooltip icons for MB Score, FCF Yield
+- `V5ExtensionTabs.tsx` — Added 1-2 line criteria descriptions per tab
 
 ---
 
@@ -54,18 +63,19 @@ fortress-app/
 │   └── ...
 │
 ├── app/
-│   ├── actions.ts (server actions: getStocks, getLive*, etc.)
+│   ├── actions.ts (server actions: getStocks, getLive*, getLatestMacroSnapshot)
 │   │
 │   ├── v5-extension/
-│   │   └── page.tsx (V5 tabs: fetches 3 curated + 3 live in parallel)
+│   │   └── page.tsx (Deep Value Scanner: fetches 3 curated + 3 live + macro in parallel)
 │   │
 │   └── fortress-30/
-│       └── page.tsx (Fortress 30: fetches curated + candidates)
+│       └── page.tsx (Fortress 30: default market NSE, fetches curated + candidates)
 │
 ├── components/fortress/
-│   ├── V5ExtensionTabs.tsx (main tab component)
-│   ├── V5StockCard.tsx (stock card with live badge)
-│   ├── ScannerCandidateCard.tsx (NEW: compact candidate card)
+│   ├── MacroSentimentBanner.tsx (NEW: macro snapshot banner for scanner page)
+│   ├── V5ExtensionTabs.tsx (main tab component with criteria descriptions)
+│   ├── V5StockCard.tsx (stock card with live badge + tooltips)
+│   ├── ScannerCandidateCard.tsx (compact candidate card with tooltips)
 │   ├── StockCard.tsx (Fortress 30 curated card)
 │   └── ...
 │
@@ -124,7 +134,7 @@ interface ScannerCandidate {
 
 ## Data Flow Diagrams
 
-### V5 Extension Tabs Flow
+### Deep Value Scanner (V5 Extension) Flow
 ```
 getV5LowStocks()           ─┐
 getLive52WLowStocks()      ─┤
@@ -132,15 +142,16 @@ getV5PennyStocks()         ─┤
 getLivePennyStocks()       ─┼─> Promise.all([...])
 getV5SubTenStocks()        ─┤       ↓
 getLiveSub20Stocks()       ─┤    Merge by symbol
-getV5TopMutualFunds()      ─┤  (curated first, live appended)
-                            ─┤       ↓
-                            ─→ V5ExtensionTabs
+getLatestMacroSnapshot()   ─┤  (curated first, live appended)
+getV5TopMutualFunds()      ─┤       ↓
+                            ─→ MacroSentimentBanner (NEW, top)
+                            ─→ V5ExtensionTabs (with criteria descriptions)
                                    ↓
-                        SplitStockGrid (per tab)
+                        SplitStockGrid (per tab, with tooltips)
                         ├─ Curated section (amber label)
-                        │  └─ V5StockCard[] (no badge)
+                        │  └─ V5StockCard[] (no badge, tooltips on QS/OCF)
                         └─ Scanner Detected (emerald label)
-                           └─ V5StockCard[] (green badge, MB score)
+                           └─ V5StockCard[] (green badge, MB score, tooltips)
 ```
 
 ### Fortress 30 Flow
@@ -230,12 +241,17 @@ Fortress 30 Page
 - [ ] SplitStockGrid hides live section when live.length === 0
 
 ### Integration Tests (Pages)
-- [ ] /v5-extension page fetches all 6 data sources in parallel
+- [ ] /v5-extension page fetches all 7 data sources in parallel (including macro snapshot)
+- [ ] /v5-extension displays MacroSentimentBanner at top (NEW)
 - [ ] /v5-extension merges curated + live correctly (no duplicates by symbol)
+- [ ] /v5-extension tabs show criteria descriptions below tab labels (NEW)
 - [ ] /v5-extension tabs switch between categories
+- [ ] /fortress-30 page defaults to NSE market (NEW)
 - [ ] /fortress-30 page fetches stocks + candidates in parallel
 - [ ] /fortress-30 shows candidates section only if candidates.length > 0
 - [ ] /fortress-30 candidates are excluded from curated stocks
+- [ ] All stock cards show tooltip icons for QS/OCF/MB Score (NEW)
+- [ ] Tooltips display plain-English definitions on hover (NEW)
 
 ### Server Action Tests (app/actions.ts)
 - [ ] getV5LowStocks() returns DB data if available
@@ -260,13 +276,18 @@ Fortress 30 Page
 
 - [ ] Database schema applied: `npm run drizzle:push`
 - [ ] scan_results table populated with at least one completed scan
-- [ ] Server actions deployed: `npm run build`
-- [ ] V5ExtensionTabs component deployed
-- [ ] ScannerCandidateCard component deployed
-- [ ] V5StockCard updated to show live badge
-- [ ] Fortress 30 page updated with candidates section
+- [ ] Server actions deployed: `npm run build` (includes `getLatestMacroSnapshot`)
+- [ ] MacroSentimentBanner component deployed (NEW)
+- [ ] V5ExtensionTabs component deployed with criteria descriptions (NEW)
+- [ ] ScannerCandidateCard component deployed with tooltips (NEW)
+- [ ] V5StockCard updated with tooltips for QS/OCF/MB Score (NEW)
+- [ ] Fortress 30 page default market set to NSE (NEW)
+- [ ] Test /v5-extension shows macro banner at top (NEW)
+- [ ] Test /v5-extension tab descriptions display correctly (NEW)
 - [ ] Test /v5-extension tab switching
+- [ ] Test /fortress-30 defaults to NSE market (NEW)
 - [ ] Test /fortress-30 with/without candidates
+- [ ] Test tooltip hover on stock cards (NEW)
 - [ ] Test mobile responsive layout on all components
 
 ---
@@ -289,11 +310,11 @@ Fortress 30 Page
 
 ## Related Documentation
 
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** — Detailed system architecture
-- **[FRONTEND.md](./FRONTEND.md)** — Component implementation details
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** — Detailed system architecture (updated Apr 22)
+- **[FRONTEND.md](./FRONTEND.md)** — Component implementation details (updated Apr 22)
 - **[BACKEND.md](./BACKEND.md)** — Server actions and database queries
 - **[../../ai-handover.md](../../ai-handover.md)** — Full system overview, deployment, VPS setup
-- **[../../CHANGELOG.md](../../CHANGELOG.md)** — Feature release history
+- **[../../CHANGELOG.md](../../CHANGELOG.md)** — Feature release history (updated Apr 22)
 
 ---
 
@@ -301,13 +322,14 @@ Fortress 30 Page
 
 | File | Purpose | Key Content |
 |------|---------|-------------|
-| `app/actions.ts` | Server data fetching | getV5*(), getLive*(), seedV5Stocks() |
-| `app/v5-extension/page.tsx` | V5 tabs page | Parallel fetch + merge logic |
-| `app/fortress-30/page.tsx` | Fortress 30 page | Curated + candidates render |
-| `components/fortress/V5ExtensionTabs.tsx` | Tab UI | TabsList + SplitStockGrid |
-| `components/fortress/V5StockCard.tsx` | Stock card | Green badge + MB score row for live |
-| `components/fortress/ScannerCandidateCard.tsx` | Candidate card | Compact display for F30 candidates |
-| `lib/types.ts` | TypeScript types | V5Stock, ScannerCandidate, etc. |
+| `app/actions.ts` | Server data fetching | getV5*(), getLive*(), getLatestMacroSnapshot(), seedV5Stocks() |
+| `app/v5-extension/page.tsx` | Deep Value Scanner page | Parallel fetch + macro banner + merge logic |
+| `app/fortress-30/page.tsx` | Fortress 30 page | Default market NSE, curated + candidates render |
+| `components/fortress/MacroSentimentBanner.tsx` | Macro banner (NEW) | Nifty, VIX, USD-INR, sentiment display |
+| `components/fortress/V5ExtensionTabs.tsx` | Tab UI | TabsList with criteria descriptions + SplitStockGrid |
+| `components/fortress/V5StockCard.tsx` | Stock card | Green badge + MB score + tooltips for QS/OCF |
+| `components/fortress/ScannerCandidateCard.tsx` | Candidate card | Compact display + tooltips for MB Score/FCF Yield |
+| `lib/types.ts` | TypeScript types | V5Stock, ScannerCandidate, MacroSnapshot, etc. |
 | `lib/db/schema.ts` | Database schema | stocks, scan_results, scans tables |
 | `lib/mock-data.ts` | Fallback data | Curated stock lists |
 
@@ -322,4 +344,4 @@ For questions about:
 - **Deployment & setup** → See ai-handover.md infrastructure section
 
 Last updated by: Claude (AI)
-Last feature: Live Scanner UI Bridge (March 25, 2026)
+Last feature: Phase 1+2 Beta Feedback Redesign (April 22, 2026)

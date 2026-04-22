@@ -1,7 +1,7 @@
 # Fortress Intelligence — Architecture Codemap
 
-**Last Updated:** March 25, 2026
-**System Status:** V5 Extension with Live Scanner Bridge
+**Last Updated:** April 22, 2026
+**System Status:** Deep Value Scanner with Macro Sentiment & Enhanced Tooltips
 
 ---
 
@@ -16,12 +16,13 @@ Fortress is a curated intelligence platform for NRI investors, combining:
 ┌─────────────────────────────────────────────────────────────┐
 │                      USER INTERFACE                         │
 ├─────────────────────────────────────────────────────────────┤
-│  Fortress 30      │  V5 Extension (3 tabs)                  │
-│  (Curated)        │  • 52W Lows                             │
+│  Fortress 30      │  Deep Value Scanner (3 tabs)            │
+│  (Curated)        │  • Macro Sentiment Banner (NEW)         │
+│                   │  • 52W Lows                             │
 │                   │  • Qualified Penny                      │
 │                   │  • Sub-₹20 Spec                         │
 │                   │  + Scanner Candidates (F30)             │
-│                   │  + Scanner Detected (V5 tabs)           │
+│                   │  + Scanner Detected (tabs)              │
 └──────────────────┬────────────────────────────────────────────┘
                    │ Parallel Fetch
         ┌──────────┴──────────┬─────────────────┐
@@ -84,6 +85,7 @@ ScannerCandidate (new, for Fortress 30)
 | `getLive52WLowStocks()` | scan_results | latest scan, category='52W_LOW' | V5Stock[] |
 | `getLivePennyStocks()` | scan_results | latest scan, category='PENNY' | V5Stock[] |
 | `getLiveF30Candidates(limit)` | scan_results | latest scan, NOT IN curated symbols | ScannerCandidate[] |
+| `getLatestMacroSnapshot()` (NEW) | macro data | Latest snapshot | MacroSnapshot (Nifty, VIX, USD-INR, sentiment) |
 
 ### Helper Functions
 
@@ -109,15 +111,19 @@ ScannerCandidate (new, for Fortress 30)
 
 ### Page Components
 
-**`app/v5-extension/page.tsx`**
+**`app/v5-extension/page.tsx`** (Deep Value Scanner page)
 ```typescript
-// Fetch all three categories + live equivalents in parallel
-const [curated*, live*] = await Promise.all([
+// Fetch all three categories + live equivalents + macro snapshot in parallel
+const [curated*, live*, macroSnapshot] = await Promise.all([
   getV5LowStocks(), getLive52WLowStocks(),
   getV5PennyStocks(), getLivePennyStocks(),
   getV5SubTenStocks(), getLiveSub20Stocks(),
+  getLatestMacroSnapshot(),  // NEW
   ...
 ]);
+
+// Render MacroSentimentBanner first (NEW)
+<MacroSentimentBanner macro={macroSnapshot} />
 
 // Merge: curated first, live deduplicated after
 const mergeWithLive = (curated, live) => [
@@ -126,21 +132,23 @@ const mergeWithLive = (curated, live) => [
 ];
 ```
 
-**`app/fortress-30/page.tsx`**
+**`app/fortress-30/page.tsx`** (Default market now NSE)
 ```typescript
 const [stocks, candidates] = await Promise.all([
   getStocks(),
   getLiveF30Candidates(10),
 ]);
 
+// Market state now defaults to "NSE" instead of "US"
 // Render curated Fortress 30 grid
 // Render Scanner Candidates section only if candidates.length > 0
 ```
 
 ### UI Components
 
-**`components/fortress/V5ExtensionTabs.tsx`**
+**`components/fortress/V5ExtensionTabs.tsx`** (Criteria descriptions added)
 - Renders tabs: 52W Lows | Qualified Penny | Sub-₹20 Spec | Top Picks & MF | Scanner | Glossary
+- Each stock category tab shows 1-2 line description of filter logic (NEW)
 - Embeds `SplitStockGrid` component for each stock category
 
 **`components/fortress/SplitStockGrid.tsx`** (internal to V5ExtensionTabs)
@@ -160,13 +168,22 @@ const live = stocks.filter(s => s.isLivePick);
 - Shows "–" instead of "0%" for missing `drop52w`
 - All other fields (why_down, why_buy, moat, tag) same for curated + live
 
-**`components/fortress/ScannerCandidateCard.tsx`** (NEW)
+**`components/fortress/ScannerCandidateCard.tsx`** (Tooltips added)
 ```typescript
 // Compact card for Fortress 30 candidates
-// Layout: symbol + price | MB tier badge + score
+// Layout: symbol + price | MB tier badge + score (with tooltip ⓘ, NEW)
 //         megatrend emoji + label
-//         [Score] [FCF Yield %] [Debt direction icon]
+//         [Score] [FCF Yield % with tooltip ⓘ] [Debt direction icon]
 //         "Scanner Detected · No Editorial Review" footer
+```
+
+**`components/fortress/MacroSentimentBanner.tsx`** (NEW)
+```typescript
+// Banner component embedded at top of /v5-extension page
+// Displays: Nifty index + VIX + USD-INR rates
+// Shows: Sentiment indicator (Bullish / Neutral / Bearish)
+// Link: "View Full Intelligence" → /macro page
+// Responsive: full-width banner with padding
 ```
 
 **Legend Updates**

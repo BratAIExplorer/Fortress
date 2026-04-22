@@ -31,12 +31,13 @@ The flagship list. Top 30 stocks from the latest scan, ranked by Multi-Bagger (M
 
 **Markets:** 🇮🇳 India (NSE) | 🇺🇸 United States (NYSE/NASDAQ) | 🌍 Global (blended top 30)
 
-### V5 Extension — Specialized Deep Value Scans
+### Deep Value Scanner — Specialized Deep Value Scans
 Beyond the flagship 30. Specialized filters for:
 - **52-Week Lows** — Quality stocks at extreme discounts
 - **Qualified Penny** — Small caps that pass rigorous quality criteria
 - **Speculative Picks** — High-risk, high-conviction momentum plays
 - **Top Picks & ETFs** — Curated selections with full investment thesis
+- **Macro Sentiment Banner** — Real-time Nifty, VIX, USD-INR snapshot + sentiment
 
 **Markets:** 🇮🇳 India (NSE) | 🇺🇸 United States (NYSE/NASDAQ)
 

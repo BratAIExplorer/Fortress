@@ -1,4 +1,24 @@
-# Current Status — March 25, 2026
+# Current Status — April 22, 2026
+
+## Session 3 — Phase 1+2 Beta Feedback Redesign (Live)
+
+### What Was Fixed
+1. **Investment Genie — India shows US stocks**: Fixed missing market filter in `allocatePortfolio()` upside/Rocket-tier layer. Curated India portfolios no longer include US equities.
+
+2. **Investment Genie — Currency stays USD when India selected**: Fixed hardcoded `$` in `AllocationResult.tsx` — now uses `formatPrice()` to display ₹ INR when India market selected.
+
+3. **Intelligent Scanner — silently broken for users**: Scanner showed active button but ran admin-only at API level. Non-admin users now see "Scanner runs automatically — results appear in the tabs above."
+
+4. **QS / OCF / MB Score tooltips missing**: Added hover tooltips (ⓘ icon) on all stock cards with plain-English definitions of Quality Score, Operating Cash Flow, and Multi-Bagger Score.
+
+### What's Live
+- Macro Sentiment Banner on Deep Value Scanner page (NEW)
+- Deep Value Scanner tab criteria descriptions (1-2 lines each)
+- Fortress-30 default market now NSE (was US)
+- Intelligence page progressive disclosure (sections collapsed by default)
+- All stock cards with enhanced tooltips
+
+---
 
 ## Session 2 — Live Scanner Tab Fix + Deployment Stabilisation
 

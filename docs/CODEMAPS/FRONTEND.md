@@ -1,7 +1,7 @@
 # Frontend Components Codemap
 
-**Last Updated:** March 25, 2026
-**Focus:** V5 Extension & Fortress 30 UI with Live Scanner Integration
+**Last Updated:** April 22, 2026
+**Focus:** Deep Value Scanner & Fortress 30 UI with Macro Sentiment & Tooltips
 
 ---
 
@@ -15,16 +15,23 @@ app/
 │       ├── Renders: StockCard[] (curated)
 │       └── Renders: ScannerCandidateCard[] (if candidates exist)
 │
-└── v5-extension/
+└── v5-extension/ (Deep Value Scanner page)
     └── page.tsx
-        ├── Fetches: getV5*Stocks() + getLive*Stocks() in parallel
+        ├── Fetches: getV5*Stocks() + getLive*Stocks() + getLatestMacroSnapshot() in parallel
+        ├── Renders: MacroSentimentBanner (top, new)
         └── Renders: V5ExtensionTabs
             └── SplitStockGrid (for each tab)
                 └── V5StockCard[] (mixed curated + live)
 
 components/fortress/
+├── MacroSentimentBanner.tsx (NEW)
+│   ├── Props: macro snapshot (Nifty, VIX, USD-INR, sentiment)
+│   ├── Displays: Macro indicators + sentiment badge
+│   ├── Link: "View Full Intelligence" → /macro
+│   └── Responsive: full width banner layout
+│
 ├── V5ExtensionTabs.tsx
-│   ├── Renders: TabsList (6 tabs)
+│   ├── Renders: TabsList (6 tabs with criteria descriptions, new)
 │   ├── Renders: SplitStockGrid in each TabsContent
 │   └── State: activeTab (string)
 │
@@ -40,12 +47,14 @@ components/fortress/
 │   ├── Shows: MB Score row if isLivePick + mbScore != null
 │   ├── Shows: why_down, why_buy, multi_bagger_case (expandable on mobile)
 │   ├── Shows: moat + tag at bottom
+│   ├── Shows: Tooltip icons (ⓘ) for QS/OCF/MB Score with plain-English definitions (new)
 │   └── Interaction: hover lift, mobile tap toggle
 │
 ├── ScannerCandidateCard.tsx (NEW)
 │   ├── Displays: symbol, price, MB tier badge
 │   ├── Shows: MB score, megatrend emoji + label
 │   ├── Shows: total score, FCF yield %, debt direction icon
+│   ├── Shows: Tooltip icons (ⓘ) for MB Score and FCF Yield with definitions (new)
 │   ├── Interaction: hover lift
 │   └── Footer: "Scanner Detected · No Editorial Review"
 │
@@ -78,14 +87,19 @@ interface V5ExtensionTabsProps {
 **Tabs Definition:**
 ```typescript
 [
-  { id: "lows", label: "52W Lows", icon: TrendingDown, color: "data-[state=active]:bg-primary" },
-  { id: "penny", label: "Qualified Penny", icon: Coins, color: "data-[state=active]:bg-primary" },
-  { id: "speculative", label: "Sub-₹20 Spec", icon: Zap, color: "data-[state=active]:bg-primary" },
+  { id: "lows", label: "52W Lows", description: "Quality stocks hit hardest by market weakness", icon: TrendingDown, color: "data-[state=active]:bg-primary" },
+  { id: "penny", label: "Qualified Penny", description: "Small caps that pass rigorous fundamentals", icon: Coins, color: "data-[state=active]:bg-primary" },
+  { id: "speculative", label: "Sub-₹20 Spec", description: "High-risk momentum plays under ₹20", icon: Zap, color: "data-[state=active]:bg-primary" },
   { id: "picks", label: "Top Picks & MF", icon: Star, color: "..." },
   { id: "scanner", label: "Intelligent Scanner", icon: Search, color: "..." },
   { id: "glossary", label: "Glossary", icon: Info, color: "..." },
 ]
 ```
+
+**Criteria Descriptions (NEW):**
+- Each stock category tab shows a 1-2 line explanation below the tab label
+- Explains the filter logic (e.g., "52W Lows = quality past extreme drawdown")
+- Updated in V5ExtensionTabs component
 
 **Key Features:**
 - Tab switching via `useState("lows")`
@@ -412,8 +426,9 @@ import { cn } from "@/lib/utils";
 
 ## Related Files
 
-- `app/v5-extension/page.tsx` — V5 Extension page (fetches data)
+- `app/v5-extension/page.tsx` — Deep Value Scanner page (fetches data + macro snapshot)
 - `app/fortress-30/page.tsx` — Fortress 30 page (fetches curated + candidates)
-- `app/actions.ts` — Server actions for data fetching
+- `app/actions.ts` — Server actions for data fetching (includes `getLatestMacroSnapshot()`)
 - `lib/types.ts` — Type definitions (V5Stock, ScannerCandidate)
 - `lib/mock-data.ts` — Fallback data for V5 stocks
+- `components/fortress/MacroSentimentBanner.tsx` — New macro banner component
