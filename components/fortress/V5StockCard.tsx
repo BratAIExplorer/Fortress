@@ -5,7 +5,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { TrendingDown, Target, Zap, ChevronDown, ChevronUp, RadioTower } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TrendingDown, Target, Zap, ChevronDown, ChevronUp, RadioTower, Info } from "lucide-react";
 import { V5Stock } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/markets/config";
@@ -73,10 +74,34 @@ export function V5StockCard({ stock, market = "NSE" }: { stock: V5Stock, market?
                                     <RadioTower className="h-2.5 w-2.5" /> Live Scan
                                 </Badge>
                             )}
-                            <Badge variant={stock.quality_score >= 80 ? "default" : "outline"} className="font-mono text-xs">
-                                QS: {stock.quality_score}
-                            </Badge>
-                            <span className="text-[10px] text-muted-foreground font-mono">OCF: {stock.ocf || "N/A"}</span>
+                            <TooltipProvider delayDuration={200}>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="flex items-center gap-1 cursor-default">
+                                            <Badge variant={stock.quality_score >= 80 ? "default" : "outline"} className="font-mono text-xs">
+                                                QS: {stock.quality_score}
+                                            </Badge>
+                                            <Info className="h-3 w-3 text-muted-foreground hover:text-primary transition-colors" />
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" className="max-w-[220px] text-xs">
+                                        Quality Score (0–100): Composite score across 6 fundamental gates — Financial Safety, Pricing Power, Macro Alignment, Growth, Governance &amp; Momentum.
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider delayDuration={200}>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="flex items-center gap-1 cursor-default">
+                                            <span className="text-[10px] text-muted-foreground font-mono">OCF: {stock.ocf || "N/A"}</span>
+                                            <Info className="h-3 w-3 text-muted-foreground hover:text-primary transition-colors" />
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" className="max-w-[220px] text-xs">
+                                        Operating Cash Flow (₹ Cr): Cash generated from core business operations. Positive = business generates real cash. N/A = insufficient data.
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
                 </CardHeader>
@@ -103,10 +128,22 @@ export function V5StockCard({ stock, market = "NSE" }: { stock: V5Stock, market?
 
                     {/* Live Scan metrics row */}
                     {stock.isLivePick && stock.mbScore != null && (
-                        <div className="flex items-center justify-between text-[10px] border border-emerald-500/20 bg-emerald-500/5 rounded-sm px-2 py-1.5">
-                            <span className="text-muted-foreground uppercase tracking-wide">MB Score</span>
-                            <span className="font-bold text-emerald-400">{stock.mbScore} · {stock.mbTier}</span>
-                        </div>
+                        <TooltipProvider delayDuration={200}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center justify-between text-[10px] border border-emerald-500/20 bg-emerald-500/5 rounded-sm px-2 py-1.5 cursor-default">
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-muted-foreground uppercase tracking-wide">MB Score</span>
+                                            <Info className="h-3 w-3 text-muted-foreground hover:text-primary transition-colors" />
+                                        </div>
+                                        <span className="font-bold text-emerald-400">{stock.mbScore} · {stock.mbTier}</span>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-[240px] text-xs">
+                                    Multi-Bagger Score: Fortress proprietary score for 2x–10x return potential. Calculated from PEG ratio, FCF yield, debt trajectory &amp; margin direction.
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     )}
 
                     {/* Content Section (Auto-expand on desktop hover OR mobile toggle) */}

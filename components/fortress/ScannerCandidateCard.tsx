@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { RadioTower, TrendingDown, TrendingUp, Minus, ChevronDown, ChevronUp, CheckCircle2, XCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { RadioTower, TrendingDown, TrendingUp, Minus, ChevronDown, ChevronUp, CheckCircle2, XCircle, Info } from "lucide-react";
 import { ScannerCandidate } from "@/lib/types";
 import { formatPrice, getMarket } from "@/lib/markets/config";
 import { cn } from "@/lib/utils";
@@ -123,14 +124,26 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
                                 <span className="text-[9px] text-muted-foreground/60">{market.flag}</span>
                             </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                            <Badge className={cn("font-mono text-[10px] border", tierColor)}>
-                                {candidate.mbTier}
-                            </Badge>
-                            <span className="text-[10px] font-bold text-emerald-400 font-mono">
-                                MB {candidate.mbScore}
-                            </span>
-                        </div>
+                        <TooltipProvider delayDuration={200}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex flex-col items-end gap-1 shrink-0 cursor-default">
+                                        <Badge className={cn("font-mono text-[10px] border", tierColor)}>
+                                            {candidate.mbTier}
+                                        </Badge>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-[10px] font-bold text-emerald-400 font-mono">
+                                                MB {candidate.mbScore}
+                                            </span>
+                                            <Info className="h-3 w-3 text-muted-foreground hover:text-primary transition-colors" />
+                                        </div>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-[240px] text-xs">
+                                    Multi-Bagger Score: Fortress proprietary score for 2x–10x return potential. Calculated from PEG ratio, FCF yield, debt trajectory &amp; margin direction.
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
                 </CardHeader>
 

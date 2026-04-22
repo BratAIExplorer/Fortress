@@ -63,6 +63,15 @@ interface V5ExtensionTabsProps {
     market?: string;
 }
 
+const TAB_CRITERIA: Record<string, string> = {
+    lows: "Stocks trading within 15% of their 52-week low, with Quality Score ≥ 40 and positive OCF — price weakness in fundamentally sound businesses.",
+    penny: "Indian equities priced below ₹20 (or $1 for US) with positive operating cash flow, debt-to-equity < 2, and at least 2 profitable recent quarters. Excludes illiquid and shell companies.",
+    speculative: "Sub-₹20 (or Sub-$2) stocks with speculative multi-bagger characteristics — higher risk, higher potential. Not suitable for conservative investors.",
+    picks: "Fortress-curated high-conviction picks: stocks scoring in the top 10% of the full scan universe by MB Score, with analyst consensus alignment.",
+    scanner: "Live market scan using the Fortress 6-layer algorithm (Quality → Moat → Macro → Growth → Governance → Momentum). Results refresh every scan cycle.",
+    glossary: "Definitions and methodology for every metric used across Fortress scans — Quality Score, MB Score, OCF, Moat, and more.",
+};
+
 export function V5ExtensionTabs({
     lowStocks,
     pennyStocks,
@@ -74,7 +83,7 @@ export function V5ExtensionTabs({
     market = "NSE"
 }: V5ExtensionTabsProps) {
     const [activeTab, setActiveTab] = useState("lows");
-    
+
     const isUS = market === "US";
 
     const tabs = [
@@ -121,6 +130,13 @@ export function V5ExtensionTabs({
                     </div>
                 </div>
             </div>
+
+            {/* Tab criteria description */}
+            {TAB_CRITERIA[activeTab] && (
+                <div className="bg-white/5 border border-white/10 text-xs text-muted-foreground py-2 px-4 rounded-sm leading-relaxed">
+                    {TAB_CRITERIA[activeTab]}
+                </div>
+            )}
 
             <TabsContent value="lows" className="mt-0 outline-none">
                 <SplitStockGrid stocks={lowStocks} market={market} />

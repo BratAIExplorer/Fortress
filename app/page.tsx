@@ -64,7 +64,7 @@ export default function Home() {
         >
           <Button size="lg" className="gap-2 bg-amber-500 hover:bg-amber-600 text-black font-bold" asChild>
             <Link href="/v5-extension">
-              Explore V5 Extension <ArrowRight className="h-4 w-4" />
+              Deep Value Scanner <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>

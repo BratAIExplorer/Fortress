@@ -688,3 +688,41 @@ export async function updateV5Stock(id: string, data: Partial<V5Stock>) {
 
     return { success: true };
 }
+
+// ─── Macro snapshot (latest only, for the scanner page banner) ─────────────────
+
+export interface MacroSnapshotRow {
+    snapshotDate: string;
+    nifty50: string | null;
+    bankNifty: string | null;
+    indiaVix: string | null;
+    cboeVix: string | null;
+    usdInr: string | null;
+    goldUsd: string | null;
+    crudeOilUsd: string | null;
+    us10yYield: string | null;
+}
+
+export async function getLatestMacroSnapshot(): Promise<MacroSnapshotRow | null> {
+    try {
+        const rows = await db
+            .select({
+                snapshotDate: schema.macroSnapshots.snapshotDate,
+                nifty50: schema.macroSnapshots.nifty50,
+                bankNifty: schema.macroSnapshots.bankNifty,
+                indiaVix: schema.macroSnapshots.indiaVix,
+                cboeVix: schema.macroSnapshots.cboeVix,
+                usdInr: schema.macroSnapshots.usdInr,
+                goldUsd: schema.macroSnapshots.goldUsd,
+                crudeOilUsd: schema.macroSnapshots.crudeOilUsd,
+                us10yYield: schema.macroSnapshots.us10yYield,
+            })
+            .from(schema.macroSnapshots)
+            .orderBy(desc(schema.macroSnapshots.snapshotDate))
+            .limit(1);
+
+        return rows[0] ?? null;
+    } catch {
+        return null;
+    }
+}

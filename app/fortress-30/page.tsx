@@ -15,7 +15,7 @@ export default async function Fortress30Page({
     searchParams: Promise<{ market?: string }>;
 }) {
     const params = await searchParams;
-    const marketCode = (params.market ?? "US").toUpperCase();
+    const marketCode = (params.market ?? "NSE").toUpperCase();
     const marketConfig = getMarket(marketCode);
 
     const [stocks, candidates] = await Promise.all([

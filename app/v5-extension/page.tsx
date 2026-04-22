@@ -1,6 +1,7 @@
-import { getV5LowStocks, getV5PennyStocks, getV5SubTenStocks, getLiveSub20Stocks, getLive52WLowStocks, getLivePennyStocks, getV5TopMutualFunds, getV5TopIndexFunds, getV5TopFortressPicks, getGlossaryData } from "@/app/actions";
+import { getV5LowStocks, getV5PennyStocks, getV5SubTenStocks, getLiveSub20Stocks, getLive52WLowStocks, getLivePennyStocks, getV5TopMutualFunds, getV5TopIndexFunds, getV5TopFortressPicks, getGlossaryData, getLatestMacroSnapshot } from "@/app/actions";
 import { V5ExtensionTabs } from "@/components/fortress/V5ExtensionTabs";
 import { Navbar } from "@/components/fortress/Navbar";
+import { MacroSentimentBanner } from "@/components/fortress/MacroSentimentBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,13 @@ export default async function V5ExtensionPage({
         curatedPennyStocks, livePennyStocks,
         curatedSubTenStocks, liveSub20Stocks,
         topMF,
+        macroSnapshot,
     ] = await Promise.all([
         getV5LowStocks(market), getLive52WLowStocks(market),
         getV5PennyStocks(market), getLivePennyStocks(market),
         getV5SubTenStocks(market), getLiveSub20Stocks(market),
         getV5TopMutualFunds(market),
+        getLatestMacroSnapshot(),
     ]);
 
     const mergeWithLive = (curated: any[], live: any[]) => {
@@ -39,12 +42,15 @@ export default async function V5ExtensionPage({
     return (
         <div className="min-h-screen bg-[#050505] text-slate-200 pb-20 selection:bg-primary/30">
             <main className="container px-4 sm:px-8 pt-12 max-w-7xl">
+                <div className="mb-6">
+                    <MacroSentimentBanner snapshot={macroSnapshot} />
+                </div>
                 <div className="mb-12 space-y-4">
                     <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tighter text-white">
-                        Specialized <span className="text-primary italic">Deep Value</span> Scans
+                        Deep Value <span className="text-primary italic">Scanner</span>
                     </h1>
                     <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed">
-                        Beyond the flagship Fortress 30. These specialized filters target unique market conditions: extreme oversold quality, micro-cap gems, and high-probability turnarounds.
+                        Specialized filters targeting unique market opportunities — extreme oversold quality, micro-cap gems, and high-probability turnarounds. Every pick shows you exactly why it qualified.
                     </p>
                 </div>
 
