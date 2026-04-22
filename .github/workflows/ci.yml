@@ -62,11 +62,15 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
           mkdir -p ~/.ssh
+          # Write deploy key
           printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          # Populate known_hosts — fall back gracefully if keyscan times out
+          # Always create known_hosts first so chmod never fails on missing file
+          touch ~/.ssh/known_hosts
+          # Populate known_hosts — keyscan failure is non-fatal (StrictHostKeyChecking=no handles it)
           ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
           chmod 644 ~/.ssh/known_hosts
+          echo "SSH setup complete"
 
       - name: Deploy to VPS
         env:
