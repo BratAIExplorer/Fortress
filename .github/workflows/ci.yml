@@ -9,36 +9,35 @@ on:
 env:
   NODE_VERSION: '24'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DATABASE_URL: postgresql://test:test@localhost:5432/test
+  NEXTAUTH_SECRET: placeholder
+  CI: true
 
 jobs:
-  build:
-    name: Build & Test
+  build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.1.1
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4.0.1
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci
 
       - name: Run linter
         run: npm run lint
-        continue-on-error: true  # Don't fail on lint for now
-
-      - name: Build application
-        run: npm run build
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
-          NEXTAUTH_SECRET: placeholder
+        continue-on-error: true
 
       - name: Run tests
         run: npm test
+
+      - name: Build application
+        run: npm run build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.3.1
@@ -49,7 +48,7 @@ jobs:
 
   deploy:
     name: Deploy to VPS
-    needs: build
+    needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
