@@ -7,8 +7,9 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { MarketSelector } from "@/components/ui/MarketSelector";
+import { LogOut, LayoutDashboard } from "lucide-react";
 
 interface NavbarProps {
     title?: string;
@@ -28,8 +29,9 @@ export function Navbar({
     containerClassName
 }: NavbarProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const isAdmin = (session?.user as any)?.isAdmin;
+    const isLoggedIn = status === "authenticated";
 
     return (
         <header className={cn(
@@ -88,9 +90,26 @@ export function Navbar({
                     {showLinks && <MarketSelector size="sm" />}
                     {rightElement}
                     {!rightElement && showLinks && (
-                        <Button variant="default" size="sm" asChild>
-                            <Link href="/admin">Member Login</Link>
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            {isLoggedIn ? (
+                                <>
+                                    <Button variant="ghost" size="sm" asChild className="hidden lg:flex">
+                                        <Link href="/admin" className="gap-2">
+                                            <LayoutDashboard className="h-4 w-4" />
+                                            Dashboard
+                                        </Link>
+                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={() => signOut()} className="gap-2 border-primary/20 hover:bg-primary/5">
+                                        <LogOut className="h-4 w-4" />
+                                        Logout
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button variant="default" size="sm" asChild>
+                                    <Link href="/admin">Member Login</Link>
+                                </Button>
+                            )}
+                        </div>
                     )}
                 </nav>
 
@@ -177,13 +196,36 @@ export function Navbar({
                                     <BookMarked className="h-4 w-4 text-primary" />
                                     Guide
                                 </Link>
-                                <Link
-                                    href="/admin"
-                                    onClick={() => setIsOpen(false)}
-                                    className="text-lg font-medium text-primary py-2"
-                                >
-                                    Member Login
-                                </Link>
+                                {isLoggedIn ? (
+                                    <>
+                                        <Link
+                                            href="/admin"
+                                            onClick={() => setIsOpen(false)}
+                                            className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50 flex items-center gap-2"
+                                        >
+                                            <LayoutDashboard className="h-4 w-4 text-primary" />
+                                            Dashboard
+                                        </Link>
+                                        <button
+                                            onClick={() => {
+                                                setIsOpen(false);
+                                                signOut();
+                                            }}
+                                            className="text-lg font-medium text-red-400 hover:text-red-300 transition-colors py-2 flex items-center gap-2 text-left"
+                                        >
+                                            <LogOut className="h-4 w-4" />
+                                            Logout
+                                        </button>
+                                    </>
+                                ) : (
+                                    <Link
+                                        href="/admin"
+                                        onClick={() => setIsOpen(false)}
+                                        className="text-lg font-medium text-primary py-2"
+                                    >
+                                        Member Login
+                                    </Link>
+                                )}
                             </div>
                         </motion.div>
                     </>

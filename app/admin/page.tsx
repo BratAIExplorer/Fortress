@@ -27,7 +27,15 @@ export default function AdminDashboardPage() {
                 const res = await fetch("/api/analytics/live-activity");
                 if (res.ok) {
                     const data = await res.json();
-                    setAnalytics(data);
+                    // Map API keys to frontend interface keys
+                    setAnalytics({
+                        usersOnline: data.liveUsers || 0,
+                        mostPopular: (data.trendingPages || []).map((p: any) => ({
+                            pagePath: p.pagePath,
+                            count: p.views
+                        })),
+                        recentActivity: "System monitoring active"
+                    });
                 }
             } catch (err) {
                 console.error("Failed to fetch analytics", err);
