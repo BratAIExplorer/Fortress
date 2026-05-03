@@ -65,7 +65,11 @@
       "Bash(curl -s https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs/24630533015/logs)",
       "Read(//opt/**)",
       "Bash(pm2 logs *)",
-      "Bash(xargs ls *)"
+      "Bash(git log --oneline *)",
+      "Bash(git branch *)",
+      "Bash(git tag *)",
+      "Bash(ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no root@76.13.179.32 *)",
+      "Bash(pm2 *)"
     ]
   }
 }
