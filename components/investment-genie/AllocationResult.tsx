@@ -123,16 +123,16 @@ export default function AllocationResult({
       )}
 
       {/* Market Signals */}
-      {allocation.signals && allocation.signals.length > 0 && (
-        <div className="space-y-6">
-          <h3 className="text-xl font-bold font-serif text-white/90">Institutional Intelligence Signals</h3>
+      <div className="space-y-6">
+        <h3 className="text-xl font-bold font-serif text-white/90">Institutional Intelligence Signals</h3>
+        {allocation.signals && allocation.signals.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {allocation.signals.map((signal, idx) => (
               <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/[0.07] transition-colors">
                 <div className="flex items-start gap-4">
                   <div className={cn(
                     "flex-shrink-0 w-2 h-2 rounded-full mt-1.5 shadow-[0_0_10px_currentColor]",
-                    signal.impact === "high" ? "bg-red-500 text-red-500" : 
+                    signal.impact === "high" ? "bg-red-500 text-red-500" :
                     signal.impact === "medium" ? "bg-amber-500 text-amber-500" : "bg-emerald-500 text-emerald-500"
                   )} />
                   <div className="flex-grow">
@@ -145,8 +145,34 @@ export default function AllocationResult({
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { name: "Market Momentum", desc: "Analysis of broader equity market trends" },
+              { name: "Volatility Assessment", desc: "VIX and implied volatility metrics" },
+              { name: "Currency Exposure", desc: "USD/INR and currency hedging signals" },
+              { name: "Macro Headwinds", desc: "Inflation, rates, and macro policy impacts" },
+              { name: "Sentiment Indicators", desc: "Institutional positioning and flows" },
+              { name: "Earnings Revisions", desc: "Forward guidance and estimate changes" }
+            ].map((placeholder, idx) => (
+              <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-5 opacity-60 hover:bg-white/[0.07] transition-colors">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-2 h-2 rounded-full mt-1.5 bg-slate-600 shadow-[0_0_10px_rgba(71,85,105,0.3)]" />
+                  <div className="flex-grow">
+                    <h4 className="text-sm font-bold text-white/70 mb-1">
+                      {placeholder.name}
+                    </h4>
+                    <p className="text-xs text-muted-foreground/60 leading-relaxed">{placeholder.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <p className="text-xs text-amber-200/70 md:col-span-2 text-center pt-2">
+              Real-time signals will populate as intelligence updates are processed.
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Return Projections */}
       {allocation.projectedReturns && (
