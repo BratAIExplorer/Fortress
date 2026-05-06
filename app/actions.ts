@@ -217,7 +217,8 @@ export async function getV5LowStocks(market: string = "NSE"): Promise<V5Stock[]>
             .where(
                 and(
                     eq(schema.stocks.v5Category, "low"),
-                    eq(schema.stocks.isActive, true)
+                    eq(schema.stocks.isActive, true),
+                    eq(schema.stocks.market, market)
                 )
             );
 
@@ -235,7 +236,8 @@ export async function getV5SubTenStocks(market: string = "NSE") {
             .where(
                 and(
                     eq(schema.stocks.v5Category, "sub_ten"),
-                    eq(schema.stocks.isActive, true)
+                    eq(schema.stocks.isActive, true),
+                    eq(schema.stocks.market, market)
                 )
             );
         
@@ -286,7 +288,8 @@ export async function getV5PennyStocks(market: string = "NSE") {
             .where(
                 and(
                     eq(schema.stocks.v5Category, "penny"),
-                    eq(schema.stocks.isActive, true)
+                    eq(schema.stocks.isActive, true),
+                    eq(schema.stocks.market, market)
                 )
             );
         

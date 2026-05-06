@@ -6,6 +6,7 @@ export const stocks = pgTable("stocks", {
     symbol: text("symbol").notNull().unique(),
     name: text("name").notNull(),
     sector: text("sector").notNull(),
+    market: text("market").notNull().default("NSE"),
     logoUrl: text("logo_url"),
     currentPrice: numeric("current_price"),
     qualityScore: integer("quality_score"),
