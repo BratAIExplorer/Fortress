@@ -1,5 +1,5 @@
 import { db, schema } from "@/lib/db/client";
-import { eq, desc, and, gte } from "drizzle-orm";
+import { eq, desc, and, gte, lte } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           gte(schema.scans.runAt, may2Date),
-          gte(may4Date, schema.scans.runAt)
+          lte(schema.scans.runAt, may4Date)
         )
       )
       .orderBy(desc(schema.scans.runAt));

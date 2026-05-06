@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { Navbar } from "@/components/fortress/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, BarChart3, Activity, TrendingUp, CheckCircle2, RefreshCw, AlertTriangle, Scale } from "lucide-react";
+import { Shield, BarChart3, Activity, TrendingUp, CheckCircle2, RefreshCw, AlertTriangle, Scale, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -17,9 +17,9 @@ const WEIGHT_PRESETS = {
 };
 
 const MARKETS = [
-    { id: "NSE", label: "NSE (India)", count: "~2,000", icon: "🇮🇳" },
-    { id: "US", label: "NYSE/NASDAQ", count: "~5,000", icon: "🇺🇸" },
-    { id: "HKEX", label: "HKEX (Hong Kong)", count: "~2,400", icon: "🇭🇰" },
+    { id: "NSE", label: "NSE (India)", count: "~2,000", icon: <Globe className="h-5 w-5 text-emerald-400" /> },
+    { id: "US", label: "NYSE/NASDAQ", count: "~5,000", icon: <Globe className="h-5 w-5 text-blue-400" /> },
+    { id: "HKEX", label: "HKEX (Hong Kong)", count: "~2,400", icon: <Globe className="h-5 w-5 text-red-400" /> },
 ];
 
 export default function AdminScannerPage() {
@@ -98,7 +98,7 @@ export default function AdminScannerPage() {
                                         )}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className="text-xl">{m.icon}</span>
+                                            <span className="text-xl flex items-center justify-center">{m.icon}</span>
                                             <div className="text-left">
                                                 <div className="font-bold">{m.label}</div>
                                                 <div className="text-[10px] opacity-60 uppercase">{m.id} Market</div>

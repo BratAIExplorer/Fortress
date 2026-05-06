@@ -1,7 +1,6 @@
 export const MARKETS = {
   NSE: {
     label: "India",
-    flag: "🇮🇳",
     currency: "₹",
     currencyCode: "INR",
     exchange: "NSE",
@@ -9,7 +8,6 @@ export const MARKETS = {
   },
   US: {
     label: "United States",
-    flag: "🇺🇸",
     currency: "$",
     currencyCode: "USD",
     exchange: "NYSE / NASDAQ",

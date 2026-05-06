@@ -298,7 +298,7 @@ function evalNifty50(value: number | null, prev: number | null): SignalEvaluatio
   return {
     signal: 'nifty50',
     label: 'Nifty 50',
-    emoji: '🇮🇳',
+    emoji: '📈',
     value,
     formattedValue: fmt(value, '', '', 0),
     level,

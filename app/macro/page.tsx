@@ -42,7 +42,7 @@ interface IndicatorConfig {
 
 const INDICATORS: IndicatorConfig[] = [
     {
-        key: "nifty50", label: "Nifty 50", emoji: "🇮🇳", desc: "India benchmark index",
+        key: "nifty50", label: "Nifty 50", emoji: "📈", desc: "India benchmark index",
         format: (v) => v.toLocaleString("en-IN", { maximumFractionDigits: 2 }),
         chgType: "pct",
     },
@@ -356,7 +356,7 @@ export default function MacroPage() {
                                 <thead>
                                     <tr className="border-b border-white/10 bg-white/5">
                                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
-                                        <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">🇮🇳 Nifty 50</th>
+                                        <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">📈 Nifty 50</th>
                                         <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">💱 USD/INR</th>
                                         <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">🥇 Gold</th>
                                         <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">🛢️ Crude</th>
