@@ -6,6 +6,7 @@ import json
 import os
 import pickle
 import requests
+import sys
 import io
 import concurrent.futures
 import argparse
@@ -57,6 +58,93 @@ class _DiskCache:
             pass  # Cache write failures are non-fatal
 
 _cache = _DiskCache()
+
+# ─── RATE-LIMIT HANDLING ───────────────────────────────────────────────────────
+# Retry logic with exponential backoff for yfinance 429 errors.
+# Circuit breaker tracks consecutive batch failures to prevent wasting API quota.
+
+class CircuitBreaker:
+    """Track consecutive batch failures; stop if 3+ batches fail."""
+    def __init__(self, failure_threshold: int = 3):
+        self.failure_threshold = failure_threshold
+        self.consecutive_failures = 0
+        self.last_failure_time = None
+
+    def record_success(self):
+        self.consecutive_failures = 0
+
+    def record_failure(self):
+        self.consecutive_failures += 1
+        self.last_failure_time = datetime.now()
+
+    def is_open(self) -> bool:
+        """Returns True if circuit breaker is open (stop retrying)."""
+        return self.consecutive_failures >= self.failure_threshold
+
+    def get_status(self) -> dict:
+        return {
+            "consecutive_failures": self.consecutive_failures,
+            "is_open": self.is_open(),
+            "last_failure_time": self.last_failure_time.isoformat() if self.last_failure_time else None
+        }
+
+def fetch_ticker_with_retry(symbol: str, max_retries: int = 3) -> dict | None:
+    """
+    Fetch ticker info with exponential backoff retry for yfinance 429 errors.
+    Attempts: 1) original symbol (.NS for NSE), 2) fallback without suffix
+    Delays: 5s, 15s, 45s (exponential backoff)
+    """
+    ticker_formats = [symbol]  # Try original first
+    if symbol.endswith('.NS'):
+        ticker_formats.append(symbol[:-3])  # Fallback: remove .NS suffix
+
+    for ticker_symbol in ticker_formats:
+        for attempt in range(max_retries):
+            try:
+                ticker = yf.Ticker(ticker_symbol)
+                # Trigger the actual fetch by accessing info
+                info = ticker.info
+                if info and len(info) > 0:
+                    return {"symbol": ticker_symbol, "ticker": ticker, "info": info}
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 429:  # Rate-limit error
+                    if attempt < max_retries - 1:
+                        delay = 5 * (3 ** attempt)  # Geometric backoff: 5s, 15s, 45s for attempts 0-2
+                        print(json.dumps({
+                            "type": "rate_limit",
+                            "symbol": ticker_symbol,
+                            "attempt": attempt + 1,
+                            "retry_delay_seconds": delay,
+                            "message": f"yfinance rate-limit detected for {ticker_symbol}; retrying after {delay}s"
+                        }), file=sys.stderr)
+                        time.sleep(delay)
+                        continue
+                    else:
+                        print(json.dumps({
+                            "type": "error",
+                            "symbol": ticker_symbol,
+                            "message": f"yfinance rate-limit persisted after {max_retries} retries"
+                        }), file=sys.stderr)
+                        break  # Try next ticker format (bare symbol)
+                else:
+                    break  # Non-rate-limit HTTP error: try next ticker format
+            except Exception as e:
+                # Log the error; try next format rather than fail immediately
+                print(json.dumps({
+                    "type": "error",
+                    "symbol": ticker_symbol,
+                    "attempt": attempt + 1,
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "message": f"Unexpected error fetching {ticker_symbol}: {type(e).__name__}: {str(e)}"
+                }), file=sys.stderr)
+
+                # On final attempt, break to try next format rather than fail
+                if attempt == max_retries - 1:
+                    break
+                time.sleep([5, 15, 45][attempt])
+
+    return None
 
 # ─── MARKET ADAPTERS ───────────────────────────────────────────────────────────
 
@@ -1343,42 +1431,54 @@ def get_roce_from_statements(income_stmt, balance_sheet):
 
 def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
     try:
-        ticker = yf.Ticker(symbol)
+        # ── Fetch ticker with retry logic + fallback format ──────────────────
+        ticker_result = fetch_ticker_with_retry(symbol)
+        if ticker_result is None:
+            print(json.dumps({
+                "type": "error",
+                "symbol": symbol,
+                "message": f"Failed to fetch {symbol} after retry attempts"
+            }), file=sys.stderr)
+            return None
+
+        ticker = ticker_result["ticker"]
+        actual_symbol = ticker_result["symbol"]
 
         # ── Cache-aware fetches ───────────────────────────────────────────────
-        info = _cache.get(f"{symbol}_info")
+        cache_key = f"{actual_symbol}_info"
+        info = _cache.get(cache_key)
         if info is None:
-            info = ticker.info
-            _cache.set(f"{symbol}_info", info)
+            info = ticker_result["info"]
+            _cache.set(cache_key, info)
 
-        hist = _cache.get(f"{symbol}_hist")
+        hist = _cache.get(f"{actual_symbol}_hist")
         if hist is None:
             hist = ticker.history(period="1y")   # 1Y for multi-band L3 momentum
-            _cache.set(f"{symbol}_hist", hist)
+            _cache.set(f"{actual_symbol}_hist", hist)
 
         # ── Historical data (fetched once, reused across all scorers) ─────────
         # Wrapped individually so a failure on one doesn't kill the entire scan.
         try:
-            balance_sheet = _cache.get(f"{symbol}_bs")
+            balance_sheet = _cache.get(f"{actual_symbol}_bs")
             if balance_sheet is None:
                 balance_sheet = ticker.balance_sheet
-                _cache.set(f"{symbol}_bs", balance_sheet)
+                _cache.set(f"{actual_symbol}_bs", balance_sheet)
         except Exception:
             balance_sheet = None
 
         try:
-            income_stmt = _cache.get(f"{symbol}_is")
+            income_stmt = _cache.get(f"{actual_symbol}_is")
             if income_stmt is None:
                 income_stmt = ticker.income_stmt
-                _cache.set(f"{symbol}_is", income_stmt)
+                _cache.set(f"{actual_symbol}_is", income_stmt)
         except Exception:
             income_stmt = None
 
         try:
-            cashflow = _cache.get(f"{symbol}_cf")
+            cashflow = _cache.get(f"{actual_symbol}_cf")
             if cashflow is None:
                 cashflow = ticker.cashflow
-                _cache.set(f"{symbol}_cf", cashflow)
+                _cache.set(f"{actual_symbol}_cf", cashflow)
         except Exception:
             cashflow = None
 
@@ -1397,7 +1497,7 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
         l1 = calculate_l1(info, market=market_key, max_pts=weights['l1'],
                           debt_trajectory=debt_traj)
         l2 = calculate_l2(info, max_pts=weights['l2'])
-        l3 = calculate_l3(symbol, hist, benchmark_hist, max_pts=weights['l3'])
+        l3 = calculate_l3(actual_symbol, hist, benchmark_hist, max_pts=weights['l3'])
         l4 = calculate_l4(info, max_pts=weights['l4'])
         # L5: Governance & Ownership Quality (v2 — real yfinance ownership signals)
         l5 = calculate_l5_governance(info, debt_traj, max_pts=weights['l5'])
@@ -1427,7 +1527,7 @@ def scan_stock(symbol, adapter, market_key, benchmark_hist, weights):
             category = adapter.classify_price(price)
 
         return {
-            "symbol":   symbol,
+            "symbol":   actual_symbol,  # Use actual symbol (may differ from requested if fallback used)
             "price":    price,
             "currency": adapter.currency,
 
@@ -1512,26 +1612,64 @@ def main():
         benchmark_hist = None
 
     results_count = 0
-    BATCH_SIZE = 20 
-    
+    BATCH_SIZE = 20
+    breaker = CircuitBreaker(failure_threshold=3)
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         for i in range(0, total, BATCH_SIZE):
+            # Check circuit breaker before processing batch
+            if breaker.is_open():
+                print(json.dumps({
+                    "type": "error",
+                    "message": f"Circuit breaker OPEN: {breaker.consecutive_failures} consecutive batch failures. Stopping scan.",
+                    "status": breaker.get_status()
+                }), file=sys.stderr)
+                break
+
             batch = tickers[i:i+BATCH_SIZE]
+            batch_num = i // BATCH_SIZE + 1
+            batch_failed = False
+            batch_success_count = 0
+
             futures = {executor.submit(scan_stock, s, adapter, market_key, benchmark_hist, weights): s for s in batch}
             for future in concurrent.futures.as_completed(futures, timeout=120):
                 try:
                     res = future.result(timeout=30)
-                except (concurrent.futures.TimeoutError, Exception):
+                except concurrent.futures.TimeoutError:
+                    print(json.dumps({
+                        "type": "error",
+                        "message": f"Batch {batch_num}: Task timeout (30s) for {futures[future]}"
+                    }), file=sys.stderr)
+                    batch_failed = True
                     continue
-                if res:
+                except Exception as e:
+                    print(json.dumps({
+                        "type": "error",
+                        "message": f"Batch {batch_num}: Exception for {futures[future]}: {str(e)}"
+                    }), file=sys.stderr)
+                    batch_failed = True
+                    continue
 
+                if res:
                     # In coffeecan mode: only emit Strong or Classic stocks
                     if coffeecan_mode and res.get("cc_score", 0) < 60:
                         continue
                     results_count += 1
+                    batch_success_count += 1
                     print(json.dumps({"type": "progress", "data": res}))
-            
-            time.sleep(1) # Rate limit protection
+                else:
+                    batch_failed = True
+
+            # Record batch-level result (not per-stock)
+            # A batch succeeds if we got results AND didn't encounter critical failures
+            if batch_success_count > 0 and not batch_failed:
+                breaker.record_success()
+            else:
+                breaker.record_failure()
+
+            # Adaptive rate limiting: longer delay after failures
+            delay = 5 if batch_failed else 2  # 5s after failure, 2s after success
+            time.sleep(delay)
 
     print(json.dumps({"type": "complete", "count": results_count}))
 

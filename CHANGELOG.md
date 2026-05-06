@@ -1,5 +1,10 @@
 # Fortress Intelligence — Changelog
 
+## [0.4.2] - 2026-05-06 (Windows UI Rendering Fixes)
+
+### Fixed
+- **UI Rendering — Broken Emoji Fallbacks on Windows**: Fixed an issue where the Windows OS fallback for unsupported flag emojis caused ugly two-letter strings (e.g., "us United States" or "in India") to appear in the UI. Removed `marketConfig.flag` and `market.flag` from all visible strings across the Fortress 30 and Deep Value Scanner pages. Files modified: `app/fortress-30/page.tsx`, `components/ui/MarketSelector.tsx`, `components/fortress/ScannerCandidateCard.tsx`
+
 ## [0.4.1] - 2026-04-22 (Phase 1+2 Beta Feedback Redesign)
 
 ### Fixed

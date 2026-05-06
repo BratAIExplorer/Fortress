@@ -121,7 +121,6 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
                                 <p className="text-[10px] text-muted-foreground font-mono">
                                     {formatPrice(candidate.price, candidate.market)}
                                 </p>
-                                <span className="text-[9px] text-muted-foreground/60">{market.flag}</span>
                             </div>
                         </div>
                         <TooltipProvider delayDuration={200}>

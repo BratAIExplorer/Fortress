@@ -41,7 +41,7 @@ export default async function Fortress30Page({
                             </div>
                             <h1 className="text-4xl font-serif font-bold tracking-tight">The Conviction List</h1>
                             <p className="text-muted-foreground max-w-2xl">
-                                Top 30 stocks from the latest {marketConfig.flag} {marketConfig.label} scan,
+                                Top 30 stocks from the latest {marketConfig.label} scan,
                                 ranked by Multi-Bagger Score. Automatically updated every scan cycle.
                                 Click any stock to see exactly why it was selected.
                             </p>
@@ -65,7 +65,7 @@ export default async function Fortress30Page({
                         <div className="py-24 text-center border border-dashed border-white/10 rounded-xl">
                             <RadioTower className="h-10 w-10 text-slate-600 mx-auto mb-4" />
                             <h4 className="text-slate-300 font-medium">
-                                No {marketConfig.flag} {marketConfig.label} scan data yet
+                                No {marketConfig.label} scan data yet
                             </h4>
                             <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto">
                                 The daily scanner will populate this list automatically.

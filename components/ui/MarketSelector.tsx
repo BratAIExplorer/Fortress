@@ -54,7 +54,6 @@ export function MarketSelector({ className, size = "md" }: MarketSelectorProps) 
               : "text-muted-foreground hover:text-white hover:bg-white/5"
           )}
         >
-          <span>{m.flag}</span>
           <span className="hidden sm:inline">{m.label}</span>
           <span className="sm:hidden">{m.code}</span>
         </button>
