@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fortress Intelligence — Personal Investment Brief | May 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0a0f1e;
+    --card: #151d2e;
+    --card2: #1a2540;
+    --gold: #c9a84c;
+    --gold-light: #f0c96e;
+    --green: #10b981;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: rgba(201,168,76,0.2);
+  }
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0 0 60px 0;
+  }
+
+  /* HEADER */
+  .hero {
+    background: linear-gradient(135deg, #0a0f1e 0%, #0d1829 50%, #0a1520 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .gem-icon {
+    font-size: 2.5rem;
+    display: inline-block;
+    animation: pulse-glow 3s ease-in-out infinite;
+    margin-bottom: 12px;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(201,168,76,0.4)); }
+    50% { filter: drop-shadow(0 0 20px rgba(201,168,76,0.8)); }
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .hero p.subtitle {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: 10px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* MISSION BAR */
+  .mission-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-width: 900px;
+    margin: 28px auto;
+    padding: 20px 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mission-bar .m-item { text-align: center; }
+  .mission-bar .m-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+  .mission-bar .m-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* VERDICTS */
+  .verdict-section {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    padding: 0 24px;
+  }
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 640px) { .verdict-grid { grid-template-columns: 1fr; } }
+  .verdict-card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 3px solid;
+  }
+  .verdict-card.keep { border-color: var(--green); }
+  .verdict-card.skip { border-color: var(--red); }
+  .verdict-card h4 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .verdict-card.keep h4 { color: var(--green); }
+  .verdict-card.skip h4 { color: var(--red); }
+  .verdict-card ul { list-style: none; }
+  .verdict-card ul li {
+    font-size: 0.88rem;
+    color: var(--text);
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .verdict-card ul li:last-child { border-bottom: none; }
+  .verdict-card ul li span.icon { font-size: 0.85rem; flex-shrink: 0; }
+  .verdict-card ul li span.note { color: var(--muted); font-size: 0.8rem; display: block; }
+
+  /* SECTION HEADERS */
+  .section-header {
+    max-width: 900px;
+    margin: 36px auto 16px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-header .tier-badge {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #0a0f1e;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--gold-light);
+  }
+  .section-header .alloc {
+    margin-left: auto;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .section-header .alloc span { color: var(--muted); font-size: 0.8rem; }
+
+  /* ETF CARDS */
+  .etf-grid {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 640px) { .etf-grid { grid-template-columns: 1fr; } }
+  .etf-card {
+    background: var(--card);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 10px;
+    padding: 18px;
+    animation: fadeInUp 0.5s ease both;
+  }
+  .etf-card:nth-child(1) { animation-delay: 0.1s; }
+  .etf-card:nth-child(2) { animation-delay: 0.2s; }
+  .etf-card:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .etf-card .ticker {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+  .etf-card .name {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .etf-card .alloc-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+  .etf-card .why {
+    font-size: 0.82rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .etf-card .tag {
+    display: inline-block;
+    background: rgba(201,168,76,0.15);
+    color: var(--gold);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  /* GEM CARDS */
+  .gems-grid {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 640px) { .gems-grid { grid-template-columns: 1fr; } }
+  .gem-card {
+    background: var(--card);
+    border: 1px solid;
+    border-radius: 12px;
+    padding: 22px;
+    animation: fadeInUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .gem-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+  .gem-card.elite { border-color: var(--gold); }
+  .gem-card.promising { border-color: var(--amber); }
+  .gem-card.watch { border-color: var(--blue); }
+  .gem-card:nth-child(1) { animation-delay: 0.1s; }
+  .gem-card:nth-child(2) { animation-delay: 0.2s; }
+  .gem-card:nth-child(3) { animation-delay: 0.3s; }
+  .gem-card:nth-child(4) { animation-delay: 0.4s; }
+  .gem-card:nth-child(5) { animation-delay: 0.5s; }
+  .gem-card:nth-child(6) { animation-delay: 0.6s; }
+
+  .gem-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .gem-card-header .left .ticker {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+  .gem-card-header .left .name {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .gem-card-header .left .market-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+  .tag-us { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .tag-india { background: rgba(16,185,129,0.2); color: #34d399; }
+  .tag-moon { background: rgba(139,92,246,0.2); color: #a78bfa; }
+
+  /* SCORE RING */
+  .score-ring-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .score-ring-wrap .score-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .score-ring svg { overflow: visible; }
+  .score-ring .bg-circle { stroke: rgba(255,255,255,0.08); fill: none; }
+  .score-ring .fg-circle {
+    fill: none;
+    stroke-linecap: round;
+    stroke-dasharray: 188.5;
+    stroke-dashoffset: 188.5;
+    transition: stroke-dashoffset 1.2s ease;
+  }
+  .score-ring .score-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 700;
+    fill: var(--gold-light);
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+
+  .gem-why {
+    font-size: 0.83rem;
+    color: var(--text);
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+  .gem-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .meta-item {
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    padding: 7px 10px;
+  }
+  .meta-item .meta-key {
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .meta-item .meta-val {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .pill {
+    font-size: 0.73rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .pill-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+  .pill-red { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+  .score-bars { margin-top: 12px; }
+  .score-bar-item { margin-bottom: 7px; }
+  .score-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .score-bar-track {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    width: 0;
+    transition: width 1s ease;
+  }
+
+  .alloc-badge {
+    display: inline-block;
+    background: rgba(16,185,129,0.15);
+    color: var(--green);
+    border: 1px solid rgba(16,185,129,0.3);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 4px;
+  }
+
+  /* MOONSHOT SECTION */
+  .moonshot-note {
+    max-width: 900px;
+    margin: 0 auto 16px;
+    padding: 0 24px;
+  }
+  .moonshot-box {
+    background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(201,168,76,0.08));
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 0.86rem;
+    color: var(--text);
+  }
+  .moonshot-box strong { color: #a78bfa; }
+
+  /* DRY POWDER */
+  .dry-powder {
+    max-width: 900px;
+    margin: 0 auto 16px;
+    padding: 0 24px;
+  }
+  .dry-powder-card {
+    background: var(--card);
+    border: 1px dashed rgba(201,168,76,0.3);
+    border-radius: 10px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .dry-powder-card .dp-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    white-space: nowrap;
+  }
+  .dry-powder-card .dp-text { font-size: 0.85rem; color: var(--muted); }
+  .dry-powder-card .dp-text strong { color: var(--text); display: block; margin-bottom: 4px; }
+
+  /* EXIT RULES */
+  .exit-section {
+    max-width: 900px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+  }
+  .exit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 640px) { .exit-grid { grid-template-columns: 1fr; } }
+  .exit-card {
+    background: var(--card);
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .exit-card.danger { border-color: rgba(239,68,68,0.3); }
+  .exit-card.catalyst { border-color: rgba(16,185,129,0.3); }
+  .exit-card h5 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .exit-card.danger h5 { color: var(--red); }
+  .exit-card.catalyst h5 { color: var(--green); }
+  .exit-card ul { list-style: none; }
+  .exit-card ul li {
+    font-size: 0.82rem;
+    color: var(--text);
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .exit-card ul li:last-child { border-bottom: none; }
+
+  /* ALLOCATION TABLE */
+  .alloc-table-section {
+    max-width: 900px;
+    margin: 28px auto 0;
+    padding: 0 24px;
+  }
+  .alloc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+  }
+  .alloc-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-weight: 500;
+  }
+  .alloc-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+  .alloc-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .alloc-table .t-ticker { font-weight: 600; color: var(--gold-light); font-family: 'Playfair Display', serif; }
+  .alloc-table .t-amount { font-weight: 600; color: var(--green); }
+  .alloc-table .t-tier {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .tier-foundation { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .tier-compounder { background: rgba(16,185,129,0.15); color: var(--green); }
+  .tier-moonshot { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .tier-cash { background: rgba(148,163,184,0.15); color: var(--muted); }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    max-width: 900px;
+    margin: 40px auto 0;
+    padding: 16px 24px;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* FOOTER */
+  footer {
+    max-width: 900px;
+    margin: 24px auto 0;
+    padding: 0 24px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: #475569;
+  }
+  footer span { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="gem-icon">💎</div>
+  <h1>Fortress Intelligence<br>Personal Investment Brief</h1>
+  <p class="subtitle">May 14, 2026 &nbsp;·&nbsp; $25,000 Deployment Plan &nbsp;·&nbsp; 3-Tier Barbell Strategy</p>
+</div>
+
+<!-- MISSION BAR -->
+<div class="mission-bar">
+  <div class="m-item"><div class="m-val">$25,000</div><div class="m-label">Total Capital</div></div>
+  <div class="m-item"><div class="m-val">13</div><div class="m-label">Total Picks</div></div>
+  <div class="m-item"><div class="m-val">4</div><div class="m-label">Markets</div></div>
+  <div class="m-item"><div class="m-val">10x–100x</div><div class="m-label">Moonshot Target</div></div>
+  <div class="m-item"><div class="m-val">40%</div><div class="m-label">ETF Foundation</div></div>
+  <div class="m-item"><div class="m-val">10%</div><div class="m-label">Dry Powder</div></div>
+</div>
+
+<!-- VERDICTS SECTION -->
+<div class="verdict-section">
+  <div class="verdict-grid">
+    <div class="verdict-card keep">
+      <h4>✅ Keep From the Feedback</h4>
+      <ul>
+        <li><span class="icon">✓</span><div><strong>Barbell structure is correct</strong><span class="note">ETF core + moonshots = the right framework</span></div></li>
+        <li><span class="icon">✓</span><div><strong>Supplier-of-suppliers insight</strong><span class="note">VRT, LITE over NVDA is genuine alpha thinking</span></div></li>
+        <li><span class="icon">✓</span><div><strong>India as a core thesis</strong><span class="note">7.4% GDP, US trade deal, Goldman Overweight</span></div></li>
+        <li><span class="icon">✓</span><div><strong>Defense as a supercycle</strong><span class="note">Not a trade — a structural decade shift</span></div></li>
+        <li><span class="icon">✓</span><div><strong>Exit rules matter</strong><span class="note">Most investors get the entry right, not the exit</span></div></li>
+      </ul>
+    </div>
+    <div class="verdict-card skip">
+      <h4>✂️ Cut / Skip</h4>
+      <ul>
+        <li><span class="icon">✗</span><div><strong>Ghost Analyst / automation</strong><span class="note">Interesting for Fortress v2, irrelevant to investing now</span></div></li>
+        <li><span class="icon">✗</span><div><strong>Korea (EWY) at +85% YTD</strong><span class="note">Already a crowded trade — not a hidden gem anymore</span></div></li>
+        <li><span class="icon">✗</span><div><strong>20 stocks + 6 ETFs</strong><span class="note">A research report, not a portfolio. Too many moving parts.</span></div></li>
+        <li><span class="icon">✗</span><div><strong>RGTI (quantum computing)</strong><span class="note">Real tech, wrong stage. Years from revenue, too volatile.</span></div></li>
+        <li><span class="icon">✗</span><div><strong>LUNR (Intuitive Machines)</strong><span class="note">Too small, too early. Lunar economy is real, but 2030+.</span></div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- TIER 1: FOUNDATION ETFs -->
+<div class="section-header">
+  <span class="tier-badge">Tier 1</span>
+  <h2>Foundation — ETF Core</h2>
+  <div class="alloc"><span>Allocation: </span>$10,000 <span>(40%)</span></div>
+</div>
+<div class="etf-grid">
+  <div class="etf-card">
+    <div class="ticker">SOXX</div>
+    <div class="name">iShares Semiconductor ETF</div>
+    <div class="alloc-amount">$4,000</div>
+    <div class="why">The entire semiconductor supercycle in one trade. Industry growing from $891B → $1.3T by 2030. PHLX Semiconductors up 258% over 3 years. One ETF, 30 companies, captures AI chips without picking winners.</div>
+    <span class="tag">AI Infrastructure</span>
+  </div>
+  <div class="etf-card">
+    <div class="ticker">INDA</div>
+    <div class="name">iShares MSCI India ETF</div>
+    <div class="alloc-amount">$3,000</div>
+    <div class="why">India is the world's fastest-growing major economy at 7.4% GDP. US-India trade deal just signed. Goldman Sachs upgraded to Overweight. Cleaner India exposure than NSE stock-picking risk.</div>
+    <span class="tag">Emerging Markets</span>
+  </div>
+  <div class="etf-card">
+    <div class="ticker">URA</div>
+    <div class="name">Global X Uranium ETF</div>
+    <div class="alloc-amount">$3,000</div>
+    <div class="why">Nuclear is the only firm, zero-carbon baseload power at scale. AI data centers are creating a power crisis. This isn't a trade — it's a decade theme. +108% over 1 year with more runway ahead.</div>
+    <span class="tag">AI Power Crisis</span>
+  </div>
+</div>
+
+<!-- TIER 2: QUALITY COMPOUNDERS -->
+<div class="section-header">
+  <span class="tier-badge">Tier 2</span>
+  <h2>Quality Compounders</h2>
+  <div class="alloc"><span>Allocation: </span>$7,500 <span>(30%)</span></div>
+</div>
+<div class="gems-grid">
+
+  <!-- VRT -->
+  <div class="gem-card promising">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">VRT</div>
+        <div class="name">Vertiv Holdings</div>
+        <span class="market-tag tag-us">US · NYSE</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="67">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--amber)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">67</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$3,000</div>
+    <p class="gem-why" style="margin-top:10px">The most overlooked AI play. Data centers physically cannot run without power management and cooling. Q1 EPS up 83% YoY. $15B backlog with a book-to-bill of 2.9x — for every $1 in revenue, $2.90 in new orders are queued. Real earnings. Real margins.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Q1 EPS Growth</div><div class="meta-val">+83% YoY</div></div>
+      <div class="meta-item"><div class="meta-key">Backlog</div><div class="meta-val">$15 Billion</div></div>
+      <div class="meta-item"><div class="meta-key">Book-to-Bill</div><div class="meta-val">2.9x</div></div>
+      <div class="meta-item"><div class="meta-key">Sector</div><div class="meta-val">AI Infrastructure</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: Hyperscaler capex rising 75% in 2026</span>
+      <span class="pill pill-red">⚠ Risk: Execution on $15B backlog</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>16/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="64"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>10/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="40"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>23/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="92"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+    </div>
+  </div>
+
+  <!-- NVDA -->
+  <div class="gem-card promising">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">NVDA</div>
+        <div class="name">NVIDIA Corporation</div>
+        <span class="market-tag tag-us">US · NASDAQ</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="62">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--amber)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">62</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$2,500</div>
+    <p class="gem-why" style="margin-top:10px">The Blackwell GPU ramp is happening now. 42 analysts say Strong Buy with avg target $276 — 37% upside from current $202. Hyperscaler AI capex has been underestimated every quarter for 2 years straight. Earnings May 20 is a near-term catalyst.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Analyst Target</div><div class="meta-val">$276 avg</div></div>
+      <div class="meta-item"><div class="meta-key">Upside</div><div class="meta-val">~37%</div></div>
+      <div class="meta-item"><div class="meta-key">Analyst Rating</div><div class="meta-val">42x Strong Buy</div></div>
+      <div class="meta-item"><div class="meta-key">Earnings</div><div class="meta-val">May 20, 2026</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: Blackwell ramp + May 20 earnings</span>
+      <span class="pill pill-red">⚠ Risk: China export ban, priced for perfection</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>12/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="48"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>8/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="32"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>24/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="96"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+    </div>
+  </div>
+
+  <!-- AVAV -->
+  <div class="gem-card elite">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">AVAV</div>
+        <div class="name">AeroVironment</div>
+        <span class="market-tag tag-us">US · NASDAQ</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="76">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--gold)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">76</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$2,000</div>
+    <p class="gem-why" style="margin-top:10px">Currently trading at $168 vs GF Value of $239 — a 33% discount. Down 4.7% recently despite the entire defense sector being up. Ukraine/Taiwan have proven that $10M tanks are useless against $50K drones. AeroVironment dominates the tactical drone niche. This is the divergence you look for.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Current Price</div><div class="meta-val">~$168</div></div>
+      <div class="meta-item"><div class="meta-key">GF Fair Value</div><div class="meta-val">$239</div></div>
+      <div class="meta-item"><div class="meta-key">Discount to Value</div><div class="meta-val">~33%</div></div>
+      <div class="meta-item"><div class="meta-key">Sector</div><div class="meta-val">Defense Drones</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: NATO 5% GDP target driving procurement</span>
+      <span class="pill pill-red">⚠ Risk: Budget cycle delays in government contracts</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>22/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="88"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>14/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="56"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TIER 3: MOONSHOTS -->
+<div class="section-header">
+  <span class="tier-badge">Tier 3</span>
+  <h2>Moonshots — 10x to 100x Targets</h2>
+  <div class="alloc"><span>Allocation: </span>$5,000 <span>(20%)</span></div>
+</div>
+
+<div class="moonshot-note">
+  <div class="moonshot-box">
+    <strong>Rule for this tier:</strong> Size each position so you can stomach total loss. If any one of these goes to zero, your Foundation (Tier 1) protects the overall portfolio. If one hits, it pays for the entire portfolio multiple times over. This is where Sandisk-style returns come from.
+  </div>
+</div>
+
+<div class="gems-grid">
+
+  <!-- OKLO -->
+  <div class="gem-card promising">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">OKLO</div>
+        <div class="name">Oklo Inc.</div>
+        <span class="market-tag tag-moon">US · NYSE · Pre-Revenue</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="65">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--amber)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">65</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$2,000</div>
+    <p class="gem-why" style="margin-top:10px">The thesis is simple: AI data centers need power on-site, not from the grid. Micro-reactors solve this permanently. Sam Altman (OpenAI CEO) backs OKLO directly. DoE license in progress. Currently ~$70 after a 75% rebound from March lows. If micro-nuclear becomes standard for data center power — this is 10x minimum.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Current Price</div><div class="meta-val">~$70</div></div>
+      <div class="meta-item"><div class="meta-key">Stage</div><div class="meta-val">Pre-Revenue</div></div>
+      <div class="meta-item"><div class="meta-key">Backed By</div><div class="meta-val">Sam Altman</div></div>
+      <div class="meta-item"><div class="meta-key">YTD</div><div class="meta-val">+0.7% (volatile)</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: DoE license + hyperscaler power contracts</span>
+      <span class="pill pill-red">⚠ Risk: Pre-revenue, regulatory delays, 2028+ timeline</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>12/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="48"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>15/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="60"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+    </div>
+  </div>
+
+  <!-- LITE -->
+  <div class="gem-card elite">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">LITE</div>
+        <div class="name">Lumentum Holdings</div>
+        <span class="market-tag tag-us">US · NASDAQ</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="72">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--gold)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">72</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$1,500</div>
+    <p class="gem-why" style="margin-top:10px">The Sandisk-level discovery from the original brief. +624% over 1 year. Sole supplier of co-packaged optics (CPO) for Nvidia's Blackwell GPU — the chip inside every AI server. Revenue up 90% YoY to $808M. CPO is just beginning to ramp. This is the fibre-optic of the AI era.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">1-Year Return</div><div class="meta-val">+624%</div></div>
+      <div class="meta-item"><div class="meta-key">Revenue Growth</div><div class="meta-val">+90% YoY</div></div>
+      <div class="meta-item"><div class="meta-key">Revenue (Annual)</div><div class="meta-val">$808M</div></div>
+      <div class="meta-item"><div class="meta-key">Niche</div><div class="meta-val">Sole CPO Supplier</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: Every Blackwell GPU needs LITE optics</span>
+      <span class="pill pill-red">⚠ Risk: Concentration — if NVDA loses market share, LITE follows</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>15/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="60"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>15/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="60"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>22/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="88"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+    </div>
+  </div>
+
+  <!-- KTOS -->
+  <div class="gem-card promising">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">KTOS</div>
+        <div class="name">Kratos Defense</div>
+        <span class="market-tag tag-us">US · NASDAQ</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="74">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--amber)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">74</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$1,000</div>
+    <p class="gem-why" style="margin-top:10px">Expendable combat drones are becoming the ammunition of modern warfare. XQ-58 Valkyrie selected by US Marine Corps — $231.5M contract. Low-cost, high-volume. Think of KTOS as the ammunition manufacturer of the drone age. Currently ~$52-57. RBC kept Outperform rating in May 2026.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Current Price</div><div class="meta-val">~$52-57</div></div>
+      <div class="meta-item"><div class="meta-key">USMC Contract</div><div class="meta-val">$231.5M</div></div>
+      <div class="meta-item"><div class="meta-key">Rating</div><div class="meta-val">RBC Outperform</div></div>
+      <div class="meta-item"><div class="meta-key">Niche</div><div class="meta-val">Expendable Drones</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: Pentagon autonomous systems budget $13B+</span>
+      <span class="pill pill-red">⚠ Risk: Small-cap defense is volatile, budget cycle dependent</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>16/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="64"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+    </div>
+  </div>
+
+  <!-- MP -->
+  <div class="gem-card elite">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">MP</div>
+        <div class="name">MP Materials</div>
+        <span class="market-tag tag-us">US · NYSE</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="78">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--gold)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">78</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$500</div>
+    <p class="gem-why" style="margin-top:10px">America's only fully integrated rare earth producer. Q1 2026 revenue +49% YoY. DoD contracts, Apple offtake agreements, $500M government funding. China controls 90% of supply — every US-China trade tension event is a direct catalyst for MP. Asymmetric risk/reward.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Revenue Growth</div><div class="meta-val">+49% YoY</div></div>
+      <div class="meta-item"><div class="meta-key">Gov. Funding</div><div class="meta-val">$500M DoD</div></div>
+      <div class="meta-item"><div class="meta-key">Market Position</div><div class="meta-val">Only US Producer</div></div>
+      <div class="meta-item"><div class="meta-key">Inst. Coverage</div><div class="meta-val">Low (rare earth niche)</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: Any US-China tension event = instant re-rating</span>
+      <span class="pill pill-red">⚠ Risk: Government program risk, small-cap volatility</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DRY POWDER -->
+<div class="section-header">
+  <span class="tier-badge">Tier 4</span>
+  <h2>Dry Powder — Cash Reserve</h2>
+  <div class="alloc"><span>Allocation: </span>$2,500 <span>(10%)</span></div>
+</div>
+<div class="dry-powder">
+  <div class="dry-powder-card">
+    <div class="dp-amount">$2,500</div>
+    <div class="dp-text">
+      <strong>Hold this. Do not deploy immediately.</strong>
+      Wait for NVIDIA earnings on May 20 — if the market drops on results, buy the dip on SOXX or VRT. Wait for OKLO to pull back below $65 before adding. Use this if any position drops 15%+ without a change in the underlying thesis. Cash is a position.
+    </div>
+  </div>
+</div>
+
+<!-- FULL ALLOCATION TABLE -->
+<div class="alloc-table-section">
+  <div class="section-header" style="margin-top:0; margin-bottom:14px;">
+    <h2 style="font-size:1.2rem;">Complete Allocation Summary</h2>
+  </div>
+  <table class="alloc-table">
+    <thead>
+      <tr>
+        <th>Ticker</th>
+        <th>Name</th>
+        <th>Tier</th>
+        <th>Market</th>
+        <th>Amount</th>
+        <th>% of Portfolio</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="t-ticker">SOXX</td><td>iShares Semiconductor ETF</td><td><span class="t-tier tier-foundation">Foundation</span></td><td>US</td><td class="t-amount">$4,000</td><td>16%</td></tr>
+      <tr><td class="t-ticker">INDA</td><td>iShares MSCI India ETF</td><td><span class="t-tier tier-foundation">Foundation</span></td><td>India</td><td class="t-amount">$3,000</td><td>12%</td></tr>
+      <tr><td class="t-ticker">URA</td><td>Global X Uranium ETF</td><td><span class="t-tier tier-foundation">Foundation</span></td><td>Global</td><td class="t-amount">$3,000</td><td>12%</td></tr>
+      <tr><td class="t-ticker">VRT</td><td>Vertiv Holdings</td><td><span class="t-tier tier-compounder">Compounder</span></td><td>US</td><td class="t-amount">$3,000</td><td>12%</td></tr>
+      <tr><td class="t-ticker">NVDA</td><td>NVIDIA Corporation</td><td><span class="t-tier tier-compounder">Compounder</span></td><td>US</td><td class="t-amount">$2,500</td><td>10%</td></tr>
+      <tr><td class="t-ticker">AVAV</td><td>AeroVironment</td><td><span class="t-tier tier-compounder">Compounder</span></td><td>US</td><td class="t-amount">$2,000</td><td>8%</td></tr>
+      <tr><td class="t-ticker">OKLO</td><td>Oklo Inc.</td><td><span class="t-tier tier-moonshot">Moonshot</span></td><td>US</td><td class="t-amount">$2,000</td><td>8%</td></tr>
+      <tr><td class="t-ticker">LITE</td><td>Lumentum Holdings</td><td><span class="t-tier tier-moonshot">Moonshot</span></td><td>US</td><td class="t-amount">$1,500</td><td>6%</td></tr>
+      <tr><td class="t-ticker">KTOS</td><td>Kratos Defense</td><td><span class="t-tier tier-moonshot">Moonshot</span></td><td>US</td><td class="t-amount">$1,000</td><td>4%</td></tr>
+      <tr><td class="t-ticker">MP</td><td>MP Materials</td><td><span class="t-tier tier-moonshot">Moonshot</span></td><td>US</td><td class="t-amount">$500</td><td>2%</td></tr>
+      <tr><td class="t-ticker">CASH</td><td>Dry Powder Reserve</td><td><span class="t-tier tier-cash">Reserve</span></td><td>—</td><td class="t-amount">$2,500</td><td>10%</td></tr>
+      <tr style="background:rgba(201,168,76,0.05)"><td class="t-ticker" colspan="4"><strong>TOTAL</strong></td><td class="t-amount"><strong>$25,000</strong></td><td><strong>100%</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- EXIT RULES -->
+<div class="exit-section">
+  <div class="section-header" style="margin-top:28px; margin-bottom:14px;">
+    <h2 style="font-size:1.2rem;">Exit Rules — When to Act</h2>
+  </div>
+  <div class="exit-grid">
+    <div class="exit-card danger">
+      <h5>🔴 Exit Signals — Reduce or Sell</h5>
+      <ul>
+        <li><span>⚡</span><div>Any major hyperscaler cuts AI capex guidance — exit SOXX, VRT, NVDA immediately</div></li>
+        <li><span>⚡</span><div>NVDA earnings miss + guidance cut (May 20) — reduce all semiconductor positions</div></li>
+        <li><span>⚡</span><div>Uranium spot price falls below $80/lb — reduce URA</div></li>
+        <li><span>⚡</span><div>OKLO DoE license denied — this is an exit, the whole thesis breaks</div></li>
+        <li><span>⚡</span><div>Any position drops 25%+ without news — reassess before adding</div></li>
+      </ul>
+    </div>
+    <div class="exit-card catalyst">
+      <h5>🟢 Add / Hold Catalysts</h5>
+      <ul>
+        <li><span>⚡</span><div>NVDA May 20 earnings beat — buy SOXX dip if any exists</div></li>
+        <li><span>⚡</span><div>Anduril IPO (late 2026/2027) — reserve cash now, buy at open</div></li>
+        <li><span>⚡</span><div>US-China trade tension escalates — MP Materials is a direct buy</div></li>
+        <li><span>⚡</span><div>India H2 2026 consumption surge — add to INDA on any pullback</div></li>
+        <li><span>⚡</span><div>OKLO first commercial letter of intent signed — add to position</div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- EXTENDED PORTFOLIO: IF YOU HAD MORE CAPITAL -->
+<div style="max-width:900px; margin: 48px auto 0; padding: 0 24px;">
+  <div style="background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(201,168,76,0.08)); border: 1px solid rgba(139,92,246,0.4); border-radius: 14px; padding: 24px 28px; margin-bottom: 24px;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+      <span style="font-size:1.5rem;">🚀</span>
+      <h2 style="font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--gold-light);">Extended Wish List — With Additional Capital (~$10,000 more)</h2>
+    </div>
+    <p style="font-size:0.88rem; color:var(--muted); line-height:1.6;">These are the picks I'd add if the base $25,000 portfolio was already deployed. Split across 3 new sleeves: <strong style="color:var(--text)">India NSE direct stocks</strong>, <strong style="color:var(--text)">Korea/Asia</strong>, and <strong style="color:var(--text)">Penny & Small-Cap moonshots</strong>. Total additional capital: ~$10,000.</p>
+  </div>
+</div>
+
+<!-- INDIA NSE DIRECT -->
+<div class="section-header" style="margin-top:4px;">
+  <span class="tier-badge" style="background: linear-gradient(135deg,#10b981,#34d399); color:#0a0f1e;">India NSE</span>
+  <h2>India Direct — NSE Stocks</h2>
+  <div class="alloc"><span>Add: </span>$4,000</div>
+</div>
+<div class="gems-grid">
+
+  <!-- BEL -->
+  <div class="gem-card elite" style="border-color:var(--green);">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">BEL</div>
+        <div class="name">Bharat Electronics Ltd.</div>
+        <span class="market-tag tag-india">India · NSE</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="82">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--gold)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">82</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$2,000</div>
+    <p class="gem-why" style="margin-top:10px">India's premier defense electronics company. Q3 FY26 revenue up 23.96%, profit up 20.45%. Just won a ₹1,251 crore army order in May 2026. India's defense budget is rising every year and BEL is the primary domestic beneficiary. Radar, electronic warfare, comms — dual exposure to India's defense AND tech buildout.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Current Price</div><div class="meta-val">₹436.85</div></div>
+      <div class="meta-item"><div class="meta-key">Revenue Growth</div><div class="meta-val">+23.96% Q3</div></div>
+      <div class="meta-item"><div class="meta-key">Profit Growth</div><div class="meta-val">+20.45% Q3</div></div>
+      <div class="meta-item"><div class="meta-key">May 2026 Order</div><div class="meta-val">₹1,251 Cr</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: India defense budget expansion + US-India deal</span>
+      <span class="pill pill-red">⚠ Risk: Government procurement delays, PSU stock volatility</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>19/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="76"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>23/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="92"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+    </div>
+  </div>
+
+  <!-- HDFCBANK -->
+  <div class="gem-card elite" style="border-color:var(--green);">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">HDFC</div>
+        <div class="name">HDFC Bank</div>
+        <span class="market-tag tag-india">India · NSE</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="80">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--gold)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">80</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$1,500</div>
+    <p class="gem-why" style="margin-top:10px">Classic divergence play. Price down 24% over 6 months, but Q4 PAT up 9% to ₹19,221 crore. The business is growing — the stock is being sold by foreign investors rotating out of India. RBI is cutting rates, which directly boosts HDFC's loan demand in housing, auto, and MSME. Buy the business while others are selling the chart.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Current Price</div><div class="meta-val">₹749</div></div>
+      <div class="meta-item"><div class="meta-key">6-Month Return</div><div class="meta-val">-24% (dip)</div></div>
+      <div class="meta-item"><div class="meta-key">Q4 PAT Growth</div><div class="meta-val">+9% YoY</div></div>
+      <div class="meta-item"><div class="meta-key">Signal</div><div class="meta-val">Price-Business Divergence</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: RBI rate cuts accelerating loan demand</span>
+      <span class="pill pill-red">⚠ Risk: FII selling pressure, INR/USD FX risk</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>22/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="88"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>21/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="84"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>19/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="76"></div></div></div>
+    </div>
+  </div>
+
+  <!-- TCS -->
+  <div class="gem-card promising" style="border-color:var(--amber); grid-column: 1 / -1; max-width:440px; margin: 0 auto;">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">TCS</div>
+        <div class="name">Tata Consultancy Services</div>
+        <span class="market-tag tag-india">India · NSE</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="70">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--amber)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">70</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$500</div>
+    <p class="gem-why" style="margin-top:10px">The stable India tech anchor. Q4 net profits up 12%, ₹31/share dividend, actively repositioning for AI-led outsourcing. US-India trade deal reduces uncertainty for IT exports. Lower upside than BEL but much lower risk — a quality compounder.</p>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: AI services outsourcing wave from US enterprises</span>
+      <span class="pill pill-red">⚠ Risk: Margin pressure if global spending slows</span>
+    </div>
+  </div>
+</div>
+
+<!-- KOREA / ASIA -->
+<div class="section-header">
+  <span class="tier-badge" style="background: linear-gradient(135deg,#3b82f6,#60a5fa); color:#fff;">Korea · Asia</span>
+  <h2>Korea & Malaysia</h2>
+  <div class="alloc"><span>Add: </span>$3,500</div>
+</div>
+<div style="max-width:900px; margin: 0 auto 16px; padding: 0 24px;">
+  <div class="moonshot-box" style="border-color: rgba(59,130,246,0.3);">
+    <strong style="color:#60a5fa;">On EWY vs SK Hynix directly:</strong> EWY is already up +85% YTD — that's not a hidden gem. SK Hynix (OTC: <strong>HXSCL</strong>) is different. It trades at just <strong>7x earnings</strong> and controls 50–62% of the global HBM memory market with shortage confirmed until 2028. You can buy it via OTC markets through most US brokerages. A US listing is also planned — that event alone could be a re-rating catalyst.
+  </div>
+</div>
+<div class="gems-grid">
+
+  <!-- SK HYNIX -->
+  <div class="gem-card elite">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">HXSCL</div>
+        <div class="name">SK Hynix (OTC / KRX: 000660)</div>
+        <span class="market-tag" style="background:rgba(59,130,246,0.2);color:#60a5fa;">Korea · OTC</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="84">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--gold)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">84</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$2,000</div>
+    <p class="gem-why" style="margin-top:10px">The most important stock nobody in your network is talking about. Controls 50–62% of global HBM memory — the single most critical component NVIDIA needs for its Blackwell GPUs. HBM shortage confirmed until 2028. Record Q1 2026 profit. UBS raised target to 1.7M KRW. Trading at just 7x earnings despite being the monopoly supplier of AI's most critical hardware. US listing planned — that event is a re-rating.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Price (KRX)</div><div class="meta-val">~1.83M KRW</div></div>
+      <div class="meta-item"><div class="meta-key">YTD Performance</div><div class="meta-val">+197%</div></div>
+      <div class="meta-item"><div class="meta-key">Forward P/E</div><div class="meta-val">~7x (cheap)</div></div>
+      <div class="meta-item"><div class="meta-key">HBM Market Share</div><div class="meta-val">50–62%</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: US listing + HBM shortage through 2028</span>
+      <span class="pill pill-red">⚠ Risk: OTC liquidity lower, KRW/USD FX exposure</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>22/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="88"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>23/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="92"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>19/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="76"></div></div></div>
+    </div>
+  </div>
+
+  <!-- EWM Malaysia -->
+  <div class="gem-card promising">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">EWM</div>
+        <div class="name">iShares MSCI Malaysia ETF</div>
+        <span class="market-tag" style="background:rgba(245,158,11,0.2);color:#fbbf24;">Malaysia · ETF</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="68">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--amber)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">68</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$1,500</div>
+    <p class="gem-why" style="margin-top:10px">Malaysia is the world's semiconductor assembly and packaging hub. Microsoft, Google, and AWS are all committing billions to Malaysian data centers. KLCI up 13% YoY. This is the "factory floor" of the AI infrastructure build — cleanest way to capture that without stock-picking individual Malaysian companies.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">KLCI (YoY)</div><div class="meta-val">+13%</div></div>
+      <div class="meta-item"><div class="meta-key">Key Theme</div><div class="meta-val">Semiconductor OSAT hub</div></div>
+      <div class="meta-item"><div class="meta-key">Data Center Investment</div><div class="meta-val">Microsoft + Google + AWS</div></div>
+      <div class="meta-item"><div class="meta-key">Expense Ratio</div><div class="meta-val">0.59%</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: Hyperscaler data center buildout in Malaysia</span>
+      <span class="pill pill-red">⚠ Risk: Political risk, MYR/USD FX exposure</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>16/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="64"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>17/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="68"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>17/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="68"></div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PENNY & SMALL-CAP MOONSHOTS -->
+<div class="section-header">
+  <span class="tier-badge" style="background: linear-gradient(135deg,#8b5cf6,#a78bfa); color:#fff;">Penny / Small Cap</span>
+  <h2>Penny & Small-Cap Moonshots</h2>
+  <div class="alloc"><span>Add: </span>$2,500</div>
+</div>
+<div style="max-width:900px; margin: 0 auto 16px; padding: 0 24px;">
+  <div class="moonshot-box">
+    <strong>These are genuine lottery tickets.</strong> Size each at $500–$800 max. If any one of them hits, it returns more than the cost of the entire extended portfolio. If all three go to zero, you lose $2,500 — which the Foundation ETFs will partially recover in 6–12 months. That is the correct mental model for this sleeve.
+  </div>
+</div>
+<div class="gems-grid">
+
+  <!-- RCAT -->
+  <div class="gem-card watch" style="border-color:var(--purple);">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">RCAT</div>
+        <div class="name">Red Cat Holdings</div>
+        <span class="market-tag tag-moon">US · NASDAQ · Small Cap</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="71">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--purple)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">71</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$1,000</div>
+    <p class="gem-why" style="margin-top:10px">Revenue up 2,500% YoY in Q4 2025 to $26.2M. Full-year revenue $40.7M, up 160%. They make small tactical military drones — exactly what modern warfare is demanding. Pulled back from $18.78 high to ~$12, creating a potential re-entry. This is the most tangible revenue growth story in the penny/small-cap drone space.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Q4 Revenue</div><div class="meta-val">+2,500% YoY</div></div>
+      <div class="meta-item"><div class="meta-key">FY Revenue</div><div class="meta-val">$40.7M (+160%)</div></div>
+      <div class="meta-item"><div class="meta-key">Current Price</div><div class="meta-val">~$12 (pulled back)</div></div>
+      <div class="meta-item"><div class="meta-key">Niche</div><div class="meta-val">Tactical Military Drones</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: DoD small-drone procurement surge</span>
+      <span class="pill pill-red">⚠ Risk: Small-cap, illiquid, volatility is extreme</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>20/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="80"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>15/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="60"></div></div></div>
+    </div>
+  </div>
+
+  <!-- BBAI -->
+  <div class="gem-card watch" style="border-color:var(--purple);">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">BBAI</div>
+        <div class="name">BigBear.ai Holdings</div>
+        <span class="market-tag tag-moon">US · NYSE · ~$3.58</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="62">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--purple)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">62</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$800</div>
+    <p class="gem-why" style="margin-top:10px">Defense AI at $3.58/share. 2026 full-year guidance $135M–$165M. Institutions have already found it — BlackRock, Vanguard, and Goldman Sachs are holders. That's the best possible signal for a penny stock: the smart money is already inside. This is a discovery play with institutional validation.</p>
+    <div class="gem-meta">
+      <div class="meta-item"><div class="meta-key">Current Price</div><div class="meta-val">~$3.58</div></div>
+      <div class="meta-item"><div class="meta-key">2026 Guidance</div><div class="meta-val">$135M–$165M</div></div>
+      <div class="meta-item"><div class="meta-key">Institutional Holders</div><div class="meta-val">BlackRock, Goldman, Vanguard</div></div>
+      <div class="meta-item"><div class="meta-key">Sector</div><div class="meta-val">Defense AI</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: DoD AI budget expansion, institutional discovery</span>
+      <span class="pill pill-red">⚠ Risk: Revenue declined 38% in Q4 2025 — watch guidance execution</span>
+    </div>
+    <div class="score-bars">
+      <div class="score-bar-item"><div class="score-bar-label"><span>Valuation</span><span>18/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="72"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Institutional Blindspot</span><span>16/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="64"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Fundamentals</span><span>14/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="56"></div></div></div>
+      <div class="score-bar-item"><div class="score-bar-label"><span>Momentum Divergence</span><span>14/25</span></div><div class="score-bar-track"><div class="score-bar-fill" data-pct="56"></div></div></div>
+    </div>
+  </div>
+
+  <!-- PDYN -->
+  <div class="gem-card watch" style="border-color:var(--purple); grid-column: 1 / -1; max-width:440px; margin: 0 auto;">
+    <div class="gem-card-header">
+      <div class="left">
+        <div class="ticker">PDYN</div>
+        <div class="name">Palladyne AI</div>
+        <span class="market-tag tag-moon">US · NASDAQ · Small Cap</span>
+      </div>
+      <div class="score-ring-wrap">
+        <svg class="score-ring" width="72" height="72" viewBox="0 0 72 72" data-score="66">
+          <circle class="bg-circle" cx="36" cy="36" r="30" stroke-width="6"/>
+          <circle class="fg-circle" cx="36" cy="36" r="30" stroke-width="6" stroke="var(--purple)" transform="rotate(-90 36 36)"/>
+          <text class="score-text" x="36" y="36">66</text>
+        </svg>
+        <span class="score-label">Gem Score</span>
+      </div>
+    </div>
+    <div class="alloc-badge">$700</div>
+    <p class="gem-why" style="margin-top:10px">Drone swarms and autonomous battlefield AI. Air Force contract in hand. Revenue projected 4–5x in 2026 vs 2025. Spiked 27% on Q4 2025 earnings. This is KTOS's software counterpart — if KTOS makes the drone body, PDYN is the AI brain that coordinates the swarm. Highest risk, highest upside in this sleeve.</p>
+    <div class="pills">
+      <span class="pill pill-green">⚡ Catalyst: Air Force AI autonomy programme + drone swarm doctrine</span>
+      <span class="pill pill-red">⚠ Risk: Pre-scale, earnings execution risk, extreme volatility</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- FULL EXTENDED SUMMARY TABLE -->
+<div class="alloc-table-section" style="margin-top:32px;">
+  <div class="section-header" style="margin-top:0; margin-bottom:14px;">
+    <h2 style="font-size:1.2rem;">Complete Extended Portfolio Summary ($35,000 Total)</h2>
+  </div>
+  <table class="alloc-table">
+    <thead>
+      <tr><th>Ticker</th><th>Name</th><th>Market</th><th>Sleeve</th><th>Amount</th><th>Note</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="t-ticker">SOXX</td><td>iShares Semiconductor ETF</td><td>US</td><td><span class="t-tier tier-foundation">Foundation</span></td><td class="t-amount">$4,000</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">INDA</td><td>iShares MSCI India ETF</td><td>India</td><td><span class="t-tier tier-foundation">Foundation</span></td><td class="t-amount">$3,000</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">URA</td><td>Global X Uranium ETF</td><td>Global</td><td><span class="t-tier tier-foundation">Foundation</span></td><td class="t-amount">$3,000</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">VRT</td><td>Vertiv Holdings</td><td>US</td><td><span class="t-tier tier-compounder">Compounder</span></td><td class="t-amount">$3,000</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">NVDA</td><td>NVIDIA Corporation</td><td>US</td><td><span class="t-tier tier-compounder">Compounder</span></td><td class="t-amount">$2,500</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">AVAV</td><td>AeroVironment</td><td>US</td><td><span class="t-tier tier-compounder">Compounder</span></td><td class="t-amount">$2,000</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">OKLO</td><td>Oklo Inc.</td><td>US</td><td><span class="t-tier tier-moonshot">Moonshot</span></td><td class="t-amount">$2,000</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">LITE</td><td>Lumentum Holdings</td><td>US</td><td><span class="t-tier tier-moonshot">Moonshot</span></td><td class="t-amount">$1,500</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">KTOS</td><td>Kratos Defense</td><td>US</td><td><span class="t-tier tier-moonshot">Moonshot</span></td><td class="t-amount">$1,000</td><td>Base portfolio</td></tr>
+      <tr><td class="t-ticker">MP</td><td>MP Materials</td><td>US</td><td><span class="t-tier tier-moonshot">Moonshot</span></td><td class="t-amount">$500</td><td>Base portfolio</td></tr>
+      <tr style="background:rgba(16,185,129,0.04)"><td class="t-ticker">BEL</td><td>Bharat Electronics</td><td>NSE India</td><td><span class="t-tier" style="background:rgba(16,185,129,0.15);color:var(--green);">India Direct</span></td><td class="t-amount">$2,000</td><td>Extended (+$10k)</td></tr>
+      <tr style="background:rgba(16,185,129,0.04)"><td class="t-ticker">HDFC</td><td>HDFC Bank</td><td>NSE India</td><td><span class="t-tier" style="background:rgba(16,185,129,0.15);color:var(--green);">India Direct</span></td><td class="t-amount">$1,500</td><td>Extended (+$10k)</td></tr>
+      <tr style="background:rgba(16,185,129,0.04)"><td class="t-ticker">TCS</td><td>Tata Consultancy Services</td><td>NSE India</td><td><span class="t-tier" style="background:rgba(16,185,129,0.15);color:var(--green);">India Direct</span></td><td class="t-amount">$500</td><td>Extended (+$10k)</td></tr>
+      <tr style="background:rgba(59,130,246,0.04)"><td class="t-ticker">HXSCL</td><td>SK Hynix (OTC)</td><td>Korea OTC</td><td><span class="t-tier" style="background:rgba(59,130,246,0.15);color:#60a5fa;">Korea/Asia</span></td><td class="t-amount">$2,000</td><td>Extended (+$10k)</td></tr>
+      <tr style="background:rgba(59,130,246,0.04)"><td class="t-ticker">EWM</td><td>iShares MSCI Malaysia</td><td>Malaysia</td><td><span class="t-tier" style="background:rgba(59,130,246,0.15);color:#60a5fa;">Korea/Asia</span></td><td class="t-amount">$1,500</td><td>Extended (+$10k)</td></tr>
+      <tr style="background:rgba(139,92,246,0.04)"><td class="t-ticker">RCAT</td><td>Red Cat Holdings</td><td>US Small Cap</td><td><span class="t-tier" style="background:rgba(139,92,246,0.15);color:#a78bfa;">Penny/Small</span></td><td class="t-amount">$1,000</td><td>Extended (+$10k)</td></tr>
+      <tr style="background:rgba(139,92,246,0.04)"><td class="t-ticker">BBAI</td><td>BigBear.ai Holdings</td><td>US Penny</td><td><span class="t-tier" style="background:rgba(139,92,246,0.15);color:#a78bfa;">Penny/Small</span></td><td class="t-amount">$800</td><td>Extended (+$10k)</td></tr>
+      <tr style="background:rgba(139,92,246,0.04)"><td class="t-ticker">PDYN</td><td>Palladyne AI</td><td>US Small Cap</td><td><span class="t-tier" style="background:rgba(139,92,246,0.15);color:#a78bfa;">Penny/Small</span></td><td class="t-amount">$700</td><td>Extended (+$10k)</td></tr>
+      <tr><td class="t-ticker">CASH</td><td>Dry Powder Reserve</td><td>—</td><td><span class="t-tier tier-cash">Reserve</span></td><td class="t-amount">$2,500</td><td>Base portfolio</td></tr>
+      <tr style="background:rgba(201,168,76,0.06)"><td class="t-ticker" colspan="4"><strong>TOTAL (Base $25k + Extended $10k)</strong></td><td class="t-amount"><strong>$35,000</strong></td><td><strong>18 picks · 6 markets</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer" style="margin: 32px 24px 0; max-width: 900px; margin-left: auto; margin-right: auto;">
+  <strong style="color: #f87171;">DISCLAIMER:</strong> This analysis is for educational and informational purposes only. It does not constitute financial advice. Past performance is not indicative of future results. Always conduct your own due diligence or consult a licensed financial advisor before making investment decisions. Hidden gems and moonshot positions carry higher volatility and liquidity risk. Fortress Intelligence is not a registered investment advisor.
+</div>
+
+<footer>
+  <p>Generated by <span>Fortress Intelligence</span> · May 14, 2026 · Personal Investment Brief</p>
+  <p style="margin-top:6px; color:#334155">fortressintelligence.space</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate score rings
+  setTimeout(() => {
+    document.querySelectorAll('.score-ring[data-score]').forEach(svg => {
+      const score = parseInt(svg.getAttribute('data-score'));
+      const circle = svg.querySelector('.fg-circle');
+      const circumference = 188.5;
+      const offset = circumference - (score / 100 * circumference);
+      circle.style.strokeDashoffset = offset;
+    });
+  }, 300);
+
+  // Animate score bars
+  setTimeout(() => {
+    document.querySelectorAll('.score-bar-fill[data-pct]').forEach(bar => {
+      const pct = bar.getAttribute('data-pct');
+      bar.style.width = pct + '%';
+    });
+  }, 400);
+});
+</script>
+</body>
+</html>
