@@ -2,7 +2,7 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** Production Ready ✅ (v0.3.0) — May 23, 2026 | Phase 1 Live ✅ May 22 | Phase 2-3 Scaffold ✅ May 23 | Build Validated ✅ Zero Errors | Ready for VPS Deployment  
+**Status:** Production Ready ✅ (v0.4.0) — May 23, 2026 | Premium Portfolio Overhaul & IBKR CSV Importer Shipped ✅ | Build Validated ✅ Zero Errors | Ready for VPS Deployment  
 **Live App:** https://fortressintelligence.space  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2)
 
@@ -19,7 +19,8 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 ### ✅ Features (LIVE)
 
 **Investment Genie**
-- Multi-market portfolio allocation form
+- Multi-market portfolio allocation form with 3-step progressive onboarding wizard
+- Dynamic live barbell split risk preview
 - AI-powered risk-based allocation (US % / India %)
 - Result summary with allocation breakdown
 
@@ -43,7 +44,8 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 **Design & UX**
 - Dark Luxury theme (modern, professional, accessible)
 - Fully responsive (desktop, tablet, mobile)
-- Clean, intuitive navigation
+- Dynamic interactive canvas line charts with hover year-by-year tooltips
+- Native SVG score ring title disclosures
 
 ### 🏗 Tech Stack
 

@@ -735,6 +735,7 @@
       <div class="gem-badges"><span class="badge b-gold">Elite 88/100</span><span class="badge b-blue">ETF</span><span class="badge b-purple">AI Infrastructure</span><span class="badge b-green">NRI Accessible</span></div></div>
       <div class="score-wrap">
         <svg class="score-ring" width="66" height="66" viewBox="0 0 72 72">
+          <title>Gem Score (88/100): Valuation (80%), Fundamentals (96%), Inst. Blindspot (72%), Momentum (88%)</title>
           <circle class="sr-bg" cx="36" cy="36" r="30" stroke-width="5"/>
           <circle class="sr-fill" data-score="88" cx="36" cy="36" r="30" stroke-width="5" stroke="#c9a84c"/>
           <text class="sr-txt" x="36" y="36" transform="rotate(90,36,36)">88</text>
@@ -768,6 +769,7 @@
       <div class="gem-badges"><span class="badge b-gold">Elite 85/100</span><span class="badge b-amber">Stocks+ETF</span><span class="badge b-green">NRE Tax-Free</span><span class="badge b-blue">Fastest Economy</span></div></div>
       <div class="score-wrap">
         <svg class="score-ring" width="66" height="66" viewBox="0 0 72 72">
+          <title>Gem Score (85/100): Valuation (76%), Fundamentals (92%), Inst. Blindspot (82%), Momentum (88%)</title>
           <circle class="sr-bg" cx="36" cy="36" r="30" stroke-width="5"/>
           <circle class="sr-fill" data-score="85" cx="36" cy="36" r="30" stroke-width="5" stroke="#c9a84c"/>
           <text class="sr-txt" x="36" y="36" transform="rotate(90,36,36)">85</text>
@@ -801,6 +803,7 @@
       <div class="gem-badges"><span class="badge b-gold">Elite 82/100</span><span class="badge b-blue">ETF</span><span class="badge b-gold">Dalio 10–15%</span><span class="badge b-green">Tax-efficient for NRI</span></div></div>
       <div class="score-wrap">
         <svg class="score-ring" width="66" height="66" viewBox="0 0 72 72">
+          <title>Gem Score (82/100): Macro Alignment (96%), Fundamentals (84%), Tax Efficiency (92%), Momentum (90%)</title>
           <circle class="sr-bg" cx="36" cy="36" r="30" stroke-width="5"/>
           <circle class="sr-fill" data-score="82" cx="36" cy="36" r="30" stroke-width="5" stroke="#c9a84c"/>
           <text class="sr-txt" x="36" y="36" transform="rotate(90,36,36)">82</text>
@@ -1059,7 +1062,7 @@ function recalc() {
 function set(id, txt) { const el = document.getElementById(id); if(el) el.textContent = txt; }
 
 // ── CHART ──────────────────────────────────────────────
-function drawChart(cap, years) {
+function drawChart(cap, years, activeYr = null) {
   const canvas = document.getElementById('growthChart');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -1126,6 +1129,100 @@ function drawChart(cap, years) {
     ctx.fillStyle=col; ctx.font='10px system-ui,sans-serif'; ctx.textAlign='left';
     ctx.fillText('— '+lbl, P.l+i*80, P.t+12);
   });
+
+  // Tooltip rendering when activeYr is hovered
+  if (activeYr !== null) {
+    // vertical line
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(px(activeYr), P.t);
+    ctx.lineTo(px(activeYr), P.t + ch);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // dots on the lines
+    const drawDot = (v, col) => {
+      ctx.beginPath(); ctx.arc(px(activeYr), py(v), 5, 0, Math.PI*2);
+      ctx.fillStyle = col; ctx.fill();
+      ctx.strokeStyle = '#0a0f1e'; ctx.lineWidth = 1.5; ctx.stroke();
+    };
+    drawDot(bearV[activeYr], '#ef4444');
+    drawDot(baseV[activeYr], '#c9a84c');
+    drawDot(bullV[activeYr], '#10b981');
+
+    // tooltip box positioning
+    const boxW = 125, boxH = 72;
+    let boxX = px(activeYr) + 12;
+    if (boxX + boxW > canvas.width) {
+      boxX = px(activeYr) - boxW - 12;
+    }
+    const boxY = P.t + 10;
+
+    // draw tooltip rounded rectangle
+    ctx.fillStyle = 'rgba(20,28,46,0.92)';
+    ctx.strokeStyle = 'rgba(201,168,76,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(boxX, boxY, boxW, boxH, 6);
+    } else {
+      ctx.rect(boxX, boxY, boxW, boxH);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    // tooltip text
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 10px system-ui,sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Year ' + activeYr, boxX + 8, boxY + 16);
+
+    ctx.font = '10px system-ui,sans-serif';
+    ctx.fillStyle = '#10b981';
+    ctx.fillText('Bull: $' + fmt(bullV[activeYr]), boxX + 8, boxY + 32);
+    ctx.fillStyle = '#c9a84c';
+    ctx.fillText('Base: $' + fmt(baseV[activeYr]), boxX + 8, boxY + 48);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillText('Bear: $' + fmt(bearV[activeYr]), boxX + 8, boxY + 64);
+  }
+
+  // Setup Event Listeners once
+  canvas.dataset.cap = cap;
+  canvas.dataset.years = years;
+
+  if (!canvas.dataset.listened) {
+    canvas.dataset.listened = "true";
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const currentCap = parseFloat(canvas.dataset.cap);
+      const currentYears = parseInt(canvas.dataset.years);
+      
+      const paddingL = 64, paddingR = 20;
+      const plotW = canvas.width - paddingL - paddingR;
+      const getPxLoc = (idx) => paddingL + (idx / currentYears) * plotW;
+
+      let minD = Infinity, nearest = 0;
+      for (let i = 0; i <= currentYears; i++) {
+        const dist = Math.abs(x - getPxLoc(i));
+        if (dist < minD) { minD = dist; nearest = i; }
+      }
+      
+      if (minD < 35) {
+        drawChart(currentCap, currentYears, nearest);
+      } else {
+        drawChart(currentCap, currentYears, null);
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      const currentCap = parseFloat(canvas.dataset.cap);
+      const currentYears = parseInt(canvas.dataset.years);
+      drawChart(currentCap, currentYears, null);
+    });
+  }
 }
 
 // ── INIT ────────────────────────────────────────────────
