@@ -138,7 +138,8 @@
       "Bash(node diagnostic-scan-status.js)",
       "Bash(node ../diagnostic-scan-status.js)",
       "Bash(git -C /c/Antigravity/Fortress show HEAD:CLAUDE.md)",
-      "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")"
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")",
+      "Bash(cat \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Antigravity-Fortress\\\\ac45cda5-d48d-4489-a5d0-73536b0778f5\\\\tasks\\\\b9m29qirx.output\" 2>/dev/null || cat /c/Users/user/AppData/Local/Temp/claude/C--Antigravity-Fortress/ac45cda5-d48d-4489-a5d0-73536b0778f5/tasks/b9m29qirx.output 2>/dev/null)"
     ]
   }
 }
