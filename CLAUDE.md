@@ -2,7 +2,7 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** Beta Live ✅ (v0.2.0) — May 3, 2026 | UI Overhaul ✅ May 21, 2026 | Trading Skills Installed ✅ May 21, 2026  
+**Status:** Production Ready ✅ (v0.3.0) — May 23, 2026 | Phase 1 Live ✅ May 22 | Phase 2-3 Scaffold ✅ May 23 | Build Validated ✅ Zero Errors | Ready for VPS Deployment  
 **Live App:** https://fortressintelligence.space  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2)
 
@@ -29,6 +29,16 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - Growth (momentum-driven candidates)
 - US Market: 346 candidates live
 - India (NSE): Schema ready, awaiting data population
+
+**Portfolio Strategy Tracker** _(added May 23, 2026)_
+- `/portfolio` — Strategy cards + live P&L summary + SkillBrowser
+- `/portfolio/[id]` — Holdings table, rebalance actions (Buy/Trim/Hold), blood rule
+- `/portfolio/[id]/edit` — Holdings editor: enter IBKR share counts + avg buy prices
+- `/portfolio/rebalance-schedule` — Quarterly countdown, 5-step protocol, blood rule
+- Seed endpoint: one-click creates 10X Moonshot strategy (SMH/QQQ/TQQQ/SOXL/INDA/GLD)
+- Live prices via yahoo-finance2 with 5-min in-memory cache
+- 5% drift threshold triggers rebalance alerts
+- **Requires VPS migration:** `npm run drizzle:push` to create `strategies` + `strategy_holdings` tables
 
 **Design & UX**
 - Dark Luxury theme (modern, professional, accessible)
@@ -88,7 +98,7 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 
 ---
 
-## 📊 CURRENT STATE (May 21, 2026)
+## 📊 CURRENT STATE (May 23, 2026)
 
 ### ✅ WORKING
 - **Production** stable and live on port 3000 (PM2)
@@ -96,18 +106,46 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - **NSE market** live with 1,085+ stock candidates, real-time API responses
 - **US market** screening & data updates running (9:30 AM EST daily, Mon-Fri)
 - **Investment Genie** form-to-results flow 100% functional
-- **Fortress 30 (Deep Value Scanner)** with new client-friendly UI:
-  - ✅ Tabs renamed: "Value Picks", "Hidden Gems", "High Risk / High Reward", "How It Works"
-  - ✅ Progressive disclosure: Plain English default + expandable technical details
-  - ✅ Layer labels: "Financial Safety", "Pricing Power", "Market Momentum", etc.
-  - ✅ MB Score display: "Growth Potential: Very High/High/Moderate/Low"
-  - ✅ Human insights: Plain-language stock thesis + FCF, PEG, debt/margin trends
+- **Fortress 30 (Deep Value Scanner)** with client-friendly UI
 - **CI/CD** GitHub Actions → VPS automated deployment working flawlessly
+- **TypeScript build** — zero errors as of May 23 (all pre-existing errors resolved)
 
-### 🔧 INFRASTRUCTURE FIXED
-- **Database credentials** corrected (was using wrong password in .env.local)
-- **Connection string** updated: `postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress`
-- **Port mapping** verified: App listens on 3000, Nginx reverse proxy to 443 (HTTPS)
+### 🆕 PORTFOLIO STRATEGY TRACKER (May 23, 2026)
+Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push`):
+
+**New database tables** (run `npm run drizzle:push` on VPS to activate):
+- `strategies` — user's investment strategies (name, risk tier, target multiple, horizon)
+- `strategy_holdings` — holdings per strategy (ticker, target weight %, units, avg buy price)
+
+**New API routes:**
+- `GET/POST /api/portfolio` — list all strategies with live snapshots / create strategy
+- `GET /api/portfolio/[id]` — strategy detail with live prices + rebalance actions
+- `PUT /api/portfolio/[id]/holdings` — upsert all holdings for a strategy
+- `POST /api/portfolio/seed` — idempotent: creates 10X Moonshot if no strategies exist
+
+**New pages:**
+- `/portfolio` — overview: strategy cards, P&L summary bar, SkillBrowser
+- `/portfolio/[id]` — detail: holdings table, weight bars, return %, rebalance actions
+- `/portfolio/[id]/edit` — holdings editor: enter IBKR units + avg buy price per ticker
+- `/portfolio/rebalance-schedule` — quarterly countdown, 5-step protocol, blood rule
+
+**New components:**
+- `StrategyCard` — card with metrics, progress bar toward target multiple, rebalance badge
+- `HoldingsTable` — weight bars (5% drift = amber alert), return %, action badges
+- `RebalanceSummary` — Buy/Trim/Hold list with $ amounts + "Mark as Rebalanced" button
+- `HoldingsEditor` — inline table with number inputs, live cost basis preview
+- `SeedButton` — client component for one-click 10X Moonshot seed
+- `SkillResult` — renders skill analysis output (summary, signals, recommendation)
+
+**10X Moonshot seed data** (personal $10K challenge strategy):
+- SMH 20%, QQQ 15%, TQQQ 30%, SOXL 15%, INDA 10%, GLD 10%
+
+**Build fixes applied May 23:**
+- Installed `@radix-ui/react-select` (was missing, broke SkillBrowser Select)
+- Created `SkillResult` component (was imported but never created)
+- Fixed `schema-feedback.ts`: removed broken `users` FK, use `varchar userId` instead
+- Fixed Zod `.errors` → `.issues` (v3 API) in two portfolio API routes
+- Fixed yahoo-finance2 type cast for `regularMarketPrice`
 
 ### 🆕 TRADING SKILLS INSTALLED (May 21, 2026)
 - **30 Claude Code skills** live in `~/.claude/skills/` — zero config needed
@@ -118,6 +156,7 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - **Integration plan** → `TRADING_INTEGRATION_PLAN.md`
 
 ### ⏳ BACKLOG (MONTH 2+)
+- **VPS migration** — run `npm run drizzle:push` to activate portfolio tables ← **DO THIS FIRST**
 - **Investment Genie Feedback Loop** (Track user allocations over time, learn preferences)
 - **Advanced analytics** (Performance tracking, recommendation engine)
 - **Expanded markets** (Malaysia, Singapore, Hong Kong — Phase 2)
@@ -173,6 +212,13 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - `GET /api/scan/results?market=US` — US stocks
 - `GET /api/scan/results?market=GLOBAL` — Top 30 blended
 
+### API Endpoints (Portfolio Strategy Tracker)
+- `GET /api/portfolio` — all strategies with live price snapshots
+- `POST /api/portfolio` — create new strategy
+- `GET /api/portfolio/[id]` — strategy detail + holdings + rebalance actions
+- `PUT /api/portfolio/[id]/holdings` — upsert holdings (units, avg buy price)
+- `POST /api/portfolio/seed` — idempotent seed for 10X Moonshot strategy
+
 ### Market Data Sources
 - **US:** yfinance (Yahoo Finance API wrapper)
 - **NSE:** yfinance with `.NS` suffix, NSE APIs (in setup)
@@ -213,6 +259,10 @@ npm run dev
 
 ## 📋 KNOWN ISSUES & NOTES
 
+### ✅ RESOLVED (May 23)
+- TypeScript build errors: zero errors — `@radix-ui/react-select` installed, `SkillResult` created, `schema-feedback.ts` FK fixed, Zod `.issues`, yahoo-finance2 type cast
+- `schema-feedback.ts` Phase 3 tables: removed broken `users` FK reference (table doesn't exist — NextAuth uses `authUser`)
+
 ### ✅ RESOLVED (May 21)
 - Database connection issue (wrong password in .env.local) — **FIXED**
 - Production 502 errors — **FIXED**
@@ -233,12 +283,14 @@ npm run dev
 
 ## 📅 ROADMAP SUMMARY
 
-### NOW (Beta Live — v0.2.0)
+### NOW (v0.3.0 — May 23, 2026)
 - ✅ Investment Genie (multi-market allocation)
 - ✅ Fortress 30 / Deep Value Scanner (stock screening, NSE + US live)
 - ✅ Dark Luxury UI with client-friendly overhaul (May 21)
 - ✅ NSE market live (1,085+ stock candidates, real-time API)
 - ✅ Trading Skills integrated (30 skills in ~/.claude/skills/)
+- ✅ **Portfolio Strategy Tracker** — track 10X Moonshot + any strategy, live P&L, quarterly rebalance
+- ✅ TypeScript build: zero errors
 
 ### MONTH 2+ (Backlog)
 1. Investment Genie feedback loop (after 50+ users)
@@ -269,5 +321,5 @@ This CLAUDE.md serves as the project's living memory. When:
 
 ---
 
-**Last Updated:** May 21, 2026  
-**Next Review:** When trading skills are fully integrated into UI (Month 2 milestone)
+**Last Updated:** May 23, 2026  
+**Next Review:** After VPS `drizzle:push` + first real holdings entered. Then: Phase 3 feedback loop (July 2026)
