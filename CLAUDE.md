@@ -2,7 +2,7 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** Production Ready ✅ (v0.4.0) — May 23, 2026 | Premium Portfolio Overhaul & IBKR CSV Importer Shipped ✅ | Build Validated ✅ Zero Errors | Ready for VPS Deployment  
+**Status:** Production Ready ✅ (v0.5.0) — May 26, 2026 | Portfolio 3-Layer Feature Complete (Edit/Delete/Feedback + Genie Integration) ✅ | Build Validated ✅ Zero Errors | Deploying to VPS  
 **Live App:** https://fortressintelligence.space  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2)
 
@@ -23,6 +23,8 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - Dynamic live barbell split risk preview
 - AI-powered risk-based allocation (US % / India %)
 - Result summary with allocation breakdown
+- ✨ **NEW (May 26):** "Approve & Add to Portfolio" button → Creates strategy from allocation with live holdings
+- Optional "Save for Later" for users who just want to review without tracking
 
 **Fortress 30**
 - Real-time stock screening engine
@@ -31,7 +33,7 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - US Market: 346 candidates live
 - India (NSE): Schema ready, awaiting data population
 
-**Portfolio Strategy Tracker** _(added May 23, 2026)_
+**Portfolio Strategy Tracker** _(added May 23, 2026 | Enhanced May 26, 2026)_
 - `/portfolio` — Strategy cards + live P&L summary + SkillBrowser
 - `/portfolio/[id]` — Holdings table, rebalance actions (Buy/Trim/Hold), blood rule
 - `/portfolio/[id]/edit` — Holdings editor: enter IBKR share counts + avg buy prices
@@ -39,6 +41,9 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - Seed endpoint: one-click creates 10X Moonshot strategy (SMH/QQQ/TQQQ/SOXL/INDA/GLD)
 - Live prices via yahoo-finance2 with 5-min in-memory cache
 - 5% drift threshold triggers rebalance alerts
+- ✨ **NEW (May 26):** Edit/Delete buttons on strategy cards with optional feedback modal
+- ✨ **NEW (May 26):** Investment Genie → Portfolio integration (create strategies from allocations)
+- Optional feedback collection on strategy deletion (Phase 3 learning engine)
 - **Requires VPS migration:** `npm run drizzle:push` to create `strategies` + `strategy_holdings` tables
 
 **Design & UX**
@@ -216,9 +221,10 @@ Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push
 
 ### API Endpoints (Portfolio Strategy Tracker)
 - `GET /api/portfolio` — all strategies with live price snapshots
-- `POST /api/portfolio` — create new strategy
+- `POST /api/portfolio` — create new strategy (now accepts optional holdings)
 - `GET /api/portfolio/[id]` — strategy detail + holdings + rebalance actions
 - `PUT /api/portfolio/[id]/holdings` — upsert holdings (units, avg buy price)
+- `DELETE /api/portfolio/[id]` — soft-delete strategy with optional feedback
 - `POST /api/portfolio/seed` — idempotent seed for 10X Moonshot strategy
 
 ### Market Data Sources
@@ -285,17 +291,19 @@ npm run dev
 
 ## 📅 ROADMAP SUMMARY
 
-### NOW (v0.3.0 — May 23, 2026)
+### NOW (v0.5.0 — May 26, 2026) — PORTFOLIO 3-LAYER COMPLETE
 - ✅ Investment Genie (multi-market allocation)
 - ✅ Fortress 30 / Deep Value Scanner (stock screening, NSE + US live)
 - ✅ Dark Luxury UI with client-friendly overhaul (May 21)
 - ✅ NSE market live (1,085+ stock candidates, real-time API)
 - ✅ Trading Skills integrated (30 skills in ~/.claude/skills/)
 - ✅ **Portfolio Strategy Tracker** — track 10X Moonshot + any strategy, live P&L, quarterly rebalance
+- ✅ **Portfolio 3-Layer Feature** — Edit/Delete with optional feedback (May 26)
+- ✅ **Genie Integration** — Create portfolio strategies from allocations (May 26)
 - ✅ TypeScript build: zero errors
 
 ### MONTH 2+ (Backlog)
-1. Investment Genie feedback loop (after 50+ users)
+1. Phase 3: Investment Genie feedback loop (learning engine)
 2. Advanced filtering & analytics
 3. Real-time alerts & monitoring
 4. Expanded market coverage (Malaysia, Singapore, Hong Kong)
@@ -323,5 +331,6 @@ This CLAUDE.md serves as the project's living memory. When:
 
 ---
 
-**Last Updated:** May 23, 2026  
-**Next Review:** After VPS `drizzle:push` + first real holdings entered. Then: Phase 3 feedback loop (July 2026)
+**Last Updated:** May 26, 2026  
+**Status:** Portfolio 3-Layer feature complete + Genie integration live (awaiting VPS deployment)  
+**Next Review:** After deployment validation + first user creates strategy from Genie. Then: Phase 3 feedback loop (June 2026)
