@@ -2,7 +2,7 @@ name: Deploy to VPS
 
 on:
   push:
-    branches: [main]
+    branches: [master, main]
 
 env:
   VPS_HOST: 76.13.179.32
