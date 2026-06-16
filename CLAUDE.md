@@ -2,10 +2,10 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** Production Ready ✅ (v0.5.1) — May 30, 2026 | Portfolio 3-Layer Feature Complete ✅ | Genie Integration Live ✅ | Database Tables Activating ⏳ | Build Validated ✅ Zero Errors  
+**Status:** Production Ready ✅ (v0.5.2) — June 16, 2026 | Fortress 30 UI/UX Redesign Complete ✅ | Risk-Based Filtering Working ✅ | Portfolio Tracker Live ✅ | Build Validated ✅ Zero Errors  
 **Live App:** https://fortressintelligence.space  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2)  
-**Latest:** VPS database activation in progress (drizzle:push scheduled for May 30)
+**Latest:** Fortress 30 filtering bug fixed + world-class UI redesign deployed (June 16)
 
 ---
 
@@ -27,12 +27,15 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - ✨ **NEW (May 26):** "Approve & Add to Portfolio" button → Creates strategy from allocation with live holdings
 - Optional "Save for Later" for users who just want to review without tracking
 
-**Fortress 30**
-- Real-time stock screening engine
-- Safe Core (dividend-quality stocks)
-- Growth (momentum-driven candidates)
+**Fortress 30** _(Enhanced June 16, 2026 — World-Class UI/UX Redesign)_
+- ✨ **Working Risk-Based Filtering:** Conservative/Balanced/Aggressive buttons now actually filter stocks (was completely broken)
+- ✨ **Sticky Filter Controls:** Risk buttons always visible (no scrolling required)
+- ✨ **Premium Design:** Color-coded profiles, smooth animations, backdrop blur, gradient text
+- Safe Core filtering (dividend-quality, low debt, positive FCF)
+- Growth filtering (momentum, margin expansion)
+- Progressive disclosure (show/hide runners-up 31-40)
 - US Market: 346 candidates live
-- India (NSE): Schema ready, awaiting data population
+- India (NSE): 1,085+ candidates live
 
 **Portfolio Strategy Tracker** _(added May 23, 2026 | Enhanced May 26, 2026)_
 - `/portfolio` — Strategy cards + live P&L summary + SkillBrowser
@@ -106,7 +109,7 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 
 ---
 
-## 📊 CURRENT STATE (May 30, 2026)
+## 📊 CURRENT STATE (June 16, 2026)
 
 ### ✅ WORKING
 - **Production** stable and live on port 3000 (PM2)
@@ -114,10 +117,30 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - **NSE market** live with 1,085+ stock candidates, real-time API responses
 - **US market** screening & data updates running (9:30 AM EST daily, Mon-Fri)
 - **Investment Genie** form-to-results flow 100% functional (auto-submit active)
-- **Fortress 30 (Deep Value Scanner)** with client-friendly UI (resilient to missing tickers)
+- **Fortress 30** ✨ REDESIGNED (June 16) — Risk-based filtering now working + premium UI
+- **Portfolio Tracker** — all routes live, strategies + holdings tables operational
 - **CI/CD** GitHub Actions → VPS automated deployment working flawlessly
-- **TypeScript build** — zero errors as of May 30 (all 7 fixes applied & verified)
-- **Portfolio tracker code** — fully deployed to VPS, routes live, awaiting DB activation
+- **TypeScript build** — zero errors (latest commit: 2179281)
+
+### 🆕 FORTRESS 30 REDESIGN (June 16, 2026)
+**Critical Bugs Fixed:**
+- ✅ Risk filtering — Conservative/Balanced/Aggressive buttons now actually filter stocks (was non-functional)
+- ✅ Navigation scrolling — Sticky filter header keeps controls always visible
+
+**Design Improvements:**
+- Color-coded risk profiles (emerald/blue/amber)
+- Smooth animations & filter transitions
+- Progressive disclosure (show/hide runners-up)
+- Better visual hierarchy & information architecture
+- Premium feel with backdrop blur, gradients, animations
+
+**Technical:**
+- New `Fortress30Client` component (265 lines)
+- `filterStocksByRisk()` function with proper logic
+- useMemo optimization for filtering performance
+- All Tailwind classes static (no dynamic generation)
+- Zero TypeScript errors
+- Comprehensive documentation in `FORTRESS_30_REDESIGN.md`
 
 ### 🆕 PORTFOLIO STRATEGY TRACKER (May 23, 2026)
 Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push`):
