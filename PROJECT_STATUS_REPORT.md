@@ -16,11 +16,12 @@
 ### ✅ WHAT'S WORKING
 1. **Investment Genie** - Multi-market allocation form → Results page
 2. **Fortress 30** - Stock screening with market selection (US data live)
-3. **Dark Luxury Theme** - Complete, responsive design
-4. **Database** - PostgreSQL with all schemas deployed
-5. **CI/CD** - GitHub Actions automated deployment
-6. **Cron Jobs** - US scans (9:30 AM EST Mon-Fri), NSE scheduled (awaiting yfinance recovery)
-7. **Standalone Mode** - ecosystem.config.js + start.sh working correctly
+3. **Strategy Planner** - Interactive Portfolio Strategy Builder (New)
+4. **Dark Luxury Theme** - Complete, responsive design
+5. **Database** - PostgreSQL with all schemas deployed
+6. **CI/CD** - GitHub Actions automated deployment
+7. **Cron Jobs** - US scans (9:30 AM EST Mon-Fri), NSE scheduled (awaiting yfinance recovery)
+8. **Standalone Mode** - ecosystem.config.js + start.sh working correctly
 
 ### 🔄 IN PROGRESS (NO BLOCKERS)
 - NSE scanner data population (auto-retry, yfinance rate limit recovery expected 24-48h)

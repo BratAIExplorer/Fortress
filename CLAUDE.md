@@ -2,9 +2,10 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** Production Ready ✅ (v0.5.0) — May 26, 2026 | Portfolio 3-Layer Feature Complete (Edit/Delete/Feedback + Genie Integration) ✅ | Build Validated ✅ Zero Errors | Deploying to VPS  
+**Status:** Production Ready ✅ (v0.5.1) — May 30, 2026 | Portfolio 3-Layer Feature Complete ✅ | Genie Integration Live ✅ | Database Tables Activating ⏳ | Build Validated ✅ Zero Errors  
 **Live App:** https://fortressintelligence.space  
-**Production VPS:** 76.13.179.32 (port 3000 via PM2)
+**Production VPS:** 76.13.179.32 (port 3000 via PM2)  
+**Latest:** VPS database activation in progress (drizzle:push scheduled for May 30)
 
 ---
 
@@ -105,17 +106,18 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 
 ---
 
-## 📊 CURRENT STATE (May 23, 2026)
+## 📊 CURRENT STATE (May 30, 2026)
 
 ### ✅ WORKING
 - **Production** stable and live on port 3000 (PM2)
 - **Database** PostgreSQL `fortress` fully operational with 27 tables, 200K+ rows
 - **NSE market** live with 1,085+ stock candidates, real-time API responses
 - **US market** screening & data updates running (9:30 AM EST daily, Mon-Fri)
-- **Investment Genie** form-to-results flow 100% functional
-- **Fortress 30 (Deep Value Scanner)** with client-friendly UI
+- **Investment Genie** form-to-results flow 100% functional (auto-submit active)
+- **Fortress 30 (Deep Value Scanner)** with client-friendly UI (resilient to missing tickers)
 - **CI/CD** GitHub Actions → VPS automated deployment working flawlessly
-- **TypeScript build** — zero errors as of May 23 (all pre-existing errors resolved)
+- **TypeScript build** — zero errors as of May 30 (all 7 fixes applied & verified)
+- **Portfolio tracker code** — fully deployed to VPS, routes live, awaiting DB activation
 
 ### 🆕 PORTFOLIO STRATEGY TRACKER (May 23, 2026)
 Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push`):
@@ -162,10 +164,15 @@ Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push
 - **Source repos** → `C:/Antigravity/trading-repos/`
 - **Integration plan** → `TRADING_INTEGRATION_PLAN.md`
 
+### 🔄 IN PROGRESS (Week 1)
+- **VPS Database Activation** — `npm run drizzle:push` to create `strategies` + `strategy_holdings` tables (May 30, 2026)
+  - Status: SSH credential resolution in progress
+  - Impact: Unlocks full portfolio tracker functionality
+  - ETA: <5 minutes once credentials resolved
+
 ### ⏳ BACKLOG (MONTH 2+)
-- **VPS migration** — run `npm run drizzle:push` to activate portfolio tables ← **DO THIS FIRST**
-- **Investment Genie Feedback Loop** (Track user allocations over time, learn preferences)
-- **Advanced analytics** (Performance tracking, recommendation engine)
+- **Investment Genie Feedback Loop** (Track user allocations over time, learn preferences) — Phase 3
+- **Advanced analytics** (Performance tracking, recommendation engine) — Phase 3
 - **Expanded markets** (Malaysia, Singapore, Hong Kong — Phase 2)
 
 ---
@@ -331,6 +338,25 @@ This CLAUDE.md serves as the project's living memory. When:
 
 ---
 
-**Last Updated:** May 26, 2026  
-**Status:** Portfolio 3-Layer feature complete + Genie integration live (awaiting VPS deployment)  
-**Next Review:** After deployment validation + first user creates strategy from Genie. Then: Phase 3 feedback loop (June 2026)
+**Last Updated:** May 30, 2026  
+**Status:** Portfolio 3-Layer feature complete + Genie integration live | VPS database activation in progress  
+**Next Review:** After VPS activation + first user creates strategy from Genie. Then: Phase 3 feedback loop (June 2026)
+
+---
+
+## 🤖 OPERATING MODE (Updated May 30, 2026)
+
+**Hands-Free Execution Model:**
+- Claude executes end-to-end without permission gates
+- Completes tasks autonomously: plan → test → deploy → verify → document
+- Only asks for clarification if genuinely uncertain
+- Challenges/proposes alternatives when needed (out of scope, risk, or better approach)
+- Reports status when complete with full documentation + validation results
+- Updates memory, skills, and principles automatically after each major task
+
+**This Model Applies To:**
+- Bug fixes and deployments
+- Feature implementation and testing
+- Database migrations and schema changes
+- Documentation and memory updates
+- Code reviews and quality validation

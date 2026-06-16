@@ -7,7 +7,7 @@ set -e
 VPS_HOST="76.13.179.32"
 VPS_USER="root"
 SCANNER_HOME="/opt/fortress-scanner"
-DATABASE_URL="postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress_db"
+DATABASE_URL="postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress"
 
 echo "=========================================="
 echo "Fortress Intelligence VPS Deployment"
@@ -57,7 +57,7 @@ echo "[4/7] Creating database schema..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} <<'EOSSH'
 cd /opt/fortress-scanner
 source venv/bin/activate
-export DATABASE_URL="postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress_db"
+export DATABASE_URL="postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress"
 
 python3 << 'EOPY'
 import psycopg2
@@ -127,7 +127,7 @@ echo "[5/7] Running manual NSE scan verification..."
 ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} <<'EOSSH'
 cd /opt/fortress-scanner
 source venv/bin/activate
-export DATABASE_URL="postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress_db"
+export DATABASE_URL="postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress"
 
 python3 scanner_db_writer.py --market NSE 2>&1 | head -50
 echo ""
@@ -144,7 +144,7 @@ cat > /opt/fortress-scanner/cron-runner.sh <<'EOF'
 #!/bin/bash
 cd /opt/fortress-scanner
 source venv/bin/activate
-export DATABASE_URL="postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress_db"
+export DATABASE_URL="postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress"
 MARKET=$1
 LOG_FILE="/var/log/fortress-scanner/${MARKET}-$(date +%Y%m%d-%H%M%S).log"
 mkdir -p /var/log/fortress-scanner
@@ -167,7 +167,7 @@ echo "VPS Status:"
 echo "  Scanner home: $(ls -la /opt/fortress-scanner/ | grep -E 'scanner.py|scanner_db_writer.py|requirements.txt' | wc -l) core files"
 echo "  Virtualenv: $(test -d /opt/fortress-scanner/venv && echo '✅ Active' || echo '❌ Missing')"
 echo "  Database connection:"
-psql postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress_db -c "SELECT 'Database OK' as status;" 2>&1
+psql postgresql://fortress_user:FortressSecure2026!@127.0.0.1:5432/fortress -c "SELECT 'Database OK' as status;" 2>&1
 echo "  Cron jobs:"
 crontab -l 2>/dev/null | grep -E 'NSE|US' || echo "No cron jobs found"
 echo ""
@@ -181,7 +181,7 @@ echo "=========================================="
 echo ""
 echo "VPS: 76.13.179.32"
 echo "Scanner Home: /opt/fortress-scanner"
-echo "Database: fortress_db (fortress_user)"
+echo "Database: fortress (fortress_user)"
 echo "Cron: NSE (9:30 AM IST), US (9:30 AM EST)"
 echo ""
 echo "Next: Monitor scans at /var/log/fortress-scanner/"
