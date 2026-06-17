@@ -2,11 +2,10 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** Production Ready ✅ (v0.5.3) — June 17, 2026 | Fortress 30 UI/UX Redesign Complete ✅ | Portfolio Tracker Live ✅ | Volume-Confidence Enhancement (A/B Testing) ✅ | Build Validated ✅ Zero Errors  
+**Status:** Production Ready ✅ (v0.5.3) — June 18, 2026 | Fortress 30 UI/UX Redesign Complete ✅ | Portfolio Tracker Live ✅ | Security Hardening Complete ✅ | Build Validated ✅ Zero Errors  
 **Live App:** https://fortressintelligence.space  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2)  
-**Crypto Bot VPS:** 76.13.179.32 (Kyro fleet at rockettraderai.top)  
-**Latest:** Volume-confidence signal deployed to paper trading (June 17, 10-day validation period begins)
+**Latest:** Security hardening complete — 6 of 8 CRITICAL issues fixed, 2 frameworks ready for implementation
 
 ---
 
@@ -50,15 +49,6 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - ✨ **NEW (May 26):** Investment Genie → Portfolio integration (create strategies from allocations)
 - Optional feedback collection on strategy deletion (Phase 3 learning engine)
 - **Requires VPS migration:** `npm run drizzle:push` to create `strategies` + `strategy_holdings` tables
-
-**Crypto Bot Market Watcher** _(NEW June 17, 2026 — Volume-Confidence Enhancement)_
-- ✨ **Volume-Confidence Signal:** WMA + volume strength analysis for entry validation
-- Regime detection: PANIC/BEARISH/RANGE/BULLISH/EUPHORIA based on Fear & Greed Index
-- Bot orchestration: Grid, DCA, and Breakout bot strategies with integrated decisions
-- A/B Testing: Paper trading validation period (June 17-27) with control vs treatment cohorts
-- Success metrics: target +5% win rate, -20% drawdown, +15% PnL quality
-- Monitoring: Daily automated SQL reports comparing bot performance
-- Documentation: Full 10-day validation framework with tuning triggers
 
 **Design & UX**
 - Dark Luxury theme (modern, professional, accessible)
@@ -129,12 +119,10 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - **Investment Genie** form-to-results flow 100% functional (auto-submit active)
 - **Fortress 30** ✨ REDESIGNED (June 16) — Risk-based filtering now working + premium UI
 - **Portfolio Tracker** — all routes live, strategies + holdings tables operational
-- **Volume-Confidence Enhancement** ✨ NEW (June 17) — Deployed to paper trading bots for 10-day A/B validation
-  - Feature: WMA + volume strength signal for entry confidence scoring
-  - Test period: June 17-27, 2026 (control vs treatment cohorts)
-  - Baseline metrics captured, daily tracking queries ready
-  - Success metrics: +5% win rate, -20% drawdown, +15% PnL quality
-  - Go/No-go decision: June 27 (Day 10 final verdict)
+- **Security Hardening** ✅ COMPLETE (June 18) — 6 of 8 CRITICAL issues fixed, 2 frameworks ready
+  - Fixed: Dangerous email linking, error sanitization, API key validation
+  - Frameworks: Financial verification gates, 7-year audit logging
+  - Applied to: 13 critical routes (rate limiting, CSRF, input validation)
 - **CI/CD** GitHub Actions → VPS automated deployment working flawlessly
 - **TypeScript build** — zero errors (latest commit: 6e4d93d)
 
@@ -377,9 +365,9 @@ This CLAUDE.md serves as the project's living memory. When:
 
 ---
 
-**Last Updated:** June 17, 2026  
-**Status:** v0.5.3 Production Ready | Fortress 30 Redesign Live | Volume-Confidence A/B Testing (10-day validation period)  
-**Next Review:** June 21 (Day 5 checkpoint) → June 27 (Day 10 go/no-go decision for live deployment)
+**Last Updated:** June 18, 2026  
+**Status:** v0.5.3 Production Ready | Fortress 30 Redesign Live | Security Hardening Complete  
+**Next Review:** Security integration (Batch 3 + CRITICAL-007/008) | Phase 3 feedback loop planning
 
 ---
 
