@@ -241,7 +241,10 @@
       "Bash(cat /opt/fortress/fortress-app/app/fortress-30/page.tsx)",
       "Bash(scp /tmp/fortress30page.tsx root@76.13.179.32:/opt/fortress/fortress-app/app/fortress-30/page.tsx)",
       "Bash(scp /tmp/fortress30grid.tsx root@76.13.179.32:/opt/fortress/fortress-app/components/fortress/Fortress30Grid.tsx)",
-      "Bash(curl -s https://fortressintelligence.space/fortress-30?market=NSE)"
+      "Bash(curl -s https://fortressintelligence.space/fortress-30?market=NSE)",
+      "Bash(find \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\ChatExport_2026-06-24 \\(1\\)\" -type f -name \"*.json\" | head -20)",
+      "Bash(ls -la \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\\" | grep ChatExport)",
+      "Bash(python scripts/parse_telegram_exports.py --spoton \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\ChatExport_2026-06-24\" --deepak \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\ChatExport_2026-06-24 \\(1\\)\" --output /tmp/telegram_calls.json)"
     ]
   }
 }
