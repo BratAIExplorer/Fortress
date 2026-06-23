@@ -224,7 +224,24 @@
       "WebFetch(domain:www.bybit.com)",
       "mcp__visualize__read_me",
       "mcp__visualize__show_widget",
-      "WebFetch(domain:in.tradingview.com)"
+      "WebFetch(domain:in.tradingview.com)",
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(curl -s https://fortressintelligence.space/fortress-30?market=US)",
+      "Bash(xargs wc -l)",
+      "Bash(rm -rf .next node_modules)",
+      "Bash(npm ci *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" https://fortressintelligence.space/fortress-30)",
+      "Bash(curl -s https://fortressintelligence.space/api/scan/results?market=NSE)",
+      "Bash(curl -s http://localhost:3000/fortress-30?market=NSE)",
+      "Bash(ls -la /c/Fortress-fresh/.git 2>&1 | head -5)",
+      "Bash(ls /c/Fortress-fresh/fortress-app/components/fortress/Fortress30Client.tsx 2>&1)",
+      "Bash(cat /c/Fortress-fresh/.gitmodules 2>&1 | head -10)",
+      "Bash(curl -s http://localhost:3000/fortress-30?market=NSE -I)",
+      "Bash(cat /opt/fortress/fortress-app/app/fortress-30/page.tsx)",
+      "Bash(scp /tmp/fortress30page.tsx root@76.13.179.32:/opt/fortress/fortress-app/app/fortress-30/page.tsx)",
+      "Bash(scp /tmp/fortress30grid.tsx root@76.13.179.32:/opt/fortress/fortress-app/components/fortress/Fortress30Grid.tsx)",
+      "Bash(curl -s https://fortressintelligence.space/fortress-30?market=NSE)"
     ]
   }
 }
