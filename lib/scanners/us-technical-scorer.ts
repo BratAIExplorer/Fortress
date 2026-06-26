@@ -89,17 +89,13 @@ async function fetchOHLCV(ticker: string, apiKey: string): Promise<OHLCVBar[]> {
 
   if (!res.ok) throw new Error(`Massive ${res.status} for ${ticker}`);
 
-  const text = await res.text();
-  const lines = text.trim().split("\n");
-  if (lines.length < 2) return [];
+  const json = await res.json() as {
+    results?: { t: number; o: number; h: number; l: number; c: number; v: number }[];
+    status?: string;
+  };
 
-  const headers = lines[0].split(",");
-  return lines.slice(1).map(line => {
-    const vals = line.split(",");
-    const row: Record<string, number> = {};
-    headers.forEach((h, i) => { row[h.trim()] = parseFloat(vals[i] ?? "0"); });
-    return { t: row["t"], o: row["o"], h: row["h"], l: row["l"], c: row["c"], v: row["v"] };
-  }).filter(bar => bar.c > 0);
+  if (!json.results || json.results.length === 0) return [];
+  return json.results.map(r => ({ t: r.t, o: r.o, h: r.h, l: r.l, c: r.c, v: r.v }));
 }
 
 // ── Scorer ────────────────────────────────────────────────────────────────────
