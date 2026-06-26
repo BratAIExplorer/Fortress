@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, TrendingUp, BookOpen, Database, Brain } from "lucide-react";
 import Link from "next/link";
 import { SignInBenefits } from "@/components/auth/SignInBenefits";
+import { MarketStatusBadge } from "@/components/fortress/MarketStatusBadge";
 
 export default function Home() {
   return (
@@ -55,6 +56,8 @@ export default function Home() {
           The Educational Intelligence Layer for Indian Markets.
           Bridging the gap between raw screener data and blind tipster faith.
         </motion.p>
+
+        <MarketStatusBadge />
 
         <motion.div
           className="flex flex-col sm:flex-row gap-4"
