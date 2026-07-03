@@ -4,6 +4,7 @@ import { db, schema } from "@/lib/db/client";
 import { eq, and, desc, notInArray, ne, count } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
 import { auth } from "@/auth";
+import { unstable_cache as cache } from "next/cache";
 
 const RETENTION_LIMIT = 10;
 
@@ -274,24 +275,33 @@ export async function POST(req: NextRequest) {
     });
 }
 
-export async function GET() {
-    const lastScan = await db.query.scans.findFirst({
-        orderBy: [desc(schema.scans.runAt)],
-    });
-
-    if (!lastScan) return NextResponse.json({ status: "IDLE" });
-
-    if (lastScan.status === "RUNNING") {
-        const results = await db.select()
-            .from(schema.scanResults)
-            .where(eq(schema.scanResults.scanId, lastScan.id));
-
-        return NextResponse.json({
-            ...lastScan,
-            currentCount: results.length,
-            progress: lastScan.totalScanned ? Math.round((results.length / lastScan.totalScanned) * 100) : null
+const getCachedScanStatus = cache(
+    async () => {
+        const lastScan = await db.query.scans.findFirst({
+            orderBy: [desc(schema.scans.runAt)],
         });
-    }
 
-    return NextResponse.json(lastScan);
+        if (!lastScan) return { status: "IDLE" };
+
+        if (lastScan.status === "RUNNING") {
+            const results = await db.select()
+                .from(schema.scanResults)
+                .where(eq(schema.scanResults.scanId, lastScan.id));
+
+            return {
+                ...lastScan,
+                currentCount: results.length,
+                progress: lastScan.totalScanned ? Math.round((results.length / lastScan.totalScanned) * 100) : null
+            };
+        }
+
+        return lastScan;
+    },
+    ["scan-status"],
+    { revalidate: 1800 } // 30-minute cache window
+);
+
+export async function GET() {
+    const scanStatus = await getCachedScanStatus();
+    return NextResponse.json(scanStatus);
 }

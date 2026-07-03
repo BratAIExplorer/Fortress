@@ -24,7 +24,7 @@ export async function GET() {
   try {
     const res = await fetch(`${MASSIVE_BASE}/v1/marketstatus/now`, {
       headers: { Authorization: `Bearer ${key}` },
-      next: { revalidate: 60 },
+      next: { revalidate: 1800 },
     });
 
     if (!res.ok) {

@@ -91,7 +91,7 @@ export function V5MarketScanner({ market = "NSE" }: { market?: string }) {
                         clearInterval(poll);
                         toast.success("Background scan finished. Refresh to see totals.");
                     }
-                }, 5000);
+                }, 600000);
                 return;
             }
             if (response.status === 429) {
