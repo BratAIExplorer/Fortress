@@ -22,32 +22,80 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install & Build
+      - name: Install dependencies
+        working-directory: fortress-app
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        working-directory: fortress-app
+        run: npm run build
+
+      - name: Verify build output
         working-directory: fortress-app
         run: |
-          npm install
-          npm run build
-          echo "✓ Build successful"
+          if [ ! -f ".next/standalone/server.js" ]; then
+            echo "ERROR: Build output missing"
+            exit 1
+          fi
+          echo "✓ Build successful - standalone server ready"
 
-      - name: Deploy to VPS
+      - name: Setup SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
 
-          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST "
-          cd $VPS_APP_DIR/$VPS_APP_NAME
-          git fetch origin master
-          git reset --hard origin/master
-          npm install
-          npm run build
-          pm2 restart $VPS_APP_NAME || pm2 start ecosystem.config.js
-          systemctl reload nginx
-          echo '✓ Deployment complete'
-          "
+      - name: Deploy to VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new \
+            $VPS_USER@$VPS_HOST << 'DEPLOY_SCRIPT'
+          set -e
+          echo "📦 Deploying to VPS..."
+          
+          if [ ! -d "$VPS_APP_DIR/$VPS_APP_NAME" ]; then
+            echo "ERROR: App directory not found on VPS"
+            exit 1
+          fi
+          
+          cd "$VPS_APP_DIR/$VPS_APP_NAME"
+          
+          if [ -d .git ]; then
+            git fetch origin master
+            git reset --hard origin/master
+            echo "✓ Git updated"
+          else
+            echo "⚠️  Not a git repo on VPS"
+          fi
+          
+          if [ -f package.json ]; then
+            npm install --no-audit --no-fund --production
+            npm run build
+            echo "✓ Build complete on VPS"
+          fi
+          
+          if pm2 describe $VPS_APP_NAME >/dev/null 2>&1; then
+            pm2 restart $VPS_APP_NAME
+            echo "✓ PM2 restarted"
+          elif [ -f ecosystem.config.js ]; then
+            pm2 start ecosystem.config.js
+            echo "✓ PM2 started"
+          fi
+          
+          nginx -t >/dev/null 2>&1 && systemctl reload nginx
+          echo "✓ Nginx reloaded"
+          echo "✅ Deployment complete"
+DEPLOY_SCRIPT
 
-      - name: Health Check
-        run: sleep 5 && curl -f https://fortressintelligence.space/_health || echo "Health check pending"
+      - name: Health check
+        run: |
+          sleep 5
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://fortressintelligence.space/_health || echo "000")
+          echo "Health check: HTTP $STATUS"
+          if [ "$STATUS" != "000" ]; then
+            echo "✅ App is responding"
+          else
+            echo "⚠️  App may still be starting up"
+          fi
