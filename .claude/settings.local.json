@@ -224,7 +224,9 @@
       "WebFetch(domain:www.bybit.com)",
       "mcp__visualize__read_me",
       "mcp__visualize__show_widget",
-      "WebFetch(domain:in.tradingview.com)"
+      "WebFetch(domain:in.tradingview.com)",
+      "Bash(ssh fortress *)",
+      "Bash(curl -sf https://fortressintelligence.space/)"
     ]
   }
 }
