@@ -226,11 +226,20 @@ Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push
 - PM2 status: ✅ online (PID 272049, 51.9 MB, 0 restarts)
 - Health check: ✅ HTTPS responding with 200 status
 
-**Next Steps:**
-1. Investigate Turbopack symlink root cause (git history cleanup needed?)
-2. Switch to Next.js 15 (no Turbopack) OR fix git history
-3. Restore full Next.js app once build issue resolved
-4. See [july_5_complete_vps_rework.md](../memory/july_5_complete_vps_rework.md) for full technical details
+**Session 1 Complete (July 5, 2:30 PM UTC):**
+- ✅ App live on minimal server (zero build errors)
+- ✅ CI/CD pipeline fixed
+- ✅ Config files prepared for full app (package.json, next.config.js, tsconfig.json)
+- ✅ Next.js 15 proven working (Turbopack issues eliminated)
+- ⏳ Full restoration pending: 50+ dependencies need installation + testing
+
+**Session 2 (Next):**
+1. Install complete dependency tree (traceable from import failures)
+2. Build full Next.js app locally
+3. Push to main → GitHub Actions auto-deploys
+4. Verify Fortress 30 + Portfolio routes live
+5. See [FULL_APP_RESTORATION_PATH.md](FULL_APP_RESTORATION_PATH.md) for exact checklist
+6. See [july_5_complete_vps_rework.md](../memory/july_5_complete_vps_rework.md) for full technical details
 
 ### ⏳ BACKLOG (MONTH 2+)
 - **Investment Genie Feedback Loop** (Track user allocations over time, learn preferences) — Phase 3
