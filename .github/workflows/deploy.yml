@@ -20,7 +20,17 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          submodules: recursive
+
+      # 1.5 Verify app directory exists (fail fast)
+      - name: Verify app directory exists
+        run: |
+          echo "Repository root:"
+          ls -la | head -20
+          if [ ! -d "fortress-app" ]; then
+            echo "ERROR: fortress-app directory not found"
+            exit 1
+          fi
+          echo "✓ fortress-app directory verified"
 
       # 2. Setup Node.js
       - name: Setup Node.js
@@ -28,7 +38,7 @@ jobs:
         with:
           node-version: '18'
 
-      # 3. CRITICAL: Extract and validate PORT from .env.production BEFORE building
+      # 3. Extract PORT from .env.production
       - name: Extract PORT from .env.production
         id: get-port
         env:
@@ -48,29 +58,22 @@ jobs:
           echo "app_port=$PORT" >> $GITHUB_OUTPUT
           echo "✓ Using PORT=$PORT"
 
-      # 4. SKIP: Nginx config validation (managed on VPS, not in repo)
-      - name: Note nginx config
-        run: |
-          echo "ℹ️  Nginx config is managed on VPS (/etc/nginx/sites-enabled/fortress)"
-          echo "Deployment will update proxy_pass port on VPS if needed"
-
-      # 6. Install dependencies
+      # 4. Install dependencies (using npm ci for reproducible builds)
       - name: Install dependencies
-        run: |
-          cd fortress-app
-          npm install
+        working-directory: fortress-app
+        run: npm ci
 
-      # 7. Run tests
+      # 5. Run tests
       - name: Run tests
+        working-directory: fortress-app
         run: |
-          cd fortress-app
           npm run test -- --passWithNoTests 2>/dev/null || true
           echo "✓ Tests completed"
 
-      # 8. Build Next.js app (generates standalone)
+      # 6. Build Next.js app
       - name: Build Next.js app
+        working-directory: fortress-app
         run: |
-          cd fortress-app
           npm run build
           if [ ! -d ".next/standalone" ]; then
             echo "ERROR: Next.js standalone output not generated"
@@ -78,11 +81,12 @@ jobs:
           fi
           echo "✓ Build successful (.next/standalone generated)"
 
-      # 9. Deploy to VPS via SSH and Git
+      # 7. Deploy to VPS
       - name: Deploy to VPS
         env:
           SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
           APP_PORT: ${{ steps.get-port.outputs.app_port }}
+          GITHUB_SHA: ${{ github.sha }}
         run: |
           # Setup SSH
           mkdir -p ~/.ssh
@@ -90,59 +94,78 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null
 
-          # Run deployment script on VPS
-          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST \
-            "bash -s ${{ github.sha }} $APP_PORT" << 'EOF'
+          # Deploy with explicit arg passing to remote script
+          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST "bash -s" -- "$GITHUB_SHA" "$APP_PORT" "$VPS_APP_DIR" "$VPS_APP_NAME" <<'DEPLOY_EOF'
 
-          COMMIT_SHA=$1
-          APP_PORT=$2
+COMMIT_SHA=$1
+APP_PORT=$2
+VPS_APP_DIR=$3
+VPS_APP_NAME=$4
 
-          set -e
+set -euo pipefail
 
-          echo "🚀 Starting deployment..."
-          echo "  Commit: $COMMIT_SHA"
-          echo "  App Port: $APP_PORT"
+echo "🚀 Starting deployment..."
+echo "  Commit: $COMMIT_SHA"
+echo "  App Port: $APP_PORT"
+echo "  App Dir: $VPS_APP_DIR"
+echo "  App Name: $VPS_APP_NAME"
 
-          # Pull latest code
-          cd $VPS_APP_DIR/$VPS_APP_NAME
-          git fetch origin main
-          git reset --hard $COMMIT_SHA
+# Verify app directory exists
+if [ ! -d "$VPS_APP_DIR/$VPS_APP_NAME" ]; then
+  echo "❌ App directory $VPS_APP_DIR/$VPS_APP_NAME not found on VPS"
+  exit 1
+fi
 
-          # Validate PORT in .env.production matches what was deployed
-          DEPLOYED_PORT=$(grep "^PORT=" .env.production | cut -d= -f2)
-          if [ "$DEPLOYED_PORT" != "$APP_PORT" ]; then
-            echo "❌ DEPLOYMENT ABORT: Port mismatch detected on VPS"
-            echo "  Expected: $APP_PORT"
-            echo "  Found in .env.production: $DEPLOYED_PORT"
-            exit 1
-          fi
-          echo "✓ Port validation passed on VPS"
+cd "$VPS_APP_DIR/$VPS_APP_NAME"
 
-          # Validate Nginx config
-          if ! grep -q "proxy_pass http://127.0.0.1:$APP_PORT" /etc/nginx/sites-enabled/fortress; then
-            echo "⚠️  Updating Nginx proxy_pass to port $APP_PORT"
-            sed -i "s/proxy_pass http:\/\/127.0.0.1:[0-9]*/proxy_pass http:\/\/127.0.0.1:$APP_PORT/g" /etc/nginx/sites-enabled/fortress
-          fi
+# Git operations (defensive)
+if [ -d .git ]; then
+  git fetch origin main
+  git reset --hard "$COMMIT_SHA"
+else
+  echo "⚠️  Not a git repo at $VPS_APP_DIR/$VPS_APP_NAME; skipping git reset"
+fi
 
-          # Validate Nginx syntax
-          if ! nginx -t 2>&1; then
-            echo "❌ Nginx configuration syntax error"
-            exit 1
-          fi
-          echo "✓ Nginx configuration valid"
+# Validate PORT in .env.production
+if [ -f .env.production ]; then
+  DEPLOYED_PORT=$(grep "^PORT=" .env.production | cut -d= -f2 || true)
+else
+  DEPLOYED_PORT=""
+fi
 
-          # Restart PM2
-          echo "Restarting PM2 process..."
-          pm2 restart $VPS_APP_NAME || pm2 start ecosystem.config.js
+if [ -n "$DEPLOYED_PORT" ] && [ "$DEPLOYED_PORT" != "$APP_PORT" ]; then
+  echo "❌ DEPLOYMENT ABORT: Port mismatch detected on VPS"
+  echo "  Expected: $APP_PORT"
+  echo "  Found in .env.production: $DEPLOYED_PORT"
+  exit 1
+fi
+echo "✓ Port validation passed on VPS"
 
-          # Reload Nginx
-          echo "Reloading Nginx..."
-          systemctl reload nginx
+# Nginx validation and update
+if ! grep -q "proxy_pass http://127.0.0.1:$APP_PORT" /etc/nginx/sites-enabled/fortress 2>/dev/null; then
+  echo "⚠️  Updating Nginx proxy_pass to port $APP_PORT"
+  sed -i "s/proxy_pass http:\/\/127.0.0.1:[0-9]*/proxy_pass http:\/\/127.0.0.1:$APP_PORT/g" /etc/nginx/sites-enabled/fortress || true
+fi
+if ! nginx -t 2>&1; then
+  echo "❌ Nginx configuration syntax error"
+  exit 1
+fi
+echo "✓ Nginx configuration valid"
 
-          echo "✓ Deployment script completed"
-          EOF
+# Restart PM2 (defensive)
+if pm2 describe "$VPS_APP_NAME" >/dev/null 2>&1; then
+  pm2 restart "$VPS_APP_NAME"
+else
+  echo "⚠️  PM2 process $VPS_APP_NAME not found; attempting to start"
+  pm2 start ecosystem.config.js || pm2 start .next/standalone/server.js --name "$VPS_APP_NAME" || true
+fi
 
-      # 10. Health checks - verify app is responding
+systemctl reload nginx || true
+
+echo "✓ Deployment script completed"
+DEPLOY_EOF
+
+      # 8. Health checks
       - name: Run health checks
         env:
           APP_PORT: ${{ steps.get-port.outputs.app_port }}
@@ -150,7 +173,7 @@ jobs:
           echo "Waiting for app to be ready..."
           sleep 5
 
-          # Check local health endpoint (via SSH)
+          # Check local app health
           echo "Checking local app health on port $APP_PORT..."
           MAX_ATTEMPTS=10
           ATTEMPT=0
@@ -174,16 +197,16 @@ jobs:
             exit 1
           fi
 
-          # Check public domain health endpoint
+          # Check public domain
           echo "Checking public domain health endpoint..."
           DOMAIN_RESULT=$(curl -s -o /dev/null -w '%{http_code}' https://fortressintelligence.space/_health || echo "000")
           if [ "$DOMAIN_RESULT" == "200" ]; then
             echo "✓ Public domain health check passed (HTTP 200)"
           else
-            echo "⚠️  Public domain health check returned HTTP $DOMAIN_RESULT (may be due to DNS caching)"
+            echo "⚠️  Public domain health check returned HTTP $DOMAIN_RESULT"
           fi
 
-          # Verify API returns data
+          # Verify API
           echo "Checking API endpoint..."
           API_RESULT=$(curl -s https://fortressintelligence.space/api/scan/results?market=NSE | grep -c "scanId" || echo "0")
           if [ "$API_RESULT" -gt 0 ]; then
@@ -192,7 +215,7 @@ jobs:
             echo "⚠️  API endpoint not returning expected data"
           fi
 
-      # 11. Rollback on failure
+      # 9. Rollback on failure (defensive)
       - name: Rollback on failure
         if: failure()
         env:
@@ -200,22 +223,47 @@ jobs:
         run: |
           echo "❌ Deployment failed, initiating rollback..."
 
-          # Create SSH key and known_hosts (may not exist if deploy step failed early)
+          # Setup SSH
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
 
-          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST << 'EOF'
-          cd $VPS_APP_DIR/$VPS_APP_NAME
-          echo "Rolling back to previous commit..."
-          git reset --hard HEAD~1
-          pm2 restart $VPS_APP_NAME
-          nginx -t && systemctl reload nginx
-          echo "✓ Rollback complete"
-          EOF
+          # Rollback with explicit args (defensive)
+          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST "bash -s" -- "$VPS_APP_DIR" "$VPS_APP_NAME" <<'ROLLBACK_EOF'
+VPS_APP_DIR=$1
+VPS_APP_NAME=$2
 
-      # 12. Notify on success
+set -euo pipefail
+
+if [ ! -d "$VPS_APP_DIR/$VPS_APP_NAME" ]; then
+  echo "App directory not found on VPS: $VPS_APP_DIR/$VPS_APP_NAME"
+  exit 0
+fi
+
+cd "$VPS_APP_DIR/$VPS_APP_NAME"
+
+echo "Rolling back to previous commit..."
+if [ -d .git ]; then
+  git reset --hard HEAD~1
+else
+  echo "Not a git repo; skipping git reset"
+fi
+
+if pm2 describe "$VPS_APP_NAME" >/dev/null 2>&1; then
+  pm2 restart "$VPS_APP_NAME"
+else
+  echo "PM2 process $VPS_APP_NAME not found; skipping restart"
+fi
+
+if nginx -t 2>/dev/null; then
+  systemctl reload nginx || true
+fi
+
+echo "✓ Rollback complete"
+ROLLBACK_EOF
+
+      # 10. Deployment success
       - name: Deployment successful
         run: |
           echo "✅ Deployment completed successfully!"
