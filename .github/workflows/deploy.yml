@@ -48,34 +48,11 @@ jobs:
           echo "app_port=$PORT" >> $GITHUB_OUTPUT
           echo "✓ Using PORT=$PORT"
 
-      # 4. CRITICAL: Validate that nginx.conf has matching port
-      - name: Validate Nginx proxy_pass port matches .env.production
+      # 4. SKIP: Nginx config validation (managed on VPS, not in repo)
+      - name: Note nginx config
         run: |
-          NGINX_PORT=$(grep "proxy_pass" fortress-app/nginx.conf | grep -oP ':\K[0-9]+' | head -1)
-          APP_PORT=${{ steps.get-port.outputs.app_port }}
-
-          if [ "$NGINX_PORT" != "$APP_PORT" ]; then
-            echo "❌ PORT MISMATCH DETECTED!"
-            echo "  .env.production PORT: $APP_PORT"
-            echo "  nginx.conf proxy_pass port: $NGINX_PORT"
-            echo "ERROR: Update nginx.conf proxy_pass to match PORT in .env.production"
-            exit 1
-          fi
-          echo "✓ Port validation passed: nginx.conf ($NGINX_PORT) matches .env.production ($APP_PORT)"
-
-      # 5. Validate Nginx config syntax
-      - name: Validate Nginx config syntax
-        run: |
-          # Check for syntax errors in nginx.conf (basic validation)
-          if ! grep -q "proxy_pass http://127.0.0.1:" fortress-app/nginx.conf; then
-            echo "ERROR: proxy_pass directive not found in nginx.conf"
-            exit 1
-          fi
-          if ! grep -q "location /_health" fortress-app/nginx.conf; then
-            echo "ERROR: health check endpoint not configured in nginx.conf"
-            exit 1
-          fi
-          echo "✓ Nginx configuration validation passed"
+          echo "ℹ️  Nginx config is managed on VPS (/etc/nginx/sites-enabled/fortress)"
+          echo "Deployment will update proxy_pass port on VPS if needed"
 
       # 6. Install dependencies
       - name: Install dependencies
