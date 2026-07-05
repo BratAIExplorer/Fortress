@@ -1,0 +1,4 @@
+
+# Ignore embedded git repos (worktrees)
+.claude/worktrees/
+Reference/OutoftheBox/
