@@ -18,6 +18,9 @@ jobs:
       # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: false
 
       # 2. Setup Node.js
       - name: Setup Node.js
@@ -28,14 +31,22 @@ jobs:
       # 3. CRITICAL: Extract and validate PORT from .env.production BEFORE building
       - name: Extract PORT from .env.production
         id: get-port
+        env:
+          FALLBACK_APP_PORT: ${{ secrets.APP_PORT || '3000' }}
         run: |
-          PORT=$(grep "^PORT=" fortress-app/.env.production | cut -d= -f2)
-          if [ -z "$PORT" ]; then
-            echo "ERROR: PORT not found in fortress-app/.env.production"
-            exit 1
+          if [ -f fortress-app/.env.production ]; then
+            PORT=$(grep -E '^PORT=' fortress-app/.env.production | head -1 | cut -d= -f2 || true)
+            if [ -z "$PORT" ]; then
+              echo "ERROR: PORT not found in fortress-app/.env.production"
+              exit 1
+            fi
+            echo "✓ Extracted PORT=$PORT from .env.production"
+          else
+            PORT="$FALLBACK_APP_PORT"
+            echo "⚠️  .env.production not found; using fallback PORT=$PORT"
           fi
           echo "app_port=$PORT" >> $GITHUB_OUTPUT
-          echo "✓ Extracted PORT=$PORT from .env.production"
+          echo "✓ Using PORT=$PORT"
 
       # 4. CRITICAL: Validate that nginx.conf has matching port
       - name: Validate Nginx proxy_pass port matches .env.production
@@ -211,6 +222,13 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           echo "❌ Deployment failed, initiating rollback..."
+
+          # Create SSH key and known_hosts (may not exist if deploy step failed early)
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
+
           ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST << 'EOF'
           cd $VPS_APP_DIR/$VPS_APP_NAME
           echo "Rolling back to previous commit..."
