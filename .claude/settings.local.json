@@ -226,7 +226,12 @@
       "mcp__visualize__show_widget",
       "WebFetch(domain:in.tradingview.com)",
       "Bash(ssh fortress *)",
-      "Bash(curl -sf https://fortressintelligence.space/)"
+      "Bash(curl -sf https://fortressintelligence.space/)",
+      "Bash(curl -I https://fortressintelligence.space)",
+      "Bash(git ls-tree *)",
+      "Bash(grep -E '\\\\.json$|package\\\\.json|tsconfig|next\\\\.config')",
+      "Bash(curl -sf https://fortressintelligence.space -I)",
+      "Bash(curl -sf https://fortressintelligence.space)"
     ]
   }
 }
