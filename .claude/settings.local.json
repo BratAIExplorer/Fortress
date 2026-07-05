@@ -244,7 +244,22 @@
       "Bash(curl -s https://fortressintelligence.space/fortress-30?market=NSE)",
       "Bash(find \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\ChatExport_2026-06-24 \\(1\\)\" -type f -name \"*.json\" | head -20)",
       "Bash(ls -la \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\\" | grep ChatExport)",
-      "Bash(python scripts/parse_telegram_exports.py --spoton \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\ChatExport_2026-06-24\" --deepak \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\ChatExport_2026-06-24 \\(1\\)\" --output /tmp/telegram_calls.json)"
+      "Bash(python scripts/parse_telegram_exports.py --spoton \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\ChatExport_2026-06-24\" --deepak \"C:\\\\Users\\\\user\\\\Downloads\\\\Telegram Desktop\\\\ChatExport_2026-06-24 \\(1\\)\" --output /tmp/telegram_calls.json)",
+      "Bash(cat /tmp/telegram_calls.json | head -100)",
+      "Bash(ls -la /c/Antigravity/Fortress/ 2>/dev/null | head -20 || ls -la ~/Antigravity/Fortress/ 2>/dev/null | head -20)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(list\\(d.get\\('mcpServers',{}\\).keys\\(\\)\\), indent=2\\)\\)\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('mcpServers',{}\\), indent=2\\)\\)\")",
+      "mcp__Massive_Market_Data__search_endpoints",
+      "mcp__Massive_Market_Data__call_api",
+      "Bash(npx next *)",
+      "Bash(find /opt/Kyro -name \"bot_executor.py\" -o -name \"nexus*\" -o -name \"*sniper*\" 2>/dev/null | head -20)",
+      "Bash(find /opt/Kyro -type f -name \"*.json\" | grep -E \"\\(config|bot|nexus\\)\" 2>/dev/null | head -20)",
+      "Bash(rm -f .git/index.lock && git add CLAUDE.md && git commit -m \"docs: correct API caching optimization claims - free tier has no per-call charges\")",
+      "Artifact",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "Bash(grep -E \"\\\\.\\(tsx|ts|jsx\\)$\")"
     ]
   }
 }

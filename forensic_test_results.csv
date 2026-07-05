@@ -1,0 +1,4 @@
+Symbol,Win Rate,Profit Factor,Sharpe Ratio,Score,Verdict
+HDFCBANK.NS,48.8%,1.11,0.70,69,MODERATE
+AAPL,51.4%,1.05,0.30,64,RISKY
+INFY.NS,41.5%,0.71,-2.10,33,AVOID
