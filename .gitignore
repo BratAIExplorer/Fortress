@@ -1,0 +1,32 @@
+.next
+.turbopack
+node_modules
+*.log
+.env
+.env.local
+.env.production
+package-lock.json
+
+# Broken symlink - exclude from builds
+fortress-scanner/
+venv/
+.venv/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+coverage/
+
+# Temp
+.cache
+tmp/
