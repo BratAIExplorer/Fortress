@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd fortress-app
-          npm ci
+          npm install
 
       # 7. Run tests
       - name: Run tests
