@@ -13,91 +13,41 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Verify app directory exists
-        run: |
-          if [ ! -d "fortress-app" ]; then
-            echo "ERROR: fortress-app directory not found"
-            exit 1
-          fi
-          echo "✓ fortress-app directory verified"
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Install dependencies
+      - name: Install & Build
         working-directory: fortress-app
         run: |
-          if [ -f package.json ]; then
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install --no-audit --no-fund
-            fi
-          else
-            echo "⚠️  No package.json found; skipping npm install"
-          fi
-
-      - name: Build Next.js app
-        working-directory: fortress-app
-        run: |
-          if [ -f package.json ] && [ -f next.config.js ]; then
-            npm run build
-            if [ ! -d ".next/standalone" ]; then
-              echo "ERROR: Next.js standalone output not generated"
-              exit 1
-            fi
-            echo "✓ Build successful"
-          else
-            echo "⚠️  Next.js app files not found; relying on VPS deployment"
-          fi
+          npm install
+          npm run build
+          echo "✓ Build successful"
 
       - name: Deploy to VPS
         env:
           SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
-          GITHUB_SHA: ${{ github.sha }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null
 
-          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST \
-            "cd $VPS_APP_DIR/$VPS_APP_NAME && \
-            git fetch origin main && \
-            git reset --hard $GITHUB_SHA && \
-            ([ -f package.json ] && ([ -f package-lock.json ] && npm ci || npm install --no-audit --no-fund) || true) && \
-            ([ -f next.config.js ] && npm run build || true) && \
-            pm2 restart $VPS_APP_NAME || pm2 start ecosystem.config.js && \
-            systemctl reload nginx && \
-            echo '✓ Deployment completed'"
+          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST "
+          cd $VPS_APP_DIR/$VPS_APP_NAME
+          git fetch origin master
+          git reset --hard origin/master
+          npm install
+          npm run build
+          pm2 restart $VPS_APP_NAME || pm2 start ecosystem.config.js
+          systemctl reload nginx
+          echo '✓ Deployment complete'
+          "
 
-      - name: Health check
-        run: |
-          sleep 5
-          curl -f https://fortressintelligence.space/_health || echo "⚠️  Health check warning"
-
-      - name: Rollback on failure
-        if: failure()
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
-
-          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST \
-            "cd $VPS_APP_DIR/$VPS_APP_NAME && \
-            git reset --hard HEAD~1 && \
-            pm2 restart $VPS_APP_NAME && \
-            systemctl reload nginx && \
-            echo '✓ Rollback complete'" || echo "Rollback attempted"
+      - name: Health Check
+        run: sleep 5 && curl -f https://fortressintelligence.space/_health || echo "Health check pending"

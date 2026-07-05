@@ -259,7 +259,14 @@
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page",
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
-      "Bash(grep -E \"\\\\.\\(tsx|ts|jsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(tsx|ts|jsx\\)$\")",
+      "Bash(git rm *)",
+      "Bash(git submodule *)",
+      "Bash(\n# Remove submodule configuration entirely\ngit rm --cached fortress-app\ngit config --remove-section submodule.fortress-app 2>/dev/null || true\nrm -f .gitmodules\ngit add -A\n\n# Restore fortress-app directory as normal files \\(not a submodule\\)\ngit reset HEAD fortress-app/ 2>/dev/null || true\n\n# Verify status\ngit status --short | head -20\n)",
+      "Bash(\n# Reset everything\ngit reset --hard HEAD\n\n# Remove any submodule configuration\ngit config --remove-section submodule.fortress-app 2>/dev/null || true\ngit config --remove-section submodule 2>/dev/null || true\nrm -f .gitmodules\n\n# Remove embedded git repos \\(worktrees, fortress-app\\)\ngit rm --cached -r .claude/worktrees 2>/dev/null || true\ngit rm --cached fortress-app 2>/dev/null || true\ngit rm --cached Reference/OutoftheBox 2>/dev/null || true\n\n# Clean .gitignore to prevent these from being re-added\necho \"\" >> .gitignore\necho \"# Ignore embedded git repos \\(worktrees\\)\" >> .gitignore\necho \".claude/worktrees/\" >> .gitignore\necho \"Reference/OutoftheBox/\" >> .gitignore\n\n# Verify clean state\ngit status --short | head -20\n)",
+      "Bash(\n# Remove fortress-app/.git \\(it's a nested repo\\)\nrm -rf fortress-app/.git\n\n# Add fortress-app as normal directory files\ngit add fortress-app/\n\n# Count files being added\necho \"Files being staged:\"\ngit status --short | grep \"^A \" | wc -l\necho \"files will be added\"\n)",
+      "Bash(\n# Remove git lock\nrm -f .git/index.lock\n\n# Quick add of essential source files only \\(not .next or node_modules\\)\ngit add \\\\\n  fortress-app/package.json \\\\\n  fortress-app/tsconfig.json \\\\\n  fortress-app/next.config.js \\\\\n  fortress-app/tailwind.config.ts \\\\\n  fortress-app/postcss.config.js \\\\\n  fortress-app/ecosystem.config.js \\\\\n  fortress-app/start.sh \\\\\n  fortress-app/.env.production \\\\\n  fortress-app/.gitignore \\\\\n  fortress-app/app/ \\\\\n  fortress-app/components/ \\\\\n  fortress-app/lib/ \\\\\n  fortress-app/public/ \\\\\n  2>&1 | grep -v \"warning:\" | head -20\n\necho \"✓ Staged essential fortress-app files\"\ngit status --short | grep \"^A\" | wc -l\necho \"new files staged\"\n)",
+      "Bash(git ls-tree *)"
     ]
   }
 }

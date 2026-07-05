@@ -1,21 +1,7 @@
-# Build artifacts
 .next/
-.turbo/
-out/
+node_modules/
+.env.local
+.env.*.local
 dist/
 build/
-
-# Dependencies
-node_modules/
-
-# Environment
-.env.local
-.env.production.local
-
-# IDE
-.vscode/
-.idea/
-
-# OS
 .DS_Store
-Thumbs.db
