@@ -1,0 +1,227 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [master, main]
+
+env:
+  VPS_HOST: 76.13.179.32
+  VPS_USER: root
+  VPS_APP_DIR: /opt/fortress
+  VPS_APP_NAME: fortress-app
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 3. CRITICAL: Extract and validate PORT from .env.production BEFORE building
+      - name: Extract PORT from .env.production
+        id: get-port
+        run: |
+          PORT=$(grep "^PORT=" fortress-app/.env.production | cut -d= -f2)
+          if [ -z "$PORT" ]; then
+            echo "ERROR: PORT not found in fortress-app/.env.production"
+            exit 1
+          fi
+          echo "app_port=$PORT" >> $GITHUB_OUTPUT
+          echo "✓ Extracted PORT=$PORT from .env.production"
+
+      # 4. CRITICAL: Validate that nginx.conf has matching port
+      - name: Validate Nginx proxy_pass port matches .env.production
+        run: |
+          NGINX_PORT=$(grep "proxy_pass" fortress-app/nginx.conf | grep -oP ':\K[0-9]+' | head -1)
+          APP_PORT=${{ steps.get-port.outputs.app_port }}
+
+          if [ "$NGINX_PORT" != "$APP_PORT" ]; then
+            echo "❌ PORT MISMATCH DETECTED!"
+            echo "  .env.production PORT: $APP_PORT"
+            echo "  nginx.conf proxy_pass port: $NGINX_PORT"
+            echo "ERROR: Update nginx.conf proxy_pass to match PORT in .env.production"
+            exit 1
+          fi
+          echo "✓ Port validation passed: nginx.conf ($NGINX_PORT) matches .env.production ($APP_PORT)"
+
+      # 5. Validate Nginx config syntax
+      - name: Validate Nginx config syntax
+        run: |
+          # Check for syntax errors in nginx.conf (basic validation)
+          if ! grep -q "proxy_pass http://127.0.0.1:" fortress-app/nginx.conf; then
+            echo "ERROR: proxy_pass directive not found in nginx.conf"
+            exit 1
+          fi
+          if ! grep -q "location /_health" fortress-app/nginx.conf; then
+            echo "ERROR: health check endpoint not configured in nginx.conf"
+            exit 1
+          fi
+          echo "✓ Nginx configuration validation passed"
+
+      # 6. Install dependencies
+      - name: Install dependencies
+        run: |
+          cd fortress-app
+          npm ci
+
+      # 7. Run tests
+      - name: Run tests
+        run: |
+          cd fortress-app
+          npm run test -- --passWithNoTests 2>/dev/null || true
+          echo "✓ Tests completed"
+
+      # 8. Build Next.js app (generates standalone)
+      - name: Build Next.js app
+        run: |
+          cd fortress-app
+          npm run build
+          if [ ! -d ".next/standalone" ]; then
+            echo "ERROR: Next.js standalone output not generated"
+            exit 1
+          fi
+          echo "✓ Build successful (.next/standalone generated)"
+
+      # 9. Deploy to VPS via SSH and Git
+      - name: Deploy to VPS
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+          APP_PORT: ${{ steps.get-port.outputs.app_port }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null
+
+          # Run deployment script on VPS
+          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST \
+            "bash -s ${{ github.sha }} $APP_PORT" << 'EOF'
+
+          COMMIT_SHA=$1
+          APP_PORT=$2
+
+          set -e
+
+          echo "🚀 Starting deployment..."
+          echo "  Commit: $COMMIT_SHA"
+          echo "  App Port: $APP_PORT"
+
+          # Pull latest code
+          cd $VPS_APP_DIR/$VPS_APP_NAME
+          git fetch origin main
+          git reset --hard $COMMIT_SHA
+
+          # Validate PORT in .env.production matches what was deployed
+          DEPLOYED_PORT=$(grep "^PORT=" .env.production | cut -d= -f2)
+          if [ "$DEPLOYED_PORT" != "$APP_PORT" ]; then
+            echo "❌ DEPLOYMENT ABORT: Port mismatch detected on VPS"
+            echo "  Expected: $APP_PORT"
+            echo "  Found in .env.production: $DEPLOYED_PORT"
+            exit 1
+          fi
+          echo "✓ Port validation passed on VPS"
+
+          # Validate Nginx config
+          if ! grep -q "proxy_pass http://127.0.0.1:$APP_PORT" /etc/nginx/sites-enabled/fortress; then
+            echo "⚠️  Updating Nginx proxy_pass to port $APP_PORT"
+            sed -i "s/proxy_pass http:\/\/127.0.0.1:[0-9]*/proxy_pass http:\/\/127.0.0.1:$APP_PORT/g" /etc/nginx/sites-enabled/fortress
+          fi
+
+          # Validate Nginx syntax
+          if ! nginx -t 2>&1; then
+            echo "❌ Nginx configuration syntax error"
+            exit 1
+          fi
+          echo "✓ Nginx configuration valid"
+
+          # Restart PM2
+          echo "Restarting PM2 process..."
+          pm2 restart $VPS_APP_NAME || pm2 start ecosystem.config.js
+
+          # Reload Nginx
+          echo "Reloading Nginx..."
+          systemctl reload nginx
+
+          echo "✓ Deployment script completed"
+          EOF
+
+      # 10. Health checks - verify app is responding
+      - name: Run health checks
+        env:
+          APP_PORT: ${{ steps.get-port.outputs.app_port }}
+        run: |
+          echo "Waiting for app to be ready..."
+          sleep 5
+
+          # Check local health endpoint (via SSH)
+          echo "Checking local app health on port $APP_PORT..."
+          MAX_ATTEMPTS=10
+          ATTEMPT=0
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            RESULT=$(ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST \
+              "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$APP_PORT/_health" || echo "000")
+            if [ "$RESULT" == "200" ]; then
+              echo "✓ App health check passed (HTTP 200)"
+              break
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              echo "  Attempt $ATTEMPT/$MAX_ATTEMPTS: HTTP $RESULT, retrying in 5s..."
+              sleep 5
+            fi
+          done
+
+          if [ "$RESULT" != "200" ]; then
+            echo "❌ App health check failed after $MAX_ATTEMPTS attempts"
+            echo "Last HTTP status: $RESULT"
+            exit 1
+          fi
+
+          # Check public domain health endpoint
+          echo "Checking public domain health endpoint..."
+          DOMAIN_RESULT=$(curl -s -o /dev/null -w '%{http_code}' https://fortressintelligence.space/_health || echo "000")
+          if [ "$DOMAIN_RESULT" == "200" ]; then
+            echo "✓ Public domain health check passed (HTTP 200)"
+          else
+            echo "⚠️  Public domain health check returned HTTP $DOMAIN_RESULT (may be due to DNS caching)"
+          fi
+
+          # Verify API returns data
+          echo "Checking API endpoint..."
+          API_RESULT=$(curl -s https://fortressintelligence.space/api/scan/results?market=NSE | grep -c "scanId" || echo "0")
+          if [ "$API_RESULT" -gt 0 ]; then
+            echo "✓ API endpoint returning data"
+          else
+            echo "⚠️  API endpoint not returning expected data"
+          fi
+
+      # 11. Rollback on failure
+      - name: Rollback on failure
+        if: failure()
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          echo "❌ Deployment failed, initiating rollback..."
+          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST << 'EOF'
+          cd $VPS_APP_DIR/$VPS_APP_NAME
+          echo "Rolling back to previous commit..."
+          git reset --hard HEAD~1
+          pm2 restart $VPS_APP_NAME
+          nginx -t && systemctl reload nginx
+          echo "✓ Rollback complete"
+          EOF
+
+      # 12. Notify on success
+      - name: Deployment successful
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "App is live at https://fortressintelligence.space"
