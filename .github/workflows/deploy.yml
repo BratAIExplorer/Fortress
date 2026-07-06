@@ -40,7 +40,7 @@ jobs:
       # 4. CRITICAL: Validate that nginx.conf has matching port
       - name: Validate Nginx proxy_pass port matches .env.production
         run: |
-          NGINX_PORT=$(grep "proxy_pass" nginx.conf | grep -oP ':\K[0-9]+' | head -1)
+          NGINX_PORT=$(grep "proxy_pass" nginx.conf | sed 's/.*:\([0-9]*\).*/\1/' | head -1)
           APP_PORT=${{ steps.get-port.outputs.app_port }}
 
           if [ "$NGINX_PORT" != "$APP_PORT" ]; then
