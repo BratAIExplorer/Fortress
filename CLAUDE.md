@@ -248,6 +248,23 @@ Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push
 
 ---
 
+## 📋 PENDING ITEMS & ROADMAP
+
+**Detailed breakdown:** See [PENDING_ITEMS.md](PENDING_ITEMS.md)
+
+### Session 4-5 Critical Path (This Week)
+1. **GitHub Actions deployment** → Applies database schema (drizzle:push)
+2. **Seed sample data** → Populates 20 stocks to Fortress 30
+3. **Verify on VPS** → Test Fortress 30 displays results
+4. **PM2 health check** → Ensure no errors in production
+
+### Upcoming Phases
+- **Phase 3 (July-Aug):** Learning engine + personalization
+- **Phase 3+ (Aug-Sep):** Advanced analytics + real-time alerts
+- **Phase 4 (Q3 2026):** Market expansion (Malaysia, Singapore, Hong Kong)
+
+---
+
 ## 🛠 HOW TO WORK WITH THIS PROJECT
 
 ### Your Working Style
@@ -369,22 +386,41 @@ npm run dev
 
 ## 📅 ROADMAP SUMMARY
 
-### NOW (v0.5.0 — May 26, 2026) — PORTFOLIO 3-LAYER COMPLETE
-- ✅ Investment Genie (multi-market allocation)
-- ✅ Fortress 30 / Deep Value Scanner (stock screening, NSE + US live)
-- ✅ Dark Luxury UI with client-friendly overhaul (May 21)
-- ✅ NSE market live (1,085+ stock candidates, real-time API)
-- ✅ Trading Skills integrated (30 skills in ~/.claude/skills/)
-- ✅ **Portfolio Strategy Tracker** — track 10X Moonshot + any strategy, live P&L, quarterly rebalance
-- ✅ **Portfolio 3-Layer Feature** — Edit/Delete with optional feedback (May 26)
-- ✅ **Genie Integration** — Create portfolio strategies from allocations (May 26)
+### NOW (v0.5.3 — June 18, 2026) — LIVE & HARDENED
+- ✅ Investment Genie (multi-market allocation wizard)
+- ✅ Fortress 30 (stock screening with risk-based filtering, redesigned June 16)
+- ✅ Dark Luxury UI (fully responsive, accessible)
+- ✅ NSE market (1,085+ stock candidates live)
+- ✅ US market (346+ candidates live)
+- ✅ Trading Skills integrated (30 skills + NSE toolkit)
+- ✅ Portfolio Strategy Tracker (live P&L, holdings, rebalance, feedback)
+- ✅ Security hardening (6/8 CRITICAL issues fixed)
+- ✅ CI/CD pipeline (GitHub Actions → VPS auto-deploy)
 - ✅ TypeScript build: zero errors
 
-### MONTH 2+ (Backlog)
-1. Phase 3: Investment Genie feedback loop (learning engine)
-2. Advanced filtering & analytics
-3. Real-time alerts & monitoring
-4. Expanded market coverage (Malaysia, Singapore, Hong Kong)
+### Session 4-5 (This Week) — Database Restoration
+1. ⏳ GitHub Actions deploys database schema to VPS
+2. ⏳ Seed 20 sample stocks to Fortress 30
+3. ⏳ Verify on VPS + health check
+4. ⏳ Monitor PM2 logs
+
+### Phase 3 (July-Aug 2026) — Learning Engine
+1. Feedback collection loop (why users delete strategies)
+2. Learning engine (identify winning allocations)
+3. Personalization (adjust presets based on learnings)
+4. A/B testing infrastructure
+
+### Phase 3+ (Aug-Sep 2026) — Advanced Analytics
+1. Performance dashboard (returns, drawdown, volatility)
+2. Real-time alerts (drift, price moves, rebalance triggers)
+3. Risk monitoring (beta, sector concentration, currency exposure)
+4. Daily market summary email
+
+### Phase 4 (Q3 2026) — Market Expansion
+1. Malaysia (KLSE), Singapore (SGX), Hong Kong (HKEX)
+2. Adapter pattern for data sources (reduce API dependency)
+3. Regional allocation presets
+4. Currency conversion display
 
 ---
 
