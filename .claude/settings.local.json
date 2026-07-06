@@ -237,7 +237,12 @@
       "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
       "Bash(curl -s \"https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs?head_branch=main\" -H \"Accept: application/vnd.github.v3+json\")",
       "Bash(curl -s \"https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs/28761148741/logs\" -L)",
-      "Bash(curl -s https://fortressintelligence.space/api/portfolio -H \"Authorization: Bearer test\")"
+      "Bash(curl -s https://fortressintelligence.space/api/portfolio -H \"Authorization: Bearer test\")",
+      "Bash(curl -s \"https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs?head_branch=main&per_page=1\")",
+      "Bash(curl -s \"https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs?per_page=2\")",
+      "Bash(curl -s \"https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs?per_page=3\")",
+      "Bash(curl -s \"https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs?per_page=1&branch=main\")",
+      "Bash(curl -s -w \"Status: %{http_code}\\\\n\" https://fortressintelligence.space/investment-genie)"
     ]
   }
 }
