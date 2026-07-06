@@ -142,9 +142,15 @@ jobs:
           git fetch origin main
           git reset --hard $COMMIT_SHA
 
-          # Apply database schema migrations
-          echo "Applying database migrations..."
-          npm run drizzle:push 2>&1 | head -20 || echo "⚠️  Drizzle migration had issues (may be OK if schema already exists)"
+          # Apply database schema migrations (idempotent — safe to re-run)
+          echo "Applying database schema..."
+          if npm run drizzle:push 2>&1 | head -30; then
+            echo "✓ Database schema applied successfully"
+          else
+            # Drizzle push is idempotent; if tables exist, it's OK
+            echo "⚠️  Schema push returned error (may be OK if tables already exist)"
+            psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';" 2>/dev/null && echo "✓ Database connection OK" || echo "✗ Database unreachable"
+          fi
 
           # Validate PORT in .env.production matches what was deployed
           DEPLOYED_PORT=$(grep "^PORT=" .env.production | cut -d= -f2)

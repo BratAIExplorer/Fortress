@@ -83,7 +83,13 @@ export const scanResults = pgTable("scan_results", {
     ccTier: text("cc_tier"),                    // "Classic" | "Strong" | "Developing" | "Inconsistent"
     ccRevenueCagr: numeric("cc_revenue_cagr"),  // 4yr revenue CAGR as %
     ccYearsChecked: integer("cc_years_checked"), // how many years of data were available
-});
+}, (table) => ({
+    // ponytail: indexes for Fortress 30 queries (getBestScan → scanId, then sort by mbScore)
+    scanIdIdx: index("idx_scan_results_scan_id").on(table.scanId),
+    mbScoreIdx: index("idx_scan_results_mb_score_desc").on(table.mbScore),
+    marketIdx: index("idx_scan_results_market").on(table.market),
+    symbolIdx: index("idx_scan_results_symbol").on(table.symbol),
+}));
 
 
 // 2. THESES TABLE (The "Why" - Educational Layer)
