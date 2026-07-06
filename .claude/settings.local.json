@@ -231,7 +231,10 @@
       "Bash(git ls-tree *)",
       "Bash(grep -E '\\\\.json$|package\\\\.json|tsconfig|next\\\\.config')",
       "Bash(curl -sf https://fortressintelligence.space -I)",
-      "Bash(curl -sf https://fortressintelligence.space)"
+      "Bash(curl -sf https://fortressintelligence.space)",
+      "Bash(curl -sf https://fortressintelligence.space -w \"\\\\nStatus: %{http_code}\\\\n\")",
+      "Bash(cd /opt/fortress && npm run build 2>&1 | head -50)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")"
     ]
   }
 }
