@@ -25,8 +25,19 @@ export function MarketSelector({ className, size = "md" }: MarketSelectorProps) 
 
   const urlParam = URL_ROUTED_PAGES[pathname];
 
+  // ponytail: for URL-routed pages, try to read from URL; for others, use context
+  let displayMarket = market;
+  if (urlParam) {
+    try {
+      const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+      displayMarket = (params.get(urlParam) ?? market) as MarketCode;
+    } catch {
+      // Fall back to context if URL read fails
+    }
+  }
+
   const handleSelect = (code: MarketCode) => {
-    if (code === market) return; // No change
+    if (code === displayMarket) return; // No change
 
     setMarket(code);
 
@@ -56,13 +67,13 @@ export function MarketSelector({ className, size = "md" }: MarketSelectorProps) 
         <button
           key={m.code}
           onClick={() => handleSelect(m.code as MarketCode)}
-          aria-pressed={market === m.code}
+          aria-pressed={displayMarket === m.code}
           className={cn(
             "flex items-center gap-1.5 rounded-lg font-medium transition-all",
             size === "sm"
               ? "px-2.5 py-1 text-[11px]"
               : "px-3 py-1.5 text-xs",
-            market === m.code
+            displayMarket === m.code
               ? "bg-primary text-primary-foreground shadow-sm"
               : "text-muted-foreground hover:text-white hover:bg-white/5"
           )}

@@ -93,7 +93,7 @@ function SortIcon({ col, sortKey }: SortIconProps) {
         : <ArrowUpDown className="h-3 w-3 inline ml-1 opacity-40" />;
 }
 
-export function ScanResultsTable({ scanId }: { scanId?: string }) {
+export function ScanResultsTable({ scanId, market = "NSE" }: { scanId?: string; market?: string }) {
     const [rows, setRows] = useState<ScanRow[]>([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -106,7 +106,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
     const fetchResults = useCallback(async () => {
         setLoading(true);
         try {
-            const params = new URLSearchParams({ sort: sortKey, limit: "200" });
+            const params = new URLSearchParams({ sort: sortKey, limit: "200", market });
             if (scanId) params.set("scanId", scanId);
             if (tierFilter !== "All") params.set("tier", tierFilter);
             if (ccTierFilter !== "All") params.set("cc_tier", ccTierFilter);
@@ -123,7 +123,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
         } finally {
             setLoading(false);
         }
-    }, [scanId, sortKey, tierFilter, ccTierFilter, categoryFilter]);
+    }, [scanId, sortKey, tierFilter, ccTierFilter, categoryFilter, market]);
 
     useEffect(() => { fetchResults(); }, [fetchResults]);
 

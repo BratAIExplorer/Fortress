@@ -260,7 +260,7 @@ export function V5MarketScanner({ market = "NSE" }: { market?: string }) {
                             </p>
                         </div>
                     </div>
-                    <ScanResultsTable key={lastScanResult?.scanId ?? "latest"} scanId={lastScanResult?.scanId} />
+                    <ScanResultsTable key={lastScanResult?.scanId ?? "latest"} scanId={lastScanResult?.scanId} market={market} />
                 </div>
             )}
 
