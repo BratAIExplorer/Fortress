@@ -250,7 +250,12 @@
       "Bash(curl -s https://fortressintelligence.space)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" https://fortressintelligence.space)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" https://fortressintelligence.space)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(npm run dev > /tmp/dev.log 2>&1 & *)",
+      "Bash(pkill -f \"next dev\")",
+      "PowerShell(Get-Process node | Where-Object {$_.CommandLine -match \"next dev\"} | Stop-Process -Force 2>$null; Write-Host \"Stopped next dev process\")",
+      "PowerShell(Stop-Process -Id 1780 -Force 2>$null)",
+      "Bash(netstat -ano)"
     ]
   }
 }
