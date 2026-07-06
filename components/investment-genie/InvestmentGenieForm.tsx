@@ -7,6 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+interface LabelProps {
+  children: React.ReactNode;
+  htmlFor?: string;
+  className?: string;
+}
+
+function Label({ children, htmlFor, className }: LabelProps) {
+  return (
+    <label htmlFor={htmlFor} className={cn("block text-sm font-medium text-white/70 mb-2", className)}>
+      {children}
+    </label>
+  );
+}
+
 export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserProfile) => void }) {
   const [age, setAge] = useState<number>(30);
   const [amount, setAmount] = useState<number>(1000);
@@ -99,12 +113,6 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
       onSubmit(profile);
     }
   };
-
-  const Label = ({ children, htmlFor, className }: { children: React.ReactNode; htmlFor?: string; className?: string }) => (
-    <label htmlFor={htmlFor} className={cn("block text-sm font-medium text-white/70 mb-2", className)}>
-      {children}
-    </label>
-  );
 
   return (
     <form aria-label="Investment Genie Form" onSubmit={handleSubmit} className="space-y-8">

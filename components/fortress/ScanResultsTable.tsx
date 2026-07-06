@@ -82,6 +82,17 @@ const CC_TIER_CONFIG: Record<string, { emoji: string; color: string; bg: string 
     Inconsistent: { emoji: "📉", color: "text-slate-400",  bg: "bg-white/5 border-white/10" },
 };
 
+interface SortIconProps {
+    col: SortKey;
+    sortKey: SortKey;
+}
+
+function SortIcon({ col, sortKey }: SortIconProps) {
+    return sortKey === col
+        ? <ArrowDown className="h-3 w-3 inline ml-1 text-primary" />
+        : <ArrowUpDown className="h-3 w-3 inline ml-1 opacity-40" />;
+}
+
 export function ScanResultsTable({ scanId }: { scanId?: string }) {
     const [rows, setRows] = useState<ScanRow[]>([]);
     const [total, setTotal] = useState(0);
@@ -119,11 +130,6 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
     const toggleSort = (key: SortKey) => {
         setSortKey(key);
     };
-
-    const SortIcon = ({ col }: { col: SortKey }) =>
-        sortKey === col
-            ? <ArrowDown className="h-3 w-3 inline ml-1 text-primary" />
-            : <ArrowUpDown className="h-3 w-3 inline ml-1 opacity-40" />;
 
     return (
         <div className="space-y-4">
@@ -226,12 +232,12 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
                                 <th className="text-left text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">Megatrend</th>
                                 <th className="text-right text-muted-foreground py-3 px-4 font-medium whitespace-nowrap cursor-pointer hover:text-white"
                                     onClick={() => toggleSort("mb_score")}>
-                                    MB Score <SortIcon col="mb_score" />
+                                    MB Score <SortIcon col="mb_score" sortKey={sortKey} />
                                 </th>
                                 <th className="text-left text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">Tier</th>
                                 <th className="text-right text-muted-foreground py-3 px-4 font-medium whitespace-nowrap cursor-pointer hover:text-white"
                                     onClick={() => toggleSort("total_score")}>
-                                    5L Score <SortIcon col="total_score" />
+                                    5L Score <SortIcon col="total_score" sortKey={sortKey} />
                                 </th>
                                 <th className="text-right text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">FCF Yield</th>
                                 <th className="text-right text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">EQ Ratio</th>
@@ -240,7 +246,7 @@ export function ScanResultsTable({ scanId }: { scanId?: string }) {
                                 <th className="text-center text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">Margin</th>
                                 <th className="text-right text-muted-foreground py-3 px-4 font-medium whitespace-nowrap cursor-pointer hover:text-white"
                                     onClick={() => toggleSort("cc_score")}>
-                                    ☕ CC Score <SortIcon col="cc_score" />
+                                    ☕ CC Score <SortIcon col="cc_score" sortKey={sortKey} />
                                 </th>
                                 <th className="text-left text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">Category</th>
                             </tr>
