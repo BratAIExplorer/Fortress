@@ -471,28 +471,34 @@ export async function getGlossaryData(): Promise<Glossary> {
 const MIN_GOOD_RESULTS = 25;
 
 async function getBestScan(market = "NSE") {
-    const [good] = await db
-        .select()
-        .from(schema.scans)
-        .where(and(
-            eq(schema.scans.status, "COMPLETED"),
-            eq(schema.scans.market, market),
-            gte(schema.scans.goodResultsCount, MIN_GOOD_RESULTS)
-        ))
-        .orderBy(desc(schema.scans.runAt))
-        .limit(1);
-    if (good) return good;
-    // Fallback: most recent completed for this market regardless of quality
-    const [fallback] = await db
-        .select()
-        .from(schema.scans)
-        .where(and(
-            eq(schema.scans.status, "COMPLETED"),
-            eq(schema.scans.market, market)
-        ))
-        .orderBy(desc(schema.scans.runAt))
-        .limit(1);
-    return fallback ?? null;
+    try {
+        const [good] = await db
+            .select()
+            .from(schema.scans)
+            .where(and(
+                eq(schema.scans.status, "COMPLETED"),
+                eq(schema.scans.market, market),
+                gte(schema.scans.goodResultsCount, MIN_GOOD_RESULTS)
+            ))
+            .orderBy(desc(schema.scans.runAt))
+            .limit(1);
+        if (good) return good;
+        // Fallback: most recent completed for this market regardless of quality
+        const [fallback] = await db
+            .select()
+            .from(schema.scans)
+            .where(and(
+                eq(schema.scans.status, "COMPLETED"),
+                eq(schema.scans.market, market)
+            ))
+            .orderBy(desc(schema.scans.runAt))
+            .limit(1);
+        return fallback ?? null;
+    } catch (e) {
+        // ponytail: graceful fallback when DB unavailable (e.g. local dev without PostgreSQL)
+        console.error(`[getBestScan] ${market} scan query failed:`, e instanceof Error ? e.message : String(e));
+        return null;
+    }
 }
 
 function mapToCandidate(
