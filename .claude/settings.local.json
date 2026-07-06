@@ -234,7 +234,10 @@
       "Bash(curl -sf https://fortressintelligence.space)",
       "Bash(curl -sf https://fortressintelligence.space -w \"\\\\nStatus: %{http_code}\\\\n\")",
       "Bash(cd /opt/fortress && npm run build 2>&1 | head -50)",
-      "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
+      "Bash(curl -s \"https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs?head_branch=main\" -H \"Accept: application/vnd.github.v3+json\")",
+      "Bash(curl -s \"https://api.github.com/repos/BratAIExplorer/Fortress/actions/runs/28761148741/logs\" -L)",
+      "Bash(curl -s https://fortressintelligence.space/api/portfolio -H \"Authorization: Bearer test\")"
     ]
   }
 }

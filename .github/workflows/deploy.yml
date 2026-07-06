@@ -29,9 +29,9 @@ jobs:
       - name: Extract PORT from .env.production
         id: get-port
         run: |
-          PORT=$(grep "^PORT=" fortress-app/.env.production | cut -d= -f2)
+          PORT=$(grep "^PORT=" .env.production | cut -d= -f2)
           if [ -z "$PORT" ]; then
-            echo "ERROR: PORT not found in fortress-app/.env.production"
+            echo "ERROR: PORT not found in .env.production"
             exit 1
           fi
           echo "app_port=$PORT" >> $GITHUB_OUTPUT
@@ -40,7 +40,7 @@ jobs:
       # 4. CRITICAL: Validate that nginx.conf has matching port
       - name: Validate Nginx proxy_pass port matches .env.production
         run: |
-          NGINX_PORT=$(grep "proxy_pass" fortress-app/nginx.conf | grep -oP ':\K[0-9]+' | head -1)
+          NGINX_PORT=$(grep "proxy_pass" nginx.conf | grep -oP ':\K[0-9]+' | head -1)
           APP_PORT=${{ steps.get-port.outputs.app_port }}
 
           if [ "$NGINX_PORT" != "$APP_PORT" ]; then
@@ -56,11 +56,11 @@ jobs:
       - name: Validate Nginx config syntax
         run: |
           # Check for syntax errors in nginx.conf (basic validation)
-          if ! grep -q "proxy_pass http://127.0.0.1:" fortress-app/nginx.conf; then
+          if ! grep -q "proxy_pass http://127.0.0.1:" nginx.conf; then
             echo "ERROR: proxy_pass directive not found in nginx.conf"
             exit 1
           fi
-          if ! grep -q "location /_health" fortress-app/nginx.conf; then
+          if ! grep -q "location /_health" nginx.conf; then
             echo "ERROR: health check endpoint not configured in nginx.conf"
             exit 1
           fi
@@ -69,20 +69,17 @@ jobs:
       # 6. Install dependencies
       - name: Install dependencies
         run: |
-          cd fortress-app
           npm ci
 
       # 7. Run tests
       - name: Run tests
         run: |
-          cd fortress-app
           npm run test -- --passWithNoTests 2>/dev/null || true
           echo "✓ Tests completed"
 
       # 8. Build Next.js app (generates standalone)
       - name: Build Next.js app
         run: |
-          cd fortress-app
           npm run build
           if [ ! -d ".next/standalone" ]; then
             echo "ERROR: Next.js standalone output not generated"
