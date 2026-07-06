@@ -617,7 +617,7 @@ export async function seedV5Stocks(): Promise<{ success: boolean; inserted: numb
                 multiBaggerCase: stock.multi_bagger_case,
                 killerRisk: stock.killer_risk,
                 fortressNote: stock.fortress_note,
-                market: (stock as any).market || "NSE",
+                market: stock.market || "NSE",
             });
             inserted++;
         } else {
