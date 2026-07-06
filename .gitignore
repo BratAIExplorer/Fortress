@@ -30,3 +30,6 @@ coverage/
 # Temp
 .cache
 tmp/
+
+# Claude Code worktrees (local only)
+.claude/worktrees/
