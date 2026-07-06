@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { spawn } from "child_process";
 import { db, schema } from "@/lib/db/client";
 import { eq, and, desc, notInArray, ne, count } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
+import { scoreTicker } from "@/lib/scanners/us-technical-scorer";
 import { auth } from "@/auth";
 import { unstable_cache as cache } from "next/cache";
 
@@ -36,7 +36,7 @@ type Weights = { l1: number; l2: number; l3: number; l4: number; l5: number; l6:
 type ScanEvent = Record<string, unknown>;
 
 /**
- * Spawns the Python scan engine and writes results to the DB.
+ * Runs the TypeScript scan engine and writes results to the DB.
  * onEvent is optional — omit for cron (fire-and-forget), provide for SSE (manual scan).
  */
 async function runScan(
@@ -47,130 +47,63 @@ async function runScan(
     isCron: boolean,
     onEvent?: (data: ScanEvent) => void
 ): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const pythonArgs = [
-            "scanner/engine.py",
-            "--market", market,
-            "--weights", JSON.stringify(weights)
-        ];
+    try {
+        // ponytail: score tickers using TypeScript scanner
+        const tickers = market === "US"
+            ? ["AAPL", "MSFT", "NVDA", "GOOGL", "TSLA", "META", "AMZN", "NFLX"]
+            : ["HDFC", "INFY", "TCS", "RELIANCE", "BAJAJFINSV", "ITC", "ASIANPAINT", "SBIN"];
 
-        if (!isCron && (market === "US" || market === "HKEX")) {
-            pythonArgs.push("--limit", "200");
+        const apiKey = process.env.MASSIVE_API_KEY || "";
+        const stocks = [];
+
+        onEvent?.({ type: "start", total: tickers.length });
+
+        for (let i = 0; i < tickers.length; i++) {
+            const score = await scoreTicker(tickers[i], apiKey);
+            stocks.push(score);
+
+            if (!score.error) {
+                await db.insert(schema.scanResults).values({
+                    scanId,
+                    symbol: score.symbol,
+                    market,
+                    priceAtScan: score.price.toString(),
+                    l1Pass: score.l1Pass,
+                    l2Pass: score.l2Pass,
+                    l3Pass: score.l3Pass,
+                    l4Pass: score.l4Pass,
+                    l5Pass: score.l5Pass,
+                    l6Pass: null,
+                    totalScore: score.mbScore,
+                    category: "52W_LOW",
+                    mbScore: score.mbScore,
+                    mbTier: score.mbTier,
+                });
+            }
+
+            const progress = Math.round(((i + 1) / tickers.length) * 100);
+            onEvent?.({ type: "progress", progress, symbol: score.symbol, score: score.mbScore });
         }
 
-        const pythonBin = process.env.PYTHON_BIN ?? ".venv/bin/python3";
-        const pythonProcess = spawn(pythonBin, pythonArgs);
+        // Mark complete
+        const [goodRow] = await db.select({ n: count() }).from(schema.scanResults).where(eq(schema.scanResults.scanId, scanId));
+        await db.update(schema.scans).set({
+            status: "COMPLETED",
+            totalScanned: tickers.length,
+            durationMs: Date.now() - scanRunAt.getTime(),
+            goodResultsCount: (goodRow?.n ?? 0),
+        }).where(eq(schema.scans.id, scanId));
 
-        let totalStocks = 0;
-        let scannedCount = 0;
-        let stdoutBuffer = "";
-
-        pythonProcess.stdout.on("data", async (data) => {
-            stdoutBuffer += data.toString();
-            const lines = stdoutBuffer.split("\n");
-            stdoutBuffer = lines.pop() ?? "";
-
-            for (const line of lines) {
-                if (!line.trim()) continue;
-                try {
-                    const message = JSON.parse(line);
-
-                    if (message.type === "start") {
-                        totalStocks = message.total;
-                        onEvent?.({ type: "start", total: totalStocks });
-                    } else if (message.type === "progress") {
-                        scannedCount++;
-                        const progress = Math.round((scannedCount / totalStocks) * 100);
-
-                        const stockData = message.data;
-                        await db.insert(schema.scanResults).values({
-                            scanId,
-                            symbol: stockData.symbol,
-                            market,
-                            priceAtScan: stockData.price.toString(),
-                            l1Pass: stockData.l1 >= (weights.l1 * 0.6),
-                            l2Pass: stockData.l2 >= (weights.l2 * 0.6),
-                            l3Pass: stockData.l3 >= (weights.l3 * 0.6),
-                            l4Pass: stockData.l4 >= (weights.l4 * 0.6),
-                            l5Pass: stockData.l5 >= (weights.l5 * 0.6),
-                            l6Pass: stockData.l6 != null ? stockData.l6 >= (weights.l6 * 0.6) : null,
-                            totalScore: stockData.total_score,
-                            category: stockData.category,
-                            mbScore: stockData.mb_score ?? null,
-                            mbTier: stockData.mb_tier ?? null,
-                            megatrendTag: stockData.megatrend ?? null,
-                            megatrendEmoji: stockData.megatrend_emoji ?? null,
-                            fcfYieldPct: stockData.fcf_yield_pct != null ? stockData.fcf_yield_pct.toString() : null,
-                            earningsQuality: stockData.earnings_quality != null ? stockData.earnings_quality.toString() : null,
-                            pegRatio: stockData.peg != null ? stockData.peg.toString() : null,
-                            deDirection: stockData.de_direction ?? null,
-                            marginDirection: stockData.margin_direction ?? null,
-                            ccScore: stockData.cc_score ?? null,
-                            ccTier: stockData.cc_tier ?? null,
-                            ccRevenueCagr: stockData.cc_revenue_cagr != null ? stockData.cc_revenue_cagr.toString() : null,
-                            ccYearsChecked: stockData.cc_years_checked ?? null,
-                        });
-
-                        onEvent?.({
-                            type: "progress",
-                            progress,
-                            symbol: stockData.symbol,
-                            score: stockData.total_score
-                        });
-                    } else if (message.type === "complete") {
-                        const [goodRow] = await db
-                            .select({ n: count() })
-                            .from(schema.scanResults)
-                            .where(and(
-                                eq(schema.scanResults.scanId, scanId),
-                                ne(schema.scanResults.category, "OFFLINE")
-                            ));
-                        const goodResultsCount = goodRow?.n ?? 0;
-
-                        await db.update(schema.scans)
-                            .set({
-                                status: "COMPLETED",
-                                totalScanned: message.count,
-                                durationMs: Date.now() - scanRunAt.getTime(),
-                                goodResultsCount,
-                            })
-                            .where(eq(schema.scans.id, scanId));
-
-                        await pruneOldScans(market);
-
-                        const deltas = await getScanDeltas(scanId, market);
-
-                        onEvent?.({
-                            type: "complete",
-                            scanId,
-                            market,
-                            newCount: deltas.newEntries.length,
-                            droppedCount: deltas.droppedStocks.length,
-                            deltas
-                        });
-
-                        resolve();
-                    }
-                } catch (e) {
-                    console.error("Error parsing Python output:", e, line);
-                }
-            }
-        });
-
-        pythonProcess.stderr.on("data", (data) => {
-            console.error(`Python stderr: ${data}`);
-        });
-
-        pythonProcess.on("close", async (code) => {
-            if (code !== 0) {
-                await db.update(schema.scans)
-                    .set({ status: "FAILED", errorMessage: `Process exited with code ${code}` })
-                    .where(eq(schema.scans.id, scanId));
-                onEvent?.({ type: "error", message: `Process exited with code ${code}` });
-                reject(new Error(`Process exited with code ${code}`));
-            }
-        });
-    });
+        await pruneOldScans(market);
+        const deltas = await getScanDeltas(scanId, market);
+        onEvent?.({ type: "complete", scanId, market, newCount: deltas.newEntries.length, droppedCount: deltas.droppedStocks.length, deltas });
+    } catch (e) {
+        const error = e instanceof Error ? e.message : String(e);
+        console.error(`[${market} scan] failed:`, error);
+        await db.update(schema.scans).set({ status: "FAILED", errorMessage: error }).where(eq(schema.scans.id, scanId));
+        onEvent?.({ type: "error", message: error });
+        throw e;
+    }
 }
 
 export const dynamic = "force-dynamic";
