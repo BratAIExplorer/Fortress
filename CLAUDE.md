@@ -2,12 +2,12 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 DEPLOYMENT LIVE ✅ (July 5, 2026) | Full App Build Ready ✅ (July 6, 2026) | CI/CD Pipeline Fixed ✅ | Validated Locally  
-**Live App:** https://fortressintelligence.space (minimal fallback server, full app deploying via CI/CD)  
+**Status:** 🟡 DATA PIPELINE RESTORATION (July 6, 2026 Session 4)  
+**Live App:** https://fortressintelligence.space (minimal fallback server; full app + database migrations deploying via GitHub Actions)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx proxy active)  
-**Latest:** Full app restoration complete (July 6) — Fixed 15+ missing dependencies, created critical config files, corrected CI/CD workflow. Build verified locally at 101% confidence. Ready for production deployment.  
+**Latest:** Root cause of missing Fortress 30 data identified: CI/CD pipeline was missing `npm run drizzle:push` (database migration step). Fixed by adding drizzle-kit + migration to deployment. GitHub Actions now deploying with fix.  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
-**Deploy Status:** ✅ Main branch (commit 9e49b9f) — All dependencies, configs, and code ready. CI/CD pipeline corrected and deployed.
+**Deploy Status:** 🟡 Main branch (commit 46c5a2d) — Database migration step added to CI/CD. GitHub Actions deployment in progress. See SESSION_4_DATA_RESTORATION.md for details.
 
 ---
 
