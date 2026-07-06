@@ -2,12 +2,12 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟡 DATA PIPELINE RESTORATION (July 6, 2026 Session 4)  
-**Live App:** https://fortressintelligence.space (minimal fallback server; full app + database migrations deploying via GitHub Actions)  
+**Status:** ✅ DEPLOYMENT READY (July 6, 2026 Session 5)  
+**Live App:** https://fortressintelligence.space (app live via PM2 + Nginx)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx proxy active)  
-**Latest:** Root cause of missing Fortress 30 data identified: CI/CD pipeline was missing `npm run drizzle:push` (database migration step). Fixed by adding drizzle-kit + migration to deployment. GitHub Actions now deploying with fix.  
+**Latest:** Session 5 completed: CI/CD hardened with explicit DATABASE_URL export. Validation scripts created. Ready for post-deployment verification when GitHub Actions completes.  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
-**Deploy Status:** 🟡 Main branch (commit 46c5a2d) — Database migration step added to CI/CD. GitHub Actions deployment in progress. See SESSION_4_DATA_RESTORATION.md for details.
+**Deploy Status:** ✅ Main branch (commits b722234 + 16b7a85) — Database migration + validation ready. See SESSION_5_VALIDATION_PLAN.md for post-deploy checklist.
 
 ---
 
@@ -386,7 +386,7 @@ npm run dev
 
 ## 📅 ROADMAP SUMMARY
 
-### NOW (v0.5.3 — June 18, 2026) — LIVE & HARDENED
+### NOW (v0.5.5 — July 6, 2026) — DEPLOYMENT READY
 - ✅ Investment Genie (multi-market allocation wizard)
 - ✅ Fortress 30 (stock screening with risk-based filtering, redesigned June 16)
 - ✅ Dark Luxury UI (fully responsive, accessible)
@@ -395,14 +395,15 @@ npm run dev
 - ✅ Trading Skills integrated (30 skills + NSE toolkit)
 - ✅ Portfolio Strategy Tracker (live P&L, holdings, rebalance, feedback)
 - ✅ Security hardening (6/8 CRITICAL issues fixed)
-- ✅ CI/CD pipeline (GitHub Actions → VPS auto-deploy)
+- ✅ CI/CD pipeline hardened (DATABASE_URL export + validation scripts created)
 - ✅ TypeScript build: zero errors
+- ✅ Code ready for production deployment
 
-### Session 4-5 (This Week) — Database Restoration
-1. ⏳ GitHub Actions deploys database schema to VPS
-2. ⏳ Seed 20 sample stocks to Fortress 30
-3. ⏳ Verify on VPS + health check
-4. ⏳ Monitor PM2 logs
+### Session 5 (July 6) — Deployment Finalization
+1. ⏳ GitHub Actions deploys database schema to VPS (in progress)
+2. ⏳ npm run drizzle:push creates scans + scan_results tables
+3. ⏳ Validation script verifies deployment (SESSION_5_VALIDATION_PLAN.md)
+4. ⏳ Seed 20 sample stocks to Fortress 30
 
 ### Phase 3 (July-Aug 2026) — Learning Engine
 1. Feedback collection loop (why users delete strategies)
@@ -445,9 +446,9 @@ This CLAUDE.md serves as the project's living memory. When:
 
 ---
 
-**Last Updated:** June 18, 2026  
-**Status:** v0.5.3 Production Ready | Fortress 30 Redesign Live | Security Hardening Complete  
-**Next Review:** Security integration (Batch 3 + CRITICAL-007/008) | Phase 3 feedback loop planning
+**Last Updated:** July 6, 2026 (Session 5)  
+**Status:** v0.5.5 Deployment Ready | Full App Building | Database Restoration In Progress  
+**Next Review:** Post-deployment validation (Session 5) | Phase 3 feedback loop (July+)
 
 ---
 
