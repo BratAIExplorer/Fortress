@@ -144,6 +144,7 @@ jobs:
 
           # Apply database schema migrations (idempotent — safe to re-run)
           echo "Applying database schema..."
+          export DATABASE_URL=$(grep "^DATABASE_URL=" .env.production | cut -d= -f2-)
           if npm run drizzle:push 2>&1 | head -30; then
             echo "✓ Database schema applied successfully"
           else
