@@ -359,6 +359,14 @@ function buildAllocationLayers(
             why: "Financials. Cyclical benefit from rate environment.",
           },
         ]
+      : template.swing > 0
+      ? [
+          {
+            ticker: "VGT",
+            weight: template.swing,
+            why: "Information technology ETF. Default tactical allocation when no specific signals present.",
+          },
+        ]
       : [];
 
   layers.swing = {
