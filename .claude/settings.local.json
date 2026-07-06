@@ -256,7 +256,8 @@
       "PowerShell(Get-Process node | Where-Object {$_.CommandLine -match \"next dev\"} | Stop-Process -Force 2>$null; Write-Host \"Stopped next dev process\")",
       "PowerShell(Stop-Process -Id 1780 -Force 2>$null)",
       "Bash(netstat -ano)",
-      "Bash(psql postgresql://fortress_user:fortress_password@localhost/fortress -c ' *)"
+      "Bash(psql postgresql://fortress_user:fortress_password@localhost/fortress -c ' *)",
+      "Bash(rm /c/Users/user/.claude/projects/C--Antigravity-Fortress/memory/july_6_missing_scanner_blocker.md 2>&1 || echo \"File removed\")"
     ]
   }
 }
