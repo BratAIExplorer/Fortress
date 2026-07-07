@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GemScoreResponse, TradeSignal } from "@/lib/types/trading-specialist";
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
+
+const yahooFinance = new YahooFinance();
 
 // In-memory cache: { symbol: { data, timestamp } }
 const scoreCache = new Map<string, { data: GemScoreResponse; timestamp: number }>();
