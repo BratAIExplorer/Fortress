@@ -257,7 +257,12 @@
       "PowerShell(Stop-Process -Id 1780 -Force 2>$null)",
       "Bash(netstat -ano)",
       "Bash(psql postgresql://fortress_user:fortress_password@localhost/fortress -c ' *)",
-      "Bash(rm /c/Users/user/.claude/projects/C--Antigravity-Fortress/memory/july_6_missing_scanner_blocker.md 2>&1 || echo \"File removed\")"
+      "Bash(rm /c/Users/user/.claude/projects/C--Antigravity-Fortress/memory/july_6_missing_scanner_blocker.md 2>&1 || echo \"File removed\")",
+      "Bash(psql -h localhost -U postgres fortress_db -c \"SELECT COUNT\\(*\\) as scan_count FROM scans WHERE status='COMPLETED';\")",
+      "Bash(curl http://localhost:3000/api/admin/seed-fortress-30?secret=fortress-seed-dev-only -X POST -s)",
+      "Bash(cat /tmp/dev.log 2>&1 | head -50)",
+      "Bash(curl \"http://localhost:3000/api/admin/seed-fortress-30?secret=fortress-seed-2026\" -X POST -s)",
+      "Bash(nc -zv localhost 5432)"
     ]
   }
 }

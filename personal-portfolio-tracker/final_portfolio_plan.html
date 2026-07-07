@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Final Portfolio Plan — MYR 20,000 / 30,000</title>
+<style>
+  :root {
+    --bg: #0b0e14; --card: #131722; --border: #232838;
+    --text: #e6e9f0; --muted: #8b93a7; --accent: #d4af37;
+    --extreme: #e5484d; --high: #f5a524; --moderate: #3dd68c; --core: #5b8def;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 32px; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  h2 { font-size: 15px; color: var(--accent); margin: 28px 0 10px; }
+  h3 { font-size: 13px; color: var(--text); margin: 0 0 10px; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 13px; margin-bottom: 8px; }
+  th { text-align: left; padding: 10px 9px; background: #171c2a; color: var(--accent); font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 9px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .ticker { font-weight: 700; color: #fff; }
+  .num { font-variant-numeric: tabular-nums; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10.5px; font-weight: 600; }
+  .tag-core { background: rgba(91,141,239,0.15); color: var(--core); }
+  .tag-sat { background: rgba(245,165,36,0.15); color: var(--high); }
+  .tag-extreme { background: rgba(229,72,77,0.15); color: var(--extreme); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; }
+  .card ul { margin: 6px 0 0; padding-left: 18px; }
+  .card li { margin-bottom: 7px; font-size: 13px; line-height: 1.5; }
+  .card li span.label { color: var(--accent); font-weight: 600; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .footer-note { margin-top: 24px; font-size: 11px; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--border); padding-top: 12px; }
+  .pill-row { display:flex; gap:8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .pill { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 12px; color: var(--muted); }
+  .pill b { color: var(--text); }
+</style>
+</head>
+<body>
+
+<h1>Final Portfolio Plan — Core + Thematic Satellite</h1>
+<div class="subtitle">One-time lump sum. MYR 20,000 base (required) + optional MYR 10,000 add-on (thematic satellite). Built for B, Malaysia-based expat, Indian passport. Snapshot: early July 2026.</div>
+
+<div class="pill-row">
+  <div class="pill">Base capital: <b>MYR 20,000</b></div>
+  <div class="pill">Optional add-on: <b>MYR 10,000</b></div>
+  <div class="pill">Structure: <b>Core (diversified) + Satellite (thematic)</b></div>
+  <div class="pill">Investment type: <b>One-time lump sum</b></div>
+</div>
+
+<h2>1. Should you add the extra MYR 10,000?</h2>
+<div class="card">
+<p style="font-size:13px; line-height:1.6; margin:0;">
+<b>Conditional yes</b> — but only if it's genuinely spare capital beyond your emergency fund and near-term cash needs. The reason to add it: it lets the four new structural themes (semiconductors, Japan equipment, defense, nuclear/power) get properly sized (15-30% each within their own sleeve) as new money, without cannibalizing the diversified core we already built for the first MYR 20,000. If you'd rather not add capital, keep the original 20,000 core fully intact and only carve a small 2-item satellite (e.g. SMH + one of Defense/Nuclear, ~10% total) out of the growth sleeve — see the fallback note at the bottom.
+</p>
+</div>
+
+<h2>2. Top recommendations (ranked)</h2>
+<table>
+<thead>
+<tr><th>#</th><th>Instrument</th><th>Sleeve</th><th>Growth or Income?</th><th>Market / Access</th><th>Vehicle</th><th>MYR 20k Alloc</th><th>MYR 10k Add-on Alloc</th><th>Why it's on the list</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td><span class="ticker">VWRA / CSPX</span><br>Vanguard/iShares UCITS</td>
+  <td><span class="tag tag-core">Core Growth</span></td>
+  <td><b>Growth</b> — accumulating, ~1-1.5% yield, reinvests automatically</td>
+  <td>LSE, via IBKR</td>
+  <td>ETF</td>
+  <td class="num">8,000 (40%)</td>
+  <td class="num">—</td>
+  <td>Diversified compounding engine; UCITS wrapper caps US WHT at 15% vs 30%.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><span class="ticker">JGPI</span><br>JPM Global Equity Premium Income UCITS</td>
+  <td><span class="tag tag-core">Core Income</span></td>
+  <td><b>Income</b> — monthly cash distribution, ~7.5% yield (dist share class)</td>
+  <td>LSE/Xetra, via IBKR</td>
+  <td>ETF</td>
+  <td class="num">6,000 (30%)</td>
+  <td class="num">—</td>
+  <td>Monthly income overlay; watch total return, not just the 7.5% yield (NAV erosion is real here too).</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><span class="ticker">03416.HK</span><br>Global X HSCEI Covered Call</td>
+  <td><span class="tag tag-core">Core Income</span></td>
+  <td><b>Income</b> — monthly cash distribution from option premiums</td>
+  <td>HKEX, via IBKR</td>
+  <td>ETF</td>
+  <td class="num">3,000 (15%)</td>
+  <td class="num">—</td>
+  <td>Income diversifier away from US/global tech concentration.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>Bursa dividend stocks / REITs</td>
+  <td><span class="tag tag-core">Core Stability</span></td>
+  <td><b>Blend</b> — dividend-led (REITs/blue-chips) with modest capital appreciation</td>
+  <td>Bursa Malaysia</td>
+  <td>Direct equity</td>
+  <td class="num">2,000 (10%)</td>
+  <td class="num">—</td>
+  <td>MYR-matched, no FX risk, single-tier dividends generally tax-exempt to individuals.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>Cash / Money Market Fund</td>
+  <td><span class="tag tag-core">Core Buffer</span></td>
+  <td><b>Income</b> — interest-bearing, capital preservation, no growth intent</td>
+  <td>Malaysia MMF or USD equivalent</td>
+  <td>Fund</td>
+  <td class="num">1,000 (5%)</td>
+  <td class="num">—</td>
+  <td>Liquidity for rebalancing / opportunistic buys.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><span class="ticker">SMH</span><br>VanEck Semiconductor ETF</td>
+  <td><span class="tag tag-sat">Satellite Growth</span></td>
+  <td><b>Growth</b> — under 1% yield, pure capital appreciation play</td>
+  <td>NASDAQ, via IBKR</td>
+  <td>ETF</td>
+  <td class="num">—</td>
+  <td class="num">3,000 (30%)</td>
+  <td>Broadest, most liquid AI-compute pick; already down ~12% from its high — DCA in, don't lump-sum.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><span class="ticker">2644.T</span><br>Global X Japan Semiconductor ETF</td>
+  <td><span class="tag tag-sat">Satellite Growth</span></td>
+  <td><b>Growth</b> — low yield, capital appreciation</td>
+  <td>Tokyo Stock Exchange, via IBKR</td>
+  <td>ETF</td>
+  <td class="num">—</td>
+  <td class="num">1,500 (15%)</td>
+  <td>Genuinely different holdings (fab equipment: Advantest, Disco, Screen) — real diversification, not a repeat of SMH.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><span class="ticker">EUDF / WDEF</span><br>WisdomTree Europe Defence UCITS</td>
+  <td><span class="tag tag-sat">Satellite Growth</span></td>
+  <td><b>Growth</b> — accumulating share class, minimal yield</td>
+  <td>Xetra, via IBKR</td>
+  <td>ETF</td>
+  <td class="num">—</td>
+  <td class="num">2,000 (20%)</td>
+  <td>Policy-backed multi-year catalyst: NATO 5%-of-GDP by 2035, Pentagon FY27 request +44%.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><span class="ticker">NUCL</span><br>VanEck Uranium & Nuclear Technologies UCITS</td>
+  <td><span class="tag tag-sat">Satellite Growth</span></td>
+  <td><b>Growth</b> — accumulating, minimal yield</td>
+  <td>LSE, via IBKR</td>
+  <td>ETF</td>
+  <td class="num">—</td>
+  <td class="num">2,000 (20%)</td>
+  <td>Direct beneficiary of the AI data-center power bottleneck (Meta/Constellation 20-yr nuclear deal starts 2027).</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td>Malaysia regional-tech unit trust<br>e.g. RHB Pacific Technology (RM class)</td>
+  <td><span class="tag tag-sat">Satellite Growth</span></td>
+  <td><b>Growth</b> — capital appreciation fund, not a dividend product</td>
+  <td>Malaysia, via local AMC/bank</td>
+  <td>Unit Trust (MF)</td>
+  <td class="num">—</td>
+  <td class="num">1,500 (15%)</td>
+  <td>Your requested Malaysia-domiciled exposure — regional tech (not single-country), deliberately <b>not</b> the #1 trailing-return fund (see note below).</td>
+</tr>
+</tbody>
+</table>
+
+<h2>3. On the Malaysia unit trusts you shared</h2>
+<div class="card">
+<p style="font-size:13px; line-height:1.6; margin:0 0 8px;">
+United Great Dragon (MYR Hedged) at ~179% and the Shariah/Eastspring China funds at ~110-114% are real funds (verified: United Great Dragon feeds into United China A-Shares Innovation Fund, managed by UOB Asset Management Malaysia) — but picking the #1 trailing-1-year performer is the same trap flagged with the semiconductor and Korea HBM trades: funds at the top of a 1-year leaderboard are disproportionately likely to mean-revert, precisely because they got there by being the most concentrated, most leveraged-to-one-theme option (here: China A-shares tech, a single country with real regulatory/political risk on top of market risk). I've deliberately picked RHB Pacific Technology instead — still a hot theme (~93-94% 1yr) but regional rather than single-country, which is a meaningfully different risk profile.
+</p>
+</div>
+
+<h2>4. Selection parameters used across this whole exercise</h2>
+<div class="two-col">
+<div class="card">
+<ul>
+<li><span class="label">Structural catalyst over 1-year momentum</span> — policy-backed multi-year themes (NATO spending, hyperscaler capex, data-center power) weighted above single-year performance-chasing.</li>
+<li><span class="label">Tax-efficient wrapper</span> — Ireland-UCITS ETFs preferred over US-listed where it caps US dividend withholding at 15% vs 30% for you as a Malaysia-based non-US person.</li>
+<li><span class="label">One vehicle per theme</span> — redundancy filter eliminated SOXX/FTXL/CHPS/EWT/0050/Korea HBM as overlapping bets on the same 20-30 stocks.</li>
+</ul>
+</div>
+<div class="card">
+<ul>
+<li><span class="label">Entry discipline</span> — used pullback-from-52-week-high as an objective signal rather than chasing headline returns.</li>
+<li><span class="label">Concentration ceiling</span> — flagged/excluded ideas with single-stock or single-country weight above ~50-60% (TSMC in 0050, SK Hynix+Samsung in Korea HBM funds, China A-shares single-country funds).</li>
+<li><span class="label">Real access & recency-bias check</span> — verified tradability from Malaysia (IBKR / local AMC), and deliberately avoided picking instruments solely because they topped a trailing-return leaderboard.</li>
+</ul>
+</div>
+</div>
+
+<h2>5. Lump sum, MF vs ETF — how to actually execute</h2>
+<div class="card">
+<ul>
+<li><span class="label">Core sleeve (items 1-5):</span> Safe to invest as a lump sum now. Historically, lump-sum investing into a diversified core outperforms phased entry roughly two-thirds of the time — being a "one-time investment" doesn't argue against putting it to work immediately here.</li>
+<li><span class="label">Satellite sleeve (items 6-10):</span> Still split into 2-3 tranches over 6-10 weeks even though it's a one-time allocation of capital — "one-time" describes your top-up plan, not your entry timing. These themes have already moved 30-300% in a year; buying at once into that is a timing bet, not a diversification decision.</li>
+<li><span class="label">MF vs ETF:</span> Use a unit trust (MF) specifically for the Malaysia sleeve (item 10) — practical local-currency access via your existing bank/AMC relationship, no forced FX conversion, workable at small ticket sizes. Keep ETFs for everything else — Malaysian unit trust fees typically run 1.5-2%/yr vs 0.1-0.4% for the ETFs above, so there's no cost benefit to using MFs beyond that one local-access case.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>If you don't add the MYR 10,000</h3>
+<p style="font-size:13px; line-height:1.6; margin:0;">Keep the core (items 1-5) exactly as sized. Trim the global growth sleeve from 40% to 30% (freeing MYR 2,000) and split that between just SMH and one of Defense/Nuclear — don't try to fit all four thematic ideas into the smaller base, you'll end up with position sizes too small to matter and too many line items to monitor.</p>
+</div>
+
+<div class="footer-note">
+Figures verified via web search as of early-to-mid July 2026 (Yahoo Finance, Morningstar, JustETF, WisdomTree, VanEck, UOB Asset Management, SEBI circular dated Feb 26 2026). Not investment, tax, or legal advice — informational reference only, built for discussion with a licensed advisor given your cross-border India/Malaysia/US tax exposure. Verify live prices, current TERs, and your broker's actual market access before placing any trade.
+</div>
+
+</body>
+</html>

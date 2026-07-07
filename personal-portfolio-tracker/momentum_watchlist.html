@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI/Semiconductor Momentum Watchlist</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --card: #131722;
+    --border: #232838;
+    --text: #e6e9f0;
+    --muted: #8b93a7;
+    --accent: #d4af37;
+    --extreme: #e5484d;
+    --high: #f5a524;
+    --moderate: #3dd68c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 32px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  .updated {
+    display: inline-block;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 12px 10px;
+    background: #171c2a;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  .ticker { font-weight: 700; color: #fff; }
+  .market { color: var(--muted); font-size: 12px; }
+  .risk-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .risk-extreme { background: rgba(229,72,77,0.15); color: var(--extreme); }
+  .risk-high { background: rgba(245,165,36,0.15); color: var(--high); }
+  .risk-moderate { background: rgba(61,214,140,0.15); color: var(--moderate); }
+  .num { font-variant-numeric: tabular-nums; }
+  .pos { color: var(--moderate); }
+  .neg { color: var(--extreme); }
+  section { margin-top: 28px; }
+  h2 {
+    font-size: 15px;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .rules {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .rules ul { margin: 0; padding-left: 18px; }
+  .rules li { margin-bottom: 8px; font-size: 13px; line-height: 1.5; }
+  .rules li span.label { color: var(--accent); font-weight: 600; }
+  .footer-note {
+    margin-top: 20px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<h1>AI / Semiconductor Momentum Watchlist — Global Markets</h1>
+<div class="subtitle">Satellite (speculative) sleeve tracker — not the core portfolio. Built for B / Antigravity Ventures.</div>
+<div class="updated">Snapshot: verified figures as of ~July 5-6, 2026</div>
+
+<table>
+<thead>
+<tr>
+  <th>ETF / Market</th>
+  <th>Access / Exchange</th>
+  <th>1yr Return</th>
+  <th>Pullback from 52wk High</th>
+  <th>Concentration (top names)</th>
+  <th>Entry Trigger</th>
+  <th>Suggested Allocation</th>
+  <th>Forward 12mo Expectation</th>
+  <th>Hold Period</th>
+  <th>Risk Flag</th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+  <td><span class="ticker">SMH</span><br><span class="market">VanEck Semiconductor ETF</span></td>
+  <td>US (NASDAQ) — via IBKR</td>
+  <td class="num pos">+64.5% YTD</td>
+  <td class="num neg">−11.6%</td>
+  <td>NVDA 19%, TSM 9.4%, AVGO 5.6%, AMD 5.6%, MU 5.3%</td>
+  <td>Already in a pullback. DCA in 2-3 tranches; avoid lump sum at highs.</td>
+  <td class="num">5% (~MYR 1,000)</td>
+  <td class="num">Wide range: −30% to +25%. Do not underwrite another 70-80% repeat.</td>
+  <td>6-12 months, review monthly</td>
+  <td><span class="risk-tag risk-high">High</span></td>
+</tr>
+
+<tr>
+  <td><span class="ticker">SOXX</span><br><span class="market">iShares Semiconductor ETF</span></td>
+  <td>US (NASDAQ) — via IBKR</td>
+  <td class="num pos">+89.1% YTD</td>
+  <td class="num neg">−13.6%</td>
+  <td>~90% holdings overlap with SMH</td>
+  <td>Redundant with SMH — skip unless replacing SMH, not adding to it.</td>
+  <td class="num">0% (skip)</td>
+  <td>—</td>
+  <td>—</td>
+  <td><span class="risk-tag risk-high">High (redundant)</span></td>
+</tr>
+
+<tr>
+  <td><span class="ticker">FTXL / CHPS</span><br><span class="market">First Trust Nasdaq Semi / Xtrackers</span></td>
+  <td>US (NASDAQ) — via IBKR</td>
+  <td class="num pos">+118-120% claimed</td>
+  <td class="num">unverified</td>
+  <td>Same core holdings as SMH/SOXX, different weighting</td>
+  <td>No unique exposure vs SMH — skip, extra fee drag for no new diversification.</td>
+  <td class="num">0% (skip)</td>
+  <td>—</td>
+  <td>—</td>
+  <td><span class="risk-tag risk-high">High (redundant)</span></td>
+</tr>
+
+<tr>
+  <td><span class="ticker">EWT / 0050</span><br><span class="market">Taiwan (TSMC-heavy)</span></td>
+  <td>US-listed EWT, or Bursa/IBKR access to 0050</td>
+  <td class="num pos">+75.6% YTD (EWT)</td>
+  <td class="num neg">−3.8%</td>
+  <td>TSMC ~58-60% of index</td>
+  <td>Redundant — TSMC already sits inside SMH and your global core (VWRA/CSPX). Also 20% Taiwan dividend WHT drag.</td>
+  <td class="num">0% (skip)</td>
+  <td>—</td>
+  <td>—</td>
+  <td><span class="risk-tag risk-high">High (redundant + tax drag)</span></td>
+</tr>
+
+<tr>
+  <td><span class="ticker">2644.T</span><br><span class="market">Global X Japan Semiconductor ETF</span></td>
+  <td>Tokyo Stock Exchange — via IBKR</td>
+  <td class="num pos">+99.9% 1yr / +34.5% YTD</td>
+  <td class="num">smaller pullback reported</td>
+  <td>Advantest 10.5%, Disco 10.9%, Screen Holdings 8.7%, Lasertec 5.5% — equipment/tools, not chip designers</td>
+  <td>The genuine "hidden gem" here — different holdings (fab equipment, not GPUs), less crowded trade than SMH/Korea.</td>
+  <td class="num">3% (~MYR 600)</td>
+  <td class="num">−15% to +35% — still tied to AI capex cycle but less parabolic than Korea/US names</td>
+  <td>12 months+, less urgent to trim</td>
+  <td><span class="risk-tag risk-moderate">Moderate</span></td>
+</tr>
+
+<tr>
+  <td><span class="ticker">TIGER/KODEX Semiconductor</span><br><span class="market">Korea (Samsung + SK Hynix / HBM)</span></td>
+  <td>Korea Exchange (KRX) — limited broker access from Malaysia, check IBKR KRX access</td>
+  <td class="num pos">+301% to +388% 1yr</td>
+  <td class="num">Leveraged versions already down ~26-30% in the last month</td>
+  <td>SK Hynix + Samsung = ~53-55% of fund. Pure HBM/memory bet.</td>
+  <td>Extreme move already showing crash signs in leveraged products. Analysts explicitly warning "plan your exit for H2 2026." Entry only with strict stop-loss discipline, if at all.</td>
+  <td class="num">2% (~MYR 400) max, or 0% if risk-averse</td>
+  <td class="num">−40% to +20% — this is the one most likely to give back gains fast</td>
+  <td>3-6 months, tight monitoring, hard stop at −15%</td>
+  <td><span class="risk-tag risk-extreme">Extreme</span></td>
+</tr>
+
+</tbody>
+</table>
+
+<section>
+<h2>How to use this satellite sleeve</h2>
+<div class="rules">
+<ul>
+<li><span class="label">Size:</span> Total satellite exposure capped at ~10% of the MYR 20,000 portfolio (~MYR 2,000). This is speculative money you can afford to see drop 30-40% — it does not replace the diversified core built earlier.</li>
+<li><span class="label">Don't stack duplicates:</span> SMH, SOXX, FTXL, CHPS, EWT, and 0050 mostly hold the same 15-25 stocks. Owning several is concentration, not diversification. Pick SMH (broadest) and/or the Japan equipment ETF (genuinely different holdings) instead of all of them.</li>
+<li><span class="label">Entry discipline:</span> After 60-300%+ one-year moves, don't lump-sum buy at the top. Split any new money into 2-3 tranches over 6-10 weeks.</li>
+<li><span class="label">Forward return expectation:</span> Base rates say extreme recent returns are far more likely to mean-revert than repeat. Treat "another 70-80% in a year" as the low-probability tail case, not the plan.</li>
+<li><span class="label">Exit rule:</span> Set a hard stop (e.g. −15% to −20% from your entry, or from the recent 52-week high) on the Korea position specifically — leveraged flows there are already unwinding.</li>
+<li><span class="label">Review cadence:</span> Check this table monthly, not daily. Momentum sleeves need less frequent but more decisive action (trim winners, cut losers) rather than constant tinkering.</li>
+</ul>
+</div>
+</section>
+
+<div class="footer-note">
+Figures verified via web search as of early July 2026 (Yahoo Finance, Morningstar, ETF.com, BigGo Finance, VanEck, iShares fact sheets). Not investment advice — informational reference only. Verify live prices and your own broker's market access (KRX/TSE access varies by broker) before placing any trade. Re-run research before acting if this file is opened more than a few weeks after the snapshot date above.
+</div>
+
+</body>
+</html>
