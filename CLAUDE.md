@@ -346,11 +346,12 @@ npm run dev
 # Open http://localhost:3000
 ```
 
-### Cron Jobs (VPS)
-- **US Scan:** 6:00 PM EST (23:00 UTC) Mon-Fri
-- **NSE Scan:** 4:30 PM IST (11:00 UTC) Mon-Fri
-- Both run `scanner_db_writer.py --market [NSE|US]`
-- Logs: `/var/log/fortress/`
+### Cron Jobs (VPS) — Automatic Daily Scans
+- **NSE Scan:** Mon-Fri **4:30 PM IST (11:00 UTC)** → `/api/scan/ai-run?market=NSE`
+- **US Scan:** Mon-Fri **6:00 PM IST (12:30 UTC)** → `/api/scan/ai-run?market=US`
+- Both trigger TypeScript scanner via HTTP (no Python required)
+- Logs: `/var/log/fortress_nse_scan.log` and `/var/log/fortress_us_scan.log`
+- Auth: `x-cron-secret: fortress-scan-secret-2026` header
 
 ### Monitoring
 - **App:** Nginx reverse proxy + PM2 process monitoring
