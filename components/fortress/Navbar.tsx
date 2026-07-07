@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, Brain, Globe, BookMarked, Target, ChevronDown } from "lucide-react";
+import { Shield, Menu, X, Brain, Globe, BookMarked, Target, ChevronDown, Zap } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -85,6 +85,12 @@ export function Navbar({
                                         <Link href="/v5-extension" className="gap-2">
                                             <Target className="h-4 w-4 text-primary" />
                                             Deep Value Scanner
+                                        </Link>
+                                    </Button>
+                                    <Button variant="ghost" size="sm" asChild className="w-full justify-start rounded-none">
+                                        <Link href="/trading-specialist" className="gap-2">
+                                            <Zap className="h-4 w-4 text-primary" />
+                                            Hidden Gem Finder
                                         </Link>
                                     </Button>
                                     {isAdmin && (
@@ -210,6 +216,10 @@ export function Navbar({
                                         <Link href="/v5-extension" onClick={() => setIsOpen(false)} className="text-base hover:text-primary py-2 pl-4 border-b border-border/50 flex items-center gap-2">
                                             <Target className="h-4 w-4 text-primary" />
                                             Deep Value Scanner
+                                        </Link>
+                                        <Link href="/trading-specialist" onClick={() => setIsOpen(false)} className="text-base hover:text-primary py-2 pl-4 border-b border-border/50 flex items-center gap-2">
+                                            <Zap className="h-4 w-4 text-primary" />
+                                            Hidden Gem Finder
                                         </Link>
                                         {isAdmin && (
                                             <Link href="/alpha" onClick={() => setIsOpen(false)} className="text-base hover:text-purple-400 text-purple-400 py-2 pl-4 border-b border-border/50 flex items-center gap-2">
