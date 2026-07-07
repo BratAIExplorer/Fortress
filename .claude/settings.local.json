@@ -266,7 +266,8 @@
       "Bash(curl -s \"https://fortressintelligence.space/api/admin/seed-fortress-30?secret=fortress-seed-2026\" -X POST)",
       "Bash(curl -s \"https://fortressintelligence.space/api/admin/seed-fortress-30?secret=fortress-seed-dev-only\" -X POST)",
       "Bash(curl -s \"https://fortressintelligence.space/api/scan/results?market=NSE\")",
-      "Bash(curl -s \"https://fortressintelligence.space/api/scan/results?market=NSE&limit=1\")"
+      "Bash(curl -s \"https://fortressintelligence.space/api/scan/results?market=NSE&limit=1\")",
+      "Bash(curl -s \"https://fortressintelligence.space/api/scan/results?market=NSE&limit=10\")"
     ]
   }
 }
