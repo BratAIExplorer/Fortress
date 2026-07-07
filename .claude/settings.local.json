@@ -262,7 +262,10 @@
       "Bash(curl http://localhost:3000/api/admin/seed-fortress-30?secret=fortress-seed-dev-only -X POST -s)",
       "Bash(cat /tmp/dev.log 2>&1 | head -50)",
       "Bash(curl \"http://localhost:3000/api/admin/seed-fortress-30?secret=fortress-seed-2026\" -X POST -s)",
-      "Bash(nc -zv localhost 5432)"
+      "Bash(nc -zv localhost 5432)",
+      "Bash(curl -s \"https://fortressintelligence.space/api/admin/seed-fortress-30?secret=fortress-seed-2026\" -X POST)",
+      "Bash(curl -s \"https://fortressintelligence.space/api/admin/seed-fortress-30?secret=fortress-seed-dev-only\" -X POST)",
+      "Bash(curl -s \"https://fortressintelligence.space/api/scan/results?market=NSE\")"
     ]
   }
 }

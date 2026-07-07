@@ -10,6 +10,7 @@ import { RadioTower, TrendingDown, TrendingUp, Minus, ChevronDown, ChevronUp, Ch
 import { ScannerCandidate } from "@/lib/types";
 import { formatPrice, getMarket } from "@/lib/markets/config";
 import { cn } from "@/lib/utils";
+import { useRisk } from "./RiskContext";
 
 const TIER_COLORS: Record<string, string> = {
     Rocket:   "text-emerald-400 border-emerald-500/40 bg-emerald-500/10",
@@ -94,7 +95,15 @@ function generateCandidateThesis(candidate: ScannerCandidate) {
 }
 
 export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidate }) {
+    const { mode } = useRisk();
     const [showWhy, setShowWhy] = useState(false);
+
+    // ponytail: risk tier filter mapping (upgrade path: weight by score if finer granularity needed)
+    const tierRank: Record<string, number> = { Rocket: 5, Launcher: 4, Builder: 3, Crawler: 2, Grounded: 1 };
+    const modeThreshold = mode === "Conservative" ? 4 : mode === "Balanced" ? 3 : 1;
+
+    if ((tierRank[candidate.mbTier] ?? 0) < modeThreshold) return null;
+
     const tierColor = TIER_COLORS[candidate.mbTier] ?? "text-muted-foreground border-white/20 bg-white/5";
     const market = getMarket(candidate.market);
     const hasCriteria = [
