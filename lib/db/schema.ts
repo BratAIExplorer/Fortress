@@ -592,11 +592,33 @@ export const trades = pgTable("trades", {
   gemScore: integer("gem_score").notNull(), // 0-100
   action: varchar("action", { length: 10 }).notNull(), // BOUGHT|SKIPPED|LOSS
   result: varchar("result", { length: 10 }), // WIN|LOSS (null until marked)
+  entryPrice: numeric("entry_price", { precision: 14, scale: 4 }), // USD/local currency
+  currentPrice: numeric("current_price", { precision: 14, scale: 4 }), // Last checked price
+  returnPct: numeric("return_pct", { precision: 8, scale: 4 }), // Computed return %
+  checkedAt: timestamp("checked_at", { withTimezone: true }), // When auto-check ran
   date: timestamp("date", { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   tickerIdx: index("idx_trades_ticker").on(table.ticker),
   dateIdx: index("idx_trades_date").on(table.date),
+  resultIdx: index("idx_trades_result").on(table.result),
+}));
+
+// 24. LEARNING_METRICS — Win rates by GEM SCORE range (Phase 5)
+// ponytail: daily aggregation, no backfill (fresh data only)
+export const learningMetrics = pgTable("learning_metrics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  checkDate: date("check_date").notNull().defaultNow(),
+  scoreRange: varchar("score_range", { length: 10 }).notNull(), // '80-100%', '60-79%', etc.
+  totalTrades: integer("total_trades").notNull().default(0),
+  markedTrades: integer("marked_trades").notNull().default(0),
+  winCount: integer("win_count").notNull().default(0),
+  winRate: numeric("win_rate", { precision: 5, scale: 2 }), // 0-100 %
+  avgReturnPct: numeric("avg_return_pct", { precision: 8, scale: 4 }), // Average return
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  checkDateIdx: index("idx_learning_date").on(table.checkDate),
+  scoreRangeIdx: index("idx_learning_range").on(table.scoreRange),
 }));
 
 // Modular Schema Exports

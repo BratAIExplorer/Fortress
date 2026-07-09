@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { trades } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(request: NextRequest) {
-  const { ticker, gemScore, action } = await request.json();
+  const { ticker, gemScore, action, entryPrice } = await request.json();
 
   if (!ticker || gemScore === undefined || !action) {
     return NextResponse.json(
@@ -18,6 +19,7 @@ export async function POST(request: NextRequest) {
       ticker: ticker.toUpperCase(),
       gemScore: Math.max(0, Math.min(100, gemScore)),
       action,
+      entryPrice: entryPrice ? entryPrice.toString() : null,
       date: new Date(),
     })
     .returning();
@@ -28,7 +30,31 @@ export async function POST(request: NextRequest) {
   );
 }
 
+export async function PUT(request: NextRequest) {
+  const { tradeId, result } = await request.json();
+
+  if (!tradeId || !result) {
+    return NextResponse.json(
+      { success: false, error: "Missing fields: tradeId, result" },
+      { status: 400 }
+    );
+  }
+
+  const updated = await db
+    .update(trades)
+    .set({ result, checkedAt: new Date() })
+    .where(eq(trades.id, tradeId))
+    .returning();
+
+  return NextResponse.json(
+    { success: true, trade: updated[0] },
+    { status: 200 }
+  );
+}
+
 export async function GET(request: NextRequest) {
+  const { learningMetrics } = await import("@/lib/db/schema");
+
   const action = request.nextUrl.searchParams.get("action");
 
   const allTrades = await db.select().from(trades);
@@ -63,6 +89,12 @@ export async function GET(request: NextRequest) {
     };
   });
 
+  // Fetch learning insights (latest metrics by range)
+  const insights = await db.select().from(learningMetrics);
+  const latestMetrics = Array.from(
+    new Map(insights.map((m) => [m.scoreRange, m])).values()
+  );
+
   const totalTrades = filtered.length;
   const boughtCount = filtered.filter((t) => t.action === "BOUGHT").length;
   const overallWins = filtered.filter((t) => t.result === "WIN").length;
@@ -77,6 +109,7 @@ export async function GET(request: NextRequest) {
       overallWins,
       overallWinRate,
       byScoreRange: stats,
+      learningInsights: latestMetrics,
       trades: filtered,
     },
     { status: 200 }
