@@ -310,7 +310,9 @@
       "PowerShell(\"Process killed\")",
       "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
       "PowerShell(Head -5)",
-      "PowerShell(\"Processes killed\")"
+      "PowerShell(\"Processes killed\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/analysis/feedback -H 'Content-Type: application/json' -d '{\"ticker\":\"AAPL\",\"gemScore\":85,\"action\":\"BOUGHT\"}')",
+      "Bash(curl -s http://localhost:3000/api/analysis/feedback)"
     ]
   }
 }

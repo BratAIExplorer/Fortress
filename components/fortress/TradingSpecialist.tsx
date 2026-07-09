@@ -104,6 +104,36 @@ export function TradingSpecialist() {
     }
   };
 
+  const logTrade = async (action: "BOUGHT" | "SKIPPED") => {
+    if (!state.data?.signals[0]) return;
+
+    const confidence = Math.max(
+      ...state.data.signals.map((s) => s.confidence)
+    );
+
+    try {
+      const res = await fetch("/api/analysis/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ticker: state.ticker,
+          gemScore: confidence,
+          action,
+        }),
+      });
+
+      if (res.ok) {
+        // Simple confirmation toast
+        const event = new CustomEvent("trade-logged", {
+          detail: { ticker: state.ticker, action },
+        });
+        window.dispatchEvent(event);
+      }
+    } catch (err) {
+      console.error("Failed to log trade:", err);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Search Bar */}
@@ -179,6 +209,41 @@ export function TradingSpecialist() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {state.data.bottomLine.body}
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Log Trade */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                Log This Trade
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Track your decisions and build a win-rate history
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={() => logTrade("BOUGHT")}
+                  className="flex-1 gap-2"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  Bought
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => logTrade("SKIPPED")}
+                  className="flex-1 gap-2"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  Skipped
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
