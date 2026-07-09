@@ -22,6 +22,13 @@ export interface MultiTimeframeEntry {
   triggerType: "bullish" | "neutral" | "bearish";
 }
 
+export interface ChartDataPoint {
+  date: string;
+  close: number;
+  sma50: number;
+  sma200: number;
+}
+
 export interface GemScoreResponse {
   success: boolean;
   ticker: string;
@@ -29,12 +36,7 @@ export interface GemScoreResponse {
   signals: TradeSignal[];
   bottomLine: BottomLineInsight;
   multiTimeframe: MultiTimeframeEntry[];
-  chartData?: {
-    // ponytail: placeholder for chart integration (Recharts/D3)
-    // Will be populated when chart library is added
-    symbol: string;
-    period: string;
-  };
+  chartData?: ChartDataPoint[];
   error?: string;
 }
 

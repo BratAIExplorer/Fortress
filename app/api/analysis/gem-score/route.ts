@@ -160,6 +160,24 @@ function buildBottomLine(
   };
 }
 
+// ─── Helper: Build chart data (last 60 days) ─────────────────────
+function buildChartData(
+  historical: any[],
+  closes: number[]
+): Array<{ date: string; close: number; sma50: number; sma200: number }> {
+  const last60Days = Math.min(60, closes.length);
+  const startIdx = closes.length - last60Days;
+  return historical.slice(-last60Days).map((bar, idx) => {
+    const upToIdx = startIdx + idx + 1;
+    return {
+      date: new Date(bar.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      close: bar.close,
+      sma50: sma(closes.slice(0, upToIdx), 50),
+      sma200: sma(closes.slice(0, upToIdx), 200),
+    };
+  });
+}
+
 // ─── Main: Calculate real GEM SCORE ────────────────────────────────
 async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
   const { symbol, currency } = await resolveSymbol(ticker);
@@ -254,6 +272,7 @@ async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
   ];
 
   const bottomLine = buildBottomLine(signals, currentPrice, sma200, currency);
+  const chartData = buildChartData(historical as any[], closes);
 
   return {
     success: true,
@@ -262,6 +281,7 @@ async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
     signals,
     bottomLine,
     multiTimeframe,
+    chartData,
   };
 }
 

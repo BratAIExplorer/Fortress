@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MultiTimeframeSetupCard } from "@/components/fortress/MultiTimeframeSetupCard";
+import { TradingChart } from "@/components/fortress/TradingChart";
 import type {
   AnalysisState,
   GemScoreResponse,
@@ -217,19 +218,29 @@ export function TradingSpecialist() {
             })}
           </div>
 
-          {/* Chart Placeholder */}
-          <Card>
-            <CardContent className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
-              <ChartLine className="h-12 w-12 text-muted-foreground/30" />
-              <p className="text-muted-foreground text-center text-sm">
-                Price chart with moving averages
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Weekly SMA(20/50/100) + Volume bars
-              </p>
-              {/* ponytail: Placeholder for Recharts/D3 integration (Phase 2) */}
-            </CardContent>
-          </Card>
+          {/* Technical Chart */}
+          {activeTab === "technical" && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ChartLine className="h-4 w-4 text-primary" />
+                  Price Action & Moving Averages
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {state.data.chartData && state.data.chartData.length > 0 ? (
+                  <TradingChart data={state.data.chartData} />
+                ) : (
+                  <div className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
+                    <ChartLine className="h-12 w-12 text-muted-foreground/30" />
+                    <p className="text-muted-foreground text-center text-sm">
+                      No chart data available
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Multi-Timeframe Panel - Enhanced for non-technical traders */}
           <div className="space-y-3">

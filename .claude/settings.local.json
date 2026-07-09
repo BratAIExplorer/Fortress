@@ -283,7 +283,21 @@
       "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=HDFC.NS\")",
       "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=INVALID123\")",
       "Bash(curl -s -I \"https://fortressintelligence.space/trading-specialist\")",
-      "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=TSLA\")"
+      "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=TSLA\")",
+      "Bash(curl -s \"http://localhost:3000/api/analysis/gem-score?ticker=AAPL\")",
+      "Bash(curl -s \"http://localhost:3000/api/analysis/gem-score?ticker=HDFC\")",
+      "Bash(curl -s \"http://localhost:3000/api/analysis/gem-score?ticker=MSFT\")",
+      "Bash(chmod +x /tmp/validate_gem_score.sh)",
+      "Bash(/tmp/validate_gem_score.sh)",
+      "Bash(chmod +x /tmp/regression_tests.sh)",
+      "Bash(/tmp/regression_tests.sh)",
+      "Bash(curl -s https://fortressintelligence.space/api/analysis/gem-score?ticker=AAPL)",
+      "Bash(chmod +x /tmp/check_vps.sh)",
+      "Bash(/tmp/check_vps.sh)",
+      "Bash(chmod +x /tmp/vps_diagnostic.sh)",
+      "Bash(tee /tmp/build.log)",
+      "Bash(curl -s http://localhost:3000/api/analysis/gem-score?ticker=AAPL)",
+      "Bash(tail -30 /tmp/dev.log)"
     ]
   }
 }
