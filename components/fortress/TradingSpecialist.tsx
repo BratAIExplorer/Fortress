@@ -17,6 +17,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MultiTimeframeSetupCard } from "@/components/fortress/MultiTimeframeSetupCard";
 import type {
   AnalysisState,
   GemScoreResponse,
@@ -230,34 +231,19 @@ export function TradingSpecialist() {
             </CardContent>
           </Card>
 
-          {/* Multi-Timeframe Panel */}
+          {/* Multi-Timeframe Panel - Enhanced for non-technical traders */}
           <div className="space-y-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Multi-timeframe Setup
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Multi-timeframe Setup
+              </p>
+              <p className="text-xs text-muted-foreground italic">
+                Click any card for details
+              </p>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {state.data.multiTimeframe.map((item, i) => (
-                <Card key={i}>
-                  <CardContent className="p-3 text-center space-y-1.5">
-                    <p className="text-xs text-muted-foreground uppercase">
-                      {item.timeframe}
-                    </p>
-                    <p className="text-sm font-bold text-foreground">
-                      {item.value}
-                    </p>
-                    <div className="flex items-center justify-center gap-1">
-                      {item.triggerType === "bullish" && (
-                        <TrendingUp className="h-3 w-3 text-green-500" />
-                      )}
-                      {item.triggerType === "bearish" && (
-                        <TrendingDown className="h-3 w-3 text-red-500" />
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {item.trigger}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <MultiTimeframeSetupCard key={i} item={item} />
               ))}
             </div>
           </div>

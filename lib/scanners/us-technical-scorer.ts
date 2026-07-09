@@ -8,8 +8,11 @@
  * l1 → RSI not overbought (RSI < 70, ideally 40-65 = momentum without excess)
  * l2 → Price above SMA50 (uptrend confirmed)
  * l3 → Price above SMA20 (short-term momentum positive)
- * l4 → Within 25% of 52-week high (not in freefall)
+ * l4 → Proximity to 90-day high (strength signal, soft weighted not binary)
  * l5 → Volume trending up (last 10-day avg > 30-day avg)
+ *
+ * Note: L4 uses weighted scoring on proximity to 90-day high rather than hard gate,
+ * avoiding cliff effects where stocks just below threshold penalized equally to weak performers.
  */
 
 const MASSIVE_BASE = "https://api.massive.com";
@@ -32,14 +35,14 @@ export interface TechnicalScore {
   l1Pass:    boolean;  // RSI in healthy range
   l2Pass:    boolean;  // above SMA50
   l3Pass:    boolean;  // above SMA20
-  l4Pass:    boolean;  // within 25% of 52w high
+  l4Pass:    boolean;  // proximity to 90-day high (weighted, not binary)
   l5Pass:    boolean;  // volume momentum positive
   mbScore:   number;   // 0-100
   mbTier:    string;   // Rocket | Launcher | Builder | Crawler | Grounded
   rsi:       number;
   sma20:     number;
   sma50:     number;
-  high52w:   number;
+  high90d:   number;   // 90-day high (from recent 90d OHLCV data)
   error?:    string;
 }
 
@@ -75,6 +78,9 @@ function mbTierFromScore(score: number): string {
 }
 
 // ── OHLCV fetch ───────────────────────────────────────────────────────────────
+// ⚠️  Rate limit risk: Massive Market Data enforces 5 calls/min limit
+// Scanner cron must throttle requests or implement exponential backoff to avoid
+// silent partial results (some tickers fail, others succeed, scan incompleteness hidden)
 
 async function fetchOHLCV(ticker: string, apiKey: string): Promise<OHLCVBar[]> {
   const to   = new Date();
@@ -108,7 +114,7 @@ export async function scoreTicker(ticker: string, apiKey: string): Promise<Techn
     const closes  = bars.map(b => b.c);
     const volumes = bars.map(b => b.v);
     const price   = closes[closes.length - 1];
-    const high52w = Math.max(...bars.map(b => b.h));
+    const high90d = Math.max(...bars.map(b => b.h));
 
     const rsiVal  = Math.round(rsi(closes));
     const sma20   = sma(closes, 20);
@@ -119,13 +125,17 @@ export async function scoreTicker(ticker: string, apiKey: string): Promise<Techn
     const l1Pass = rsiVal >= 30 && rsiVal <= 70;
     const l2Pass = sma50 > 0 && price > sma50;
     const l3Pass = sma20 > 0 && price > sma20;
-    const l4Pass = high52w > 0 && price >= high52w * 0.75;
+    const l4Pass = high90d > 0 && price >= high90d * 0.75;
     const l5Pass = vol30 > 0 && vol10 > vol30;
 
+    // L4 soft-weighted: proximity to 90-day high (0-25 points, continuous)
+    // Avoids cliff effect where price missing threshold by 1% gets same score as deep drawdown
+    const l4Proximity = high90d > 0 ? Math.max(0, Math.min(25, (price / high90d) * 25)) : 0;
+
     const passes  = [l1Pass, l2Pass, l3Pass, l4Pass, l5Pass].filter(Boolean).length;
-    // Weight: l2 (trend) and l4 (52w proximity) count double
+    // Weight: l2 (trend) and l4 (90d proximity) are key drivers
     const weighted = (l1Pass ? 15 : 0) + (l2Pass ? 25 : 0) + (l3Pass ? 20 : 0)
-                   + (l4Pass ? 25 : 0) + (l5Pass ? 15 : 0);
+                   + l4Proximity + (l5Pass ? 15 : 0);
     const mbScore  = Math.round(weighted);
 
     return {
@@ -137,7 +147,7 @@ export async function scoreTicker(ticker: string, apiKey: string): Promise<Techn
       rsi: rsiVal,
       sma20: Math.round(sma20 * 100) / 100,
       sma50: Math.round(sma50 * 100) / 100,
-      high52w: Math.round(high52w * 100) / 100,
+      high90d: Math.round(high90d * 100) / 100,
     };
   } catch (err) {
     return {
@@ -146,7 +156,7 @@ export async function scoreTicker(ticker: string, apiKey: string): Promise<Techn
       l1Pass: false, l2Pass: false, l3Pass: false, l4Pass: false, l5Pass: false,
       mbScore: 0,
       mbTier: "Grounded",
-      rsi: 0, sma20: 0, sma50: 0, high52w: 0,
+      rsi: 0, sma20: 0, sma50: 0, high90d: 0,
       error: err instanceof Error ? err.message : String(err),
     };
   }

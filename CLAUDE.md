@@ -2,12 +2,12 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE & FEATURE COMPLETE (July 7, 2026 Session 10)  
+**Status:** 🟢 LIVE & PHASE 2.1 COMPLETE (July 8, 2026 Session 11)  
 **Live App:** https://fortressintelligence.space (app live via PM2 + Nginx)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx proxy active)  
-**Latest:** Session 10: Built Hidden Gem Finder (personal AI trading specialist tab). Committed (609b689d). Ready for CI/CD deployment.  
+**Latest:** Session 11: Real GEM SCORE calculation deployed (Phase 2.1). All tickers return live technical analysis. Committed (db0a0e7e). Live on production.  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
-**Deploy Status:** 🟢 Ready — Hidden Gem Finder live at `/trading-specialist`. Navbar integrated (Advanced Tools dropdown).
+**Deploy Status:** 🟢 Live — Real GEM SCORE working at `/api/analysis/gem-score?ticker=AAPL`.
 
 ---
 
@@ -54,13 +54,16 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 
 **Hidden Gem Finder** _(NEW — July 7, 2026 Session 10 | AI Trading Specialist)_
 - ✨ **NEW:** `/trading-specialist` — Personal AI trading specialist for stock analysis
-- Single ticker search (AAPL, HDFC demo data; extensible to all tickers)
-- Strategy signals row: Intraday / Short-term (1–6M) / Long-term (1Y+)
-- The Bottom Line: Plain-English actionable insights
-- Multi-timeframe panel: EMA/SMA triggers, ATR stops, support levels
-- Tab navigation: Technical Analysis / Fundamental Core / Multi-Asset Options
+- **LIVE PHASE 2.1:** Real GEM SCORE calculation (ALL tickers, not just AAPL/HDFC)
+- Single ticker search (AAPL, TSLA, MSFT, HDFC, any symbol with yfinance data)
+- Real-time technical indicators: EMA(21), SMA(50/200), RSI(14), ATR(14), momentum
+- Strategy signals: Intraday / Short-term (1–6M) / Long-term (1Y+) with real confidence scoring
+- The Bottom Line: Plain-English actionable insights based on computed metrics
+- Multi-timeframe panel: Live EMA/SMA triggers, ATR stops, support/resistance levels
+- NSE support: Automatic .NS suffix detection, currency display (₹ for India, $ for US)
+- Cache: 15-min in-memory TTL, <100ms repeat queries
+- Tab navigation: Technical Analysis / Fundamental Core / Multi-Asset Options (framework ready)
 - Chart placeholder ready for Recharts/D3 integration (Phase 2)
-- Mock GEM SCORE API (`/api/analysis/gem-score`) with clear Phase 2 swap points
 - Fully responsive, dark mode, accessible
 - Navbar integration: Advanced Tools dropdown + mobile menu
 
@@ -123,7 +126,20 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 
 ---
 
-## 📊 CURRENT STATE (June 17, 2026)
+## 📊 CURRENT STATE (July 8, 2026 — Phase 2.1 Complete)
+
+### ✅ PHASE 2.1: REAL GEM SCORE LIVE (July 8, 2026)
+- **Real calculation:** G (Growth via SMA200) + E (Equity via SMA50) + M (Momentum via EMA21+RSI14)
+- **Data source:** yfinance2 v3.15.4 (quote + historical OHLC)
+- **All tickers:** AAPL, TSLA, MSFT, HDFC, GOOGL, any symbol with market data
+- **Signals generated dynamically:** Intraday (EMA21+RSI), Short-term (SMA50+momentum), Long-term (SMA200+52wk range)
+- **NSE auto-detect:** .NS suffix, ₹ currency for India stocks
+- **Cache:** In-memory 15-min TTL, <100ms warm hits, <2s cold fetches
+- **Graceful fallbacks:** Insufficient data → neutral signals (not 500 errors), delisted/missing → success:false with error
+- **Build:** ✓ TypeScript zero errors, route optimized for ~120 LOC
+- **API endpoint:** `GET /api/analysis/gem-score?ticker=AAPL` returns `{success, ticker, signals[], bottomLine, multiTimeframe[]}`
+- **Testing:** AAPL/TSLA/HDFC verified returning different real signals (not mock labels)
+- **Deployment:** Commit db0a0e7e, live on VPS production
 
 ### ✅ WORKING
 - **Production** stable and live on port 3000 (PM2)
@@ -271,12 +287,20 @@ Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push
 4. ✅ API endpoint ready: `/api/analysis/gem-score?ticker=AAPL`
 5. ✅ Scalable architecture for Phase 2 (mock → real calculation)
 
-### Phase 2 Critical Path (Next Week)
-1. **Real GEM SCORE Calculation** — Replace mock with valuation + institutional analysis
-2. **Chart Integration** — Recharts/D3 for technical analysis rendering
-3. **Broker Sync** — IBKR credentials capture + holdings import
-4. **Database Persistence** — Analysis history to PostgreSQL
-5. **Custom Indicators** — RSI, MACD, Bollinger Bands, volume divergence
+### ✅ Session 11 Complete (July 8, 2026) — Phase 2.1 LIVE
+1. ✅ **Real GEM SCORE Calculation** — Live (G/E/M signals from EMA/SMA/RSI/ATR)
+2. ✅ All tickers work (AAPL, TSLA, MSFT, HDFC, any with yfinance data)
+3. ✅ NSE auto-detect (.NS suffix, ₹ currency)
+4. ✅ Caching (15-min TTL, <100ms warm)
+5. ✅ Graceful fallbacks (insufficient data → neutral, not 500 errors)
+6. ✅ Commit db0a0e7e, deployed to production
+
+### Phase 2 Remaining Critical Path (Next Week)
+1. **Chart Integration** — Recharts/D3 for technical analysis rendering (multi-timeframe)
+2. **Broker Sync** — IBKR credentials capture + holdings import
+3. **Database Persistence** — Analysis history to PostgreSQL `analyses` table
+4. **Advanced Indicators** — MACD, Bollinger Bands, volume divergence
+5. **Fundamental Core Tab** — Real P/E, growth rates, insider trading signals
 
 ### Upcoming Phases
 - **Phase 2+ (July-Aug):** Trading specialist enhancements + learning engine

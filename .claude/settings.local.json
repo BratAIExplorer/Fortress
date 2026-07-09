@@ -268,7 +268,22 @@
       "Bash(curl -s \"https://fortressintelligence.space/api/scan/results?market=NSE\")",
       "Bash(curl -s \"https://fortressintelligence.space/api/scan/results?market=NSE&limit=1\")",
       "Bash(curl -s \"https://fortressintelligence.space/api/scan/results?market=NSE&limit=10\")",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://fortressintelligence.space/trading-specialist)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://fortressintelligence.space/trading-specialist)",
+      "Bash(ssh root@76.13.179.32 \"ps aux | grep npm | grep -v grep || echo 'Build completed or not running'\")",
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && git fetch origin main && git checkout -f origin/main && pm2 restart fortress-app && sleep 3 && pm2 logs fortress-app --lines 10\")",
+      "Bash(ssh root@76.13.179.32 \"curl -s 'https://fortressintelligence.space/api/analysis/gem-score?ticker=AAPL' | head -100\")",
+      "Bash(ssh root@76.13.179.32 \"ps aux | grep 'npm run build' | grep -v grep && echo '⏳ Still building...' || echo '✅ Build likely done, checking files...'; ls -lh /opt/fortress/.next/server/app/ 2>&1 | head -5\")",
+      "Bash(ssh root@76.13.179.32 \"pm2 restart fortress-app --update-env && sleep 2 && curl -s 'https://fortressintelligence.space/api/analysis/gem-score?ticker=AAPL' | jq -c '{success: .success, ticker: .ticker, signals: [.signals[0].label, .signals[1].label, .signals[2].label], bottomLine: .bottomLine.headline}'\")",
+      "Bash(ssh root@76.13.179.32 \"sleep 3 && curl -s 'https://fortressintelligence.space/api/analysis/gem-score?ticker=AAPL' | jq .\")",
+      "Bash(ssh root@76.13.179.32 \"grep yahoo-finance2 /opt/fortress/package.json\")",
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && git pull origin main && npm run build 2>&1 | tail -5\")",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "mcp__claude-in-chrome__tabs_create_mcp",
+      "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=AAPL\")",
+      "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=HDFC.NS\")",
+      "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=INVALID123\")",
+      "Bash(curl -s -I \"https://fortressintelligence.space/trading-specialist\")",
+      "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=TSLA\")"
     ]
   }
 }

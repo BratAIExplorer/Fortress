@@ -209,6 +209,10 @@ async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
   const rsi14 = rsi(closes, 14);
   const atr14 = atr(ohlc, 14);
 
+  // 90-day high/low (recent strength signal, not 52-week)
+  const high90d = closes.length >= 90 ? Math.max(...closes.slice(-90)) : Math.max(...closes);
+  const low90d = closes.length >= 90 ? Math.min(...closes.slice(-90)) : Math.min(...closes);
+
   // Momentum (20-day % change)
   const momentum20d = closes.length >= 20 ? ((closes[closes.length - 1] - closes[closes.length - 20]) / closes[closes.length - 20]) * 100 : 0;
 
@@ -229,7 +233,7 @@ async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
   const longTerm = buildSignal(
     'longTerm',
     currentPrice > sma200 ? 1 : -1,
-    currentPrice > (quote as any).fiftyTwoWeekLow && currentPrice < (quote as any).fiftyTwoWeekHigh ? 0 : currentPrice > (quote as any).fiftyTwoWeekHigh ? 1 : -1
+    currentPrice > high90d ? 1 : currentPrice < low90d ? -1 : 0
   );
 
   const signals = [intraday, shortTerm, longTerm];
@@ -245,6 +249,7 @@ async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
     { timeframe: 'Daily', ema_or_sma: 'EMA(21)', value: `${currency}${ema21.toFixed(2)}`, trigger: currentPrice > ema21 ? '↑ Above EMA' : '↓ Below EMA', triggerType: currentPrice > ema21 ? 'bullish' : 'bearish' },
     { timeframe: 'Weekly', ema_or_sma: 'SMA(50)', value: `${currency}${sma50.toFixed(2)}`, trigger: currentPrice > sma50 ? 'Above SMA' : 'Below SMA', triggerType: currentPrice > sma50 ? 'bullish' : 'bearish' },
     { timeframe: 'Monthly', ema_or_sma: 'SMA(200)', value: `${currency}${sma200.toFixed(2)}`, trigger: currentPrice > sma200 ? 'Strong support' : 'Weak', triggerType: currentPrice > sma200 ? 'bullish' : 'bearish' },
+    { timeframe: 'Range', ema_or_sma: '90d High/Low', value: `${currency}${high90d.toFixed(2)} / ${currency}${low90d.toFixed(2)}`, trigger: currentPrice > high90d ? '↑ Above range' : currentPrice < low90d ? '↓ Below range' : 'In range', triggerType: currentPrice > high90d ? 'bullish' : currentPrice < low90d ? 'bearish' : 'neutral' },
     { timeframe: 'Volatility', ema_or_sma: 'ATR(14)', value: `${currency}${atr14.toFixed(2)}`, trigger: `Stop = ${(currentPrice - atr14 * 2).toFixed(2)}`, triggerType: 'neutral' },
   ];
 
