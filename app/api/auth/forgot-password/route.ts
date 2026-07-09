@@ -2,24 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
+    let email: string | null = null;
 
-    // Validate input
-    if (!email || typeof email !== "string") {
+    // Safely parse JSON body
+    try {
+      const body = await req.json();
+      email = body?.email;
+    } catch (parseError) {
       return NextResponse.json(
-        { error: "Valid email is required" },
+        { error: "Invalid request format" },
         { status: 400 }
       );
     }
 
-    if (!email.includes("@")) {
+    // Validate input
+    if (!email || typeof email !== "string" || email.trim() === "") {
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      );
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
       return NextResponse.json(
         { error: "Please enter a valid email address" },
         { status: 400 }
       );
     }
 
-    // Demo mode: Don't reveal if email exists (security best practice)
+    // Demo mode: Always return success (don't reveal if email exists)
     // In production: lookup in database, generate token, send email
     return NextResponse.json({
       success: true,
