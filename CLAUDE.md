@@ -2,12 +2,12 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE & PHASE 2.0 COMPLETE (July 10, 2026 Session 13)  
+**Status:** 🟢 LIVE & PHASE 4 COMPLETE (July 9, 2026 Session 14)  
 **Live App:** https://fortressintelligence.space (app live via PM2 + Nginx)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx proxy active)  
-**Latest:** Session 13: Chart rendering (Recharts) deployed to Phase 2.0. Verified locally: AAPL/MSFT/TSLA returning 60-point chart data. Ready for VPS deployment.  
+**Latest:** Session 14: Phase 4 Trade Persistence complete. Migrated trades from in-memory (Phase 3) to PostgreSQL. 4 trades persisted and verified across app restarts. Commit: `96d722fb`. Ready for Phase 4+ (mark WIN/LOSS, analytics).  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
-**Deploy Status:** 🟢 Live — Phase 2.0 chart ready: `/api/analysis/gem-score?ticker=AAPL` includes chartData array. Deploy via: `git pull && npm install && npm run build && pm2 restart fortress-app --update-env`
+**Deploy Status:** 🟢 Live — Phase 4 active: `/api/analysis/feedback` now persists trades to `trades` table. Drizzle migration completed (`npm run drizzle:push`). API surface unchanged (no breaking changes).
 
 ---
 
@@ -128,6 +128,15 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 ---
 
 ## 📊 CURRENT STATE (July 10, 2026 — Phase 2.0 Chart Rendering Complete)
+
+### ✅ PHASE 4.0: TRADE PERSISTENCE LIVE (July 9, 2026 — Session 14)
+- **Status:** ✅ PostgreSQL `trades` table persisting all logged trades
+- **API:** POST `/api/analysis/feedback` → db.insert | GET → db.select + aggregate
+- **Data:** Ticker, GEM Score (0-100), Action (BOUGHT|SKIPPED|LOSS), Result (WIN|LOSS, nullable)
+- **Verified:** 4 trades logged, survived app restart, build 10.6s (VPS) / 6.0s (local)
+- **Changes:** 2 files (schema.ts +13 lines, route.ts 60→75 lines), no breaking changes
+- **Deployment:** drizzle:push successful, PM2 restarted, all validation tests passed
+- **Next:** Phase 4+ (mark WIN/LOSS, analytics, learning engine)
 
 ### ✅ PHASE 2.0: CHART RENDERING LIVE (July 10, 2026 — Session 13)
 - **Framework:** Recharts 2.12.7 LineChart with responsive container
@@ -306,6 +315,21 @@ Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push
 5. ✅ Graceful fallbacks (insufficient data → neutral, not 500 errors)
 6. ✅ Commit db0a0e7e, deployed to production
 
+### ✅ Session 14 Complete (July 9, 2026) — Phase 4 LIVE
+**Phase 4: Trade Persistence to PostgreSQL** ✅ COMPLETE
+1. ✅ **Schema:** Added `trades` table (ticker, gemScore, action, result, date, createdAt)
+2. ✅ **Migration:** `drizzle:push` created table on VPS PostgreSQL
+3. ✅ **API Update:** Swapped in-memory array → db.insert/select queries (no breaking changes)
+4. ✅ **Persistence:** 4 trades logged and verified surviving app restart
+5. ✅ **Principles:** Think Before Coding ✓, Simplicity First ✓, Surgical Changes (2 files) ✓, Goal-Driven ✓
+6. ✅ **Commit:** `96d722fb` | **Build:** 10.6s VPS, 6.0s local, 0 errors
+7. ✅ **Status:** LIVE — `/api/analysis/feedback` fully persistent
+
+**Ready for Phase 4+:**
+- Mark WIN/LOSS on existing trades (modal or button)
+- Analytics breakdown by GEM SCORE range (calculation already in place, now persistent)
+- Learning engine (feed back to GEM SCORE weights in Phase 5)
+
 ### Phase 2 Remaining Critical Path (Next Week)
 1. **Chart Integration** — Recharts/D3 for technical analysis rendering (multi-timeframe)
 2. **Broker Sync** — IBKR credentials capture + holdings import
@@ -378,11 +402,18 @@ Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push
 - `DELETE /api/portfolio/[id]` — soft-delete strategy with optional feedback
 - `POST /api/portfolio/seed` — idempotent seed for 10X Moonshot strategy
 
-### API Endpoints (Hidden Gem Finder)
+### API Endpoints (Hidden Gem Finder / Trading Specialist)
 - `GET /api/analysis/gem-score?ticker=AAPL` — Analyze single ticker
 - Input: ticker symbol (AAPL, HDFC, etc.)
-- Output: GEM SCORE signals, bottom line, multi-timeframe data
-- Phase 2 ready: Mock data → real GEM SCORE calculation (swappable)
+- Output: GEM SCORE signals, bottom line, multi-timeframe data, 60-day chart
+- **Phase 4.0 LIVE:** Trade persistence via `/api/analysis/feedback`
+
+### API Endpoints (Trade Feedback / Phase 4)
+- `POST /api/analysis/feedback` — Log trade decision
+  - Input: `{ticker, gemScore: 0-100, action: "BOUGHT"|"SKIPPED"|"LOSS"}`
+  - Output: Trade persisted to PostgreSQL `trades` table
+- `GET /api/analysis/feedback?action=BOUGHT` — Retrieve trade stats
+  - Output: Win rate breakdown by GEM SCORE range (80-100%, 60-79%, 40-59%, 0-39%)
 
 ### Market Data Sources
 - **US:** yfinance (Yahoo Finance API wrapper)
@@ -449,7 +480,7 @@ npm run dev
 
 ## 📅 ROADMAP SUMMARY
 
-### ✅ COMPLETE (v0.6.0 — July 10, 2026) — PRODUCTION READY
+### ✅ COMPLETE (v0.7.0 — July 9, 2026) — PRODUCTION READY
 - ✅ Investment Genie (multi-market allocation wizard)
 - ✅ Fortress 30 (stock screening with risk-based filtering, redesigned June 16)
 - ✅ Dark Luxury UI (fully responsive, accessible)
@@ -459,6 +490,7 @@ npm run dev
 - ✅ Portfolio Strategy Tracker (live P&L, holdings, rebalance, feedback)
 - ✅ Hidden Gem Finder (AI trading specialist, GEM SCORE calculations, multi-timeframe analysis)
 - ✅ **PHASE 2.0:** Chart rendering (Recharts LineChart with price/SMA overlays, 60-day history)
+- ✅ **PHASE 4.0:** Trade Persistence (PostgreSQL `trades` table, db.insert/select queries)
 - ✅ Security hardening (6/8 CRITICAL issues fixed)
 - ✅ CI/CD pipeline hardened (DATABASE_URL export + validation scripts created)
 - ✅ TypeScript build: zero errors
@@ -469,22 +501,29 @@ npm run dev
 2. ✅ Added chartData to API response (60-day array)
 3. ✅ Integrated into Technical Analysis tab
 4. ✅ Verified locally: AAPL/MSFT/TSLA all returning charts
-5. ⏳ VPS deployment: `git pull && npm install && npm run build && pm2 restart fortress-app --update-env`
+5. ✅ VPS deployment complete (commit 4e3a4151)
 
-### Phase 3 (July-Aug 2026) — Learning Engine & Trade Feedback
-1. Trade feedback logging (in-memory tracker for win rate)
-2. Score-range breakdown (which GEM SCORE ranges perform best)
-3. Learning engine (identify winning allocations)
-4. Personalization (adjust presets based on learnings)
-5. A/B testing infrastructure
+### Session 14 (July 9) — Phase 4.0 Trade Persistence LIVE
+1. ✅ Added `trades` table to Drizzle schema
+2. ✅ Migrated API route from in-memory array to PostgreSQL (db.insert/select)
+3. ✅ Deployment: `drizzle:push` created table, PM2 restarted
+4. ✅ Verified persistence: 4 trades logged, survived app restart
+5. ✅ Commit `96d722fb` | Build 10.6s (VPS), 6.0s (local), 0 errors
+6. ✅ Principles applied: Think Before Coding ✓, Simplicity First ✓, Surgical Changes (2 files) ✓, Goal-Driven ✓
+
+### Phase 4+ (July-Aug 2026) — Analytics & Learning Engine
+1. Mark WIN/LOSS on existing trades (modal or button on detail view)
+2. Analytics dashboard (win rate by GEM SCORE range, monthly stats, best/worst tickers)
+3. Learning engine (feed back to GEM SCORE weights)
+4. Fundamental-to-technical bridge (cheap & about to turn signals)
+5. Advanced indicators (MACD, Bollinger Bands, volume divergence)
 
 ### Phase 2.1+ (Aug 2026) — Chart Enhancements
 1. Volume bars + Range shading
 2. Advanced technical overlays (MACD, Bollinger Bands)
-3. Fundamentals-to-technical bridge (cheap & about to turn signals)
-4. Broker sync (IBKR credentials + holdings import)
+3. Broker sync (IBKR credentials + holdings import)
 
-### Phase 4 (Q3 2026) — Advanced Analytics & Market Expansion
+### Phase 5+ (Q3 2026) — Market Expansion & Advanced Analytics
 1. Performance dashboard (returns, drawdown, volatility)
 2. Real-time alerts (drift, price moves, rebalance triggers)
 3. Malaysia (KLSE), Singapore (SGX), Hong Kong (HKEX)
@@ -514,9 +553,9 @@ This CLAUDE.md serves as the project's living memory. When:
 
 ---
 
-**Last Updated:** July 10, 2026 (Session 13)  
-**Status:** v0.6.0 Feature Complete | Phase 2.0 Chart Rendering Live | Phase 3 Ready  
-**Next:** VPS deployment of Phase 2.0 charts | Phase 3.0 trade feedback logging (July 10+)
+**Last Updated:** July 9, 2026 (Session 14)  
+**Status:** v0.7.0 Feature Complete | Phase 4.0 Trade Persistence Live | Phase 4+ Ready  
+**Next:** Mark WIN/LOSS on trades | Analytics dashboard | Learning engine (Phase 4+)
 
 ---
 
