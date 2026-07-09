@@ -32,6 +32,11 @@ async function getSession() {
 async function handleAuth(req?: NextRequest | any) {
   const path = req?.nextUrl?.pathname || "";
 
+  // Error page - redirect to login
+  if (path.includes("error")) {
+    return NextResponse.redirect(new URL("/login", req?.url || "http://localhost:3000"));
+  }
+
   // Routes that don't require authentication
   if (path.includes("signin") || path.includes("callback")) {
     return NextResponse.json({
