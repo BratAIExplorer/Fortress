@@ -297,7 +297,20 @@
       "Bash(chmod +x /tmp/vps_diagnostic.sh)",
       "Bash(tee /tmp/build.log)",
       "Bash(curl -s http://localhost:3000/api/analysis/gem-score?ticker=AAPL)",
-      "Bash(tail -30 /tmp/dev.log)"
+      "Bash(tail -30 /tmp/dev.log)",
+      "Bash(chmod +x /tmp/regression_test.sh)",
+      "Bash(/tmp/regression_test.sh)",
+      "Bash(tail -50 /tmp/dev_test.log | grep -A5 -B5 \"500\\\\|error\\\\|Error\" 2>/dev/null || echo \"No errors in log\")",
+      "Bash(curl -s https://fortressintelligence.space/api/analysis/gem-score?ticker=MSFT)",
+      "Bash(curl -s https://fortressintelligence.space/api/analysis/gem-score?ticker=TSLA)",
+      "Bash(python3 -m json.tool)",
+      "Bash(grep -n \"buildChartData\\\\|chartData\" /opt/fortress/app/api/analysis/gem-score/route.ts 2>/dev/null | head -10)",
+      "PowerShell(Get-Process node)",
+      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(\"Process killed\")",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(Head -5)",
+      "PowerShell(\"Processes killed\")"
     ]
   }
 }

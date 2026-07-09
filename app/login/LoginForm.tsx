@@ -32,23 +32,21 @@ export default function LoginForm() {
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        username,
-        password,
-        redirect: true,
-        callbackUrl,
-      }) as { error?: string } | undefined;
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-      if (result?.error) {
-        setError("Email or password is incorrect. Please try again or reset your password.");
+      if (response.ok) {
+        // Redirect to callback URL
+        window.location.href = callbackUrl;
+      } else {
+        const data = await response.json();
+        setError(data.error || "Login failed. Please try again.");
       }
     } catch {
       setError("Something went wrong. Please try again in a moment.");

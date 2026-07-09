@@ -218,7 +218,7 @@ export function TradingSpecialist() {
             })}
           </div>
 
-          {/* Technical Chart */}
+          {/* Tab Content */}
           {activeTab === "technical" && (
             <Card>
               <CardHeader className="pb-3">
@@ -238,6 +238,34 @@ export function TradingSpecialist() {
                     </p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === "fundamental" && (
+            <Card>
+              <CardContent className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
+                <Briefcase className="h-12 w-12 text-muted-foreground/30" />
+                <p className="text-muted-foreground text-center text-sm">
+                  Fundamental analysis coming soon
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  P/E ratio, earnings, dividend yield, and more
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === "options" && (
+            <Card>
+              <CardContent className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
+                <Layers className="h-12 w-12 text-muted-foreground/30" />
+                <p className="text-muted-foreground text-center text-sm">
+                  Multi-asset options coming soon
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Options chains, strategies, and risk analysis
+                </p>
               </CardContent>
             </Card>
           )}
