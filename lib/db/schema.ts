@@ -584,6 +584,21 @@ export const telegramValidationAudit = pgTable("telegram_validation_audit", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+// 23. TRADES — Trade log for Hidden Gem Finder / Trading Specialist (Phase 3+)
+// ponytail: in-memory → persisted, upgrade path ready
+export const trades = pgTable("trades", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ticker: varchar("ticker", { length: 10 }).notNull(),
+  gemScore: integer("gem_score").notNull(), // 0-100
+  action: varchar("action", { length: 10 }).notNull(), // BOUGHT|SKIPPED|LOSS
+  result: varchar("result", { length: 10 }), // WIN|LOSS (null until marked)
+  date: timestamp("date", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  tickerIdx: index("idx_trades_ticker").on(table.ticker),
+  dateIdx: index("idx_trades_date").on(table.date),
+}));
+
 // Modular Schema Exports
 export * from "./schema/auth";
 export * from "./schema/feedback";

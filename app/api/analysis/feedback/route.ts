@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// ponytail: in-memory trade log, single process
-// upgrade path: persistence to strategies.trades table (Phase 4)
-type TradeLog = {
-  ticker: string;
-  gemScore: number;
-  action: "BOUGHT" | "SKIPPED" | "LOSS";
-  date: string;
-  result?: "WIN" | "LOSS";
-};
-
-const tradeLog: TradeLog[] = [];
+import { db } from "@/lib/db";
+import { trades } from "@/lib/db/schema";
 
 export async function POST(request: NextRequest) {
   const { ticker, gemScore, action } = await request.json();
@@ -22,17 +12,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const trade: TradeLog = {
-    ticker: ticker.toUpperCase(),
-    gemScore: Math.max(0, Math.min(100, gemScore)),
-    action,
-    date: new Date().toISOString(),
-  };
-
-  tradeLog.push(trade);
+  const trade = await db
+    .insert(trades)
+    .values({
+      ticker: ticker.toUpperCase(),
+      gemScore: Math.max(0, Math.min(100, gemScore)),
+      action,
+      date: new Date(),
+    })
+    .returning();
 
   return NextResponse.json(
-    { success: true, trade },
+    { success: true, trade: trade[0] },
     { status: 201 }
   );
 }
@@ -40,10 +31,11 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const action = request.nextUrl.searchParams.get("action");
 
-  // Filter by action if specified
-  const filtered = action ? tradeLog.filter((t) => t.action === action) : tradeLog;
+  const allTrades = await db.select().from(trades);
+  const filtered = action
+    ? allTrades.filter((t) => t.action === action)
+    : allTrades;
 
-  // Calculate stats by score range
   const ranges = [
     { min: 80, max: 100, label: "80-100%" },
     { min: 60, max: 79, label: "60-79%" },

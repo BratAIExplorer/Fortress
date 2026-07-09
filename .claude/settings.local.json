@@ -312,7 +312,15 @@
       "PowerShell(Head -5)",
       "PowerShell(\"Processes killed\")",
       "Bash(curl -s -X POST http://localhost:3000/api/analysis/feedback -H 'Content-Type: application/json' -d '{\"ticker\":\"AAPL\",\"gemScore\":85,\"action\":\"BOUGHT\"}')",
-      "Bash(curl -s http://localhost:3000/api/analysis/feedback)"
+      "Bash(curl -s http://localhost:3000/api/analysis/feedback)",
+      "Bash(chmod +x /tmp/deploy_phase3.sh)",
+      "Bash(/tmp/deploy_phase3.sh)",
+      "Bash(chmod +x /tmp/verify_production.sh)",
+      "Bash(/tmp/verify_production.sh)",
+      "Bash(chmod +x /tmp/deploy_phase4.sh)",
+      "Bash(/tmp/deploy_phase4.sh)",
+      "Bash(chmod +x /tmp/verify_phase4.sh)",
+      "Bash(/tmp/verify_phase4.sh)"
     ]
   }
 }
