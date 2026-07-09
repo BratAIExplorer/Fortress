@@ -326,7 +326,9 @@
       "Bash(chmod +x /tmp/test_phase5.sh)",
       "Bash(/tmp/test_phase5.sh)",
       "Bash(curl -s -X POST https://fortressintelligence.space/api/analysis/learning-update?secret=test)",
-      "Bash(ssh root@76.13.179.32 'SECRET=$\\(grep CRON_SECRET /opt/fortress/.env.production | cut -d= -f2\\) && curl -s -X POST \"https://fortressintelligence.space/api/analysis/learning-update?secret=$SECRET\" -H '\\\\''Content-Type: application/json'\\\\'' 2>&1 | head -50')"
+      "Bash(ssh root@76.13.179.32 'SECRET=$\\(grep CRON_SECRET /opt/fortress/.env.production | cut -d= -f2\\) && curl -s -X POST \"https://fortressintelligence.space/api/analysis/learning-update?secret=$SECRET\" -H '\\\\''Content-Type: application/json'\\\\'' 2>&1 | head -50')",
+      "Bash(curl -s https://fortressintelligence.space/api/analysis/feedback)",
+      "Bash(curl -s -w \"\\\\nStatus: %{http_code}\\\\n\" https://fortressintelligence.space/api/analysis/feedback)"
     ]
   }
 }

@@ -95,6 +95,23 @@ export async function GET(request: NextRequest) {
     new Map(insights.map((m) => [m.scoreRange, m])).values()
   );
 
+  // ponytail: Calculate weight recommendations based on win rates
+  // Average win rate across ranges, recommend upweighting high performers
+  const avgWinRate =
+    stats.length > 0
+      ? stats.reduce((sum, s) => sum + (s.winRate || 0), 0) / stats.length
+      : 0;
+
+  const weightRecommendations = stats.map((s) => {
+    const adjustment = (s.winRate || 0) - avgWinRate;
+    return {
+      range: s.range,
+      currentWinRate: s.winRate,
+      adjustment: adjustment > 0 ? "UPWEIGHT" : adjustment < 0 ? "DOWNWEIGHT" : "MAINTAIN",
+      adjustmentPct: Math.round(adjustment),
+    };
+  });
+
   const totalTrades = filtered.length;
   const boughtCount = filtered.filter((t) => t.action === "BOUGHT").length;
   const overallWins = filtered.filter((t) => t.result === "WIN").length;
@@ -110,6 +127,7 @@ export async function GET(request: NextRequest) {
       overallWinRate,
       byScoreRange: stats,
       learningInsights: latestMetrics,
+      weightRecommendations,
       trades: filtered,
     },
     { status: 200 }
