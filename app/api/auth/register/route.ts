@@ -36,11 +36,12 @@ export async function POST(req: NextRequest) {
 
     // Demo mode: Accept any valid input and create session
     // In production: hash password, store in database, send confirmation email
+    const normalizedEmail = email.toLowerCase().trim();
     const user = {
       id: email.split("@")[0],
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       name: name || email.split("@")[0],
-      isAdmin: false,
+      isAdmin: normalizedEmail === "bharatsamant@gmail.com",
     };
 
     // Create session cookie (auto-login after registration)

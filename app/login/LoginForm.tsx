@@ -109,6 +109,7 @@ export default function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
+                showPasswordToggle
               />
             </div>
             <Button type="submit" className="w-full h-11" disabled={loading}>

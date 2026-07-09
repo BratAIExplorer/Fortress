@@ -19,11 +19,12 @@ export async function POST(req: NextRequest) {
 
     // Demo mode: accept any valid email/password combo
     // In production: query database, verify password hash, implement real authentication
+    const normalizedEmail = username.toLowerCase();
     const user = {
       id: username.split("@")[0],
-      email: username,
+      email: normalizedEmail,
       name: username.split("@")[0],
-      isAdmin: username === "admin@fortress.local",
+      isAdmin: normalizedEmail === "bharatsamant@gmail.com",
     };
 
     // Create session cookie

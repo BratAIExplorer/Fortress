@@ -180,6 +180,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 required
+                showPasswordToggle
               />
               <PasswordStrengthMeter
                 password={formData.password}
@@ -196,6 +197,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 required
+                showPasswordToggle
               />
             </div>
 
