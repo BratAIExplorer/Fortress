@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       id: email.split("@")[0],
       email: normalizedEmail,
       name: name || email.split("@")[0],
-      isAdmin: normalizedEmail === "bharatsamant@gmail.com",
+      isAdmin: false,
     };
 
     // Create session cookie (auto-login after registration)

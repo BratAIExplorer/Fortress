@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       id: username.split("@")[0],
       email: normalizedEmail,
       name: username.split("@")[0],
-      isAdmin: normalizedEmail === "bharatsamant@gmail.com",
+      isAdmin: false,
     };
 
     // Create session cookie
