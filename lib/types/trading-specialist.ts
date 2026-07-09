@@ -46,3 +46,25 @@ export interface AnalysisState {
   error: string | null;
   data: GemScoreResponse | null;
 }
+
+export interface TradeLog {
+  ticker: string;
+  gemScore: number;
+  action: "BOUGHT" | "SKIPPED" | "LOSS";
+  date: string;
+  result?: "WIN" | "LOSS";
+}
+
+export interface TradeStats {
+  totalTrades: number;
+  boughtCount: number;
+  overallWins: number;
+  overallWinRate: number | null;
+  byScoreRange: Array<{
+    range: string;
+    totalTrades: number;
+    boughtTrades: number;
+    wins: number;
+    winRate: number | null;
+  }>;
+}
