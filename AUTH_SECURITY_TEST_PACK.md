@@ -1,8 +1,24 @@
 # Fortress Intelligence — Authentication & Security Test Pack
 
-**Status:** 🔴 CRITICAL GAP | 51 test cases needed | 9-12 days to implement  
+**Status:** 🟢 PHASE 6 LIVE | Core auth stack deployed & production-validated July 10, 2026  
 **Created:** July 10, 2026 | **Owner:** QA Lead + Product Manager  
 **Impact:** These tests are BLOCKING public beta (users won't trust app without auth)
+
+---
+
+## 🐛 BUG REGISTRY — Phase 6 Production Validation (July 10, 2026)
+
+| # | Bug | Root Cause | Fix | Status |
+|---|-----|-----------|-----|--------|
+| 1 | Registration returned `500 "Failed to create account"` on every attempt | `auth_user` table was manually recreated during earlier VPS troubleshooting with an incomplete schema — missing `image`, `reset_token`, `reset_token_expires`, `has_seen_onboarding`, `onboarding_viewed_at` columns that the Drizzle schema queries reference. Every `SELECT` against the table failed silently. | Added missing columns via `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` on production DB. Verified with fresh registration test. | ✅ FIXED — commit `1f497bbf` (diagnostic logging), `aeaecfb4` (cleanup) |
+| 2 | Email verification link redirected to `http://0.0.0.0:3000/login?...` (unreachable internal bind address) instead of the public domain | `verify-email/route.ts` built the redirect URL with `new URL(path, req.url)`. Behind the Nginx reverse proxy, `req.url` reflects the app's internal bind address, not the public host. | Use `process.env.NEXT_PUBLIC_BASE_URL` as the redirect base instead of `req.url`. | ✅ FIXED — commit `3da4f424` |
+
+**Validated in production (curl-based end-to-end tests):**
+- ✅ Registration → account created, verification email queued
+- ✅ CSRF: unauthenticated POST to `/api/analysis/feedback` → `401 "Authentication required"` (auth gate runs before CSRF check, by design)
+- ✅ Rate limiting: 5 failed logins allowed, 6th attempt → locked out with `lockedUntil` timestamp
+- ✅ Email verification: token issued on signup, `/api/auth/verify-email?token=...` marks user verified (redirect target fixed per Bug #2)
+- ⏳ Pending: full re-test of verify → login unlock flow with fresh test account (previous account is rate-limited from Bug #2 testing)
 
 ---
 
