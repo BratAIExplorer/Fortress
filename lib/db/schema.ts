@@ -588,6 +588,7 @@ export const telegramValidationAudit = pgTable("telegram_validation_audit", {
 // ponytail: in-memory → persisted, upgrade path ready
 export const trades = pgTable("trades", {
   id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id", { length: 36 }).notNull(), // DATA ISOLATION FIX
   ticker: varchar("ticker", { length: 10 }).notNull(),
   gemScore: integer("gem_score").notNull(), // 0-100
   action: varchar("action", { length: 10 }).notNull(), // BOUGHT|SKIPPED|LOSS
@@ -599,6 +600,7 @@ export const trades = pgTable("trades", {
   date: timestamp("date", { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
+  userIdx: index("idx_trades_user").on(table.userId), // DATA ISOLATION INDEX
   tickerIdx: index("idx_trades_ticker").on(table.ticker),
   dateIdx: index("idx_trades_date").on(table.date),
   resultIdx: index("idx_trades_result").on(table.result),

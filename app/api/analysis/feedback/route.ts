@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { trades } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { getSessionFromRequest, requireAuth } from "@/lib/auth/middleware";
 
 export async function POST(request: NextRequest) {
+  // AUTH REQUIRED
+  const session = requireAuth(request);
+
   const { ticker, gemScore, action, entryPrice } = await request.json();
 
   if (!ticker || gemScore === undefined || !action) {
@@ -16,6 +20,7 @@ export async function POST(request: NextRequest) {
   const trade = await db
     .insert(trades)
     .values({
+      userId: session.userId, // DATA ISOLATION: Store userId
       ticker: ticker.toUpperCase(),
       gemScore: Math.max(0, Math.min(100, gemScore)),
       action,
@@ -31,12 +36,32 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  // AUTH REQUIRED
+  const session = requireAuth(request);
+
   const { tradeId, result } = await request.json();
 
   if (!tradeId || !result) {
     return NextResponse.json(
       { success: false, error: "Missing fields: tradeId, result" },
       { status: 400 }
+    );
+  }
+
+  // DATA ISOLATION: Verify user owns this trade
+  const existingTrade = await db
+    .select()
+    .from(trades)
+    .where(and(
+      eq(trades.id, tradeId),
+      eq(trades.userId, session.userId)
+    ))
+    .limit(1);
+
+  if (existingTrade.length === 0) {
+    return NextResponse.json(
+      { success: false, error: "Trade not found or access denied" },
+      { status: 403 }
     );
   }
 
@@ -53,14 +78,22 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  // AUTH REQUIRED
+  const session = requireAuth(request);
+
   const { learningMetrics } = await import("@/lib/db/schema");
 
   const action = request.nextUrl.searchParams.get("action");
 
-  const allTrades = await db.select().from(trades);
+  // DATA ISOLATION: Only return user's trades
+  const userTrades = await db
+    .select()
+    .from(trades)
+    .where(eq(trades.userId, session.userId));
+
   const filtered = action
-    ? allTrades.filter((t) => t.action === action)
-    : allTrades;
+    ? userTrades.filter((t) => t.action === action)
+    : userTrades;
 
   const ranges = [
     { min: 80, max: 100, label: "80-100%" },
