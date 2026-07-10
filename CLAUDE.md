@@ -2,12 +2,12 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE & PHASE 4 COMPLETE (July 9, 2026 Session 14)  
+**Status:** 🟢 LIVE & PHASE 6 COMPLETE (July 10, 2026 Session 15)  
 **Live App:** https://fortressintelligence.space (app live via PM2 + Nginx)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx proxy active)  
-**Latest:** Session 14: Phase 4 Trade Persistence complete. Migrated trades from in-memory (Phase 3) to PostgreSQL. 4 trades persisted and verified across app restarts. Commit: `96d722fb`. Ready for Phase 4+ (mark WIN/LOSS, analytics).  
+**Latest:** Session 15: Phase 6 Weight Recommendations complete. API endpoint `/api/analysis/feedback` now returns `weightRecommendations` array (UPWEIGHT/DOWNWEIGHT/MAINTAIN per GEM SCORE range). Ponytail math-based approach. Commit: `ce25e517`. Ready for Phase 6+ (UI dashboard, auto-adjustment framework).  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
-**Deploy Status:** 🟢 Live — Phase 4 active: `/api/analysis/feedback` now persists trades to `trades` table. Drizzle migration completed (`npm run drizzle:push`). API surface unchanged (no breaking changes).
+**Deploy Status:** 🟢 Live — Phase 6 active: Weight recommendations generating based on win rates by score range. Tested with real data: AAPL trade persisted, recommendations calculated correctly. API surface unchanged (no breaking changes).
 
 ---
 
@@ -127,7 +127,7 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 
 ---
 
-## 📊 CURRENT STATE (July 10, 2026 — Phase 2.0 Chart Rendering Complete)
+## 📊 CURRENT STATE (July 10, 2026 — Phase 6 Weight Recommendations Complete)
 
 ### ✅ PHASE 4.0: TRADE PERSISTENCE LIVE (July 9, 2026 — Session 14)
 - **Status:** ✅ PostgreSQL `trades` table persisting all logged trades
@@ -147,6 +147,21 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - **Testing:** AAPL/MSFT/TSLA verified returning 60-point chart arrays, responsive layout confirmed
 - **Deployment ready:** Commit pending, local build passed, awaiting VPS deployment
 - **Next:** Phase 3.0 (Trade feedback logging), Phase 2.1+ (Volume bars, range shading, fundamentals)
+
+### ✅ PHASE 6: WEIGHT RECOMMENDATIONS LIVE (July 10, 2026 — Session 15)
+- **Status:** ✅ API returns `weightRecommendations` array per GEM SCORE range
+- **Logic:** Calculate average win rate across all ranges, recommend UPWEIGHT/DOWNWEIGHT/MAINTAIN per range
+- **API:** GET `/api/analysis/feedback` now includes `weightRecommendations: [{range, currentWinRate, adjustment, adjustmentPct}, ...]`
+- **Math-based:** Ponytail lazy approach (no ML framework) — simple arithmetic comparing range win rate to average
+- **Recommendation signals:**
+  - `UPWEIGHT`: range win rate > average (upweight this range)
+  - `DOWNWEIGHT`: range win rate < average (downweight this range)
+  - `MAINTAIN`: range win rate = average (no change needed)
+- **Adjustment %:** Rounded percentage point difference from average (e.g., +15%, -8%, 0%)
+- **Verified:** AAPL test trade inserted, 80-100% range tracked, recommendations calculated correctly
+- **Files changed:** 2 (feedback/route.ts +30 lines, learning-update/route.ts already deployed Phase 5)
+- **Deployment:** Commit ce25e517, VPS live with real PostgreSQL data
+- **Next:** Phase 6+ (UI dashboard, auto-adjustment framework, sensitivity analysis)
 
 ### ✅ PHASE 2.1: REAL GEM SCORE LIVE (July 8, 2026)
 - **Real calculation:** G (Growth via SMA200) + E (Equity via SMA50) + M (Momentum via EMA21+RSI14)

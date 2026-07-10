@@ -328,7 +328,24 @@
       "Bash(curl -s -X POST https://fortressintelligence.space/api/analysis/learning-update?secret=test)",
       "Bash(ssh root@76.13.179.32 'SECRET=$\\(grep CRON_SECRET /opt/fortress/.env.production | cut -d= -f2\\) && curl -s -X POST \"https://fortressintelligence.space/api/analysis/learning-update?secret=$SECRET\" -H '\\\\''Content-Type: application/json'\\\\'' 2>&1 | head -50')",
       "Bash(curl -s https://fortressintelligence.space/api/analysis/feedback)",
-      "Bash(curl -s -w \"\\\\nStatus: %{http_code}\\\\n\" https://fortressintelligence.space/api/analysis/feedback)"
+      "Bash(curl -s -w \"\\\\nStatus: %{http_code}\\\\n\" https://fortressintelligence.space/api/analysis/feedback)",
+      "Bash(ssh root@76.13.179.32 \"curl -v https://fortressintelligence.space/api/analysis/feedback 2>&1 | head -50\")",
+      "Bash(ssh root@76.13.179.32 \"curl -s https://fortressintelligence.space/api/analysis/feedback 2>&1\")",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)",
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && pm2 status && echo '' && git log -1 --oneline\")",
+      "Bash(ssh root@76.13.179.32 \"curl -s http://localhost:3000/api/analysis/feedback 2>&1 | head -200\")",
+      "Bash(ssh root@76.13.179.32 \"pm2 logs fortress-app --lines 50 --nostream 2>&1 | tail -100\")",
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && npm run drizzle:push 2>&1 | tail -50\")",
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && cat .env.production | grep DATABASE_URL\")",
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && source .env.production && npm run drizzle:push 2>&1\")",
+      "Bash(ssh root@76.13.179.32 \"curl -s http://localhost:3000/api/analysis/feedback | python3 -c \\\\\"import sys, json; data = json.load\\(sys.stdin\\); print\\('✅ Keys:', list\\(data.keys\\(\\)\\)\\); print\\('✅ weightRecommendations:', json.dumps\\(data.get\\('weightRecommendations'\\), indent=2\\)\\)\\\\\" 2>&1\")",
+      "Bash(ssh root@76.13.179.32 \"pm2 logs fortress-app --lines 30 --nostream 2>&1 | grep -A 10 'error\\\\|Error\\\\|ERROR' | head -50\")",
+      "Bash(ssh root@76.13.179.32 \"psql -U fortress_user -d fortress -h localhost -c \\\\\"\\\\\\\\dt\\\\\" 2>&1\")",
+      "Bash(ssh root@76.13.179.32 \"PGPASSWORD=fortress_password psql -U fortress_user -d fortress -h localhost -c \\\\\"\\\\\\\\dt trades; \\\\\\\\dt learning_metrics;\\\\\" 2>&1\")",
+      "Bash(ssh root@76.13.179.32 \"pm2 logs fortress-app --lines 15 --nostream 2>&1 | tail -30\")",
+      "Bash(ssh root@76.13.179.32 \"PGPASSWORD=fortress_password psql -U fortress_user -d fortress -h localhost -c \\\\\"SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;\\\\\" 2>&1\")",
+      "Bash(ssh root@76.13.179.32 \"sleep 2 && curl -s http://localhost:3000/api/analysis/feedback\")"
     ]
   }
 }
