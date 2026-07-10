@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { validateCSRFToken } from "./csrf";
 
 export interface SessionData {
   userId: string;
@@ -38,5 +39,22 @@ export function requireAuthorizationForResource(
 ): void {
   if (session.userId !== resourceUserId && !session.isAdmin) {
     throw new Error("FORBIDDEN");
+  }
+}
+
+export async function requireCSRFToken(
+  req: NextRequest,
+  session: SessionData
+): Promise<void> {
+  const csrfToken = req.headers.get("x-csrf-token");
+
+  if (!csrfToken) {
+    throw new Error("CSRF_TOKEN_REQUIRED");
+  }
+
+  const isValid = await validateCSRFToken(session.userId, csrfToken);
+
+  if (!isValid) {
+    throw new Error("INVALID_CSRF_TOKEN");
   }
 }

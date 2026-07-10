@@ -2,79 +2,125 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { trades } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getSessionFromRequest, requireAuth } from "@/lib/auth/middleware";
+import { getSessionFromRequest, requireAuth, requireCSRFToken } from "@/lib/auth/middleware";
 
 export async function POST(request: NextRequest) {
-  // AUTH REQUIRED
-  const session = requireAuth(request);
+  try {
+    // AUTH REQUIRED
+    const session = requireAuth(request);
 
-  const { ticker, gemScore, action, entryPrice } = await request.json();
+    // CSRF PROTECTION
+    await requireCSRFToken(request, session);
 
-  if (!ticker || gemScore === undefined || !action) {
+    const { ticker, gemScore, action, entryPrice } = await request.json();
+
+    if (!ticker || gemScore === undefined || !action) {
+      return NextResponse.json(
+        { success: false, error: "Missing fields: ticker, gemScore, action" },
+        { status: 400 }
+      );
+    }
+
+    const trade = await db
+      .insert(trades)
+      .values({
+        userId: session.userId, // DATA ISOLATION: Store userId
+        ticker: ticker.toUpperCase(),
+        gemScore: Math.max(0, Math.min(100, gemScore)),
+        action,
+        entryPrice: entryPrice ? entryPrice.toString() : null,
+        date: new Date(),
+      })
+      .returning();
+
     return NextResponse.json(
-      { success: false, error: "Missing fields: ticker, gemScore, action" },
-      { status: 400 }
+      { success: true, trade: trade[0] },
+      { status: 201 }
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    if (message === "CSRF_TOKEN_REQUIRED" || message === "INVALID_CSRF_TOKEN") {
+      return NextResponse.json(
+        { success: false, error: message },
+        { status: 403 }
+      );
+    }
+    if (message === "UNAUTHENTICATED") {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    return NextResponse.json(
+      { success: false, error: message },
+      { status: 500 }
     );
   }
-
-  const trade = await db
-    .insert(trades)
-    .values({
-      userId: session.userId, // DATA ISOLATION: Store userId
-      ticker: ticker.toUpperCase(),
-      gemScore: Math.max(0, Math.min(100, gemScore)),
-      action,
-      entryPrice: entryPrice ? entryPrice.toString() : null,
-      date: new Date(),
-    })
-    .returning();
-
-  return NextResponse.json(
-    { success: true, trade: trade[0] },
-    { status: 201 }
-  );
 }
 
 export async function PUT(request: NextRequest) {
-  // AUTH REQUIRED
-  const session = requireAuth(request);
+  try {
+    // AUTH REQUIRED
+    const session = requireAuth(request);
 
-  const { tradeId, result } = await request.json();
+    // CSRF PROTECTION
+    await requireCSRFToken(request, session);
 
-  if (!tradeId || !result) {
+    const { tradeId, result } = await request.json();
+
+    if (!tradeId || !result) {
+      return NextResponse.json(
+        { success: false, error: "Missing fields: tradeId, result" },
+        { status: 400 }
+      );
+    }
+
+    // DATA ISOLATION: Verify user owns this trade
+    const existingTrade = await db
+      .select()
+      .from(trades)
+      .where(and(
+        eq(trades.id, tradeId),
+        eq(trades.userId, session.userId)
+      ))
+      .limit(1);
+
+    if (existingTrade.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Trade not found or access denied" },
+        { status: 403 }
+      );
+    }
+
+    const updated = await db
+      .update(trades)
+      .set({ result, checkedAt: new Date() })
+      .where(eq(trades.id, tradeId))
+      .returning();
+
     return NextResponse.json(
-      { success: false, error: "Missing fields: tradeId, result" },
-      { status: 400 }
+      { success: true, trade: updated[0] },
+      { status: 200 }
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    if (message === "CSRF_TOKEN_REQUIRED" || message === "INVALID_CSRF_TOKEN") {
+      return NextResponse.json(
+        { success: false, error: message },
+        { status: 403 }
+      );
+    }
+    if (message === "UNAUTHENTICATED") {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    return NextResponse.json(
+      { success: false, error: message },
+      { status: 500 }
     );
   }
-
-  // DATA ISOLATION: Verify user owns this trade
-  const existingTrade = await db
-    .select()
-    .from(trades)
-    .where(and(
-      eq(trades.id, tradeId),
-      eq(trades.userId, session.userId)
-    ))
-    .limit(1);
-
-  if (existingTrade.length === 0) {
-    return NextResponse.json(
-      { success: false, error: "Trade not found or access denied" },
-      { status: 403 }
-    );
-  }
-
-  const updated = await db
-    .update(trades)
-    .set({ result, checkedAt: new Date() })
-    .where(eq(trades.id, tradeId))
-    .returning();
-
-  return NextResponse.json(
-    { success: true, trade: updated[0] },
-    { status: 200 }
-  );
 }
 
 export async function GET(request: NextRequest) {

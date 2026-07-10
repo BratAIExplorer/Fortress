@@ -3,6 +3,7 @@ import { compare } from "bcryptjs";
 import { db } from "@/lib/db";
 import { authUser } from "@/lib/db/schema/auth";
 import { eq } from "drizzle-orm";
+import { generateCSRFToken } from "@/lib/auth/csrf";
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,6 +68,9 @@ export async function POST(req: NextRequest) {
       isAdmin: user.isAdmin,
     });
 
+    // Generate CSRF token for POST/PUT/DELETE requests
+    const csrfToken = await generateCSRFToken(user.id);
+
     const response = NextResponse.json(
       {
         success: true,
@@ -76,6 +80,7 @@ export async function POST(req: NextRequest) {
           name: user.name,
           isAdmin: user.isAdmin,
         },
+        csrfToken,
       },
       { status: 200 }
     );

@@ -57,3 +57,19 @@ export const emailTokens = pgTable(
     expiresIdx: index("idx_email_tokens_expires").on(table.expiresAt),
   })
 );
+
+export const csrfTokens = pgTable(
+  "csrf_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull().references(() => authUser.id, { onDelete: "cascade" }),
+    token: varchar("token", { length: 255 }).notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index("idx_csrf_user").on(table.userId),
+    tokenIdx: index("idx_csrf_token").on(table.token),
+    expiresIdx: index("idx_csrf_expires").on(table.expiresAt),
+  })
+);
