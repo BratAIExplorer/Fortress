@@ -11,14 +11,16 @@
 | # | Bug | Root Cause | Fix | Status |
 |---|-----|-----------|-----|--------|
 | 1 | Registration returned `500 "Failed to create account"` on every attempt | `auth_user` table was manually recreated during earlier VPS troubleshooting with an incomplete schema — missing `image`, `reset_token`, `reset_token_expires`, `has_seen_onboarding`, `onboarding_viewed_at` columns that the Drizzle schema queries reference. Every `SELECT` against the table failed silently. | Added missing columns via `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` on production DB. Verified with fresh registration test. | ✅ FIXED — commit `1f497bbf` (diagnostic logging), `aeaecfb4` (cleanup) |
-| 2 | Email verification link redirected to `http://0.0.0.0:3000/login?...` (unreachable internal bind address) instead of the public domain | `verify-email/route.ts` built the redirect URL with `new URL(path, req.url)`. Behind the Nginx reverse proxy, `req.url` reflects the app's internal bind address, not the public host. | Use `process.env.NEXT_PUBLIC_BASE_URL` as the redirect base instead of `req.url`. | ✅ FIXED — commit `3da4f424` |
+| 2 | Email verification link redirected to `http://0.0.0.0:3000/login?...` (unreachable internal bind address) instead of the public domain | `verify-email/route.ts` built the redirect URL with `new URL(path, req.url)`. Behind the Nginx reverse proxy, `req.url` reflects the app's internal bind address, not the public host. Additionally, `NEXT_PUBLIC_BASE_URL` was missing entirely from VPS `.env.local`, and — since `NEXT_PUBLIC_*` vars are inlined at Next.js **build time**, not read at runtime — adding the var later required a full rebuild, not just a PM2 restart, to take effect. | Use `process.env.NEXT_PUBLIC_BASE_URL` as the redirect base; added the var to `.env.local`; rebuilt (`rm -rf .next && npm run build`) to bake it into the bundle. | ✅ FIXED & VERIFIED — commit `3da4f424` |
 
-**Validated in production (curl-based end-to-end tests):**
-- ✅ Registration → account created, verification email queued
+**Validated end-to-end in production (curl-based tests, all passing):**
+- ✅ Registration → account created (201), verification email token issued
 - ✅ CSRF: unauthenticated POST to `/api/analysis/feedback` → `401 "Authentication required"` (auth gate runs before CSRF check, by design)
 - ✅ Rate limiting: 5 failed logins allowed, 6th attempt → locked out with `lockedUntil` timestamp
-- ✅ Email verification: token issued on signup, `/api/auth/verify-email?token=...` marks user verified (redirect target fixed per Bug #2)
-- ⏳ Pending: full re-test of verify → login unlock flow with fresh test account (previous account is rate-limited from Bug #2 testing)
+- ✅ Email verification: `/api/auth/verify-email?token=...` marks user verified, redirects to `https://fortressintelligence.space/login?verified=true` (correct public domain)
+- ✅ Post-verification login: succeeds with valid session + fresh `csrfToken` in response
+
+**Phase 6 auth stack: production-ready, no known open bugs.**
 
 ---
 
