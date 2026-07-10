@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { authUser } from "@/lib/db/schema/auth";
 import { eq } from "drizzle-orm";
 import { generateCSRFToken } from "@/lib/auth/csrf";
+import { checkLoginRateLimit, recordLoginFailure, recordLoginSuccess } from "@/lib/auth/rate-limiter";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,6 +27,18 @@ export async function POST(req: NextRequest) {
 
     const normalizedEmail = email.toLowerCase().trim();
 
+    // RATE LIMITING: Check login attempt limit
+    const rateCheck = checkLoginRateLimit(normalizedEmail);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: "Too many login attempts. Please try again later.",
+          lockedUntil: rateCheck.lockedUntil,
+        },
+        { status: 429 }
+      );
+    }
+
     // Query database for user
     const users = await db
       .select()
@@ -34,6 +47,7 @@ export async function POST(req: NextRequest) {
       .limit(1);
 
     if (users.length === 0) {
+      recordLoginFailure(normalizedEmail);
       return NextResponse.json(
         { error: "Email or password is incorrect" },
         { status: 401 }
@@ -46,6 +60,7 @@ export async function POST(req: NextRequest) {
     const passwordValid = await compare(password, user.password || "");
 
     if (!passwordValid) {
+      recordLoginFailure(normalizedEmail);
       return NextResponse.json(
         { error: "Email or password is incorrect" },
         { status: 401 }
@@ -70,6 +85,9 @@ export async function POST(req: NextRequest) {
 
     // Generate CSRF token for POST/PUT/DELETE requests
     const csrfToken = await generateCSRFToken(user.id);
+
+    // RATE LIMITING: Clear failed attempts on success
+    recordLoginSuccess(normalizedEmail);
 
     const response = NextResponse.json(
       {

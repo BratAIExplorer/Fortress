@@ -3,9 +3,20 @@ import { db } from "@/lib/db";
 import { trades } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionFromRequest, requireAuth, requireCSRFToken } from "@/lib/auth/middleware";
+import { checkAPIRateLimit, getClientId } from "@/lib/auth/rate-limiter";
 
 export async function POST(request: NextRequest) {
   try {
+    // RATE LIMITING: Check API request limit
+    const clientId = getClientId(request);
+    const rateCheck = checkAPIRateLimit(clientId);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: "Rate limit exceeded" },
+        { status: 429 }
+      );
+    }
+
     // AUTH REQUIRED
     const session = requireAuth(request);
 
@@ -60,6 +71,16 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // RATE LIMITING: Check API request limit
+    const clientId = getClientId(request);
+    const rateCheck = checkAPIRateLimit(clientId);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: "Rate limit exceeded" },
+        { status: 429 }
+      );
+    }
+
     // AUTH REQUIRED
     const session = requireAuth(request);
 
