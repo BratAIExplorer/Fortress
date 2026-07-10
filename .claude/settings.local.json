@@ -345,7 +345,8 @@
       "Bash(ssh root@76.13.179.32 \"PGPASSWORD=fortress_password psql -U fortress_user -d fortress -h localhost -c \\\\\"\\\\\\\\dt trades; \\\\\\\\dt learning_metrics;\\\\\" 2>&1\")",
       "Bash(ssh root@76.13.179.32 \"pm2 logs fortress-app --lines 15 --nostream 2>&1 | tail -30\")",
       "Bash(ssh root@76.13.179.32 \"PGPASSWORD=fortress_password psql -U fortress_user -d fortress -h localhost -c \\\\\"SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;\\\\\" 2>&1\")",
-      "Bash(ssh root@76.13.179.32 \"sleep 2 && curl -s http://localhost:3000/api/analysis/feedback\")"
+      "Bash(ssh root@76.13.179.32 \"sleep 2 && curl -s http://localhost:3000/api/analysis/feedback\")",
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && git pull origin main && npm run build 2>&1 | grep -E 'Compiled|Error' && pm2 restart fortress-app --update-env && sleep 3 && echo '✅ Deployed to VPS'\")"
     ]
   }
 }
