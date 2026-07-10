@@ -15,10 +15,12 @@ import {
   Moon,
   AlertCircle,
   RefreshCw,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MultiTimeframeSetupCard } from "@/components/fortress/MultiTimeframeSetupCard";
 import { TradingChart } from "@/components/fortress/TradingChart";
+import { WeightRecommendationsWidget } from "@/components/fortress/WeightRecommendationsWidget";
 import type {
   AnalysisState,
   GemScoreResponse,
@@ -33,7 +35,7 @@ export function TradingSpecialist() {
     data: null,
   });
   const [activeTab, setActiveTab] = useState<
-    "technical" | "fundamental" | "options"
+    "technical" | "fundamental" | "options" | "recommendations"
   >("technical");
 
   // Fetch GEM SCORE data
@@ -261,6 +263,11 @@ export function TradingSpecialist() {
                 label: "Multi-Asset Options",
                 icon: Layers,
               },
+              {
+                id: "recommendations",
+                label: "Weight Recommendations",
+                icon: BarChart3,
+              },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -333,6 +340,10 @@ export function TradingSpecialist() {
                 </p>
               </CardContent>
             </Card>
+          )}
+
+          {activeTab === "recommendations" && (
+            <WeightRecommendationsWidget />
           )}
 
           {/* Multi-Timeframe Panel - Enhanced for non-technical traders */}
