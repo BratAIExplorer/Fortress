@@ -37,3 +37,23 @@ export const passwordResetRequests = pgTable(
     expiresIdx: index("idx_reset_expires").on(table.expiresAt),
   })
 );
+
+export const emailTokens = pgTable(
+  "email_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull().references(() => authUser.id, { onDelete: "cascade" }),
+    email: varchar("email", { length: 255 }).notNull(),
+    token: varchar("token", { length: 255 }).notNull().unique(),
+    tokenType: varchar("token_type", { length: 20 }).notNull(), // VERIFY_EMAIL | PASSWORD_RESET
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index("idx_email_tokens_user").on(table.userId),
+    tokenIdx: index("idx_email_tokens_token").on(table.token),
+    typeIdx: index("idx_email_tokens_type").on(table.tokenType),
+    expiresIdx: index("idx_email_tokens_expires").on(table.expiresAt),
+  })
+);

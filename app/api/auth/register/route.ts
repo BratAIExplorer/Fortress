@@ -3,6 +3,7 @@ import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 import { authUser } from "@/lib/db/schema/auth";
 import { eq } from "drizzle-orm";
+import { sendVerificationEmail } from "@/lib/email/service";
 
 const PASSWORD_MIN_LENGTH = 8;
 
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
         name: name || normalizedEmail.split("@")[0],
         password: hashedPassword,
         isAdmin: false,
-        emailVerified: null, // TODO: Send verification email
+        emailVerified: null,
       })
       .returning({
         id: authUser.id,
@@ -81,11 +82,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Send verification email (non-blocking)
+    await sendVerificationEmail(normalizedEmail, newUser[0].id).catch(() => {
+      // Log but don't fail signup if email fails
+    });
+
     return NextResponse.json(
       {
         success: true,
         user: newUser[0],
-        message: "Account created successfully. Please log in.",
+        message: "Account created successfully. Check your email to verify.",
       },
       { status: 201 }
     );

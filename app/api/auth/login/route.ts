@@ -51,13 +51,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check email verification (TODO: enforce in Phase 1.1)
-    // if (!user.emailVerified) {
-    //   return NextResponse.json(
-    //     { error: "Please verify your email first" },
-    //     { status: 403 }
-    //   );
-    // }
+    // Check email verification
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email first. Check your inbox for the verification link." },
+        { status: 403 }
+      );
+    }
 
     // Create JWT session (simplified — use NextAuth for production)
     const sessionData = JSON.stringify({
