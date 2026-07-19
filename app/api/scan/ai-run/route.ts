@@ -10,6 +10,8 @@ export const dynamic = "force-dynamic";
 const FALLBACK_US_TICKERS = [
   "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AMD","INTC","QCOM",
   "SMH","QQQ","TQQQ","SOXL","INDA","GLD","SPY","XLK","XLF","XLE",
+  // ponytail: manual growth-name seed until a real S&P500/Nasdaq100 universe table exists
+  "DASH","PLTR","DDOG","SPOT","NU","APP","SQ","SE","MELI","SHOP","SOFI","NOW","RDDT","TOST","PANW",
 ];
 
 const RATE_LIMIT_MS = 200; // pause between Massive API calls

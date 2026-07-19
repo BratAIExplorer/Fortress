@@ -17,6 +17,7 @@ export interface UserProfile {
   riskAppetite: number; // 0-100 slider
   experience: "beginner" | "intermediate" | "experienced";
   incomeStability: "stable" | "variable" | "business";
+  residency?: "us-person" | "nri"; // NRI -> swap US-domiciled ETFs for UCITS equivalents (estate tax / withholding)
 }
 
 // ════════════════════════════════════════════════════════════════════════════

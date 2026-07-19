@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { emailTokens, authUser } from "@/lib/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 
-const transporter = nodemailer.createTransport({
+export const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || "587"),
   secure: process.env.SMTP_SECURE === "true",

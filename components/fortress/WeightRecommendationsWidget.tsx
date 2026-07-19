@@ -28,7 +28,9 @@ export function WeightRecommendationsWidget() {
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
-        const res = await fetch("/api/analysis/feedback");
+        const res = await fetch("/api/analysis/feedback", {
+          credentials: "include",
+        });
         if (!res.ok) throw new Error("Failed to fetch recommendations");
         const data = await res.json();
         setRecommendations(data.weightRecommendations || []);

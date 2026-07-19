@@ -346,7 +346,23 @@
       "Bash(ssh root@76.13.179.32 \"pm2 logs fortress-app --lines 15 --nostream 2>&1 | tail -30\")",
       "Bash(ssh root@76.13.179.32 \"PGPASSWORD=fortress_password psql -U fortress_user -d fortress -h localhost -c \\\\\"SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;\\\\\" 2>&1\")",
       "Bash(ssh root@76.13.179.32 \"sleep 2 && curl -s http://localhost:3000/api/analysis/feedback\")",
-      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && git pull origin main && npm run build 2>&1 | grep -E 'Compiled|Error' && pm2 restart fortress-app --update-env && sleep 3 && echo '✅ Deployed to VPS'\")"
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && git pull origin main && npm run build 2>&1 | grep -E 'Compiled|Error' && pm2 restart fortress-app --update-env && sleep 3 && echo '✅ Deployed to VPS'\")",
+      "Bash(curl -X POST https://fortressintelligence.space/api/auth/register -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(npx pm2 *)",
+      "Bash(curl -s https://fortressintelligence.space/api/health)",
+      "Bash(curl -X POST https://fortressintelligence.space/api/auth/login -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(env)",
+      "Bash(cd /opt/fortress && pwd && ls -la | grep -E \"env|\\\\.env\")",
+      "Bash(\n# Get FULL error context - not just last 5 lines\ngrep -B 5 -A 10 \"Failed to create account\\\\|Error: \\\\|at async\" /var/log/fortress/error-0.log | tail -100\n)",
+      "Bash(cd /opt/fortress && npm run build 2>&1 | tail -30)",
+      "Bash(cd /opt/fortress && npm run build 2>&1 | grep -E \"error|Error|ERROR\" || echo \"✓ Build OK\" && npx pm2 restart fortress-app --update-env && sleep 3)",
+      "Bash(psql -U fortress_user -d fortress -c \"SELECT token, expires_at, used_at FROM email_tokens WHERE email = 'prod-verify-test@test.dev' ORDER BY created_at DESC LIMIT 1;\")",
+      "Bash(curl -s -X POST https://fortressintelligence.space/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"prod-verify-test@test.dev\",\"password\":\"ProdTest123!\"}')",
+      "Bash(curl -s -i \"https://fortressintelligence.space/api/auth/verify-email?token=5e08aa1d98223424b0850bed80c9f9974a5837688535df7517304bf1ab50aa5d\")",
+      "mcp__Massive_Market_Data__search_endpoints",
+      "mcp__Massive_Market_Data__call_api",
+      "Bash(psql \"postgresql://fortress_user:fortress_password@localhost:5432/fortress\" -c \"select market, count\\(*\\) from stocks group by market;\")",
+      "Bash(node -e ' *)"
     ]
   }
 }

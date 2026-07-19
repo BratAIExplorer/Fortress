@@ -30,6 +30,7 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
   const [vehicles, setVehicles] = useState<UserProfile["vehicles"]>([]);
   const [riskAppetite, setRiskAppetite] = useState<number>(50);
   const [incomeStability, setIncomeStability] = useState<UserProfile["incomeStability"]>("stable");
+  const [residency, setResidency] = useState<UserProfile["residency"]>(undefined);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -76,6 +77,7 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
       vehicles: presetProfile.vehicles ?? vehicles,
       riskAppetite: presetProfile.riskAppetite ?? riskAppetite,
       incomeStability: presetProfile.incomeStability ?? incomeStability,
+      residency,
     };
 
     if (onSubmit) {
@@ -107,6 +109,7 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
       vehicles,
       riskAppetite,
       incomeStability,
+      residency,
     };
 
     if (onSubmit) {
@@ -262,6 +265,16 @@ export function InvestmentGenieForm({ onSubmit }: { onSubmit?: (profile: UserPro
               ))}
             </div>
             {errors.countries && <p className="text-destructive text-xs mt-2 font-medium">{errors.countries}</p>}
+
+            <label className="flex items-center gap-2 text-xs text-white/60 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={residency === "nri"}
+                onChange={(e) => setResidency(e.target.checked ? "nri" : undefined)}
+                className="accent-primary"
+              />
+              I&apos;m an NRI (non-US resident) — use UCITS ETFs instead of US-domiciled ones
+            </label>
           </div>
 
           {/* Investment Vehicle Types */}

@@ -47,6 +47,22 @@ export interface AnalysisState {
   data: GemScoreResponse | null;
 }
 
+export interface FundamentalsResponse {
+  success: boolean;
+  ticker: string;
+  currency: string;
+  trailingPE: number | null;
+  forwardPE: number | null;
+  priceToBook: number | null;
+  profitMargin: number | null; // fraction, e.g. 0.23
+  revenueGrowth: number | null; // fraction YoY
+  returnOnEquity: number | null; // fraction
+  dividendYield: number | null; // fraction
+  freeCashflow: number | null; // absolute, local currency
+  marketCap: number | null;
+  error?: string;
+}
+
 export interface TradeLog {
   ticker: string;
   gemScore: number;

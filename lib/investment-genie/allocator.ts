@@ -37,12 +37,16 @@ export function allocatePortfolio(
   );
 
   // 5. Build allocation layers
-  const layers = buildAllocationLayers(
+  const rawLayers = buildAllocationLayers(
     allocation,
     investmentUniverse,
     profile.countries,
     signals
   );
+
+  // 5b. Macro/signal adjustments can push weights off 100% — renormalize before swap/return.
+  const domicileLayers = applyDomicileSwap(rawLayers, profile.residency);
+  const layers = normalizeAllocation(domicileLayers);
 
   // 6. Generate signal-driven actions
   const signalActions = generateSignalActions(signals, allocation);
@@ -522,6 +526,42 @@ function buildTaxOptimization(profile: UserProfile): {
   }
 
   return optimization;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// DOMICILE SWAP: US-domiciled ETF → UCITS (Ireland-domiciled) equivalent
+// NRIs holding US-domiciled ETFs face US estate tax exposure above $60k and
+// 30% dividend withholding without a treaty. UCITS equivalents avoid both.
+// ════════════════════════════════════════════════════════════════════════════
+
+const UCITS_MAP: Record<string, { ticker: string; why: string }> = {
+  VOO: { ticker: "CSPX", why: "S&P 500 UCITS (Ireland-domiciled). No US estate tax exposure, accumulating (no dividend leakage)." },
+  QQQ: { ticker: "EQQQ", why: "Nasdaq-100 UCITS equivalent. Same exposure, Ireland-domiciled." },
+  VXUS: { ticker: "IWDA", why: "Developed-ex-US UCITS equivalent." },
+  BND: { ticker: "AGGU", why: "Global aggregate bond UCITS equivalent." },
+  GLD: { ticker: "SGLN", why: "Physical gold UCITS ETF, Ireland-domiciled." },
+  SCHD: { ticker: "VHYL", why: "High-dividend UCITS equivalent (no direct SCHD clone exists)." },
+  DGRO: { ticker: "VHYL", why: "Dividend-growth UCITS equivalent (no direct DGRO clone exists)." },
+  SMH: { ticker: "SEMI", why: "Semiconductor UCITS equivalent." },
+};
+
+function applyDomicileSwap(
+  layers: Record<string, AllocationLayer>,
+  residency?: "us-person" | "nri"
+): Record<string, AllocationLayer> {
+  if (residency !== "nri") return layers;
+
+  const swapped: Record<string, AllocationLayer> = {};
+  for (const [key, layer] of Object.entries(layers)) {
+    swapped[key] = {
+      ...layer,
+      vehicles: layer.vehicles.map((v) => {
+        const ucits = UCITS_MAP[v.ticker];
+        return ucits ? { ...v, ticker: ucits.ticker, why: ucits.why } : v;
+      }),
+    };
+  }
+  return swapped;
 }
 
 // ════════════════════════════════════════════════════════════════════════════

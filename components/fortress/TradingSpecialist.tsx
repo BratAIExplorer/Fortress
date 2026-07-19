@@ -23,6 +23,7 @@ import { TradingChart } from "@/components/fortress/TradingChart";
 import { WeightRecommendationsWidget } from "@/components/fortress/WeightRecommendationsWidget";
 import type {
   AnalysisState,
+  FundamentalsResponse,
   GemScoreResponse,
   TradeSignal,
 } from "@/lib/types/trading-specialist";
@@ -37,6 +38,8 @@ export function TradingSpecialist() {
   const [activeTab, setActiveTab] = useState<
     "technical" | "fundamental" | "options" | "recommendations"
   >("technical");
+  const [fundamentals, setFundamentals] = useState<FundamentalsResponse | null>(null);
+  const [fundamentalsLoading, setFundamentalsLoading] = useState(false);
 
   // Fetch GEM SCORE data
   const analyzeTicke = useCallback(async (ticker: string) => {
@@ -89,6 +92,17 @@ export function TradingSpecialist() {
   useEffect(() => {
     analyzeTicke("AAPL");
   }, [analyzeTicke]);
+
+  // Fetch fundamentals lazily — only when the tab is opened, per current ticker
+  useEffect(() => {
+    if (activeTab !== "fundamental" || !state.ticker) return;
+    setFundamentalsLoading(true);
+    fetch(`/api/analysis/fundamentals?ticker=${state.ticker}`)
+      .then((res) => res.json())
+      .then((json: FundamentalsResponse) => setFundamentals(json))
+      .catch(() => setFundamentals(null))
+      .finally(() => setFundamentalsLoading(false));
+  }, [activeTab, state.ticker]);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -316,14 +330,37 @@ export function TradingSpecialist() {
 
           {activeTab === "fundamental" && (
             <Card>
-              <CardContent className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
-                <Briefcase className="h-12 w-12 text-muted-foreground/30" />
-                <p className="text-muted-foreground text-center text-sm">
-                  Fundamental analysis coming soon
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  P/E ratio, earnings, dividend yield, and more
-                </p>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Briefcase className="h-4 w-4 text-primary" />
+                  Fundamentals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fundamentalsLoading ? (
+                  <div className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
+                    <RefreshCw className="h-8 w-8 text-muted-foreground/30 animate-spin" />
+                  </div>
+                ) : !fundamentals || !fundamentals.success ? (
+                  <div className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
+                    <Briefcase className="h-12 w-12 text-muted-foreground/30" />
+                    <p className="text-muted-foreground text-center text-sm">
+                      {fundamentals?.error || "Fundamentals not available for this ticker"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <FundamentalStat label="Trailing P/E" value={fundamentals.trailingPE?.toFixed(1)} />
+                    <FundamentalStat label="Forward P/E" value={fundamentals.forwardPE?.toFixed(1)} />
+                    <FundamentalStat label="Price / Book" value={fundamentals.priceToBook?.toFixed(1)} />
+                    <FundamentalStat label="Profit Margin" value={formatPct(fundamentals.profitMargin)} />
+                    <FundamentalStat label="Revenue Growth (YoY)" value={formatPct(fundamentals.revenueGrowth)} />
+                    <FundamentalStat label="Return on Equity" value={formatPct(fundamentals.returnOnEquity)} />
+                    <FundamentalStat label="Dividend Yield" value={formatPct(fundamentals.dividendYield)} />
+                    <FundamentalStat label="Free Cash Flow" value={formatLarge(fundamentals.freeCashflow, fundamentals.currency)} />
+                    <FundamentalStat label="Market Cap" value={formatLarge(fundamentals.marketCap, fundamentals.currency)} />
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -410,5 +447,27 @@ function SignalCard({ signal }: { signal: TradeSignal }) {
         </p>
       </CardContent>
     </Card>
+  );
+}
+
+function formatPct(value: number | null | undefined): string | undefined {
+  return value === null || value === undefined ? undefined : `${(value * 100).toFixed(1)}%`;
+}
+
+function formatLarge(value: number | null | undefined, currency: string): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  const abs = Math.abs(value);
+  if (abs >= 1e12) return `${currency}${(value / 1e12).toFixed(2)}T`;
+  if (abs >= 1e9) return `${currency}${(value / 1e9).toFixed(2)}B`;
+  if (abs >= 1e6) return `${currency}${(value / 1e6).toFixed(2)}M`;
+  return `${currency}${value.toFixed(0)}`;
+}
+
+function FundamentalStat({ label, value }: { label: string; value: string | undefined }) {
+  return (
+    <div className="rounded-xl border border-primary/10 bg-card/60 px-4 py-3">
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">{label}</p>
+      <p className="text-sm font-bold font-mono">{value ?? "—"}</p>
+    </div>
   );
 }

@@ -285,8 +285,39 @@ async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
   };
 }
 
+async function getScore(ticker: string): Promise<GemScoreResponse> {
+  const cacheKey = ticker.toUpperCase();
+  const now = Date.now();
+
+  const cached = scoreCache.get(cacheKey);
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  const scoreData = await calculateGemScore(ticker);
+  scoreCache.set(cacheKey, { data: scoreData, timestamp: now });
+  return scoreData;
+}
+
 export async function GET(request: NextRequest) {
   const ticker = request.nextUrl.searchParams.get("ticker");
+  const tickersParam = request.nextUrl.searchParams.get("tickers");
+
+  // Batch mode: ?tickers=DASH,PLTR,SPOT
+  if (tickersParam) {
+    const tickers = tickersParam.split(",").map(t => t.trim()).filter(Boolean);
+    const results = await Promise.all(
+      tickers.map(async t => {
+        try {
+          return await getScore(t);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Analysis failed";
+          return { success: false, ticker: t, error: message } as GemScoreResponse;
+        }
+      })
+    );
+    return NextResponse.json({ results }, { status: 200 });
+  }
 
   if (!ticker || ticker.trim().length === 0) {
     return NextResponse.json(
@@ -295,18 +326,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const cacheKey = ticker.toUpperCase();
-  const now = Date.now();
-
-  // Check cache
-  const cached = scoreCache.get(cacheKey);
-  if (cached && now - cached.timestamp < CACHE_TTL) {
-    return NextResponse.json(cached.data, { status: 200 });
-  }
-
   try {
-    const scoreData = await calculateGemScore(ticker);
-    scoreCache.set(cacheKey, { data: scoreData, timestamp: now });
+    const scoreData = await getScore(ticker);
     return NextResponse.json(scoreData, { status: 200 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Analysis failed";
