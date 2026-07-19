@@ -3,6 +3,7 @@ import { db, schema } from "@/lib/db/client";
 import { eq, and, desc, notInArray, ne, count } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
 import { scoreTicker } from "@/lib/scanners/us-technical-scorer";
+import { getUSUniverse, getNSEUniverse } from "@/lib/scanners/universe";
 import { auth } from "@/auth";
 import { unstable_cache as cache } from "next/cache";
 
@@ -48,13 +49,8 @@ async function runScan(
     onEvent?: (data: ScanEvent) => void
 ): Promise<void> {
     try {
-        // ponytail: score tickers using TypeScript scanner, fallback to curated universe if API unavailable
-        // Expanded NSE universe to avoid self-perpetuating narrow scan (was only 8 tickers)
-        const tickers = market === "US"
-            ? ["AAPL", "MSFT", "NVDA", "GOOGL", "TSLA", "META", "AMZN", "NFLX", "DASH", "PLTR", "DDOG"]
-            : ["HDFC", "INFY", "TCS", "RELIANCE", "BAJAJFINSV", "ITC", "ASIANPAINT", "SBIN",
-               "WIPRO", "LT", "MARUTI", "SUNPHARMA", "HCLTECH", "ULTRACEMCO", "TATASTEEL",
-               "ADANIPORTS", "POWERGRID", "GAIL", "ONGC", "APOLLOHOSP", "DRREDDY", "TECHM"];
+        // ponytail: live index-constituent feeds (free, unauthenticated), 15-ticker static list only if the feed is unreachable
+        const tickers = market === "US" ? await getUSUniverse() : await getNSEUniverse();
 
         const apiKey = process.env.MASSIVE_API_KEY || "";
         const sampleScores: Record<string, { l1Pass: boolean; l2Pass: boolean; l3Pass: boolean; l4Pass: boolean; l5Pass: boolean; mbScore: number; mbTier: string; price: number }> = {

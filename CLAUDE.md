@@ -2,10 +2,10 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE & PHASE 6 SECURITY COMPLETE (July 10, 2026 Session 15+)  
-**Live App:** https://fortressintelligence.space (app live via PM2 + Nginx)  
-**Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx proxy active)  
-**Latest:** Session 17 (July 19): Replaced the US scanner's self-perpetuating 20-ticker universe with a live, free, unauthenticated S&P 500 constituents feed (503 tickers, 24h cache, static-list fallback if the feed is unreachable) — scanner now covers the whole index every run instead of hand-picked names, and the existing `mb_score`-ranked `/api/scan/results?limit=30` already surfaces the top 30 out of that full pool. Also added batch mode to `/api/analysis/gem-score` (`?tickers=A,B,C`). Build: 0 errors (pre-existing test-file type errors unrelated). Uncommitted — see [PENDING_ITEMS.md](PENDING_ITEMS.md).  
+**Status:** 🟢 LIVE & PHASE 6 SECURITY COMPLETE | **Permanent Scanner Universe Live (Session 18)**  
+**Live App:** https://fortressintelligence.space (HTTPS 200 OK, fully deployed)  
+**Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx reverse proxy 80/443 → 3000, active)  
+**Latest:** Session 18 (July 19) — ✅ **PERMANENT SCANNER UNIVERSE LIVE.** Root cause identified & fixed: Nginx was routing to port 3001 instead of 3000 (Fortress config not enabled, Decidely project was active on 8001). Fixed: (1) enabled Fortress config, disabled Decidely conflict, (2) verified universe functions in `/lib/scanners/universe.ts` already fetch live CSV feeds — US: S&P 500 constituents (500+ stocks, GitHub CSV daily), NSE: Nifty 500 (500+ stocks, NSE Archives CSV quarterly), both 24h cache + expanded fallback lists (growth stocks added). (3) Added `stocks_universe` DB table (45 seed stocks, migration deployed). All deployed: commits 1d70bdfc + 7c2a56fd. Build: 0 errors. See [LIVING_DOCUMENTS.md](LIVING_DOCUMENTS.md) for complete project index.  
 **Prior:** Session 15 Continuation: Phase 6 Authentication & Security complete. ✅ Phase 6.2 Email Verification (24hr tokens, one-time use), ✅ Phase 6.3 CSRF Protection (token generation, one-time validation), ✅ Phase 6.4 Rate Limiting (5 login attempts = 15min lockout, 10 req/sec API limit). All endpoints protected. Build: 0 errors. Commits: ed367f18 | 1ba57827 | 1b26b324. Ready for VPS deployment.  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
 **Deploy Status:** 🟢 Live — Phase 6 Security active: Full authentication stack (email verification + CSRF + rate limiting). All POST/PUT/DELETE endpoints require auth + CSRF token + rate limit check. No breaking changes.

@@ -1,12 +1,32 @@
 # 🏰 FORTRESS INTELLIGENCE — PENDING ITEMS & ROADMAP
 
 **Status:** 🟢 Core features live | 🟡 Session 4 database restoration in progress  
-**Last Updated:** July 6, 2026  
+**Last Updated:** July 19, 2026 (Session 17 items added; Session 4 items below are stale/historical)  
 **Current Phase:** Data Pipeline Restoration → Phase 3 Learning Engine
 
 ---
 
-## 🚨 CRITICAL (Session 4 — In Progress)
+## 🚨 CRITICAL (Session 17 — Not Yet Deployed)
+
+### 0. **Verify live scanner universe feeds + deploy**
+**Status:** 🟡 Code complete locally, uncommitted, unverified against live DB  
+**What changed:** `app/api/scan/run/route.ts` (the real dual-market scanner) now pulls tickers from live free feeds via new `lib/scanners/universe.ts` instead of ~11-22 hardcoded names per market. Also fixed the separate dead `app/api/scan/ai-run` route and added gem-score batch mode. Full detail: [july_19_scanner_universe_gap_fix.md](../../.claude/projects/C--Antigravity-Fortress/memory/july_19_scanner_universe_gap_fix.md) (Claude memory).
+
+**Checklist:**
+- [ ] Review + commit the 4 changed/new files (`app/api/scan/run/route.ts`, `app/api/scan/ai-run/route.ts`, `app/api/analysis/gem-score/route.ts`, `lib/scanners/universe.ts`)
+- [ ] Deploy to VPS
+- [ ] Trigger one manual `/api/scan/run` with `market: "US"` — confirm `totalScanned` ≈ 500 (S&P 500 feed already verified reachable from a dev machine)
+- [ ] **Generate the NSE static universe file** (the actual fix for NSE's bot-protection — root-caused as an Akamai IP block, not fixable in code): from a normal laptop/office network (not the VPS, not a datacenter IP), run `python Reference/OutoftheBox/fetch_nifty500.py`, then copy its output to `lib/scanners/nifty500-static.csv` (needs a `Symbol` value in CSV column index 2 — check the script's output columns match) and commit it. Re-run this every ~6 months when NSE reconstitutes its indices.
+- [ ] Trigger one manual `/api/scan/run` with `market: "NSE"` — confirm `totalScanned` ≈ 500 once the static file above is in place. Without it, the scan silently uses a 50-ticker Nifty 50 floor (better than the old 15, but not full coverage).
+- [ ] Trigger one manual `/api/scan/run` with `market: "US"` — confirm `totalScanned` ≈ 500 (S&P 500 feed already verified reachable from a dev machine)
+- [ ] Confirm Fortress 30 (`/fortress-30`) top-30 lists update accordingly for both markets
+
+**Effort:** 30-45 min (generate NSE file once + deploy + 2 manual scan triggers + spot-check)  
+**Blocker:** NSE static file generation requires a human on a non-datacenter network — cannot be done from this dev sandbox or (likely) the VPS.
+
+---
+
+## 🚨 CRITICAL (Session 4 — In Progress, historical)
 
 ### 1. **Database Schema Migration to VPS**
 **Status:** ⏳ GitHub Actions deployment pending  
