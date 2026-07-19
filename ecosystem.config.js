@@ -19,5 +19,22 @@ module.exports = {
       max_restarts: 10,
       min_uptime: "10s",
     },
+    {
+      name: "fortress-cron",
+      script: "cron-scheduler.js",
+      instances: 1,
+      exec_mode: "fork",
+      watch: false,
+      env: {
+        NODE_ENV: "production",
+        SCANNER_BASE_URL: "http://localhost:3000",
+      },
+      error_file: "/var/log/fortress/cron-error.log",
+      out_file: "/var/log/fortress/cron-out.log",
+      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
+      restart_delay: 4000,
+      max_restarts: 10,
+      min_uptime: "10s",
+    },
   ],
 };
