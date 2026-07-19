@@ -362,7 +362,8 @@
       "mcp__Massive_Market_Data__search_endpoints",
       "mcp__Massive_Market_Data__call_api",
       "Bash(psql \"postgresql://fortress_user:fortress_password@localhost:5432/fortress\" -c \"select market, count\\(*\\) from stocks group by market;\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/datasets/s-and-p-500-companies/master/data/constituents.csv\")"
     ]
   }
 }

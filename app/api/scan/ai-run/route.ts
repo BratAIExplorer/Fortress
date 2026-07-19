@@ -1,47 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db/client";
-import { eq, and, desc, ne, count } from "drizzle-orm";
+import { eq, and, count } from "drizzle-orm";
 import { auth } from "@/auth";
 import { scoreTicker } from "@/lib/scanners/us-technical-scorer";
 
 export const dynamic = "force-dynamic";
 
-// Tickers to scan if no prior US scan exists in DB
+// Last-resort static list if the live constituents fetch fails (network down, source moved)
+// Include both mega-caps (SP500 core) + growth momentum names
 const FALLBACK_US_TICKERS = [
+  // Mega-cap core
   "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AMD","INTC","QCOM",
-  "SMH","QQQ","TQQQ","SOXL","INDA","GLD","SPY","XLK","XLF","XLE",
-  // ponytail: manual growth-name seed until a real S&P500/Nasdaq100 universe table exists
+  // Growth/momentum names (avoid self-perpetuating narrow universe)
   "DASH","PLTR","DDOG","SPOT","NU","APP","SQ","SE","MELI","SHOP","SOFI","NOW","RDDT","TOST","PANW",
 ];
 
 const RATE_LIMIT_MS = 200; // pause between Massive API calls
 
+// Free, unauthenticated, community-maintained S&P 500 constituents list — no paid data plan needed.
+const SP500_CSV_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/master/data/constituents.csv";
+const UNIVERSE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24h — index membership barely changes day to day
+
+let cachedUniverse: { tickers: string[]; fetchedAt: number } | null = null;
+
 async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function getUSTickersFromDB(): Promise<string[]> {
-  const lastScan = await db.query.scans.findFirst({
-    where: and(
-      eq(schema.scans.status, "COMPLETED"),
-      eq(schema.scans.market, "US")
-    ),
-    orderBy: [desc(schema.scans.runAt)],
-  });
+// ponytail: whole-index scan via a free public CSV instead of a hand-maintained ticker array.
+// Upgrade path if this source goes stale/unmaintained: swap SP500_CSV_URL for a paid index-membership API.
+async function getUSUniverse(): Promise<string[]> {
+  if (cachedUniverse && Date.now() - cachedUniverse.fetchedAt < UNIVERSE_CACHE_TTL) {
+    return cachedUniverse.tickers;
+  }
 
-  if (!lastScan) return FALLBACK_US_TICKERS;
+  try {
+    const res = await fetch(SP500_CSV_URL);
+    if (!res.ok) throw new Error(`constituents fetch failed: ${res.status}`);
+    const csv = await res.text();
+    const tickers = csv
+      .split("\n")
+      .slice(1) // header row: Symbol,Security,GICS Sector,...
+      .map(line => line.split(",")[0].trim())
+      .filter(Boolean);
 
-  const rows = await db
-    .select({ symbol: schema.scanResults.symbol })
-    .from(schema.scanResults)
-    .where(and(
-      eq(schema.scanResults.scanId, lastScan.id),
-      ne(schema.scanResults.category, "OFFLINE")
-    ))
-    .limit(100);
+    if (tickers.length < 100) throw new Error("constituents list looked truncated");
 
-  const tickers = rows.map(r => r.symbol).filter(Boolean);
-  return tickers.length > 0 ? tickers : FALLBACK_US_TICKERS;
+    cachedUniverse = { tickers, fetchedAt: Date.now() };
+    return tickers;
+  } catch {
+    return FALLBACK_US_TICKERS;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -70,7 +79,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "US scan already running" }, { status: 409 });
   }
 
-  const tickers = await getUSTickersFromDB();
+  const tickers = await getUSUniverse();
 
   // Create scan record
   const [scan] = await db.insert(schema.scans).values({

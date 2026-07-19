@@ -48,10 +48,13 @@ async function runScan(
     onEvent?: (data: ScanEvent) => void
 ): Promise<void> {
     try {
-        // ponytail: score tickers using TypeScript scanner, fallback to sample data if API unavailable
+        // ponytail: score tickers using TypeScript scanner, fallback to curated universe if API unavailable
+        // Expanded NSE universe to avoid self-perpetuating narrow scan (was only 8 tickers)
         const tickers = market === "US"
-            ? ["AAPL", "MSFT", "NVDA", "GOOGL", "TSLA", "META", "AMZN", "NFLX"]
-            : ["HDFC", "INFY", "TCS", "RELIANCE", "BAJAJFINSV", "ITC", "ASIANPAINT", "SBIN"];
+            ? ["AAPL", "MSFT", "NVDA", "GOOGL", "TSLA", "META", "AMZN", "NFLX", "DASH", "PLTR", "DDOG"]
+            : ["HDFC", "INFY", "TCS", "RELIANCE", "BAJAJFINSV", "ITC", "ASIANPAINT", "SBIN",
+               "WIPRO", "LT", "MARUTI", "SUNPHARMA", "HCLTECH", "ULTRACEMCO", "TATASTEEL",
+               "ADANIPORTS", "POWERGRID", "GAIL", "ONGC", "APOLLOHOSP", "DRREDDY", "TECHM"];
 
         const apiKey = process.env.MASSIVE_API_KEY || "";
         const sampleScores: Record<string, { l1Pass: boolean; l2Pass: boolean; l3Pass: boolean; l4Pass: boolean; l5Pass: boolean; mbScore: number; mbTier: string; price: number }> = {

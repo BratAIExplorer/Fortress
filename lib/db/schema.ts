@@ -39,6 +39,21 @@ export const stocks = pgTable("stocks", {
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+// 1a. STOCKS_UNIVERSE TABLE (Master Registry for Scanner)
+export const stocksUniverse = pgTable("stocks_universe", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    symbol: text("symbol").notNull(),
+    market: text("market").notNull(), // 'US' | 'NSE'
+    capTier: text("cap_tier"), // 'mega' | 'large' | 'mid' | 'small'
+    sector: text("sector"),
+    source: text("source").notNull(), // 'SP500' | 'NASDAQ100' | 'NSE50' | 'NSE500' | 'MANUAL'
+    isActive: boolean("is_active").default(true),
+    addedAt: timestamp("added_at", { withTimezone: true }).defaultNow(),
+}, (t) => ({
+    symbolMarketIdx: index("idx_universe_symbol_market").on(t.symbol, t.market),
+    marketActiveIdx: index("idx_universe_market_active").on(t.market, t.isActive),
+}));
+
 // 1b. SCANS TABLE (History & Status)
 export const scans = pgTable("scans", {
     id: uuid("id").primaryKey().defaultRandom(),
