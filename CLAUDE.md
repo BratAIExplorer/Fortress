@@ -488,11 +488,18 @@ Full end-to-end feature shipped and pushed to GitHub (awaiting VPS `drizzle:push
 
 ## 🚀 DEPLOYMENT & OPERATIONS
 
-### Production Deployment
+### Production Deployment (With Audit)
 ```bash
 git push origin main
 # → GitHub Actions triggers build → test → deploy → restart PM2
+
+# THEN immediately run deployment audit (REQUIRED):
+bash ~/deployment-check.sh
+# Checks: processes online, env vars set, network/DB connectivity
+# See: DEPLOYMENT_AUDIT.md for full checklist
 ```
+
+**CRITICAL:** Always run the [DEPLOYMENT_AUDIT.md](DEPLOYMENT_AUDIT.md) checklist after deployment to catch config bugs before they hit users.
 
 ### Local Development
 ```bash
