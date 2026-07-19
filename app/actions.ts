@@ -1,7 +1,7 @@
 "use server";
 
 import { db, schema } from "@/lib/db/client";
-import { eq, ilike, sql, desc, and, notInArray, gte, ne } from "drizzle-orm";
+import { eq, ilike, sql, desc, and, notInArray, gte, ne, inArray } from "drizzle-orm";
 import {
     v5LowStocks,
     v5PennyStocks,
@@ -20,31 +20,63 @@ import { Stock, StockWithThesis, Concept } from "@/lib/types";
 
 
 export async function getStocks(market: string = "NSE"): Promise<Stock[]> {
-    const stocks = await db
-        .select()
-        .from(schema.stocks)
-        .where(eq(schema.stocks.market, market))
-        .orderBy(sql`${schema.stocks.qualityScore} DESC NULLS LAST`);
+    // PERMANENT FIX: Show LAST SCAN results from scanResults table, not static stocks
+    // Cron scheduler auto-populates scanResults → Fortress 30 shows real, live scan data
 
-    // Map Drizzle result to our interface
-    return stocks.map(s => ({
-        id: s.id,
-        symbol: s.symbol,
-        name: s.name,
-        sector: s.sector,
-        logo_url: s.logoUrl ?? undefined,
-        current_price: Number(s.currentPrice) || 0,
-        quality_score: s.qualityScore || 0,
-        market_cap_crores: Number(s.marketCapCrores) || 0,
-        pe_ratio: s.peRatio ? Number(s.peRatio) : undefined,
-        roce_5yr_avg: s.roce5yrAvg ? Number(s.roce5yrAvg) : undefined,
-        debt_to_equity: s.debtToEquity ? Number(s.debtToEquity) : undefined,
-        megatrend: s.megatrend || [],
-        is_active: s.isActive ?? true,
-        market: s.market,
-        created_at: s.createdAt?.toISOString(),
-        updated_at: s.updatedAt?.toISOString(),
-    }));
+    const [lastScan] = await db
+        .select()
+        .from(schema.scans)
+        .where(and(
+            eq(schema.scans.market, market),
+            eq(schema.scans.status, "COMPLETED")
+        ))
+        .orderBy(desc(schema.scans.runAt))
+        .limit(1);
+
+    // No scans yet = show empty state "No scan data yet"
+    if (!lastScan) return [];
+
+    // Get top 30 stocks from LAST SCAN by mbScore
+    const scanResults = await db
+        .select()
+        .from(schema.scanResults)
+        .where(eq(schema.scanResults.scanId, lastScan.id))
+        .orderBy(desc(schema.scanResults.mbScore || schema.scanResults.totalScore))
+        .limit(30);
+
+    // Enrich with stock metadata (name, sector, logo)
+    const stocksMap = new Map();
+    if (scanResults.length > 0) {
+        const symbols = scanResults.map(r => r.symbol);
+        const enrichment = await db
+            .select()
+            .from(schema.stocks)
+            .where(inArray(schema.stocks.symbol, symbols));
+        enrichment.forEach(s => stocksMap.set(s.symbol, s));
+    }
+
+    // Return scan results + enrichment as Stock interface
+    return scanResults.map(result => {
+        const stock = stocksMap.get(result.symbol);
+        return {
+            id: stock?.id || result.id,
+            symbol: result.symbol,
+            name: stock?.name || result.symbol,
+            sector: stock?.sector || "Unknown",
+            logo_url: stock?.logoUrl ?? undefined,
+            current_price: Number(result.priceAtScan) || 0,
+            quality_score: result.mbScore || result.totalScore || 0,
+            market_cap_crores: stock ? Number(stock.marketCapCrores) || 0 : 0,
+            pe_ratio: stock?.peRatio ? Number(stock.peRatio) : undefined,
+            roce_5yr_avg: stock?.roce5yrAvg ? Number(stock.roce5yrAvg) : undefined,
+            debt_to_equity: stock?.debtToEquity ? Number(stock.debtToEquity) : undefined,
+            megatrend: result.megatrendTag ? [result.megatrendTag] : stock?.megatrend || [],
+            is_active: true,
+            market: result.market,
+            created_at: lastScan.runAt?.toISOString(),
+            updated_at: lastScan.runAt?.toISOString(),
+        };
+    });
 }
 
 export async function getStockBySymbol(symbol: string): Promise<StockWithThesis | null> {
