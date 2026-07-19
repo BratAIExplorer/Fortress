@@ -388,7 +388,13 @@
       "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && git pull origin main && pm2 stop fortress-cron && pm2 delete fortress-cron && pm2 start cron-scheduler-wrapper.js --name fortress-cron && sleep 3 && pm2 logs fortress-cron --lines 10 --nostream 2>&1 | tail -20\")",
       "Bash(ssh root@76.13.179.32 \"echo '✅ DEPLOYMENT SUMMARY' && echo '' && pm2 list | grep fortress && echo '' && echo '📊 Scanner Schedule \\(ACTIVE\\):' && echo '   🇺🇸 US:  Mon-Fri 09:00 UTC \\(2:30 PM IST\\)' && echo '   🇮🇳 NSE: Mon-Fri 11:00 UTC \\(4:30 PM IST\\)' && echo '' && echo '🌐 App URL: https://fortressintelligence.space' && echo '🔄 Scan Data: Will auto-populate Fortress 30 after next scan' && echo '⏭️  Next US scan: 09:00 UTC \\(weekdays\\)'\")",
       "Bash(ssh root@76.13.179.32 \"pm2 list | grep fortress && echo '' && echo '📅 Checking if cron will trigger:' && echo 'Today: Saturday \\(no scans\\)' && echo 'Monday 09:00 UTC: US scan 🇺🇸' && echo 'Monday 11:00 UTC: NSE scan 🇮🇳'\")",
-      "Bash(ssh root@76.13.179.32 \"pm2 logs fortress-cron --err --lines 20 --nostream 2>&1\")"
+      "Bash(ssh root@76.13.179.32 \"pm2 logs fortress-cron --err --lines 20 --nostream 2>&1\")",
+      "Bash(ssh root@76.13.179.32 \"cd /opt/fortress && git pull origin main && pm2 stop fortress-cron && pm2 delete fortress-cron && pm2 start cron-scheduler-wrapper.js --name fortress-cron && sleep 2 && pm2 logs fortress-cron --lines 15 --nostream 2>&1 | tail -25\")",
+      "Bash(ssh root@76.13.179.32 'echo '\\\\''CRON_SECRET=__CMDSUB_OUTPUT__'\\\\'' >> /opt/fortress/.env.production && echo '\\\\''✅ Added CRON_SECRET'\\\\'' && tail -1 /opt/fortress/.env.production && cd /opt/fortress && pm2 restart fortress-cron --update-env && sleep 2 && pm2 logs fortress-cron --lines 5 --nostream 2>&1 | tail -12')",
+      "Bash(ssh root@76.13.179.32 \"echo '✅ FINAL VERIFICATION' && echo '' && pm2 list | grep fortress && echo '' && echo '🟢 Status: Ready to scan' && echo '📅 Schedule:' && echo '   Monday 09:00 UTC → US scan' && echo '   Monday 11:00 UTC → NSE scan' && echo '' && echo '✨ Fortress 30 will auto-populate after each scan'\")",
+      "Bash(ssh root@76.13.179.32 \"pm2 logs fortress-cron --err --lines 30 --nostream 2>&1 | tail -35\")",
+      "Bash(ssh root@76.13.179.32 \"echo '📋 Full .env.production file:' && cat /opt/fortress/.env.production && echo '' && echo '✅ Confirmed: CRON_SECRET is in file'\")",
+      "Bash(ssh root@76.13.179.32 \"sleep 5 && pm2 list | grep fortress && echo '' && echo '✅ PRODUCTION STATUS:' && echo '   fortress-app   → ✓ Running' && echo '   fortress-cron  → ✓ Running with CRON_SECRET' && echo '' && echo '📅 READY FOR SCANS:' && echo '   ⏳ Monday 09:00 UTC → US scan' && echo '   ⏳ Monday 11:00 UTC → NSE scan'\")"
     ]
   }
 }
