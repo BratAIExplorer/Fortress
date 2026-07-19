@@ -55,6 +55,11 @@ curl -s https://fortressintelligence.space/api/scan/run -X GET | grep -q "error\
 ```bash
 # ✅ Check if app can query database (run from app container/environment)
 npm run db:validate
+
+# ✅ CRITICAL: Check PostgreSQL service is enabled to auto-start
+systemctl is-enabled postgresql
+# Should output: "enabled"
+# If "disabled", run: systemctl enable postgresql
 ```
 
 ### 6. Cron Schedule Verification
