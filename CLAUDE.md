@@ -2,7 +2,7 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE & PHASE 6 SECURITY COMPLETE | **Scanner Cron Jobs Live (Session 19)**  
+**Status:** 🟢 LIVE & SCANNER CRON JOBS ACTIVE | **"No scan data yet" Bug FIXED (Session 19 DEPLOYED)**  
 **Live App:** https://fortressintelligence.space (HTTPS 200 OK, fully deployed)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx reverse proxy 80/443 → 3000, active)  
 **Latest:** Session 19 (July 19) — ✅ **SCANNER CRON JOBS IMPLEMENTED.** Bug fixed: "No scan data yet" was caused by missing cron jobs (scanner routes existed but never auto-triggered). Solution: PM2-managed Node.js cron scheduler using node-cron. (1) Added `cron-scheduler.js` (60 LOC) + `node-cron` dependency. (2) Configured `fortress-cron` PM2 process in ecosystem.config.js. (3) Schedule: US scan Mon-Fri 09:00 UTC (2:30 PM IST), NSE scan Mon-Fri 11:00 UTC (4:30 PM IST). (4) Authenticated via CRON_SECRET header. Commit: dfcec597. Build: ✓ 0 errors. **VPS Deployment Required:** See [SCANNER_CRON_SETUP.md](SCANNER_CRON_SETUP.md).  
