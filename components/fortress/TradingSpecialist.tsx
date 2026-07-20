@@ -23,8 +23,9 @@ import { TradingChart } from "@/components/fortress/TradingChart";
 import { WeightRecommendationsWidget } from "@/components/fortress/WeightRecommendationsWidget";
 import { AssetTypeBadge } from "@/components/trading/AssetTypeBadge";
 import { FundMetricsPanel } from "@/components/trading/FundMetricsPanel";
-import { ConfidenceSummary } from "@/components/fortress/ConfidenceSummary";
+import { DecisionPanel } from "@/components/fortress/DecisionPanel";
 import { detectAssetType } from "@/lib/utils/detectAssetType";
+import { getTickerName } from "@/lib/utils/tickerNames";
 import type {
   AnalysisState,
   FundamentalsResponse,
@@ -218,31 +219,30 @@ export function TradingSpecialist() {
           {/* Asset Info Card */}
           <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
             <CardContent className="pt-6">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Analyzing</p>
-              <div className="flex items-center gap-4">
-                <h2 className="text-5xl font-bold text-foreground">
-                  {state.ticker}
-                </h2>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Analyzing</p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-5xl font-bold text-foreground">
+                    {state.ticker}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {getTickerName(state.ticker)}
+                  </p>
+                </div>
                 <AssetTypeBadge assetType={assetType} />
               </div>
             </CardContent>
           </Card>
 
-          {/* Confidence Summary */}
-          <ConfidenceSummary
+          {/* Unified Decision Panel (Confidence + Signal + Bottom Line + Action) */}
+          <DecisionPanel
             signals={state.data.signals}
-            primarySignal={state.data.signals[0] || null}
+            bottomLine={state.data.bottomLine}
+            onBuyClick={() => logTrade("BOUGHT")}
+            onSkipClick={() => logTrade("SKIPPED")}
           />
 
-          {/* Primary Signal (Largest Timeframe Emphasis) */}
-          {state.data.signals[0] && (
-            <SignalCard
-              signal={state.data.signals[0]}
-              isPrimary
-            />
-          )}
-
-          {/* Chart - Early for Visual Confirmation */}
+          {/* Chart - Visual Confirmation */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
@@ -291,59 +291,6 @@ export function TradingSpecialist() {
               )}
             </Card>
           )}
-
-          {/* Bottom Line */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Lightbulb className="h-4 w-4 text-primary" />
-                The Bottom Line
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="font-medium text-sm">
-                {state.data.bottomLine.headline}
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {state.data.bottomLine.body}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Log Trade Card */}
-          <Card className="border-primary/30 bg-primary/5">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                Log This Trade
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Track your decisions and build a win-rate history
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={() => logTrade("BOUGHT")}
-                  className="flex-1 gap-2"
-                >
-                  <TrendingUp className="h-4 w-4" />
-                  Bought
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => logTrade("SKIPPED")}
-                  className="flex-1 gap-2"
-                >
-                  <AlertCircle className="h-4 w-4" />
-                  Skipped
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Tabs */}
           <div className="flex gap-0 border-b border-border">
