@@ -34,6 +34,30 @@ grep -E "^(DATABASE_URL|CRON_SECRET|MASSIVE_API_KEY|NODE_ENV)" /opt/fortress/.en
 
 # ✅ Each var has a value (not empty)
 grep "=" /opt/fortress/.env.production | grep -v "^#" | awk -F= '{if ($2=="") print "EMPTY: "$1}'
+
+# ✅ CRITICAL: root .env.production and the standalone build's copy MUST match.
+# Next's standalone server reads .next/standalone/.env.production, NOT the
+# project-root file -- editing only the root file is invisible to the running
+# app until this is re-synced. Required after every deploy, not just once.
+# (Incident 2026-07-20, Bug 4.)
+diff /opt/fortress/.env.production /opt/fortress/.next/standalone/.env.production \
+  && echo "✅ env files match" \
+  || echo "❌ MISMATCH — run: cp /opt/fortress/.env.production /opt/fortress/.next/standalone/.env.production"
+
+# ✅ CRITICAL: .env.production must NOT be tracked in git (it's gitignored,
+# but was force-committed once before -- if this ever shows tracked again,
+# every future `git pull` will silently wipe CRON_SECRET). (Incident
+# 2026-07-20, Bug 3.)
+cd /opt/fortress && git ls-files --error-unmatch .env.production 2>/dev/null \
+  && echo "❌ .env.production IS TRACKED -- run: git rm --cached .env.production" \
+  || echo "✅ .env.production untracked"
+
+# ✅ CRITICAL: PM2's registered script for fortress-cron must match
+# ecosystem.config.js exactly -- a manually pm2-started side-script (e.g. a
+# "wrapper") silently drifts from the config file and survives every
+# `pm2 restart`. (Incident 2026-07-20, Bug 5.)
+pm2 describe fortress-cron | grep "script path"
+# Should show: /opt/fortress/cron-scheduler.js -- nothing else.
 ```
 
 ### 3. Cron Scheduler Status
