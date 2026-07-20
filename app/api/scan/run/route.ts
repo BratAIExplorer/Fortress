@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db/client";
 import { eq, and, desc, notInArray, ne, count } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
-import { scoreTicker } from "@/lib/scanners/us-technical-scorer";
+import { scoreTicker } from "@/lib/scanners/yahoo-technical-scorer";
 import { getUSUniverse, getNSEUniverse } from "@/lib/scanners/universe";
 import { auth } from "@/auth";
 import { unstable_cache as cache } from "next/cache";
@@ -52,33 +52,15 @@ async function runScan(
         // ponytail: live index-constituent feeds (free, unauthenticated), 15-ticker static list only if the feed is unreachable
         const tickers = market === "US" ? await getUSUniverse() : await getNSEUniverse();
 
-        const apiKey = process.env.MASSIVE_API_KEY || "";
-        const sampleScores: Record<string, { l1Pass: boolean; l2Pass: boolean; l3Pass: boolean; l4Pass: boolean; l5Pass: boolean; mbScore: number; mbTier: string; price: number }> = {
-            "AAPL": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 82, mbTier: "Rocket", price: 180 },
-            "MSFT": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 85, mbTier: "Rocket", price: 380 },
-            "NVDA": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 88, mbTier: "Rocket", price: 850 },
-            "GOOGL": { l1Pass: true, l2Pass: true, l3Pass: false, l4Pass: true, l5Pass: true, mbScore: 70, mbTier: "Builder", price: 140 },
-            "TSLA": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: false, l5Pass: true, mbScore: 68, mbTier: "Builder", price: 260 },
-            "META": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: false, mbScore: 72, mbTier: "Launcher", price: 500 },
-            "AMZN": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 79, mbTier: "Rocket", price: 180 },
-            "NFLX": { l1Pass: true, l2Pass: false, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 68, mbTier: "Builder", price: 425 },
-            "HDFC": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 78, mbTier: "Rocket", price: 2500 },
-            "INFY": { l1Pass: true, l2Pass: true, l3Pass: false, l4Pass: true, l5Pass: true, mbScore: 72, mbTier: "Launcher", price: 1800 },
-            "TCS": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 80, mbTier: "Rocket", price: 3500 },
-            "RELIANCE": { l1Pass: true, l2Pass: false, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 65, mbTier: "Builder", price: 2800 },
-            "BAJAJFINSV": { l1Pass: true, l2Pass: true, l3Pass: false, l4Pass: true, l5Pass: true, mbScore: 68, mbTier: "Launcher", price: 1400 },
-            "ITC": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: false, l5Pass: true, mbScore: 70, mbTier: "Launcher", price: 450 },
-            "ASIANPAINT": { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: false, mbScore: 75, mbTier: "Rocket", price: 3200 },
-            "SBIN": { l1Pass: true, l2Pass: false, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 62, mbTier: "Builder", price: 650 },
-        };
-
         onEvent?.({ type: "start", total: tickers.length });
 
         for (let i = 0; i < tickers.length; i++) {
             const ticker = tickers[i];
-            let score = apiKey && apiKey !== "test_key"
-                ? await scoreTicker(ticker, apiKey)
-                : { symbol: ticker, ...sampleScores[ticker] || { l1Pass: true, l2Pass: true, l3Pass: true, l4Pass: true, l5Pass: true, mbScore: 70, mbTier: "Builder", price: 100 }, error: undefined };
+            const score = await scoreTicker(ticker, market);
+
+            // yahoo-finance2 is an unofficial scraper -- small delay avoids
+            // tripping rate limits across a ~500-ticker sequential scan.
+            await new Promise(resolve => setTimeout(resolve, 150));
 
             if (!score.error) {
                 await db.insert(schema.scanResults).values({
