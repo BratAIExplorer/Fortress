@@ -21,6 +21,9 @@ import { cn } from "@/lib/utils";
 import { MultiTimeframeSetupCard } from "@/components/fortress/MultiTimeframeSetupCard";
 import { TradingChart } from "@/components/fortress/TradingChart";
 import { WeightRecommendationsWidget } from "@/components/fortress/WeightRecommendationsWidget";
+import { AssetTypeBadge } from "@/components/trading/AssetTypeBadge";
+import { FundMetricsPanel } from "@/components/trading/FundMetricsPanel";
+import { detectAssetType } from "@/lib/utils/detectAssetType";
 import type {
   AnalysisState,
   FundamentalsResponse,
@@ -40,6 +43,7 @@ export function TradingSpecialist() {
   >("technical");
   const [fundamentals, setFundamentals] = useState<FundamentalsResponse | null>(null);
   const [fundamentalsLoading, setFundamentalsLoading] = useState(false);
+  const [assetType, setAssetType] = useState<'stock' | 'etf' | 'unknown'>('unknown');
 
   // Fetch GEM SCORE data
   const analyzeTicke = useCallback(async (ticker: string) => {
@@ -60,6 +64,10 @@ export function TradingSpecialist() {
     }));
 
     try {
+      // Detect asset type (stock vs ETF)
+      const type = await detectAssetType(ticker);
+      setAssetType(type);
+
       const res = await fetch(`/api/analysis/gem-score?ticker=${ticker}`);
       const json: GemScoreResponse = await res.json();
 
@@ -152,15 +160,20 @@ export function TradingSpecialist() {
 
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
+      {/* Search Bar + Asset Type Badge */}
       <div className="flex gap-3 items-center">
-        <input
-          type="text"
-          placeholder="Enter ticker (AAPL, HDFC, etc.)"
-          defaultValue="AAPL"
-          onKeyDown={handleSearch}
-          className="flex-1 px-4 py-3 bg-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-        />
+        <div className="flex-1 flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Enter ticker (AAPL, HDFC, etc.)"
+            defaultValue="AAPL"
+            onKeyDown={handleSearch}
+            className="flex-1 px-4 py-3 bg-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          {state.data && !state.loading && (
+            <AssetTypeBadge assetType={assetType} />
+          )}
+        </div>
         <Button
           size="sm"
           onClick={handleSearchClick}
@@ -306,26 +319,43 @@ export function TradingSpecialist() {
 
           {/* Tab Content */}
           {activeTab === "technical" && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <ChartLine className="h-4 w-4 text-primary" />
-                  Price Action & Moving Averages
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {state.data.chartData && state.data.chartData.length > 0 ? (
-                  <TradingChart data={state.data.chartData} />
-                ) : (
-                  <div className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
-                    <ChartLine className="h-12 w-12 text-muted-foreground/30" />
-                    <p className="text-muted-foreground text-center text-sm">
-                      No chart data available
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <ChartLine className="h-4 w-4 text-primary" />
+                    Price Action & Moving Averages
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {state.data.chartData && state.data.chartData.length > 0 ? (
+                    <TradingChart data={state.data.chartData} />
+                  ) : (
+                    <div className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
+                      <ChartLine className="h-12 w-12 text-muted-foreground/30" />
+                      <p className="text-muted-foreground text-center text-sm">
+                        No chart data available
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* ETF-Specific Metrics (conditional) */}
+              {assetType === 'etf' && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <BarChart3 className="h-4 w-4 text-primary" />
+                      Fund Metrics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <FundMetricsPanel ticker={state.ticker} />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
 
           {activeTab === "fundamental" && (
