@@ -36,9 +36,17 @@ export async function GET(req: NextRequest): Promise<NextResponse<FundMetricsRes
       );
     }
 
+    // Validate ticker format at trust boundary
+    if (!/^[A-Z0-9.\-]{1,10}$/.test(ticker)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid ticker format' },
+        { status: 400 }
+      );
+    }
+
     // FAST-PATH: Check common ETF tickers FIRST (Node 20.20.2 yfinance2 workaround)
-    // ponytail: regex check before yfinance, fallback to yfinance for edge cases
-    const commonETFTickers = /^(SPY|QQQ|IVV|VOO|EFA|AGG|GLD|TLT|EEM|VWO|VTV|VUG|VB|VXUS|BND|BRK|XLK|XLF|XLY|XLP|XLE|XLI|XLU|XLRE|XLC)$/;
+    // ponytail: hardcoded ETF defaults (1.5% yield, 0.05% ER, 0.01% TE), upgrade: fetch real data when yfinance2 Node 20.x stabilizes
+    const commonETFTickers = /^(SPY|QQQ|IVV|VOO|EFA|AGG|GLD|TLT|EEM|VWO|VTV|VUG|VB|VXUS|BND|XLK|XLF|XLY|XLP|XLE|XLI|XLU|XLRE|XLC)$/;
     const isCommonETF = commonETFTickers.test(ticker);
 
     if (isCommonETF) {

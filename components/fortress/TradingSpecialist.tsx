@@ -68,7 +68,7 @@ export function TradingSpecialist() {
       const type = await detectAssetType(ticker);
       setAssetType(type);
 
-      const res = await fetch(`/api/analysis/gem-score?ticker=${ticker}`);
+      const res = await fetch(`/api/analysis/gem-score?ticker=${encodeURIComponent(ticker)}`);
       const json: GemScoreResponse = await res.json();
 
       if (!res.ok || !json.success) {
@@ -229,6 +229,41 @@ export function TradingSpecialist() {
                   {state.ticker}
                 </h2>
                 <AssetTypeBadge assetType={assetType} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Log Trade Card */}
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                Log This Trade
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Track your decisions and build a win-rate history
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={() => logTrade("BOUGHT")}
+                  className="flex-1 gap-2"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  Bought
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => logTrade("SKIPPED")}
+                  className="flex-1 gap-2"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  Skipped
+                </Button>
               </div>
             </CardContent>
           </Card>

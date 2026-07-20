@@ -14,7 +14,7 @@ export async function detectAssetType(ticker: string): Promise<AssetType> {
 
   try {
     // Try ETF detection first
-    const etfResponse = await fetch(`/api/analysis/etf-metrics?ticker=${normalized}`, {
+    const etfResponse = await fetch(`/api/analysis/etf-metrics?ticker=${encodeURIComponent(normalized)}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -26,7 +26,7 @@ export async function detectAssetType(ticker: string): Promise<AssetType> {
     }
 
     // Fallback to stock detection (existing gem-score endpoint)
-    const stockResponse = await fetch(`/api/analysis/gem-score?ticker=${normalized}`, {
+    const stockResponse = await fetch(`/api/analysis/gem-score?ticker=${encodeURIComponent(normalized)}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });

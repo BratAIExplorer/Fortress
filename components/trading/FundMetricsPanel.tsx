@@ -58,7 +58,7 @@ export function FundMetricsPanel({ ticker }: FundMetricsPanelProps) {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/analysis/etf-metrics?ticker=${ticker}`, {
+        const response = await fetch(`/api/analysis/etf-metrics?ticker=${encodeURIComponent(ticker)}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
