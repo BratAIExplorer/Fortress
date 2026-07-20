@@ -189,12 +189,6 @@ export async function GET(request: NextRequest) {
     };
   });
 
-  // Fetch learning insights (latest metrics by range)
-  const insights = await db.select().from(learningMetrics);
-  const latestMetrics = Array.from(
-    new Map(insights.map((m) => [m.scoreRange, m])).values()
-  );
-
   // ponytail: Calculate weight recommendations based on win rates
   // Average win rate across ranges, recommend upweighting high performers
   const avgWinRate =
@@ -226,7 +220,6 @@ export async function GET(request: NextRequest) {
       overallWins,
       overallWinRate,
       byScoreRange: stats,
-      learningInsights: latestMetrics,
       weightRecommendations,
       trades: filtered,
     },
