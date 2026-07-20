@@ -55,28 +55,35 @@ function atr(ohlc: Array<{ high: number; low: number; close: number }>, period =
 // ─── Helper: Resolve symbol (US, NSE .NS, LSE .L) ───────────────────
 async function resolveSymbol(ticker: string): Promise<{ symbol: string; currency: string }> {
   const normalized = ticker.toUpperCase().trim();
+  let lastError = '';
 
   // Try bare symbol first (US stocks, most common)
   try {
     const quote = await yahooFinance.quote(normalized);
     const currency = (quote as any).currency === 'INR' ? '₹' : '$';
     return { symbol: normalized, currency };
-  } catch {
-    // Try .NS for Indian stocks (Nifty) — this usually works faster
-    try {
-      await yahooFinance.quote(`${normalized}.NS`);
-      return { symbol: `${normalized}.NS`, currency: '₹' };
-    } catch {
-      // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
-      try {
-        await yahooFinance.quote(`${normalized}.L`);
-        return { symbol: `${normalized}.L`, currency: '£' };
-      } catch {
-        // All attempts failed — return bare symbol as fallback
-        return { symbol: normalized, currency: '$' };
-      }
-    }
+  } catch (e) {
+    lastError = (e instanceof Error ? e.message : String(e)).slice(0, 100);
   }
+
+  // Try .NS for Indian stocks (Nifty)
+  try {
+    await yahooFinance.quote(`${normalized}.NS`);
+    return { symbol: `${normalized}.NS`, currency: '₹' };
+  } catch (e) {
+    lastError = (e instanceof Error ? e.message : String(e)).slice(0, 100);
+  }
+
+  // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
+  try {
+    await yahooFinance.quote(`${normalized}.L`);
+    return { symbol: `${normalized}.L`, currency: '£' };
+  } catch (e) {
+    lastError = (e instanceof Error ? e.message : String(e)).slice(0, 100);
+  }
+
+  // All attempts failed — throw error instead of returning invalid symbol
+  throw new Error(`Symbol ${normalized} not found (tried: bare, .NS, .L): ${lastError}`);
 }
 
 // ─── Helper: Build a single TradeSignal ───────────────────────────
