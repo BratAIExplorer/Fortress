@@ -52,7 +52,7 @@ function atr(ohlc: Array<{ high: number; low: number; close: number }>, period =
   return sum / period;
 }
 
-// ─── Helper: Resolve symbol (US or NSE with .NS suffix) ───────────
+// ─── Helper: Resolve symbol (US, NSE .NS, LSE .L) ───────────────────
 async function resolveSymbol(ticker: string): Promise<{ symbol: string; currency: string }> {
   const normalized = ticker.toUpperCase().trim();
   try {
@@ -60,12 +60,18 @@ async function resolveSymbol(ticker: string): Promise<{ symbol: string; currency
     const currency = (quote as any).currency === 'INR' ? '₹' : '$';
     return { symbol: normalized, currency };
   } catch {
-    // Try with .NS suffix for Indian stocks
+    // Try .NS for Indian stocks
     try {
       await yahooFinance.quote(`${normalized}.NS`);
       return { symbol: `${normalized}.NS`, currency: '₹' };
     } catch {
-      return { symbol: normalized, currency: '$' };
+      // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
+      try {
+        await yahooFinance.quote(`${normalized}.L`);
+        return { symbol: `${normalized}.L`, currency: '£' };
+      } catch {
+        return { symbol: normalized, currency: '$' };
+      }
     }
   }
 }
