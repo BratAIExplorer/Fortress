@@ -582,7 +582,7 @@ export async function getLiveF30Stocks(limit = 30, market = "NSE"): Promise<Scan
         return results.map(r => mapToCandidate(r, scan.runAt));
     } catch (error) {
         console.error("Error fetching live F30 stocks:", error);
-        return [];
+        throw new Error("DB_UNAVAILABLE");
     }
 }
 

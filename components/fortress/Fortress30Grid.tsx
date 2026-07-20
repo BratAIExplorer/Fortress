@@ -2,19 +2,31 @@
 
 import { ScannerCandidate } from "@/lib/types";
 import { ScannerCandidateCard } from "./ScannerCandidateCard";
-import { RadioTower } from "lucide-react";
+import { RadioTower, TriangleAlert } from "lucide-react";
 
 interface Fortress30GridProps {
   stocks: ScannerCandidate[];
   marketConfig: { label: string };
   candidates: ScannerCandidate[];
+  dbError?: boolean;
 }
 
-export function Fortress30Grid({ stocks, marketConfig, candidates }: Fortress30GridProps) {
+export function Fortress30Grid({ stocks, marketConfig, candidates, dbError }: Fortress30GridProps) {
   return (
     <>
       {/* Stock Grid */}
-      {stocks.length === 0 ? (
+      {dbError ? (
+        <div className="py-24 text-center border border-dashed border-red-500/30 rounded-xl bg-red-950/10">
+          <TriangleAlert className="h-10 w-10 text-red-400 mx-auto mb-4" />
+          <h4 className="text-red-300 font-medium">
+            System issue — data temporarily unavailable
+          </h4>
+          <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto">
+            We couldn&apos;t reach the database. This isn&apos;t a missing scan —
+            it&apos;s an outage. Please try again shortly.
+          </p>
+        </div>
+      ) : stocks.length === 0 ? (
         <div className="py-24 text-center border border-dashed border-white/10 rounded-xl">
           <RadioTower className="h-10 w-10 text-slate-600 mx-auto mb-4" />
           <h4 className="text-slate-300 font-medium">

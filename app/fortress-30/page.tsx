@@ -17,10 +17,17 @@ export default async function Fortress30Page({
     const marketCode = (params.market ?? "NSE").toUpperCase();
     const marketConfig = getMarket(marketCode);
 
-    const [stocks, candidates] = await Promise.all([
-        getLiveF30Stocks(30, marketCode),
-        getLiveF30Candidates(10, marketCode),
-    ]);
+    let stocks: Awaited<ReturnType<typeof getLiveF30Stocks>> = [];
+    let candidates: Awaited<ReturnType<typeof getLiveF30Candidates>> = [];
+    let dbError = false;
+    try {
+        [stocks, candidates] = await Promise.all([
+            getLiveF30Stocks(30, marketCode),
+            getLiveF30Candidates(10, marketCode),
+        ]);
+    } catch {
+        dbError = true;
+    }
 
     return (
         <RiskProvider>
@@ -60,7 +67,7 @@ export default async function Fortress30Page({
                     </div>
 
                     {/* Stock Grid */}
-                    <Fortress30Grid stocks={stocks} marketConfig={marketConfig} candidates={candidates} />
+                    <Fortress30Grid stocks={stocks} marketConfig={marketConfig} candidates={candidates} dbError={dbError} />
                 </main>
             </div>
         </RiskProvider>
