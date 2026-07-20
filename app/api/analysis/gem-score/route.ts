@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { GemScoreResponse, TradeSignal } from "@/lib/types/trading-specialist";
 import YahooFinance from 'yahoo-finance2';
 
-const yahooFinance = new YahooFinance();
+// ponytail: Suppress strict validation for NSE/LSE tickers that don't match yahoo-finance2's schema
+// historical() deprecated but still works; mapped to chart() automatically
+const yahooFinance = new YahooFinance({
+  suppressNotices: ['ripHistorical']
+});
 
 // In-memory cache: { symbol: { data, timestamp } }
 const scoreCache = new Map<string, { data: GemScoreResponse; timestamp: number }>();
@@ -62,38 +66,44 @@ async function resolveSymbol(ticker: string): Promise<{ symbol: string; currency
   // Try bare symbol first (US stocks, most common)
   try {
     const quote = await yahooFinance.quote(normalized);
-    console.log(`[resolveSymbol] ${normalized} quote:`, { symbol: (quote as any).symbol, price: (quote as any).regularMarketPrice, currency: (quote as any).currency });
-    if ((quote as any).regularMarketPrice !== undefined) {
+    const price = (quote as any).regularMarketPrice;
+    if (price !== undefined && price !== null) {
       const currency = (quote as any).currency === 'INR' ? '₹' : '$';
-      console.log(`[resolveSymbol] ✓ Accepted ${normalized} with currency ${currency}`);
+      console.log(`[resolveSymbol] ✓ ${normalized}: price=${price}, currency=${currency}`);
       return { symbol: normalized, currency };
     }
+    console.log(`[resolveSymbol] ${normalized}: quote returned but no price`);
   } catch (e) {
-    console.log(`[resolveSymbol] ${normalized} failed:`, (e as Error).message);
+    const err = (e as Error).message;
+    console.log(`[resolveSymbol] ${normalized} error: ${err.substring(0, 100)}`);
   }
 
   // Try .NS for Indian stocks (Nifty)
   try {
     const quote = await yahooFinance.quote(`${normalized}.NS`);
-    console.log(`[resolveSymbol] ${normalized}.NS quote:`, { symbol: (quote as any).symbol, price: (quote as any).regularMarketPrice, currency: (quote as any).currency });
-    if ((quote as any).regularMarketPrice !== undefined) {
-      console.log(`[resolveSymbol] ✓ Accepted ${normalized}.NS with currency ₹`);
+    const price = (quote as any).regularMarketPrice;
+    if (price !== undefined && price !== null) {
+      console.log(`[resolveSymbol] ✓ ${normalized}.NS: price=${price}, currency=₹`);
       return { symbol: `${normalized}.NS`, currency: '₹' };
     }
+    console.log(`[resolveSymbol] ${normalized}.NS: quote returned but no price`);
   } catch (e) {
-    console.log(`[resolveSymbol] ${normalized}.NS failed:`, (e as Error).message);
+    const err = (e as Error).message;
+    console.log(`[resolveSymbol] ${normalized}.NS error: ${err.substring(0, 100)}`);
   }
 
   // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
   try {
     const quote = await yahooFinance.quote(`${normalized}.L`);
-    console.log(`[resolveSymbol] ${normalized}.L quote:`, { symbol: (quote as any).symbol, price: (quote as any).regularMarketPrice, currency: (quote as any).currency });
-    if ((quote as any).regularMarketPrice !== undefined) {
-      console.log(`[resolveSymbol] ✓ Accepted ${normalized}.L with currency £`);
+    const price = (quote as any).regularMarketPrice;
+    if (price !== undefined && price !== null) {
+      console.log(`[resolveSymbol] ✓ ${normalized}.L: price=${price}, currency=£`);
       return { symbol: `${normalized}.L`, currency: '£' };
     }
+    console.log(`[resolveSymbol] ${normalized}.L: quote returned but no price`);
   } catch (e) {
-    console.log(`[resolveSymbol] ${normalized}.L failed:`, (e as Error).message);
+    const err = (e as Error).message;
+    console.log(`[resolveSymbol] ${normalized}.L error: ${err.substring(0, 100)}`);
   }
 
   // Fallback: return bare symbol with $ (last resort)
