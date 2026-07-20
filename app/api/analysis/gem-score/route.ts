@@ -53,37 +53,44 @@ function atr(ohlc: Array<{ high: number; low: number; close: number }>, period =
 }
 
 // ─── Helper: Resolve symbol (US, NSE .NS, LSE .L) ───────────────────
-// ponytail: Use the symbol WE know we requested, not the response's symbol property
-// (response.symbol can be undefined on some tickers; our input is always valid)
+// ponytail: Validate quote response has working data; accept symbol only if
+// historical() will likely succeed (check currency, not just existence)
 async function resolveSymbol(ticker: string): Promise<{ symbol: string; currency: string }> {
   const normalized = ticker.toUpperCase().trim();
 
   // Try bare symbol first (US stocks, most common)
   try {
     const quote = await yahooFinance.quote(normalized);
-    const currency = (quote as any).currency === 'INR' ? '₹' : '$';
-    return { symbol: normalized, currency };
+    // Validate: quote.symbol can be undefined on some data; validate response quality
+    if ((quote as any).regularMarketPrice !== undefined) {
+      const currency = (quote as any).currency === 'INR' ? '₹' : '$';
+      return { symbol: normalized, currency };
+    }
   } catch (_e) {
     // Continue to next attempt
   }
 
   // Try .NS for Indian stocks (Nifty)
   try {
-    await yahooFinance.quote(`${normalized}.NS`);
-    return { symbol: `${normalized}.NS`, currency: '₹' };
+    const quote = await yahooFinance.quote(`${normalized}.NS`);
+    if ((quote as any).regularMarketPrice !== undefined) {
+      return { symbol: `${normalized}.NS`, currency: '₹' };
+    }
   } catch (_e) {
     // Continue to next attempt
   }
 
   // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
   try {
-    await yahooFinance.quote(`${normalized}.L`);
-    return { symbol: `${normalized}.L`, currency: '£' };
+    const quote = await yahooFinance.quote(`${normalized}.L`);
+    if ((quote as any).regularMarketPrice !== undefined) {
+      return { symbol: `${normalized}.L`, currency: '£' };
+    }
   } catch (_e) {
     // Continue to fallback
   }
 
-  // Fallback: return bare symbol with $ (last resort, will likely fail in historical call)
+  // Fallback: return bare symbol with $ (last resort)
   return { symbol: normalized, currency: '$' };
 }
 
