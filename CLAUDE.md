@@ -2,10 +2,10 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE — All infra bugs fixed, real data scoring now live (Session 21) | ✅ **Scan data is REAL (yahoo-finance2 powered, both markets)**  
+**Status:** 🟢 LIVE — All infra bugs fixed, real data scoring now live (Session 21) | ✅ **Scan data is REAL (yahoo-finance2 powered, both markets)** | ✅ **LSE support live (Ireland ETFs)**  
 **Live App:** https://fortressintelligence.space (HTTPS 200 OK, fully deployed)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx reverse proxy 80/443 → 3000, active)  
-**Latest:** Session 21 (July 20, continued) — Fixed the mock-data crisis: replaced Massive-only scorer with `yahoo-finance2`-based `lib/scanners/yahoo-technical-scorer.ts`. Both markets now ingest and score REAL data (NSE 501 scanned → 480 rated, US 503 scanned → 501 rated). Removed `MASSIVE_API_KEY` dependency entirely. **Fortress 30 rankings are now real, not synthetic.** Verified live: distinct real prices (APOLLOHOSP ₹8,905, BPCL ₹317.6, etc.) and computed scores. Next: 1-week observation period before Phase 2 expansion (Smallcap 250 + Russell 2000 with concurrent fetching). Full incident writeup: [INCIDENT_2026-07-20_FORTRESS30.md](INCIDENT_2026-07-20_FORTRESS30.md). Commits: 8e3e1410. **Prior Session 20:** Postgres down, missing DB grants, git-tracked .env.production, env-copy desync, PM2 drift, missing NSE universe file. All fixed. Commits: 6b3ce718, 5d3f53e0, 669978fb, 354ef547.  
+**Latest:** Session 23 (July 21) — Added London Stock Exchange (LSE) ticker support for Ireland-domiciled ETFs (CSPX, VUAA, VWRA, etc.). Symbol resolver now tries: US → NSE (.NS) → LSE (.L). Supports international investors (Malaysia, UK, etc.) seeking tax-efficient UCITS access. 6-line surgical addition to `resolveSymbol()`. Builds: ✓ 11.3s, 0 errors. Commits: cc73cf0b (fix Weight Recommendations) + c76db543 (add LSE). **Session 21 (July 20, continued)** — Fixed the mock-data crisis: replaced Massive-only scorer with `yahoo-finance2`-based `lib/scanners/yahoo-technical-scorer.ts`. Both markets now ingest and score REAL data (NSE 501 scanned → 480 rated, US 503 scanned → 501 rated). Removed `MASSIVE_API_KEY` dependency entirely. **Fortress 30 rankings are now real, not synthetic.** Verified live: distinct real prices (APOLLOHOSP ₹8,905, BPCL ₹317.6, etc.) and computed scores. Next: 1-week observation period before Phase 2 expansion (Smallcap 250 + Russell 2000 with concurrent fetching). Full incident writeup: [INCIDENT_2026-07-20_FORTRESS30.md](INCIDENT_2026-07-20_FORTRESS30.md). Commits: 8e3e1410. **Prior Session 20:** Postgres down, missing DB grants, git-tracked .env.production, env-copy desync, PM2 drift, missing NSE universe file. All fixed. Commits: 6b3ce718, 5d3f53e0, 669978fb, 354ef547.  
 **Prior:** Session 19 (July 19) — Added scanner cron jobs (`cron-scheduler.js`, PM2 `fortress-cron` process, node-cron). Correct in concept but several of its assumptions (CRON_SECRET present, env sync working) turned out false in production — see Session 20 above. Commit: dfcec597.  
 **Prior:** Session 15 Continuation: Phase 6 Authentication & Security complete. ✅ Phase 6.2 Email Verification (24hr tokens, one-time use), ✅ Phase 6.3 CSRF Protection (token generation, one-time validation), ✅ Phase 6.4 Rate Limiting (5 login attempts = 15min lockout, 10 req/sec API limit). All endpoints protected. Build: 0 errors. Commits: ed367f18 | 1ba57827 | 1b26b324. Ready for VPS deployment.  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
@@ -59,7 +59,8 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 **Hidden Gem Finder** _(NEW — July 7, 2026 Session 10 | AI Trading Specialist)_
 - ✨ **NEW:** `/trading-specialist` — Personal AI trading specialist for stock analysis
 - **LIVE PHASE 2.1:** Real GEM SCORE calculation (ALL tickers, not just AAPL/HDFC)
-- Single ticker search (AAPL, TSLA, MSFT, HDFC, any symbol with yfinance data)
+- ✨ **LSE SUPPORT (Session 23):** Ireland-domiciled ETFs (CSPX, VUAA, VWRA) + UK stocks (LSE.L suffix)
+- Single ticker search (AAPL, TSLA, MSFT, HDFC, CSPX, any symbol with yfinance data)
 - Real-time technical indicators: EMA(21), SMA(50/200), RSI(14), ATR(14), momentum
 - Strategy signals: Intraday / Short-term (1–6M) / Long-term (1Y+) with real confidence scoring
 - The Bottom Line: Plain-English actionable insights based on computed metrics
