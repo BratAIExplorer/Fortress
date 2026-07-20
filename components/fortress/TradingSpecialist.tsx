@@ -23,6 +23,7 @@ import { TradingChart } from "@/components/fortress/TradingChart";
 import { WeightRecommendationsWidget } from "@/components/fortress/WeightRecommendationsWidget";
 import { AssetTypeBadge } from "@/components/trading/AssetTypeBadge";
 import { FundMetricsPanel } from "@/components/trading/FundMetricsPanel";
+import { ConfidenceSummary } from "@/components/fortress/ConfidenceSummary";
 import { detectAssetType } from "@/lib/utils/detectAssetType";
 import type {
   AnalysisState,
@@ -44,6 +45,7 @@ export function TradingSpecialist() {
   const [fundamentals, setFundamentals] = useState<FundamentalsResponse | null>(null);
   const [fundamentalsLoading, setFundamentalsLoading] = useState(false);
   const [assetType, setAssetType] = useState<'stock' | 'etf' | 'unknown'>('unknown');
+  const [showSecondarySignals, setShowSecondarySignals] = useState(false);
 
   // Fetch GEM SCORE data
   const analyzeTicke = useCallback(async (ticker: string) => {
@@ -213,13 +215,6 @@ export function TradingSpecialist() {
       {/* Content */}
       {state.data && !state.loading && (
         <>
-          {/* Strategy Signals Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {state.data.signals.map((signal) => (
-              <SignalCard key={signal.timeframe} signal={signal} />
-            ))}
-          </div>
-
           {/* Asset Info Card */}
           <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
             <CardContent className="pt-6">
@@ -230,6 +225,88 @@ export function TradingSpecialist() {
                 </h2>
                 <AssetTypeBadge assetType={assetType} />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Confidence Summary */}
+          <ConfidenceSummary
+            signals={state.data.signals}
+            primarySignal={state.data.signals[0] || null}
+          />
+
+          {/* Primary Signal (Largest Timeframe Emphasis) */}
+          {state.data.signals[0] && (
+            <SignalCard
+              signal={state.data.signals[0]}
+              isPrimary
+            />
+          )}
+
+          {/* Chart - Early for Visual Confirmation */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ChartLine className="h-4 w-4 text-primary" />
+                Price Action & Moving Averages
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {state.data.chartData && state.data.chartData.length > 0 ? (
+                <TradingChart data={state.data.chartData} />
+              ) : (
+                <div className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
+                  <ChartLine className="h-12 w-12 text-muted-foreground/30" />
+                  <p className="text-muted-foreground text-center text-sm">
+                    No chart data available
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Secondary Signals (Collapsed by Default) */}
+          {state.data.signals.length > 1 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <button
+                  onClick={() => setShowSecondarySignals(!showSecondarySignals)}
+                  className="w-full flex items-center justify-between hover:opacity-80 transition-opacity"
+                >
+                  <CardTitle className="text-base">
+                    {showSecondarySignals ? '▼' : '▶'} Other Timeframes
+                  </CardTitle>
+                  <span className="text-xs text-muted-foreground">
+                    {state.data.signals.length - 1} more signals
+                  </span>
+                </button>
+              </CardHeader>
+              {showSecondarySignals && (
+                <CardContent className="space-y-3 border-t border-border pt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {state.data.signals.slice(1).map((signal) => (
+                      <SignalCard key={signal.timeframe} signal={signal} />
+                    ))}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          )}
+
+          {/* Bottom Line */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Lightbulb className="h-4 w-4 text-primary" />
+                The Bottom Line
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p className="font-medium text-sm">
+                {state.data.bottomLine.headline}
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {state.data.bottomLine.body}
+              </p>
             </CardContent>
           </Card>
 
@@ -265,24 +342,6 @@ export function TradingSpecialist() {
                   Skipped
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Bottom Line */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Lightbulb className="h-4 w-4 text-primary" />
-                The Bottom Line
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="font-medium text-sm">
-                {state.data.bottomLine.headline}
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {state.data.bottomLine.body}
-              </p>
             </CardContent>
           </Card>
 
@@ -330,27 +389,6 @@ export function TradingSpecialist() {
           {/* Tab Content */}
           {activeTab === "technical" && (
             <div className="space-y-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <ChartLine className="h-4 w-4 text-primary" />
-                    Price Action & Moving Averages
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {state.data.chartData && state.data.chartData.length > 0 ? (
-                    <TradingChart data={state.data.chartData} />
-                  ) : (
-                    <div className="p-12 flex flex-col items-center justify-center gap-3 min-h-80">
-                      <ChartLine className="h-12 w-12 text-muted-foreground/30" />
-                      <p className="text-muted-foreground text-center text-sm">
-                        No chart data available
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
               {/* ETF-Specific Metrics (conditional) */}
               {assetType === 'etf' && (
                 <Card>
@@ -446,7 +484,7 @@ export function TradingSpecialist() {
 }
 
 // ─── Signal Card ─────────────────────────────────────────────────────────────
-function SignalCard({ signal }: { signal: TradeSignal }) {
+function SignalCard({ signal, isPrimary = false }: { signal: TradeSignal; isPrimary?: boolean }) {
   const bgColor =
     signal.direction === "bullish"
       ? "bg-green-500/10 border-green-500/20"
@@ -468,6 +506,41 @@ function SignalCard({ signal }: { signal: TradeSignal }) {
         ? TrendingDown
         : Lightbulb;
 
+  if (isPrimary) {
+    // Primary signal: larger, more prominent
+    return (
+      <Card className={cn("border-2", bgColor, "shadow-lg")}>
+        <CardContent className="p-6 space-y-3">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                Primary Signal
+              </p>
+              <p className="text-2xl font-bold text-foreground mb-1">
+                {signal.label}
+              </p>
+            </div>
+            <Icon className="h-8 w-8 text-foreground" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {signal.timeframe === "intraday"
+                ? "Intraday (immediate)"
+                : signal.timeframe === "shortTerm"
+                  ? "Short-term (1–6 months)"
+                  : "Long-term (1+ years)"}
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold text-foreground">{signal.confidence}%</span>
+              <span className="text-xs text-muted-foreground">confidence</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Secondary signals: regular size
   return (
     <Card className={cn("border", bgColor)}>
       <CardContent className="p-4 text-center space-y-2">
