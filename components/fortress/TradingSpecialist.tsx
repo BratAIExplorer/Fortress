@@ -160,19 +160,16 @@ export function TradingSpecialist() {
 
   return (
     <div className="space-y-6">
-      {/* Search Bar + Asset Type Badge */}
+      {/* Search Bar */}
       <div className="flex gap-3 items-center">
-        <div className="flex-1 flex gap-2 items-center">
+        <div className="flex-1">
           <input
             type="text"
-            placeholder="Enter ticker (AAPL, HDFC, etc.)"
+            placeholder="Enter ticker (AAPL, HDFC, QQQ, etc.)"
             defaultValue="AAPL"
             onKeyDown={handleSearch}
-            className="flex-1 px-4 py-3 bg-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
-          {state.data && !state.loading && (
-            <AssetTypeBadge assetType={assetType} />
-          )}
         </div>
         <Button
           size="sm"
@@ -223,6 +220,19 @@ export function TradingSpecialist() {
             ))}
           </div>
 
+          {/* Asset Info Card */}
+          <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+            <CardContent className="pt-6">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Analyzing</p>
+              <div className="flex items-center gap-4">
+                <h2 className="text-5xl font-bold text-foreground">
+                  {state.ticker}
+                </h2>
+                <AssetTypeBadge assetType={assetType} />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Bottom Line */}
           <Card>
             <CardHeader className="pb-3">
@@ -238,41 +248,6 @@ export function TradingSpecialist() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {state.data.bottomLine.body}
               </p>
-            </CardContent>
-          </Card>
-
-          {/* Log Trade */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                Log This Trade
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Track your decisions and build a win-rate history
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={() => logTrade("BOUGHT")}
-                  className="flex-1 gap-2"
-                >
-                  <TrendingUp className="h-4 w-4" />
-                  Bought
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => logTrade("SKIPPED")}
-                  className="flex-1 gap-2"
-                >
-                  <AlertCircle className="h-4 w-4" />
-                  Skipped
-                </Button>
-              </div>
             </CardContent>
           </Card>
 
