@@ -120,32 +120,37 @@ export function DecisionPanel({
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3 border-t border-primary/10 pt-4">
-          <Button
-            size="lg"
-            variant="default"
-            onClick={onBuyClick}
-            className="flex-1 gap-2 text-base"
-          >
-            <TrendingUp className="h-4 w-4" />
-            Bought
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={onSkipClick}
-            className="flex-1 gap-2 text-base"
-          >
-            <AlertCircle className="h-4 w-4" />
-            Skipped
-          </Button>
+        {/* Log This Trade Label & Buttons */}
+        <div className="space-y-3 border-t border-primary/10 pt-4">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+              Log This Trade
+            </p>
+            <p className="text-sm text-muted-foreground mb-3">
+              Track your decision to build a win-rate history
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              size="lg"
+              variant="default"
+              onClick={onBuyClick}
+              className="flex-1 gap-2 text-base"
+            >
+              <TrendingUp className="h-4 w-4" />
+              Bought
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={onSkipClick}
+              className="flex-1 gap-2 text-base"
+            >
+              <AlertCircle className="h-4 w-4" />
+              Skipped
+            </Button>
+          </div>
         </div>
-
-        {/* Context */}
-        <p className="text-xs text-muted-foreground italic pt-2 border-t border-primary/10">
-          💡 Track your decisions to build a win-rate history and improve future selections.
-        </p>
       </CardContent>
     </Card>
   );

@@ -3,7 +3,7 @@
 // upgrade: fetch from yfinance metadata when available
 
 const TICKER_NAMES: Record<string, string> = {
-  // ETFs (Top 50)
+  // ETFs (Broad Market & Popular)
   SPY: "SPDR S&P 500 ETF",
   QQQ: "Invesco QQQ Trust",
   IVV: "iShares Core S&P 500 ETF",
@@ -19,6 +19,8 @@ const TICKER_NAMES: Record<string, string> = {
   VB: "Vanguard Small-Cap ETF",
   VXUS: "Vanguard Total International Stock",
   BND: "Vanguard Total Bond Market",
+
+  // Sector ETFs
   XLK: "Technology Select Sector SPDR",
   XLF: "Financial Select Sector SPDR",
   XLY: "Consumer Discretionary Select Sector",
@@ -28,6 +30,25 @@ const TICKER_NAMES: Record<string, string> = {
   XLU: "Utilities Select Sector SPDR",
   XLRE: "Real Estate Select Sector SPDR",
   XLC: "Communication Services Select Sector",
+
+  // Leveraged & Inverse ETFs
+  TQQQ: "ProShares UltraPro QQQ",
+  SQQQ: "ProShares UltraShort QQQ",
+  UPRO: "ProShares UltraPro S&P 500",
+  SPXU: "ProShares UltraShort S&P 500",
+  SSO: "ProShares Ultra S&P 500",
+  SDS: "ProShares UltraShort S&P 500",
+
+  // Popular Growth ETFs
+  ARKK: "ARK Innovation ETF",
+  ARKQ: "ARK Autonomous Tech & Robotics",
+  ARKG: "ARK Genomic Revolution ETF",
+  ARKF: "ARK Fintech Innovation ETF",
+  DIA: "SPDR Dow Jones Industrial Average",
+  IWM: "iShares Russell 2000 ETF",
+  SCHD: "Schwab U.S. Dividend Equity ETF",
+  JEPI: "JPMorgan Equity Premium Income",
+  INDA: "iShares MSCI India ETF",
 
   // Mega-cap stocks
   AAPL: "Apple Inc.",
