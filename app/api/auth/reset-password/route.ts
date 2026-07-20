@@ -1,11 +1,10 @@
 import { db } from "@/lib/db";
-import { authUser, passwordResetRequests } from "@/lib/db/schema/auth";
+import { authUser, passwordResetRequests, emailTokens } from "@/lib/db/schema/auth";
 import { eq, and, gt, isNull } from "drizzle-orm";
 import { hash } from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
-
-const PASSWORD_MIN_LENGTH = 8;
-const PASSWORD_MAX_LENGTH = 128;
+import { validatePassword } from "@/lib/validation/password";
+import { checkResetRateLimit, recordResetAttempt } from "@/lib/auth/rate-limiter";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,37 +18,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!newPassword || typeof newPassword !== "string") {
-      return NextResponse.json(
-        { error: "Password is required" },
-        { status: 400 }
-      );
-    }
-
-    if (newPassword.length < PASSWORD_MIN_LENGTH || newPassword.length > PASSWORD_MAX_LENGTH) {
-      return NextResponse.json(
-        { error: `Password must be between ${PASSWORD_MIN_LENGTH} and ${PASSWORD_MAX_LENGTH} characters` },
-        { status: 400 }
-      );
+    const passwordCheck = validatePassword(newPassword);
+    if (!passwordCheck.valid) {
+      return NextResponse.json({ error: passwordCheck.error }, { status: 400 });
     }
 
     // Validate token and find associated user
-    const resetRequest = await db
+    const resetToken = await db
       .select()
-      .from(passwordResetRequests)
+      .from(emailTokens)
       .where(
         and(
-          eq(passwordResetRequests.token, token),
-          gt(passwordResetRequests.expiresAt, new Date()),
-          isNull(passwordResetRequests.usedAt)
+          eq(emailTokens.token, token),
+          eq(emailTokens.tokenType, "PASSWORD_RESET"),
+          gt(emailTokens.expiresAt, new Date()),
+          isNull(emailTokens.usedAt)
         )
       )
       .limit(1);
 
-    if (!resetRequest.length) {
+    if (!resetToken.length) {
       return NextResponse.json(
         { error: "Invalid or expired reset link" },
         { status: 400 }
+      );
+    }
+
+    const tokenRecord = resetToken[0];
+
+    // Rate limiting: prevent brute-force on reset endpoint
+    const rateCheck = checkResetRateLimit(tokenRecord.email);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many reset attempts. Please try again later." },
+        { status: 429 }
       );
     }
 
@@ -61,29 +63,32 @@ export async function POST(req: NextRequest) {
       // Update password
       await tx
         .update(authUser)
-        .set({ 
+        .set({
           password: hashedPassword,
-          updatedAt: new Date() 
+          updatedAt: new Date()
         })
-        .where(eq(authUser.id, resetRequest[0].userId));
+        .where(eq(authUser.id, tokenRecord.userId));
 
       // Mark current token as used
       await tx
-        .update(passwordResetRequests)
+        .update(emailTokens)
         .set({ usedAt: new Date() })
-        .where(eq(passwordResetRequests.id, resetRequest[0].id));
+        .where(eq(emailTokens.id, tokenRecord.id));
 
       // Invalidate all other pending reset tokens for this user for security
       await tx
-        .update(passwordResetRequests)
+        .update(emailTokens)
         .set({ usedAt: new Date() })
         .where(
           and(
-            eq(passwordResetRequests.userId, resetRequest[0].userId),
-            isNull(passwordResetRequests.usedAt)
+            eq(emailTokens.userId, tokenRecord.userId),
+            eq(emailTokens.tokenType, "PASSWORD_RESET"),
+            isNull(emailTokens.usedAt)
           )
         );
     });
+
+    recordResetAttempt(tokenRecord.email);
 
     return NextResponse.json({
       success: true,

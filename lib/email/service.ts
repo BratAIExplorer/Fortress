@@ -53,6 +53,43 @@ export async function sendVerificationEmail(email: string, userId: string) {
   }
 }
 
+export async function sendPasswordResetEmail(email: string, userId: string) {
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + VERIFICATION_TOKEN_EXPIRES_MS);
+
+  // Store token in database
+  await db.insert(emailTokens).values({
+    userId,
+    email,
+    token,
+    tokenType: "PASSWORD_RESET",
+    expiresAt,
+  });
+
+  const resetUrl = `${BASE_URL}/reset-password/${token}`;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || "noreply@fortressintelligence.space",
+      to: email,
+      subject: "Reset your Fortress Intelligence password",
+      html: `
+        <h1>Reset Your Password</h1>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetUrl}" style="background-color: #8B5CF6; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">
+          Reset Password
+        </a>
+        <p>Or copy this link: ${resetUrl}</p>
+        <p>This link expires in 24 hours.</p>
+        <p>If you didn't request this, ignore this email.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Failed to send password reset email:", error);
+    throw error;
+  }
+}
+
 export async function verifyEmailToken(token: string) {
   const result = await db
     .select()

@@ -53,37 +53,38 @@ function atr(ohlc: Array<{ high: number; low: number; close: number }>, period =
 }
 
 // ─── Helper: Resolve symbol (US, NSE .NS, LSE .L) ───────────────────
+// ponytail: Use the symbol WE know we requested, not the response's symbol property
+// (response.symbol can be undefined on some tickers; our input is always valid)
 async function resolveSymbol(ticker: string): Promise<{ symbol: string; currency: string }> {
   const normalized = ticker.toUpperCase().trim();
-  let lastError = '';
 
   // Try bare symbol first (US stocks, most common)
   try {
     const quote = await yahooFinance.quote(normalized);
     const currency = (quote as any).currency === 'INR' ? '₹' : '$';
     return { symbol: normalized, currency };
-  } catch (e) {
-    lastError = (e instanceof Error ? e.message : String(e)).slice(0, 100);
+  } catch (_e) {
+    // Continue to next attempt
   }
 
   // Try .NS for Indian stocks (Nifty)
   try {
     await yahooFinance.quote(`${normalized}.NS`);
     return { symbol: `${normalized}.NS`, currency: '₹' };
-  } catch (e) {
-    lastError = (e instanceof Error ? e.message : String(e)).slice(0, 100);
+  } catch (_e) {
+    // Continue to next attempt
   }
 
   // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
   try {
     await yahooFinance.quote(`${normalized}.L`);
     return { symbol: `${normalized}.L`, currency: '£' };
-  } catch (e) {
-    lastError = (e instanceof Error ? e.message : String(e)).slice(0, 100);
+  } catch (_e) {
+    // Continue to fallback
   }
 
-  // All attempts failed — throw error instead of returning invalid symbol
-  throw new Error(`Symbol ${normalized} not found (tried: bare, .NS, .L): ${lastError}`);
+  // Fallback: return bare symbol with $ (last resort, will likely fail in historical call)
+  return { symbol: normalized, currency: '$' };
 }
 
 // ─── Helper: Build a single TradeSignal ───────────────────────────

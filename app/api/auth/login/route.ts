@@ -5,27 +5,25 @@ import { authUser } from "@/lib/db/schema/auth";
 import { eq } from "drizzle-orm";
 import { generateCSRFToken } from "@/lib/auth/csrf";
 import { checkLoginRateLimit, recordLoginFailure, recordLoginSuccess } from "@/lib/auth/rate-limiter";
+import { validateEmail, normalizeEmail } from "@/lib/validation/email";
+import { validatePassword } from "@/lib/validation/password";
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
     // Validation
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      return NextResponse.json({ error: emailCheck.error }, { status: 400 });
     }
 
-    if (!email.includes("@")) {
-      return NextResponse.json(
-        { error: "Invalid email format" },
-        { status: 400 }
-      );
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      return NextResponse.json({ error: passwordCheck.error }, { status: 400 });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedEmail = normalizeEmail(email);
 
     // RATE LIMITING: Check login attempt limit
     const rateCheck = checkLoginRateLimit(normalizedEmail);

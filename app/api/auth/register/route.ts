@@ -4,26 +4,22 @@ import { db } from "@/lib/db";
 import { authUser } from "@/lib/db/schema/auth";
 import { eq } from "drizzle-orm";
 import { sendVerificationEmail } from "@/lib/email/service";
-
-const PASSWORD_MIN_LENGTH = 8;
+import { validateEmail, normalizeEmail } from "@/lib/validation/email";
+import { validatePassword } from "@/lib/validation/password";
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password, name, consents } = await req.json();
 
     // Validation
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      return NextResponse.json({ error: emailCheck.error }, { status: 400 });
     }
 
-    if (!email.includes("@")) {
-      return NextResponse.json(
-        { error: "Please enter a valid email address" },
-        { status: 400 }
-      );
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      return NextResponse.json({ error: passwordCheck.error }, { status: 400 });
     }
 
     if (!consents?.dataCollection || !consents?.feedbackUsage) {
@@ -33,14 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (password.length < PASSWORD_MIN_LENGTH) {
-      return NextResponse.json(
-        { error: `Password must be at least ${PASSWORD_MIN_LENGTH} characters long` },
-        { status: 400 }
-      );
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedEmail = normalizeEmail(email);
 
     // Check if email already exists
     const existingUser = await db
