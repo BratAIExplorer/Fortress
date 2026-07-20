@@ -421,7 +421,8 @@
       "Bash(rm -f test-scorer.mjs)",
       "Bash(curl -s -m 20 -X POST https://fortressintelligence.space/api/scan/run -H 'Content-Type: application/json' -H 'x-cron-secret: __CMDSUB_OUTPUT__' -d '{\"market\":\"NSE\",\"weights\":{\"l1\":25,\"l2\":20,\"l3\":10,\"l4\":25,\"l5\":15,\"l6\":5}}')",
       "Bash(curl -s -m 20 -X POST https://fortressintelligence.space/api/scan/run -H 'Content-Type: application/json' -H 'x-cron-secret: __CMDSUB_OUTPUT__' -d '{\"market\":\"US\",\"weights\":{\"l1\":25,\"l2\":20,\"l3\":10,\"l4\":25,\"l5\":15,\"l6\":5}}')",
-      "Bash(curl -s -X POST https://fortressintelligence.space/api/macro -H 'Content-Type: application/json' -H 'x-cron-secret: __CMDSUB_OUTPUT__')"
+      "Bash(curl -s -X POST https://fortressintelligence.space/api/macro -H 'Content-Type: application/json' -H 'x-cron-secret: __CMDSUB_OUTPUT__')",
+      "Bash(curl -s https://fortressintelligence.space/api/analysis/gem-score?ticker=CSPX)"
     ]
   }
 }

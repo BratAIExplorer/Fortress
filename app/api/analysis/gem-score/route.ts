@@ -52,24 +52,27 @@ function atr(ohlc: Array<{ high: number; low: number; close: number }>, period =
   return sum / period;
 }
 
-// ─── Helper: Resolve symbol (US, NSE .NS, LSE .L) ───────────────────
+// ─── Helper: Resolve symbol (US, LSE .L, NSE .NS) ───────────────────
 async function resolveSymbol(ticker: string): Promise<{ symbol: string; currency: string }> {
   const normalized = ticker.toUpperCase().trim();
+
+  // Try bare symbol first (US stocks, most common)
   try {
     const quote = await yahooFinance.quote(normalized);
     const currency = (quote as any).currency === 'INR' ? '₹' : '$';
     return { symbol: normalized, currency };
   } catch {
-    // Try .NS for Indian stocks
+    // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
     try {
-      await yahooFinance.quote(`${normalized}.NS`);
-      return { symbol: `${normalized}.NS`, currency: '₹' };
+      await yahooFinance.quote(`${normalized}.L`);
+      return { symbol: `${normalized}.L`, currency: '£' };
     } catch {
-      // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
+      // Try .NS for Indian stocks (Nifty)
       try {
-        await yahooFinance.quote(`${normalized}.L`);
-        return { symbol: `${normalized}.L`, currency: '£' };
+        await yahooFinance.quote(`${normalized}.NS`);
+        return { symbol: `${normalized}.NS`, currency: '₹' };
       } catch {
+        // All attempts failed — return bare symbol as fallback
         return { symbol: normalized, currency: '$' };
       }
     }
