@@ -2,10 +2,10 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE — infra outage from Session 19 resolved (Session 20) | ⚠️ **Scan data is currently MOCK/SYNTHETIC in production — see Session 20 finding below**  
+**Status:** 🟢 LIVE — All infra bugs fixed, real data scoring now live (Session 21) | ✅ **Scan data is REAL (yahoo-finance2 powered, both markets)**  
 **Live App:** https://fortressintelligence.space (HTTPS 200 OK, fully deployed)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx reverse proxy 80/443 → 3000, active)  
-**Latest:** Session 20 (July 20) — Session 19's "cron fixed" claim was incomplete: Postgres was down, `fortress_user` had no table grants, `.env.production` was tracked in git (wiping CRON_SECRET on every `git pull`), the standalone build read a stale env copy, and PM2 was running a drifted `cron-scheduler-wrapper.js` instead of `ecosystem.config.js`'s declared script. All fixed and verified live. Also fixed: NSE universe file (`nifty500-static.csv`) never existed, so NSE scans silently used a 49-name fallback instead of the real ~500; sourced a real list via Wayback Machine. Added a "Last scanned" timestamp per market and a distinct DB-outage banner (previously indistinguishable from "no scan yet"). **Bigger open finding: `MASSIVE_API_KEY` is unset in prod, so every scan (both markets) has been serving hardcoded/placeholder data, not live computation — and Massive has no NSE coverage regardless. Recommended fix is reusing the working `yahoo-finance2`-based scorer from `/api/analysis/gem-score`, not yet implemented.** Full incident writeup: [INCIDENT_2026-07-20_FORTRESS30.md](INCIDENT_2026-07-20_FORTRESS30.md). Commits: 6b3ce718, 5d3f53e0, 669978fb, 354ef547.  
+**Latest:** Session 21 (July 20, continued) — Fixed the mock-data crisis: replaced Massive-only scorer with `yahoo-finance2`-based `lib/scanners/yahoo-technical-scorer.ts`. Both markets now ingest and score REAL data (NSE 501 scanned → 480 rated, US 503 scanned → 501 rated). Removed `MASSIVE_API_KEY` dependency entirely. **Fortress 30 rankings are now real, not synthetic.** Verified live: distinct real prices (APOLLOHOSP ₹8,905, BPCL ₹317.6, etc.) and computed scores. Next: 1-week observation period before Phase 2 expansion (Smallcap 250 + Russell 2000 with concurrent fetching). Full incident writeup: [INCIDENT_2026-07-20_FORTRESS30.md](INCIDENT_2026-07-20_FORTRESS30.md). Commits: 8e3e1410. **Prior Session 20:** Postgres down, missing DB grants, git-tracked .env.production, env-copy desync, PM2 drift, missing NSE universe file. All fixed. Commits: 6b3ce718, 5d3f53e0, 669978fb, 354ef547.  
 **Prior:** Session 19 (July 19) — Added scanner cron jobs (`cron-scheduler.js`, PM2 `fortress-cron` process, node-cron). Correct in concept but several of its assumptions (CRON_SECRET present, env sync working) turned out false in production — see Session 20 above. Commit: dfcec597.  
 **Prior:** Session 15 Continuation: Phase 6 Authentication & Security complete. ✅ Phase 6.2 Email Verification (24hr tokens, one-time use), ✅ Phase 6.3 CSRF Protection (token generation, one-time validation), ✅ Phase 6.4 Rate Limiting (5 login attempts = 15min lockout, 10 req/sec API limit). All endpoints protected. Build: 0 errors. Commits: ed367f18 | 1ba57827 | 1b26b324. Ready for VPS deployment.  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
@@ -31,15 +31,17 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 - ✨ **NEW (May 26):** "Approve & Add to Portfolio" button → Creates strategy from allocation with live holdings
 - Optional "Save for Later" for users who just want to review without tracking
 
-**Fortress 30** _(Enhanced June 16, 2026 — World-Class UI/UX Redesign)_
+**Fortress 30** _(Enhanced June 16, 2026 — World-Class UI/UX Redesign | July 20 — REAL DATA via yahoo-finance2)_
 - ✨ **Working Risk-Based Filtering:** Conservative/Balanced/Aggressive buttons now actually filter stocks (was completely broken)
 - ✨ **Sticky Filter Controls:** Risk buttons always visible (no scrolling required)
 - ✨ **Premium Design:** Color-coded profiles, smooth animations, backdrop blur, gradient text
+- ✨ **REAL COMPUTED SCORES (Session 21):** Replaced Massive API (US-only, no NSE) with free `yahoo-finance2` scorer. Now all rankings are real technical analysis (RSI, SMA20/50/200, 90-day proximity, volume trend), not hardcoded/placeholder data.
 - Safe Core filtering (dividend-quality, low debt, positive FCF)
 - Growth filtering (momentum, margin expansion)
 - Progressive disclosure (show/hide runners-up 31-40)
-- US Market: 346 candidates live
-- India (NSE): 1,085+ candidates live
+- **Current universe:** Nifty 500 (India), S&P 500 (US) — ~500 tickers per market
+- **Phase 2 (coming):** Expand to Nifty Smallcap 250 + Russell 2000 with concurrent batch fetching (~1,000 tickers total)
+- **Not yet:** Full NSE/BSE/US universe (~7,500+ listed entities) — too large for current sequential fetching; requires concurrency + rate-limit handling
 
 **Portfolio Strategy Tracker** _(added May 23, 2026 | Enhanced May 26, 2026)_
 - `/portfolio` — Strategy cards + live P&L summary + SkillBrowser
@@ -552,20 +554,22 @@ npm run dev
 
 ## 📅 ROADMAP SUMMARY
 
-### ✅ COMPLETE (v0.7.0 — July 9, 2026) — PRODUCTION READY
+### ✅ COMPLETE (v0.8.0 — July 20, 2026) — PRODUCTION READY
 - ✅ Investment Genie (multi-market allocation wizard)
 - ✅ Fortress 30 (stock screening with risk-based filtering, redesigned June 16)
 - ✅ Dark Luxury UI (fully responsive, accessible)
-- ✅ NSE market (1,085+ stock candidates live)
-- ✅ US market (346+ candidates live)
+- ✅ NSE market (Nifty 500 live, ~500 stock candidates)
+- ✅ US market (S&P 500 live, ~500 candidates)
 - ✅ Trading Skills integrated (30 skills + NSE toolkit)
 - ✅ Portfolio Strategy Tracker (live P&L, holdings, rebalance, feedback)
 - ✅ Hidden Gem Finder (AI trading specialist, GEM SCORE calculations, multi-timeframe analysis)
 - ✅ **PHASE 2.0:** Chart rendering (Recharts LineChart with price/SMA overlays, 60-day history)
 - ✅ **PHASE 4.0:** Trade Persistence (PostgreSQL `trades` table, db.insert/select queries)
+- ✅ **PHASE 5.0 (NEW):** Real Data Scoring (yahoo-finance2 scorer, no API key, both markets, 480+ ratings per scan)
 - ✅ Security hardening (6/8 CRITICAL issues fixed)
 - ✅ CI/CD pipeline hardened (DATABASE_URL export + validation scripts created)
 - ✅ TypeScript build: zero errors
+- ✅ All infra bugs fixed (Postgres auto-restart, env-sync, PM2 stability, git tracking, NSE universe)
 - ✅ Code ready for production deployment
 
 ### Session 13 (July 10) — Phase 2.0 Chart Deployment
@@ -583,7 +587,20 @@ npm run dev
 5. ✅ Commit `96d722fb` | Build 10.6s (VPS), 6.0s (local), 0 errors
 6. ✅ Principles applied: Think Before Coding ✓, Simplicity First ✓, Surgical Changes (2 files) ✓, Goal-Driven ✓
 
-### Phase 4+ (July-Aug 2026) — Analytics & Learning Engine
+### Session 21 (July 20, continued) — Real Data Scoring via yahoo-finance2 LIVE
+1. ✅ Replaced `us-technical-scorer.ts` (Massive-only) with `yahoo-technical-scorer.ts` (free, both markets)
+2. ✅ Removed `MASSIVE_API_KEY` dependency and hardcoded fallback dictionary entirely
+3. ✅ Committed lib/scanners/yahoo-technical-scorer.ts + updated app/api/scan/run/route.ts (commit 8e3e1410)
+4. ✅ Deployed to VPS, both scans completed with REAL data (NSE 480/501, US 501/503)
+5. ✅ Verified live: distinct computed scores and real prices on /fortress-30 (not synthetic)
+
+### Phase 2 Expansion (Aug-Sep 2026) — Smallcap 250 + Russell 2000
+**Current:** Nifty 500 + S&P 500 (1,000 tickers total, ~1 scan cycle per 15 min sequential)  
+**Phase 2 Plan:** Add Nifty Smallcap 250 + Russell 2000 (~1,500 additional tickers)  
+**Requirement:** Upgrade from sequential 150ms/ticker to concurrent batch fetching (10-20 in flight with exponential backoff) to avoid runtime cliff. Runtime: ~5 min instead of 25+ min with sequential.  
+**Not yet:** Full listed universe (7,500+ NSE+BSE / 5,400+ US) — requires Phase 3+ infrastructure (dedicated scraper tier, local caching, separate slow-update scan)
+
+### Phase 4+ (Aug 2026) — Analytics & Learning Engine
 1. Mark WIN/LOSS on existing trades (modal or button on detail view)
 2. Analytics dashboard (win rate by GEM SCORE range, monthly stats, best/worst tickers)
 3. Learning engine (feed back to GEM SCORE weights)
@@ -625,9 +642,9 @@ This CLAUDE.md serves as the project's living memory. When:
 
 ---
 
-**Last Updated:** July 9, 2026 (Session 14)  
-**Status:** v0.7.0 Feature Complete | Phase 4.0 Trade Persistence Live | Phase 4+ Ready  
-**Next:** Mark WIN/LOSS on trades | Analytics dashboard | Learning engine (Phase 4+)
+**Last Updated:** July 20, 2026 (Session 21)  
+**Status:** v0.8.0 Feature Complete | Real Data Scoring Live (Session 21) | Phase 2 Expansion Scoped  
+**Next:** 1-week observation period (monitor scans/rates for stability) → Phase 2 concurrency implementation (Smallcap 250 + Russell 2000)
 
 ---
 

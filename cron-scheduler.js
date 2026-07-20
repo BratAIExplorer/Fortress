@@ -41,6 +41,54 @@ async function runScan(market) {
   }
 }
 
+async function fetchYahooPrice(ticker) {
+  try {
+    const response = await fetch(`https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=price`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.quoteSummary?.result?.[0]?.price?.regularMarketPrice ?? null;
+  } catch (error) {
+    console.warn(`⚠️  Failed to fetch ${ticker}:`, error.message);
+    return null;
+  }
+}
+
+async function runMacroSnapshot() {
+  try {
+    console.log(`[${new Date().toISOString()}] 📊 Fetching macro snapshot...`);
+
+    const snapshot = {
+      snapshot_date: new Date().toISOString().split('T')[0],
+      nifty_50: await fetchYahooPrice('%5ENSEI'),
+      bank_nifty: await fetchYahooPrice('%5ENSEBANK'),
+      usd_inr: await fetchYahooPrice('USDINR%3DNS'),
+      gold_usd: await fetchYahooPrice('GC%3DF'),
+      crude_oil_usd: await fetchYahooPrice('CL%3DF'),
+      us_10y_yield: await fetchYahooPrice('%5ETNX'),
+      cboe_vix: await fetchYahooPrice('%5EVIX'),
+      india_vix: await fetchYahooPrice('INDIA.VIX'),
+    };
+
+    const response = await fetch(`${BASE_URL}/api/macro`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-cron-secret': CRON_SECRET,
+      },
+      body: JSON.stringify(snapshot),
+    });
+
+    if (response.ok || response.status === 201) {
+      console.log(`✅ Macro snapshot posted`);
+    } else {
+      const error = await response.json();
+      console.error(`❌ Macro snapshot failed:`, error.error);
+    }
+  } catch (error) {
+    console.error(`❌ Macro snapshot error:`, error.message);
+  }
+}
+
 // NSE: Every Monday-Friday at 4:30 AM IST (11:00 UTC)
 // Cron format: minute hour day-of-month month day-of-week
 // 0 11 * * 1-5 = 11:00 UTC every weekday
@@ -54,9 +102,16 @@ cron.schedule('0 9 * * 1-5', () => {
   runScan('US').catch(err => console.error('US cron error:', err));
 }, { timezone: 'UTC' });
 
+// Macro Snapshot: Every Sunday at 12:00 UTC (5:30 PM IST)
+// 0 12 * * 0 = 12:00 UTC every Sunday
+cron.schedule('0 12 * * 0', () => {
+  runMacroSnapshot().catch(err => console.error('Macro snapshot cron error:', err));
+}, { timezone: 'UTC' });
+
 console.log('🟢 Fortress Scanner Cron Scheduler started');
 console.log('  NSE: Mon-Fri 11:00 UTC (4:30 AM IST)');
 console.log('  US:  Mon-Fri 09:00 UTC (2:30 PM IST)');
+console.log('  Macro: Sunday 12:00 UTC (5:30 PM IST)');
 console.log('');
 
 // Keep process alive

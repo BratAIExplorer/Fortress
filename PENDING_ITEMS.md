@@ -1,254 +1,251 @@
 # 🏰 FORTRESS INTELLIGENCE — PENDING ITEMS & ROADMAP
 
-**Status:** 🟢 Core features live | 🟡 Session 4 database restoration in progress  
-**Last Updated:** July 19, 2026 (Session 17 items added; Session 4 items below are stale/historical)  
-**Current Phase:** Data Pipeline Restoration → Phase 3 Learning Engine
+**Status:** 🟢 Core features live + real data scoring | Phase 2 expansion scoped  
+**Last Updated:** July 20, 2026 (Session 21)  
+**Current Phase:** Phase 5 (Real Data Scoring) Complete → Phase 2 Expansion (Smallcap 250 + Russell 2000) Scoped
 
 ---
 
-## 🚨 CRITICAL (Session 17 — Not Yet Deployed)
+## ✅ SESSION 21 COMPLETE — Real Data Scoring LIVE
 
-### 0. **Verify live scanner universe feeds + deploy**
-**Status:** 🟡 Code complete locally, uncommitted, unverified against live DB  
-**What changed:** `app/api/scan/run/route.ts` (the real dual-market scanner) now pulls tickers from live free feeds via new `lib/scanners/universe.ts` instead of ~11-22 hardcoded names per market. Also fixed the separate dead `app/api/scan/ai-run` route and added gem-score batch mode. Full detail: [july_19_scanner_universe_gap_fix.md](../../.claude/projects/C--Antigravity-Fortress/memory/july_19_scanner_universe_gap_fix.md) (Claude memory).
+### Fixed: Mock Data Crisis
+- ✅ Replaced Massive-only scorer (US-only, no NSE) with `yahoo-finance2` (free, both markets)
+- ✅ Removed `MASSIVE_API_KEY` dependency entirely
+- ✅ Created `lib/scanners/yahoo-technical-scorer.ts` (portable, market-aware `.NS` suffix)
+- ✅ Deployed to VPS: NSE 501 scanned → 480 rated, US 503 scanned → 501 rated
+- ✅ Verified live: Distinct real prices (APOLLOHOSP ₹8,905, BPCL ₹317.6, etc.), not synthetic
+- ✅ Commit: 8e3e1410
 
-**Checklist:**
-- [ ] Review + commit the 4 changed/new files (`app/api/scan/run/route.ts`, `app/api/scan/ai-run/route.ts`, `app/api/analysis/gem-score/route.ts`, `lib/scanners/universe.ts`)
-- [ ] Deploy to VPS
-- [ ] Trigger one manual `/api/scan/run` with `market: "US"` — confirm `totalScanned` ≈ 500 (S&P 500 feed already verified reachable from a dev machine)
-- [ ] **Generate the NSE static universe file** (the actual fix for NSE's bot-protection — root-caused as an Akamai IP block, not fixable in code): from a normal laptop/office network (not the VPS, not a datacenter IP), run `python Reference/OutoftheBox/fetch_nifty500.py`, then copy its output to `lib/scanners/nifty500-static.csv` (needs a `Symbol` value in CSV column index 2 — check the script's output columns match) and commit it. Re-run this every ~6 months when NSE reconstitutes its indices.
-- [ ] Trigger one manual `/api/scan/run` with `market: "NSE"` — confirm `totalScanned` ≈ 500 once the static file above is in place. Without it, the scan silently uses a 50-ticker Nifty 50 floor (better than the old 15, but not full coverage).
-- [ ] Trigger one manual `/api/scan/run` with `market: "US"` — confirm `totalScanned` ≈ 500 (S&P 500 feed already verified reachable from a dev machine)
-- [ ] Confirm Fortress 30 (`/fortress-30`) top-30 lists update accordingly for both markets
-
-**Effort:** 30-45 min (generate NSE file once + deploy + 2 manual scan triggers + spot-check)  
-**Blocker:** NSE static file generation requires a human on a non-datacenter network — cannot be done from this dev sandbox or (likely) the VPS.
+### Confirmed Stable
+- Both markets compute REAL technical scores (RSI, SMA20/50/200, 90-day proximity, volume trend)
+- Fortress 30 rankings are no longer placeholder data
+- Sequential 150ms/ticker throttle works for ~500-ticker universe (~10-15 min per scan)
 
 ---
 
-## 🚨 CRITICAL (Session 4 — In Progress, historical)
+## 🔄 CURRENT STATE — What We Scan
 
-### 1. **Database Schema Migration to VPS**
-**Status:** ⏳ GitHub Actions deployment pending  
-**What's needed:**
-- Wait for GitHub Actions workflow to complete
-- Runs: `npm run drizzle:push` on VPS (applies `scans` + `scan_results` tables)
-- Validates with: `npm run db:validate`
-
-**Checklist (Session 5):**
-- [ ] GitHub Actions deployment completes successfully
-- [ ] SSH into VPS: confirm `psql -d fortress -c "\dt"` shows `scans` and `scan_results` tables
-- [ ] Run seed SQL: `/scratchpad/seed-scans-simple.sql` (20 stocks)
-- [ ] Visit https://fortressintelligence.space/fortress-30 → Fortress 30 displays stocks
-- [ ] Verify: NSE tab shows 10+ stocks, US tab shows 10+ stocks
-- [ ] Monitor: `pm2 logs fortress` for errors
-
-**Effort:** 30 min validation  
-**Blocker:** None (GitHub Actions should auto-complete)
+| Market | Universe | Count | Status | Notes |
+|---|---|---|---|---|
+| **NSE** | Nifty 500 | ~500 | ✅ Live | Static CSV (Wayback Machine snapshot, needs refresh ~6mo) |
+| **US** | S&P 500 | ~503 | ✅ Live | Dynamic CSV feed (free, reachable from VPS) |
+| **NOT YET** | Nifty Smallcap 250 | ~250 | 🟡 Scoped Phase 2 | Requires concurrent fetching |
+| **NOT YET** | Russell 2000 | ~2,000 | 🟡 Scoped Phase 2 | Requires concurrent fetching |
+| **NOT YET** | Full NSE+BSE | ~2,781 | 🔴 Phase 3+ | Too large for current sequential model |
+| **NOT YET** | Full US | ~5,400+ | 🔴 Phase 3+ | Too large for current sequential model |
 
 ---
 
-### 2. **Seed Sample Data to Database**
-**Status:** 🟡 Script ready, pending schema creation  
-**What's needed:**
-- SQL file at: `/scratchpad/seed-scans-simple.sql`
-- Run after schema migration: `psql -d fortress -f /scratchpad/seed-scans-simple.sql`
-- Creates 20 sample stocks (10 NSE, 10 US) with scores
+## 🚀 PHASE 2 EXPANSION — SCOPED (Do NOT implement yet)
 
-**Effort:** 5 min execution  
-**Blocker:** Pending schema creation (drizzle:push)
+**Objective:** Expand scanner universe to mid-cap + small-cap tickers (~1,500 additional)  
+**Rationale:** Fortress 30's thesis is "hidden gems disproportionately in mid/small-cap space"  
+**Timeline:** Aug-Sep 2026 (after 1-week observation of current stability)
+
+### What Changes
+1. **Universe expansion:**
+   - Add Nifty Smallcap 250 CSV feed (~250 tickers)
+   - Add Russell 2000 CSV feed (~2,000 tickers)
+   - Total: ~3,000 new tickers to score (vs. 1,000 today)
+
+2. **Scorer upgrade (REQUIRED for performance):**
+   - Upgrade from sequential (150ms/ticker) to concurrent batch fetching (10-20 in flight)
+   - Add exponential backoff on 429 rate-limit errors (yahoo-finance2 is unofficial scraper)
+   - Parallel fetching: ~5 min total (vs. 25+ min sequential)
+
+3. **Scan frequency trade-off:**
+   - NSE + US: Continue twice-daily (already ~15 min total)
+   - Smallcap + Russell 2000: Once-daily (too large for twice-daily)
+   - OR: Separate slow-update scan, cached for 24h
+
+### Effort & Risk
+
+| Task | Effort | Risk | Notes |
+|---|---|---|---|
+| Fetch smallcap + Russell CSV | 2 hrs | Low | Same pattern as S&P 500 |
+| Implement concurrent scorer | 8-12 hrs | Medium | Need proper backoff logic, test rate limits |
+| Update cron schedule | 1 hr | Low | Add a third scheduled scan |
+| Rate-limit testing | 4 hrs | Medium | Yahoo-finance2 unknown limit; test in staging |
+| Monitor for 1 week | N/A | Medium | Watch for silent throttling |
+
+**Total effort:** 15-20 hours  
+**Blocking:** None — can be done anytime after Phase 5 stabilizes
+
+### When to Start
+✅ After 1-week observation (watch for stability issues, rate-limit hits)  
+✅ Once confirmed: no regressions, consistent scoring, cron runs on schedule  
+❌ Do NOT start before 1 week of stability
 
 ---
 
-### 3. **Verify PM2 Process Health**
-**Status:** 🟡 App live but needs post-migration check  
-**What's needed:**
-- SSH to VPS: `pm2 logs fortress` → Check for errors
-- Restart if needed: `pm2 restart fortress --update-env`
-- Verify: `curl -s https://fortressintelligence.space/api/scan/results | jq .` returns JSON
+## 🔄 ONGOING — Phase 5 Observation Period (NEXT 1 WEEK)
 
-**Effort:** 5 min check  
+**What to watch:**
+- Do both scans (NSE + US) complete on schedule? (11:00 UTC + 09:00 UTC weekdays)
+- Any silent rate-limit hits? (check `/api/analysis/gem-score` logs for yfinance errors)
+- Fortress 30 rankings stable day-to-day? (or wild swings in scores?)
+- PM2 memory growth or crashes? (yahoo-finance2 is more memory-intensive than Massive API calls)
+
+**If problems appear:**
+- Increase per-ticker delay (150ms → 200ms)
+- Add jitter to delay (random ±50ms)
+- Reduce batch size if/when Phase 2 implements concurrency
+- Switch to Financial Modeling Prep or Alpha Vantage free tier (backup API)
+
+---
+
+## ✅ PHASE 2X (Parallel) — Macro Snapshot Data Fetcher COMPLETE
+
+**Objective:** Populate the empty Macro Snapshot page with weekly market context (indices, currency, commodities, risk gauges)  
+**Status:** ✅ IMPLEMENTED & SCHEDULED  
+**Timeline:** Anytime (independent of Phase 2)  
+**Effort:** 2 hours (lazy Node.js inline approach vs. 4-6 Python subprocess)
+
+### What's Built ✅
+- ✅ UI page at `/macro` (ready to display fetched data)
+- ✅ API endpoint `POST /api/macro` (accepts direct JSON + x-cron-secret header) — refactored to accept direct POST instead of subprocess
+- ✅ Database table `macroSnapshots` (stores weekly snapshots with upsert on date)
+- ✅ Fetcher logic inlined into `cron-scheduler.js` (no subprocess needed)
+- ✅ Weekly cron schedule (every Sunday 12:00 UTC / 5:30 PM IST)
+
+### Implementation Details
+1. **Lazy approach:** Added `fetchYahooPrice()` + `runMacroSnapshot()` to `cron-scheduler.js`
+   - Uses Yahoo Finance free API (same as rest of app)
+   - Parallel fetches (Promise.all could be used, but sequential is fine for 8 metrics)
+   - Graceful null handling (missing data → null in DB)
+
+2. **Cron schedule added:** Sunday 12:00 UTC (`0 12 * * 0`)
+   - Follows same pattern as NSE/US scans
+   - Includes x-cron-secret validation
+
+3. **Endpoint refactored:** `app/api/macro/route.ts`
+   - Removed subprocess spawning (unnecessary complexity)
+   - Now accepts direct JSON POST body
+   - Upserts to DB by `snapshot_date` (prevents duplicates)
+   - Returns 201 on success
+
+### Data Format
+```json
+{
+  "snapshot_date": "2026-07-21",
+  "nifty_50": 24500.25,
+  "bank_nifty": 52300.50,
+  "usd_inr": 83.45,
+  "gold_usd": 2350.75,
+  "crude_oil_usd": 78.50,
+  "us_10y_yield": 4.15,
+  "cboe_vix": 14.5,
+  "india_vix": 16.2
+}
+```
+
+### Ponytail Principles Applied ✅
+- **Think Before Coding:** Understood existing setup (cron-scheduler pattern, endpoint expectations)
+- **Simplicity First:** Inlined fetcher into Node.js (no Python subprocess, no new dependencies)
+- **Surgical Changes:** 2 files (cron-scheduler.js, macro/route.ts), ~60 LOC added
+- **Goal-Driven:** /macro page now has scheduled weekly data feed
+
+### Next Steps
+- Deploy with `npm run build && pm2 restart all`
+- Monitor first Sunday run (July 27) for any fetch failures
+- If Yahoo Finance hits rate limits, add retry logic or switch to alternative (Alpha Vantage, FMP)
+
+---
+
+## ⏳ FUTURE PHASES (DO NOT START YET)
+
+### Phase 3: Learning Engine & Personalization (Aug-Sep 2026)
+**Status:** 🔴 Not started  
+**Effort:** 40-60 hours
+
+1. Track user trade feedback (buy/skip/loss actions already logged)
+2. Analyze win rate by GEM SCORE range
+3. Adjust allocation presets based on learnings
+4. A/B test allocations vs. benchmarks
+
+**Blocker:** None (Phase 4.0 trade persistence ready)
+
+---
+
+### Phase 4: Analytics & Real-Time Alerts (Sep 2026)
+**Status:** 🔴 Not started  
+**Effort:** 30-40 hours
+
+1. Performance dashboard (returns vs. benchmarks, drawdown analysis)
+2. Drift alerts (rebalance when >5%)
+3. Price move notifications (±10%)
+4. Portfolio beta + sector concentration warnings
+
 **Blocker:** None
 
 ---
 
-## ✅ COMPLETED (Live Features)
-
-### Phase 1: Core Allocation & Screening Engine
-- ✓ Investment Genie (multi-market allocation wizard)
-- ✓ Fortress 30 (stock screening with risk-based filtering)
-- ✓ Portfolio Strategy Tracker (live P&L, holdings, rebalance)
-- ✓ Dark Luxury UI (responsive, accessible)
-- ✓ NSE Market (1,085+ candidates live)
-- ✓ US Market (346+ candidates live)
-- ✓ Authentication (Next Auth integration)
-- ✓ Database schema (Drizzle ORM defined)
-- ✓ CI/CD pipeline (GitHub Actions → VPS auto-deploy)
-
-### Phase 2: Trading Skills Integration
-- ✓ 30 Claude Code skills installed (~/.claude/skills/)
-- ✓ 9 NSE technical analysis skills (RSI, MACD, Fibonacci, etc.)
-- ✓ 21 equity research skills (DCF, earnings analysis, insider tracking, etc.)
-- ✓ `/equity-research/research SYMBOL` command live
-- ✓ SkillBrowser component (display skill analysis in UI)
-
-### Security & Hardening
-- ✓ Rate limiting on API endpoints
-- ✓ CSRF protection (SameSite cookies)
-- ✓ Input validation (Zod schemas)
-- ✓ Error sanitization (no stack traces in client)
-- ✓ API key validation (JWT tokens)
-- ✓ 6/8 CRITICAL security issues fixed (June 18)
-
----
-
-## ⏳ PENDING (Next Phases)
-
-### Phase 3: Learning Engine & Personalization
-**Status:** 🟡 Database schema deployed, feature development pending  
-**Timeline:** July-August 2026  
-**What's needed:**
-
-1. **Feedback Collection Loop** (Week 1-2)
-   - Track when users delete strategies
-   - Optional "Why?" modal (collect feedback)
-   - Store in `strategy_feedback` table
-
-2. **Learning Engine** (Week 2-3)
-   - Analyze feedback patterns
-   - Identify which allocations work best
-   - Track win rate by risk profile + market condition
-
-3. **Personalization** (Week 3-4)
-   - Adjust allocation presets based on learnings
-   - "Recommended for you" suggestions
-   - A/B test different allocations
-
-**Effort:** 40-60 hours  
-**Impact:** 🎯 HIGH — Core to product-market fit
-
----
-
-### Phase 3+: Advanced Analytics & Monitoring
+### Phase 3+: Full Listed Universe (Oct 2026+)
 **Status:** 🔴 Not started  
-**Timeline:** August-September 2026  
-**What's needed:**
+**Effort:** 50+ hours
 
-1. **Performance Dashboard**
-   - Track portfolio returns vs. benchmarks
-   - Historical P&L charts
-   - Drawdown analysis
-   - Volatility metrics
+**DO NOT START UNTIL Phase 2 (smallcap expansion) is stable for 2+ weeks.**
 
-2. **Real-Time Alerts**
-   - Notify when drift > 5% (rebalance trigger)
-   - Alert on major price moves (±10%)
-   - Daily market summary email
+1. Separate scraper tier (async job queue, not cron)
+2. Local caching + fallback to previous scan on rate limit
+3. Slow-update scan (weekly or daily, not twice-daily)
+4. Fallback data source (FMP, Alpha Vantage, Finnhub)
 
-3. **Risk Monitoring**
-   - Portfolio beta calculation
-   - Sector concentration warnings
-   - Currency exposure analysis (USD vs INR)
-
-**Effort:** 30-40 hours  
-**Impact:** 🎯 HIGH — Engagement + retention
+**Reason:** Full universe is 7,500+ tickers — sequential at 150ms/ticker = 18+ hours. Even with concurrency, needs infrastructure to handle partial failures gracefully.
 
 ---
 
-### Phase 4: Market Expansion
-**Status:** 🔴 Not started  
-**Timeline:** Q3 2026  
-**What's needed:**
+## 🛠️ INFRASTRUCTURE TASKS (ONGOING)
 
-1. **New Markets**
-   - Malaysia (KLSE)
-   - Singapore (SGX)
-   - Hong Kong (HKEX)
+### Monitoring & Health
+- ✅ Postgres auto-restart on crash (systemd override.conf, Session 20)
+- ✅ Last-scan timestamps on UI (shows staleness immediately)
+- ✅ Distinct DB-outage banner (vs. "scan hasn't run yet")
+- 🟡 External uptime monitoring (UptimeRobot pinging `/api/scan/results`)
+- 🟡 Slow-query logging (identify DB bottlenecks)
+- 🟡 Rate-limit tracking (log every 429 from yfinance, alert if >5% of scans)
 
-2. **Data Infrastructure**
-   - Adapter pattern for data sources (yfinance → Alpha Vantage → Polygon)
-   - Caching layer for rate limiting
-   - Real-time WebSocket feed (optional)
-
-3. **UI Updates**
-   - Market selector in Fortress 30
-   - Regional allocation presets
-   - Currency conversion display
-
-**Effort:** 50-70 hours  
-**Impact:** 🎯 MEDIUM — Geographic diversification
+### Deployment & Validation
+- ✅ DEPLOYMENT_AUDIT.md with 6 critical post-deploy checks (all passing)
+- ✅ Env-sync automation (`cp .env.production .next/standalone/.env.production` on deploy)
+- 🟡 Automated backups (PostgreSQL daily snapshots to S3)
+- 🟡 Schema version tracking (auto-detect schema drift)
 
 ---
 
-## 🛠️ INFRASTRUCTURE TASKS
+## 📋 QUICK REFERENCE — What NOT to Do (Yet)
 
-### VPS & Deployment
-- **Ongoing:** Monitor PM2 health, disk space, database size
-- **TODO:** Set up automated backups (PostgreSQL daily snapshots)
-- **TODO:** Configure CloudFlare analytics (traffic, security events)
-- **TODO:** Add health check endpoint (`/api/health` → DB ping)
-
-### Database
-- **TODO:** Create indexes on frequently queried columns (in progress)
-- **TODO:** Set up query logging (slow query threshold: 500ms)
-- **TODO:** Implement row-level security (per-user data isolation)
-
-### Monitoring
-- **TODO:** Sentry integration (error tracking)
-- **TODO:** New Relic or Datadog (APM)
-- **TODO:** PagerDuty integration (on-call alerts)
+❌ **Expand to 7,500+ NSE+BSE or 5,400+ US** — that's Phase 3+, needs concurrency + fallback layer  
+❌ **Add more scoring indicators** (MACD, Bollinger Bands) — Phase 4, after Phase 2 stabilizes  
+❌ **Implement learning engine** — Phase 3, after Phase 5 observation complete  
+❌ **Switch data sources** (Massive, FMP, Alpha Vantage) — don't; yahoo-finance2 is free and working  
+❌ **Increase scan frequency** — stay 2x/day; any faster risks rate-limit hitting  
+✅ **Macro Snapshot fetcher (Phase 2X)** — Low priority, can start anytime (independent, 4-6 hrs)  
 
 ---
 
-## 📋 QUICK PRIORITY MATRIX
+## ✅ WHAT IS READY NOW (If needed)
 
-| Item | Impact | Effort | Timeline | Status |
-|------|--------|--------|----------|--------|
-| Database migration verification | 🔴 CRITICAL | 30 min | Session 5 (July 6) | 🟡 In Progress |
-| Seed sample data | 🔴 CRITICAL | 5 min | Session 5 (July 6) | 🟡 Ready to run |
-| PM2 health check | 🔴 CRITICAL | 5 min | Session 5 (July 6) | ⏳ Pending |
-| Phase 3 feedback loop | 🟢 HIGH | 40-60 hrs | July-August | 🔴 Not started |
-| Real-time alerts | 🟢 HIGH | 30-40 hrs | August | 🔴 Not started |
-| Market expansion | 🟡 MEDIUM | 50-70 hrs | Q3 2026 | 🔴 Not started |
-| Advanced analytics | 🟡 MEDIUM | 30-40 hrs | August | 🔴 Not started |
-| Infrastructure (backups, monitoring) | 🟡 MEDIUM | 20-30 hrs | Ongoing | 🔴 Not started |
+✅ **Phase 2 micro-task:** Grab the Nifty Smallcap 250 CSV from any public source (5 min)  
+✅ **Phase 2 micro-task:** Grab the Russell 2000 CSV from any public source (5 min)  
+✅ **Phase 2 micro-task:** Concurrent scorer POC (test 10-ticker batch with 100ms jitter, 2 hrs)  
+✅ **Phase 2X micro-task:** Macro Snapshot fetcher (implement scanner/macro_fetcher.py, 4-6 hrs) — independent of Phase 2, can start anytime  
 
 ---
 
-## 🎯 SESSION 5 IMMEDIATE ACTIONS
+## 🎯 SESSION 21 SUMMARY
 
-**Before any new feature work:**
-
-1. ✅ Confirm GitHub Actions deployment complete
-2. ✅ Verify database schema exists on VPS
-3. ✅ Seed 20 stocks
-4. ✅ Test Fortress 30 displays data
-5. ✅ Check PM2 logs for errors
-
-**Once verified:**
-- Begin Phase 3 feedback loop development
-- OR investigate pending cron jobs for scanners
+| Item | Status | Notes |
+|---|---|---|
+| Real data scoring | ✅ DONE | yahoo-finance2 live, Massive removed |
+| NSE + US scans | ✅ DONE | 480 + 501 real ratings per run |
+| Fortress 30 rankings | ✅ REAL | No more synthetic data |
+| 1-week stability watch | 🟡 ACTIVE | Monitor until ~July 27 |
+| Phase 2 concurrency | 🟡 SCOPED | Start after stability confirmed |
+| Phase 2X (Macro fetcher) | 🔴 GAP FOUND | Endpoint built, Python script missing; added to backlog |
+| Phase 3+ (full universe) | 🔴 NOT YET | Blocked on Phase 2 completion |
 
 ---
 
-## 🤔 OPEN QUESTIONS
-
-1. **Should we add email digests?** (Daily top 5 picks)
-   - Low effort (2-3 hrs), medium engagement impact
-   - Requires user email preferences + SendGrid integration
-   - Recommendation: Add in Phase 3.1 (after feedback loop)
-
-2. **When to enable user watchlists?** (Save favorite stocks)
-   - Medium effort (4-6 hrs), high engagement
-   - Requires user auth + database table
-   - Recommendation: Add in Phase 3 (post-feedback loop)
-
-3. **Should Phase 4 (market expansion) include crypto?**
-   - Not currently planned (too volatile for conservative allocations)
-   - Can revisit Q4 2026 if user demand
-
----
-
-**Last Updated:** July 6, 2026  
 **Owner:** Bharat Samant  
-**Next Review:** Session 5 (post-migration validation)
+**Next Review:** ~July 27, 2026 (post-observation decision: proceed with Phase 2?)
