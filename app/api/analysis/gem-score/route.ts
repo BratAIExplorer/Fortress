@@ -57,40 +57,47 @@ function atr(ohlc: Array<{ high: number; low: number; close: number }>, period =
 // historical() will likely succeed (check currency, not just existence)
 async function resolveSymbol(ticker: string): Promise<{ symbol: string; currency: string }> {
   const normalized = ticker.toUpperCase().trim();
+  console.log(`[resolveSymbol] Attempting to resolve: ${normalized}`);
 
   // Try bare symbol first (US stocks, most common)
   try {
     const quote = await yahooFinance.quote(normalized);
-    // Validate: quote.symbol can be undefined on some data; validate response quality
+    console.log(`[resolveSymbol] ${normalized} quote:`, { symbol: (quote as any).symbol, price: (quote as any).regularMarketPrice, currency: (quote as any).currency });
     if ((quote as any).regularMarketPrice !== undefined) {
       const currency = (quote as any).currency === 'INR' ? '₹' : '$';
+      console.log(`[resolveSymbol] ✓ Accepted ${normalized} with currency ${currency}`);
       return { symbol: normalized, currency };
     }
-  } catch (_e) {
-    // Continue to next attempt
+  } catch (e) {
+    console.log(`[resolveSymbol] ${normalized} failed:`, (e as Error).message);
   }
 
   // Try .NS for Indian stocks (Nifty)
   try {
     const quote = await yahooFinance.quote(`${normalized}.NS`);
+    console.log(`[resolveSymbol] ${normalized}.NS quote:`, { symbol: (quote as any).symbol, price: (quote as any).regularMarketPrice, currency: (quote as any).currency });
     if ((quote as any).regularMarketPrice !== undefined) {
+      console.log(`[resolveSymbol] ✓ Accepted ${normalized}.NS with currency ₹`);
       return { symbol: `${normalized}.NS`, currency: '₹' };
     }
-  } catch (_e) {
-    // Continue to next attempt
+  } catch (e) {
+    console.log(`[resolveSymbol] ${normalized}.NS failed:`, (e as Error).message);
   }
 
   // Try .L for LSE (London Stock Exchange) — Ireland ETFs, UK stocks
   try {
     const quote = await yahooFinance.quote(`${normalized}.L`);
+    console.log(`[resolveSymbol] ${normalized}.L quote:`, { symbol: (quote as any).symbol, price: (quote as any).regularMarketPrice, currency: (quote as any).currency });
     if ((quote as any).regularMarketPrice !== undefined) {
+      console.log(`[resolveSymbol] ✓ Accepted ${normalized}.L with currency £`);
       return { symbol: `${normalized}.L`, currency: '£' };
     }
-  } catch (_e) {
-    // Continue to fallback
+  } catch (e) {
+    console.log(`[resolveSymbol] ${normalized}.L failed:`, (e as Error).message);
   }
 
   // Fallback: return bare symbol with $ (last resort)
+  console.log(`[resolveSymbol] ⚠ Fallback: returning bare ${normalized} with currency $`);
   return { symbol: normalized, currency: '$' };
 }
 
@@ -205,20 +212,30 @@ function buildChartData(
 // ─── Main: Calculate real GEM SCORE ────────────────────────────────
 async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
   const { symbol, currency } = await resolveSymbol(ticker);
+  console.log(`[calculateGemScore] Resolved ${ticker} → ${symbol} (currency: ${currency})`);
 
   // Fetch 2 years of historical data
   const end = new Date();
   const start = new Date(end);
   start.setFullYear(start.getFullYear() - 2);
 
-  const [quote, historical] = await Promise.all([
-    yahooFinance.quote(symbol),
-    yahooFinance.historical(symbol, {
-      period1: start,
-      period2: end,
-      interval: '1d',
-    }),
-  ]);
+  console.log(`[calculateGemScore] Fetching data for ${symbol} from ${start.toISOString().split('T')[0]} to ${end.toISOString().split('T')[0]}`);
+
+  let quote, historical;
+  try {
+    [quote, historical] = await Promise.all([
+      yahooFinance.quote(symbol),
+      yahooFinance.historical(symbol, {
+        period1: start,
+        period2: end,
+        interval: '1d',
+      }),
+    ]);
+    console.log(`[calculateGemScore] ✓ Quote: price=${(quote as any).regularMarketPrice}, historical rows=${(historical as any[]).length}`);
+  } catch (e) {
+    console.log(`[calculateGemScore] ✗ API call failed:`, (e as Error).message);
+    throw e;
+  }
 
   const currentPrice = (quote as any).regularMarketPrice || 0;
   const closes = (historical as any[]).map(b => b.close).filter(c => c > 0);
