@@ -29,6 +29,15 @@ export default async function Fortress30Page({
         dbError = true;
     }
 
+    const scanRunAt = stocks[0]?.scanRunAt ?? candidates[0]?.scanRunAt ?? null;
+    const scanTimestamp = scanRunAt
+        ? new Date(scanRunAt).toLocaleString("en-US", {
+              dateStyle: "medium",
+              timeStyle: "short",
+              timeZone: "UTC",
+          }) + " UTC"
+        : null;
+
     return (
         <RiskProvider>
             <div className="min-h-screen bg-background pb-20">
@@ -51,6 +60,11 @@ export default async function Fortress30Page({
                                 ranked by Multi-Bagger Score. Automatically updated every scan cycle.
                                 Click any stock to see exactly why it was selected.
                             </p>
+                            {scanTimestamp && (
+                                <p className="text-xs text-slate-500">
+                                    Last scanned: <span className="text-slate-400">{scanTimestamp}</span>
+                                </p>
+                            )}
                         </div>
                         <div>
                             <WisdomWidget />
