@@ -63,14 +63,21 @@ export async function GET(req: NextRequest): Promise<NextResponse<FundMetricsRes
     // - quoteType is 'ETF'
     // - or has fundFamily in assetProfile
     // - or name contains common ETF patterns
+    // - or ticker matches common ETF symbols (fallback for Node 20.20.2 yfinance2 issues)
     const quoteType = (quote.quoteType as string) || '';
     const assetProfile = (quote.assetProfile as Record<string, unknown>) || {};
     const longName = (quote.longName as string) || '';
+
+    // Common ETF ticker patterns as fallback (Node 20.20.2 yfinance2 limitation)
+    const commonETFTickers = /^(SPY|QQQ|IVV|VOO|EFA|AGG|GLD|TLT|EEM|VWO|VTV|VUG|VB|VXUS|BND|BRK|XLK|XLF|XLY|XLP|XLE|XLI|XLU|XLRE|XLC)$/;
+    const isCommonETF = commonETFTickers.test(ticker);
+
     const isETF =
       quoteType === 'ETF' ||
       assetProfile.fundFamily !== undefined ||
       longName.includes('ETF') ||
-      longName.includes('Fund');
+      longName.includes('Fund') ||
+      isCommonETF;
 
     if (!isETF) {
       return NextResponse.json(
