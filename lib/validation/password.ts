@@ -17,12 +17,11 @@ export function validatePassword(
     return { valid: false, error: `Password must be no more than ${PASSWORD_MAX_LENGTH} characters` };
   }
 
-  // Optional complexity check: require uppercase, lowercase, number, special char
   if (options?.requireComplexity) {
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
     const hasNumber = /\d/.test(password);
-    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?]/.test(password);
 
     if (!hasUppercase || !hasLowercase || !hasNumber || !hasSpecial) {
       return {
