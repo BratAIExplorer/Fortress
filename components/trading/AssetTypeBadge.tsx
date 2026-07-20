@@ -9,18 +9,18 @@ interface AssetTypeBadgeProps {
 export function AssetTypeBadge({ assetType }: AssetTypeBadgeProps) {
   const styles: Record<AssetType, { bg: string; text: string; label: string }> = {
     stock: {
-      bg: 'bg-primary',
-      text: 'text-primary-foreground',
+      bg: 'bg-yellow-500 dark:bg-yellow-600',
+      text: 'text-slate-900 dark:text-slate-900',
       label: 'STOCK'
     },
     etf: {
-      bg: 'bg-accent',
-      text: 'text-accent-foreground',
+      bg: 'bg-slate-300 dark:bg-slate-400',
+      text: 'text-slate-900 dark:text-slate-900',
       label: 'ETF'
     },
     unknown: {
-      bg: 'bg-muted',
-      text: 'text-muted-foreground',
+      bg: 'bg-slate-500 dark:bg-slate-600',
+      text: 'text-slate-100 dark:text-slate-100',
       label: 'UNKNOWN'
     }
   };
