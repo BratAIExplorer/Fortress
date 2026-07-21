@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Shield, Menu, X, Brain, Globe, BookMarked, Target, ChevronDown, Zap } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSession, signOut } from "next-auth/react";
 import { MarketSelector } from "@/components/ui/MarketSelector";
 import { LogOut, LayoutDashboard } from "lucide-react";
 
@@ -29,9 +28,30 @@ export function Navbar({
 }: NavbarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [advancedOpen, setAdvancedOpen] = useState(false);
-    const { data: session, status } = useSession();
-    const isAdmin = (session?.user as any)?.isAdmin;
-    const isLoggedIn = status === "authenticated";
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const isAdmin = false;
+
+    useEffect(() => {
+        const checkSession = async () => {
+            try {
+                const res = await fetch("/api/auth/session", { credentials: "include" });
+                setIsLoggedIn(res.ok);
+            } catch {
+                setIsLoggedIn(false);
+            }
+        };
+        checkSession();
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+            setIsLoggedIn(false);
+            window.location.href = "/";
+        } catch {
+            alert("Logout failed");
+        }
+    };
 
     return (
         <header className={cn(
@@ -124,7 +144,7 @@ export function Navbar({
                                             Dashboard
                                         </Link>
                                     </Button>
-                                    <Button variant="outline" size="sm" onClick={() => signOut()} className="gap-2 border-primary/20 hover:bg-primary/5">
+                                    <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 border-primary/20 hover:bg-primary/5">
                                         <LogOut className="h-4 w-4" />
                                         Logout
                                     </Button>
@@ -239,7 +259,7 @@ export function Navbar({
                                             <LayoutDashboard className="h-4 w-4 text-primary" />
                                             Dashboard
                                         </Link>
-                                        <button onClick={() => { setIsOpen(false); signOut(); }} className="text-lg font-medium text-red-400 hover:text-red-300 py-2 flex items-center gap-2 text-left">
+                                        <button onClick={() => { setIsOpen(false); handleLogout(); }} className="text-lg font-medium text-red-400 hover:text-red-300 py-2 flex items-center gap-2 text-left">
                                             <LogOut className="h-4 w-4" />
                                             Logout
                                         </button>
