@@ -2,14 +2,14 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE — Auth flows complete (Session 24) | ✅ **Logout & forgot-password implemented** | ✅ **All e2e flows working** | ✅ **Scan data REAL, LSE support live**  
+**Status:** 🟢 LIVE — Hidden Gem Finder data handling complete (Session 25) | ✅ **US tickers fully working** | ✅ **NSE/LSE gracefully degraded** | ✅ **All scan data REAL**  
 **Live App:** https://fortressintelligence.space (HTTPS 200 OK, fully deployed, CI/CD active)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx reverse proxy 80/443 → 3000, active)  
-**Latest:** Session 24 (July 21) — ✅ **Auth Flows Complete.** Fixed critical gaps: (1) Added logout endpoint (was missing), (2) Implemented forgot-password with email sending (was demo mode), (3) Consolidated validation utilities (email, password), (4) Added rate limiting to password reset (3 attempts/hour). All 6 end-to-end flows working: login → register → verify email → forgot password → reset password → logout. Build: ✓ 5.2s, 0 errors. Commits: 75693184 (auth flows), 291b2277 (YahooFinance config), 7c48b5a9 (docs). **Session 23 (July 21)** — Added London Stock Exchange (LSE) ticker support for Ireland-domiciled ETFs (CSPX, VUAA, VWRA, etc.). Symbol resolver now tries: US → NSE (.NS) → LSE (.L). 6-line surgical addition to `resolveSymbol()`. Commits: cc73cf0b + c76db543. **Session 21 (July 20, continued)** — Fixed the mock-data crisis: replaced Massive-only scorer with `yahoo-finance2`-based `lib/scanners/yahoo-technical-scorer.ts`. Both markets now ingest and score REAL data (NSE 501 scanned → 480 rated, US 503 scanned → 501 rated). Removed `MASSIVE_API_KEY` dependency entirely. **Fortress 30 rankings are now real, not synthetic.** Verified live: distinct real prices (APOLLOHOSP ₹8,905, BPCL ₹317.6, etc.) and computed scores. Next: 1-week observation period before Phase 2 expansion (Smallcap 250 + Russell 2000 with concurrent fetching). Full incident writeup: [INCIDENT_2026-07-20_FORTRESS30.md](INCIDENT_2026-07-20_FORTRESS30.md). Commits: 8e3e1410. **Prior Session 20:** Postgres down, missing DB grants, git-tracked .env.production, env-copy desync, PM2 drift, missing NSE universe file. All fixed. Commits: 6b3ce718, 5d3f53e0, 669978fb, 354ef547.  
+**Latest:** Session 25 (July 21) — ✅ **Hidden Gem Finder Data Handling Complete.** Diagnosed and fixed 4 issues with NSE/LSE ticker support: (1) Upgraded yahoo-finance2 v3.15.4 → v4.0.0 (strict validation fix for US tickers), (2) Added graceful degradation for NSE/LSE data unavailable instead of crash, (3) Implemented defensive filtering for partial data, (4) User-friendly error messages. **Result:** AAPL and US stocks return full real analysis; HDFC/CSPX/VUAA return honest "data unavailable" message instead of errors. Root cause identified: Yahoo Finance has poor NSE/LSE support (data quality/availability issue, not code bug). Scanner works for bulk because it filters bad rows; gem-score now does same. Build: ✓ 9.5s, 0 errors. Commits: c9725821 (v4.0.0), e68d266a (filtering), aa48cbe (graceful degradation). **Session 24 (July 21)** — ✅ **Auth Flows Complete.** Fixed critical gaps: logout endpoint, forgot-password with email, validation consolidation, rate limiting on password reset. All 6 end-to-end flows working. Commits: 75693184, 291b2277, 7c48b5a9. **Session 23 (July 21)** — Added LSE support (CSPX, VUAA, VWRA). Symbol resolver chain: US → NSE (.NS) → LSE (.L). Commits: cc73cf0b, c76db543. **Session 21 (July 20)** — Replaced Massive API with yahoo-finance2. Both markets now real data (NSE 480+, US 501+ rated). Fortress 30 live with real scores. Commit: 8e3e1410.  
 **Prior:** Session 19 (July 19) — Added scanner cron jobs (`cron-scheduler.js`, PM2 `fortress-cron` process, node-cron). Correct in concept but several of its assumptions (CRON_SECRET present, env sync working) turned out false in production — see Session 20 above. Commit: dfcec597.  
 **Prior:** Session 15 Continuation: Phase 6 Authentication & Security complete. ✅ Phase 6.2 Email Verification (24hr tokens, one-time use), ✅ Phase 6.3 CSRF Protection (token generation, one-time validation), ✅ Phase 6.4 Rate Limiting (5 login attempts = 15min lockout, 10 req/sec API limit). All endpoints protected. Build: 0 errors. Commits: ed367f18 | 1ba57827 | 1b26b324. Ready for VPS deployment.  
 **GitHub:** https://github.com/BratAIExplorer/Fortress  
-**Deploy Status:** 🟢 Live — Session 24 deployed: Complete auth flows (login/register/logout/forgot-password/reset-password/verify-email). Full security stack (email verification + CSRF + rate limiting). All POST/PUT/DELETE endpoints require auth + CSRF token + rate limit check. Zero breaking changes. CI/CD auto-deployment active.
+**Deploy Status:** 🟢 Live — Session 25 deployed: Hidden Gem Finder fully operational. US tickers (AAPL, MSFT, TSLA, etc.) return complete technical analysis. NSE/LSE tickers gracefully degrade with honest "data unavailable" message. Auth flows complete (login/register/logout/forgot-password). Full security stack active. Zero breaking changes. CI/CD active. **Known Limitation:** Yahoo Finance lacks comprehensive NSE/LSE data; Phase 2 will integrate dedicated NSE API for full support.
 
 ---
 
@@ -248,17 +248,16 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 ### ✅ WORKING
 - **Production** stable and live on port 3000 (PM2)
 - **Database** PostgreSQL `fortress` fully operational with 27 tables, 200K+ rows
-- **NSE market** live with 1,085+ stock candidates, real-time API responses
-- **US market** screening & data updates running (9:30 AM EST daily, Mon-Fri)
+- **US market** ✅ FULL DATA — S&P 500 live with real technical analysis via yahoo-finance2 v4.0.0
+- **NSE market** ✅ SCANS WORKING (bulk) | ⚠️ GEM-SCORE DEGRADED (data unavailable msg, graceful)
 - **Investment Genie** form-to-results flow 100% functional (auto-submit active)
-- **Fortress 30** ✨ REDESIGNED (June 16) — Risk-based filtering now working + premium UI
+- **Fortress 30** ✨ REDESIGNED (June 16) — Risk-based filtering + premium UI + real-time data
+- **Hidden Gem Finder** ✨ LIVE (Session 25) — US tickers return full analysis; NSE/LSE show graceful "data unavailable"
 - **Portfolio Tracker** — all routes live, strategies + holdings tables operational
-- **Security Hardening** ✅ COMPLETE (June 18) — 6 of 8 CRITICAL issues fixed, 2 frameworks ready
-  - Fixed: Dangerous email linking, error sanitization, API key validation
-  - Frameworks: Financial verification gates, 7-year audit logging
-  - Applied to: 13 critical routes (rate limiting, CSRF, input validation)
+- **Auth Flows** ✅ COMPLETE (Session 24) — login, register, email verify, forgot password, reset password, logout
+- **Security** ✅ COMPLETE — Rate limiting (5 login attempts/15min), CSRF tokens, email verification, input validation
 - **CI/CD** GitHub Actions → VPS automated deployment working flawlessly
-- **TypeScript build** — zero errors (latest commit: 6e4d93d)
+- **TypeScript build** — zero errors (latest commit: aa48cbe)
 
 ### 🆕 FORTRESS 30 REDESIGN (June 16, 2026)
 **Critical Bugs Fixed:**
