@@ -429,7 +429,12 @@
       "Bash(cd \"C:\\\\Antigravity\\\\Fortress\" && rm -rf .git/index && git reset && git add -A && git status --short | head -20)",
       "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=HDFC\")",
       "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=CSPX\")",
-      "Bash(curl \"https://fortressintelligence.space/api/analysis/gem-score?ticker=HDFC\")"
+      "Bash(curl \"https://fortressintelligence.space/api/analysis/gem-score?ticker=HDFC\")",
+      "Bash(curl -s -m 5 https://fortressintelligence.space)",
+      "Bash(curl -s -X POST https://fortressintelligence.space/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@example.com\",\"password\":\"test123\"}')",
+      "Bash(curl -s -X POST https://fortressintelligence.space/api/auth/logout)",
+      "Bash(curl -s -X POST https://fortressintelligence.space/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"Test1234!\"}')",
+      "Bash(curl -s -X POST https://fortressintelligence.space/api/auth/register -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"Test1234!\",\"name\":\"Test\"}')"
     ]
   }
 }

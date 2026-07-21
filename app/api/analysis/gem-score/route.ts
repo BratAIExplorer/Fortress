@@ -247,8 +247,11 @@ async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
   }
 
   const currentPrice = (quote as any).regularMarketPrice || 0;
-  const closes = (historical as any[]).map(b => b.close).filter(c => c > 0);
-  const ohlc = (historical as any[]).map(b => ({ high: b.high, low: b.low, close: b.close }));
+  // ponytail: Filter out null/partial data from LSE/NSE (yahoo-finance2 issue with these markets)
+  // Keep only rows where close has a valid price
+  const bars = (historical as any[]).filter(b => b.close && b.close > 0 && b.high && b.low);
+  const closes = bars.map(b => b.close);
+  const ohlc = bars.map(b => ({ high: b.high, low: b.low, close: b.close }));
 
   // Graceful fallback: insufficient data
   if (closes.length < 21) {
