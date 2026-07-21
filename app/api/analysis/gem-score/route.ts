@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { GemScoreResponse, TradeSignal } from "@/lib/types/trading-specialist";
 import YahooFinance from 'yahoo-finance2';
 
-// ponytail: Suppress strict validation for NSE/LSE tickers that don't match yahoo-finance2's schema
-// historical() deprecated but still works; mapped to chart() automatically
+// ponytail: Disable schema validation for NSE/LSE tickers. Yahoo Finance returns valid data
+// but doesn't include "exchange" field expected by schema — validation is overly strict.
+// Skip validation, accept responses as-is. historical() auto-maps to chart().
 const yahooFinance = new YahooFinance({
+  validateResult: false,
   suppressNotices: ['ripHistorical']
 });
 
