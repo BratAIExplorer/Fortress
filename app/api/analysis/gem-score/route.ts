@@ -2,12 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { GemScoreResponse, TradeSignal } from "@/lib/types/trading-specialist";
 import YahooFinance from 'yahoo-finance2';
 
-// ponytail: Disable strict validation for NSE/LSE tickers (missing 'exchange' field)
-// yahoo-finance2 returns valid data but schema validation is overly strict
+// Suppress historical notices for NSE/LSE tickers
 const yahooFinance = new YahooFinance({
-  validateResult: false,
   suppressNotices: ['ripHistorical']
-} as any);
+});
 
 // In-memory cache: { symbol: { data, timestamp } }
 const scoreCache = new Map<string, { data: GemScoreResponse; timestamp: number }>();
