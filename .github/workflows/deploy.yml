@@ -25,29 +25,61 @@ jobs:
         with:
           node-version: '18'
 
-      # 3. CRITICAL: Validate config files exist and extract PORT
-      - name: Validate config files and extract PORT
+      # 3. CRITICAL: Create .env.production from GitHub Secrets
+      - name: Create .env.production from secrets
         id: get-port
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SCANNER_BASE_URL: ${{ secrets.SCANNER_BASE_URL }}
         run: |
-          echo "Checking for required config files..."
-          [ -f ".env.production" ] || { echo "ERROR: .env.production not found"; exit 1; }
-          [ -f "nginx.conf" ] || { echo "ERROR: nginx.conf not found"; exit 1; }
-          echo "✓ Config files present"
+          echo "Creating .env.production from GitHub Secrets..."
+          cat > .env.production << EOF
+          DATABASE_URL=${DATABASE_URL}
+          NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+          NEXTAUTH_URL=${NEXTAUTH_URL}
+          SMTP_HOST=${SMTP_HOST}
+          SMTP_PORT=${SMTP_PORT}
+          SMTP_USER=${SMTP_USER}
+          SMTP_PASSWORD=${SMTP_PASSWORD}
+          FROM_EMAIL=${FROM_EMAIL}
+          CRON_SECRET=${CRON_SECRET}
+          SCANNER_BASE_URL=${SCANNER_BASE_URL:-http://localhost:3000}
+          PORT=3000
+          EOF
 
-          # Extract PORT from .env.production (simple, reliable method)
-          if grep -q "^PORT=" .env.production; then
-            PORT=$(grep "^PORT=" .env.production | head -1 | cut -d= -f2 | tr -d ' ')
-            if [ -z "$PORT" ]; then
-              echo "ERROR: PORT value is empty in .env.production"
+          # Verify file was created
+          [ -f ".env.production" ] || { echo "ERROR: .env.production creation failed"; exit 1; }
+          echo "✓ .env.production created from secrets"
+
+          # Validate required variables
+          echo "Validating environment variables..."
+          for VAR in DATABASE_URL NEXTAUTH_SECRET NEXTAUTH_URL SMTP_HOST SMTP_USER SMTP_PASSWORD CRON_SECRET; do
+            if ! grep -q "^$VAR=" .env.production || grep "^$VAR=$" .env.production; then
+              echo "❌ ERROR: Required variable $VAR is missing or empty"
               exit 1
             fi
-            echo "app_port=$PORT" >> $GITHUB_OUTPUT
-            echo "✓ Extracted PORT=$PORT from .env.production"
-          else
-            echo "ERROR: PORT= not found in .env.production"
-            cat .env.production
-            exit 1
-          fi
+          done
+          echo "✓ All required variables present"
+
+          # Extract PORT (always 3000)
+          PORT=3000
+          echo "app_port=$PORT" >> $GITHUB_OUTPUT
+          echo "✓ Extracted PORT=$PORT"
+
+      # 3b. Validate nginx.conf exists
+      - name: Validate nginx.conf exists
+        run: |
+          echo "Checking for nginx.conf..."
+          [ -f "nginx.conf" ] || { echo "ERROR: nginx.conf not found"; exit 1; }
+          echo "✓ nginx.conf present"
 
       # 4. CRITICAL: Validate that nginx.conf has matching port
       - name: Validate Nginx port configuration
