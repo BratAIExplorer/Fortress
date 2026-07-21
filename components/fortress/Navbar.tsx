@@ -29,15 +29,24 @@ export function Navbar({
     const [isOpen, setIsOpen] = useState(false);
     const [advancedOpen, setAdvancedOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userName, setUserName] = useState<string>("");
     const isAdmin = false;
 
     useEffect(() => {
         const checkSession = async () => {
             try {
                 const res = await fetch("/api/auth/session", { credentials: "include" });
-                setIsLoggedIn(res.ok);
+                if (res.ok) {
+                    const data = await res.json();
+                    setIsLoggedIn(true);
+                    setUserName(data.user?.name || data.user?.email || "User");
+                } else {
+                    setIsLoggedIn(false);
+                    setUserName("");
+                }
             } catch {
                 setIsLoggedIn(false);
+                setUserName("");
             }
         };
         checkSession();
@@ -138,6 +147,7 @@ export function Navbar({
                         <div className="flex items-center gap-2">
                             {isLoggedIn ? (
                                 <>
+                                    <span className="hidden md:inline text-xs text-muted-foreground px-2">{userName}</span>
                                     <Button variant="ghost" size="sm" asChild className="hidden lg:flex">
                                         <Link href="/admin" className="gap-2">
                                             <LayoutDashboard className="h-4 w-4" />
@@ -255,6 +265,9 @@ export function Navbar({
                                 </Link>
                                 {isLoggedIn ? (
                                     <>
+                                        <div className="text-sm text-muted-foreground py-2 border-b border-border/50">
+                                            Signed in as {userName}
+                                        </div>
                                         <Link href="/admin" onClick={() => setIsOpen(false)} className="text-lg font-medium hover:text-primary py-2 border-b border-border/50 flex items-center gap-2">
                                             <LayoutDashboard className="h-4 w-4 text-primary" />
                                             Dashboard
