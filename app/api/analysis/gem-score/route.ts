@@ -232,17 +232,37 @@ async function calculateGemScore(ticker: string): Promise<GemScoreResponse> {
 
   let quote, historical;
   try {
-    [quote, historical] = await Promise.all([
-      yahooFinance.quote(symbol),
-      yahooFinance.historical(symbol, {
-        period1: start,
-        period2: end,
-        interval: '1d',
-      }),
-    ]);
+    quote = await yahooFinance.quote(symbol);
+    historical = await yahooFinance.historical(symbol, {
+      period1: start,
+      period2: end,
+      interval: '1d',
+    });
     console.log(`[calculateGemScore] ✓ Quote: price=${(quote as any).regularMarketPrice}, historical rows=${(historical as any[]).length}`);
   } catch (e) {
-    console.log(`[calculateGemScore] ✗ API call failed:`, (e as Error).message);
+    const err = (e as Error).message;
+    // ponytail: LSE/NSE data quality issues (null values, missing data)
+    // Gracefully degrade to "insufficient data" response instead of crashing
+    if (err.includes('SOME') || err.includes('null') || err.includes('delisted')) {
+      console.log(`[calculateGemScore] ⚠ Data unavailable for ${symbol} (${err.substring(0, 50)})`);
+      return {
+        success: true,
+        ticker,
+        timestamp: new Date().toISOString(),
+        signals: [
+          { timeframe: 'intraday', direction: 'neutral', label: 'DATA UNAVAILABLE', confidence: 40 },
+          { timeframe: 'shortTerm', direction: 'neutral', label: 'DATA UNAVAILABLE', confidence: 40 },
+          { timeframe: 'longTerm', direction: 'neutral', label: 'DATA UNAVAILABLE', confidence: 40 },
+        ],
+        bottomLine: {
+          headline: 'Data not available',
+          body: `Yahoo Finance does not have sufficient historical data for this ticker. Try a major index or US stock instead.`,
+          sentiment: 'neutral',
+        },
+        multiTimeframe: [],
+      };
+    }
+    console.log(`[calculateGemScore] ✗ API call failed:`, err.substring(0, 100));
     throw e;
   }
 
