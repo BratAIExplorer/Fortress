@@ -443,7 +443,8 @@
       "Bash(curl -s -i http://localhost:3000/constitution)",
       "Bash(git -C C:/Antigravity/Fortress add -A)",
       "Bash(git -C C:/Antigravity/Fortress commit -m \"memory: document session 27 navbar auth fix\")",
-      "Bash(curl -s http://localhost:3000/api/auth/session)"
+      "Bash(curl -s http://localhost:3000/api/auth/session)",
+      "Bash(git -C C:/Antigravity/Fortress commit -m \"memory: add user display feature to session 27 notes\")"
     ]
   }
 }
