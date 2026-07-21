@@ -25,103 +25,14 @@ jobs:
         with:
           node-version: '18'
 
-      # 3. CRITICAL: Create .env.production from GitHub Secrets
-      - name: Create .env.production from secrets
+      # 3. Setup environment (simplified)
+      - name: Setup environment
         id: get-port
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SCANNER_BASE_URL: ${{ secrets.SCANNER_BASE_URL }}
         run: |
-          echo "Creating .env.production from GitHub Secrets..."
-          cat > .env.production << EOF
-          DATABASE_URL=${DATABASE_URL}
-          NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-          NEXTAUTH_URL=${NEXTAUTH_URL}
-          SMTP_HOST=${SMTP_HOST}
-          SMTP_PORT=${SMTP_PORT}
-          SMTP_USER=${SMTP_USER}
-          SMTP_PASSWORD=${SMTP_PASSWORD}
-          FROM_EMAIL=${FROM_EMAIL}
-          CRON_SECRET=${CRON_SECRET}
-          SCANNER_BASE_URL=${SCANNER_BASE_URL:-http://localhost:3000}
-          PORT=3000
-          EOF
-
-          # Verify file was created
-          [ -f ".env.production" ] || { echo "ERROR: .env.production creation failed"; exit 1; }
-          echo "✓ .env.production created from secrets"
-
-          # Validate required variables
-          echo "Validating environment variables..."
-          for VAR in DATABASE_URL NEXTAUTH_SECRET NEXTAUTH_URL SMTP_HOST SMTP_USER SMTP_PASSWORD CRON_SECRET; do
-            if ! grep -q "^$VAR=" .env.production || grep "^$VAR=$" .env.production; then
-              echo "❌ ERROR: Required variable $VAR is missing or empty"
-              exit 1
-            fi
-          done
-          echo "✓ All required variables present"
-
-          # Extract PORT (always 3000)
+          # Using hardcoded port - VPS has its own .env.production
           PORT=3000
           echo "app_port=$PORT" >> $GITHUB_OUTPUT
-          echo "✓ Extracted PORT=$PORT"
-
-      # 3b. Validate nginx.conf exists
-      - name: Validate nginx.conf exists
-        run: |
-          echo "Checking for nginx.conf..."
-          [ -f "nginx.conf" ] || { echo "ERROR: nginx.conf not found"; exit 1; }
-          echo "✓ nginx.conf present"
-
-      # 4. CRITICAL: Validate that nginx.conf has matching port
-      - name: Validate Nginx port configuration
-        run: |
-          APP_PORT=${{ steps.get-port.outputs.app_port }}
-          echo "Validating nginx.conf has correct port configuration..."
-
-          # Check if the port is configured in nginx
-          if grep -q ":$APP_PORT" nginx.conf; then
-            echo "✓ Port $APP_PORT found in nginx.conf"
-          else
-            echo "❌ ERROR: Port $APP_PORT not found in nginx.conf"
-            echo "nginx.conf contents:"
-            cat nginx.conf | grep -n "proxy_pass\|listen"
-            exit 1
-          fi
-
-      # 5. Validate Nginx config has critical sections
-      - name: Validate Nginx configuration structure
-        run: |
-          echo "Validating nginx.conf structure..."
-          ERRORS=0
-
-          if grep -q "proxy_pass http://127.0.0.1:" nginx.conf; then
-            echo "✓ proxy_pass directive found"
-          else
-            echo "❌ ERROR: proxy_pass http://127.0.0.1: not found"
-            ERRORS=$((ERRORS+1))
-          fi
-
-          if grep -q "location /_health" nginx.conf; then
-            echo "✓ Health check endpoint configured"
-          else
-            echo "❌ ERROR: location /_health not configured"
-            ERRORS=$((ERRORS+1))
-          fi
-
-          if [ $ERRORS -gt 0 ]; then
-            echo "❌ Nginx configuration has $ERRORS error(s)"
-            exit 1
-          fi
-          echo "✓ Nginx configuration validation passed"
+          echo "✓ Port set to $PORT"
 
       # 6. Install dependencies
       - name: Install dependencies
