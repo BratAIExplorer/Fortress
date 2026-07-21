@@ -440,7 +440,9 @@
       "Bash(find ~/ -name \".github/workflows/*.yml\" -type f 2>/dev/null | head -5)",
       "Bash(curl -s -i http://localhost:3000/api/auth/session)",
       "Bash(bash /tmp/test_auth.sh)",
-      "Bash(curl -s -i http://localhost:3000/constitution)"
+      "Bash(curl -s -i http://localhost:3000/constitution)",
+      "Bash(git -C C:/Antigravity/Fortress add -A)",
+      "Bash(git -C C:/Antigravity/Fortress commit -m \"memory: document session 27 navbar auth fix\")"
     ]
   }
 }
