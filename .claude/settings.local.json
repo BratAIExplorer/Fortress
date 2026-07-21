@@ -428,7 +428,8 @@
       "Bash(curl -s https://fortressintelligence.space/api/analysis/gem-score?ticker=VUAA)",
       "Bash(cd \"C:\\\\Antigravity\\\\Fortress\" && rm -rf .git/index && git reset && git add -A && git status --short | head -20)",
       "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=HDFC\")",
-      "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=CSPX\")"
+      "Bash(curl -s \"https://fortressintelligence.space/api/analysis/gem-score?ticker=CSPX\")",
+      "Bash(curl \"https://fortressintelligence.space/api/analysis/gem-score?ticker=HDFC\")"
     ]
   }
 }
