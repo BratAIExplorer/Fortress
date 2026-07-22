@@ -8,43 +8,38 @@
 ## 🎯 What Was Fixed
 
 ### The Bug
-Fortress 30 page repeatedly showed **"No India scan data yet"** despite NSE scans existing in the database.
+Fortress 30 page showed **"No India scan data yet"** despite NSE scans existing in the database.
 
-**Why It Kept Repeating:**
-1. Cron jobs crashed when `CRON_SECRET` environment variable was missing
-2. `getBestScan()` rejected degraded scans (goodResultsCount < 25) → empty state
-3. No observability → ops couldn't diagnose what was wrong
-4. Same root cause triggered on every VPS restart or process crash
+### ✅ CORRECTED: The Actual Root Cause
 
-### The Root Cause Chain
+**Not database connectivity** (I was wrong)  
+**Not query logic** (I was wrong)  
+**Actual cause: `CRON_SECRET` environment variable was missing from `.env.production`**
 
 ```
-CRON_SECRET missing
+CRON_SECRET missing from .env.production
     ↓
-cron-scheduler.js: process.exit(1)
+Cron scheduler starts but can't authenticate with /api/scan/run
     ↓
-Cron process dies → no scans run
+No NEW scans created after VPS restart
     ↓
-Database has no recent scans
+Old scans exist (July 20) but are stale
     ↓
-getBestScan("NSE") returns null
-    ↓
-Fortress 30 renders empty state: "No India scan data yet"
+Fortress 30 shows "No India scan data yet"
 ```
 
-OR:
+**Key Point:** Scans DID exist in the database. The issue was operational (missing env var), not a code bug.
 
-```
-Scan runs but only 20/25 results succeed (network timeout)
-    ↓
-goodResultsCount = 20 (< MIN_GOOD_RESULTS of 25)
-    ↓
-getBestScan rejects it: "quality gate failed"
-    ↓
-No fallback exists → returns null
-    ↓
-Fortress 30 shows "No data yet" even though data exists
-```
+**Why I was wrong:**
+- I hypothesized database connectivity issues
+- I suggested defensive fallback logic
+- User correctly pushed back: "scans should still show if they exist"
+- Investigation revealed: scans DO exist, but CRON_SECRET was missing from config
+
+**The operational issue:**
+- During VPS deployment, `.env.production` was set with DATABASE_URL but **CRON_SECRET was never added**
+- This prevented cron jobs from authenticating with the scan API
+- Result: no new scans after restart, users saw stale data or empty state
 
 ---
 
