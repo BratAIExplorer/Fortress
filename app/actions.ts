@@ -504,6 +504,7 @@ const MIN_GOOD_RESULTS = 25;
 
 async function getBestScan(market = "NSE") {
     try {
+        // 1. Try to find a high-quality scan (goodResultsCount >= MIN_GOOD_RESULTS)
         const [good] = await db
             .select()
             .from(schema.scans)
@@ -515,7 +516,8 @@ async function getBestScan(market = "NSE") {
             .orderBy(desc(schema.scans.runAt))
             .limit(1);
         if (good) return good;
-        // Fallback: most recent completed for this market regardless of quality
+
+        // 2. Fallback: any completed scan for this market (show degraded data rather than empty)
         const [fallback] = await db
             .select()
             .from(schema.scans)
@@ -525,7 +527,19 @@ async function getBestScan(market = "NSE") {
             ))
             .orderBy(desc(schema.scans.runAt))
             .limit(1);
-        return fallback ?? null;
+
+        if (fallback) {
+            const quality = fallback.goodResultsCount ?? 0;
+            // Log degraded scans so ops can investigate
+            if (quality < MIN_GOOD_RESULTS) {
+                console.warn(`[getBestScan] ${market} scan degraded: ${quality}/${MIN_GOOD_RESULTS} results. Still showing data.`);
+            }
+            return fallback;
+        }
+
+        // 3. No scans exist at all — log critical issue for ops
+        console.error(`[getBestScan] CRITICAL: No ${market} scans in database. Cron jobs may not be running. Check CRON_SECRET env var.`);
+        return null;
     } catch (e) {
         // ponytail: graceful fallback when DB unavailable (e.g. local dev without PostgreSQL)
         console.error(`[getBestScan] ${market} scan query failed:`, e instanceof Error ? e.message : String(e));

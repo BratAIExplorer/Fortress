@@ -13,8 +13,10 @@ const BASE_URL = process.env.SCANNER_BASE_URL || 'http://localhost:3000';
 const CRON_SECRET = process.env.CRON_SECRET;
 
 if (!CRON_SECRET) {
-  console.warn('⚠️  CRON_SECRET not set — scanners will not run');
-  process.exit(1);
+  console.error('❌ CRON_SECRET not set — scanners DISABLED. Set CRON_SECRET in .env.production');
+  console.log('   Without CRON_SECRET, /api/scan/run calls will be rejected as unauthorized.');
+  console.log('   Scans can only run manually via the dashboard (admin only).');
+  // Don't exit — allow the app to start anyway, but log the issue clearly
 }
 
 async function runScan(market) {
