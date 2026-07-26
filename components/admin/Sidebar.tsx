@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, Database, FileText, Settings, Shield, LogOut } from "lucide-react";
-import { signOut } from "next-auth/react";
 
 const navigation = [
     { name: "Overview", href: "/admin", icon: LayoutDashboard },
@@ -67,14 +66,7 @@ export function Sidebar() {
                         onClick={async () => {
                             try {
                                 await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-                                try {
-                                    await signOut({ redirect: false });
-                                } catch {}
-                                if (window.location.pathname === "/") {
-                                    window.location.reload();
-                                } else {
-                                    window.location.href = "/";
-                                }
+                                window.location.href = "/";
                             } catch {
                                 alert("Logout failed");
                             }

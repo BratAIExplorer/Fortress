@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, ShieldCheck, Activity, RefreshCw, BarChart3, TrendingUp, Shield, CheckCircle2, Table2, Scale, Clock } from "lucide-react";
@@ -22,8 +21,7 @@ type ScannerView = "summary" | "results";
 
 export function V5MarketScanner({ market = "NSE" }: { market?: string }) {
     const router = useRouter();
-    const { data: session, status: sessionStatus } = useSession();
-    const isAdmin = (session?.user as { isAdmin?: boolean } | undefined)?.isAdmin ?? false;
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
@@ -31,6 +29,14 @@ export function V5MarketScanner({ market = "NSE" }: { market?: string }) {
     const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
     const [view, setView] = useState<ScannerView>("summary");
     const [cooldown, setCooldown] = useState<{ minutes: number; nextAllowedAt: string } | null>(null);
+
+    // Check if user is admin
+    useEffect(() => {
+        fetch("/api/auth/session", { credentials: "include" })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => setIsAdmin(data?.user?.isAdmin ?? false))
+            .catch(() => setIsAdmin(false));
+    }, []);
 
     // 1. Sync with server state on mount
     useEffect(() => {
@@ -160,7 +166,7 @@ export function V5MarketScanner({ market = "NSE" }: { market?: string }) {
     const runFullScan = () => connectToSSE();
 
     // Non-admin users: show an informational panel instead of a broken scan button
-    if (sessionStatus !== "loading" && !isAdmin) {
+    if (!isAdmin) {
         return (
             <div className="space-y-8">
                 {/* Legend Section */}

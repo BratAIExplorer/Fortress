@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { UserProfile, Allocation } from "@/lib/investment-genie/contracts";
 import { allocatePortfolio } from "@/lib/investment-genie/allocator";
 import {
@@ -15,13 +14,20 @@ import { InvestmentGenieForm } from "./InvestmentGenieForm";
 import AllocationResult from "./AllocationResult";
 
 export default function InvestmentGeniePage() {
-  const { data: session } = useSession();
+  const [userId, setUserId] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [allocation, setAllocation] = useState<Allocation | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/session", { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setUserId(data?.user?.id ?? null))
+      .catch(() => setUserId(null));
+  }, []);
 
   const handleFormSubmit = async (profile: UserProfile) => {
     setUserProfile(profile);
@@ -62,7 +68,7 @@ export default function InvestmentGeniePage() {
   };
 
   const handleSaveAllocation = async () => {
-    if (!session?.user?.id || !userProfile || !allocation) {
+    if (!userId || !userProfile || !allocation) {
       setError("Please ensure you're logged in and have generated an allocation");
       return;
     }
@@ -151,7 +157,7 @@ export default function InvestmentGeniePage() {
 
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              {session?.user ? (
+              {userId ? (
                 <Button
                   onClick={handleSaveAllocation}
                   disabled={saving}

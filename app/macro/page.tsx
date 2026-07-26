@@ -10,8 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-import { useSession } from "next-auth/react";
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface MacroSnapshot {
@@ -171,6 +169,7 @@ export default function MacroPage() {
     const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
     const [generateMsg, setGenerateMsg] = useState<string | null>(null);
     const [clarityKey, setClarityKey] = useState(0); // increment to force ClarityPanel reload
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const loadSnapshots = () => {
         setLoading(true);
@@ -180,7 +179,14 @@ export default function MacroPage() {
             .finally(() => setLoading(false));
     };
 
-    useEffect(() => { loadSnapshots(); }, []);
+    useEffect(() => {
+        loadSnapshots();
+        // Check if user is admin
+        fetch("/api/auth/session", { credentials: "include" })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => setIsAdmin(data?.user?.isAdmin ?? false))
+            .catch(() => setIsAdmin(false));
+    }, []);
 
     const triggerGenerate = async () => {
         if (!secret) return;
@@ -231,9 +237,6 @@ export default function MacroPage() {
     const latest = snapshots[0] ?? null;
     const previous = snapshots[1] ?? null;
     const history = snapshots.slice(1);
-
-    const { data: session } = useSession();
-    const isAdmin = (session?.user as any)?.isAdmin;
 
     return (
         <div className="min-h-screen bg-background text-foreground">

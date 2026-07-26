@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Zap, Shield, TrendingUp } from "lucide-react";
@@ -13,7 +12,6 @@ interface OnboardingModalProps {
 }
 
 export default function OnboardingModal({ isOpen, onClose, onComplete }: OnboardingModalProps) {
-  const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
 

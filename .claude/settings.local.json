@@ -444,7 +444,13 @@
       "Bash(git -C C:/Antigravity/Fortress add -A)",
       "Bash(git -C C:/Antigravity/Fortress commit -m \"memory: document session 27 navbar auth fix\")",
       "Bash(curl -s http://localhost:3000/api/auth/session)",
-      "Bash(git -C C:/Antigravity/Fortress commit -m \"memory: add user display feature to session 27 notes\")"
+      "Bash(git -C C:/Antigravity/Fortress commit -m \"memory: add user display feature to session 27 notes\")",
+      "PowerShell(npm run build 2>&1)",
+      "Bash(psql -h localhost -U fortress -d fortress -c \"SELECT id, market, status, COUNT\\(*\\) as result_count, goodResultsCount, runAt FROM scans LEFT JOIN scanResults ON scans.id = scanResults.scanId WHERE market = 'NSE' GROUP BY scans.id, market, status, goodResultsCount, runAt ORDER BY runAt DESC LIMIT 10;\")",
+      "Bash(cat /etc/systemd/system/postgresql.service.d/override.conf 2>/dev/null || echo \"No override config found\")",
+      "Bash(cat /etc/systemd/system/postgresql.service 2>/dev/null | head -20)",
+      "Bash(grep -n \"useSession\\\\|session\" C:\\\\\\\\Antigravity\\\\\\\\Fortress\\\\\\\\app\\\\\\\\macro\\\\\\\\page.tsx)",
+      "Bash(grep -c \"const.*session\\\\|useSession\\(\\)\" /opt/fortress/app/macro/page.tsx 2>/dev/null || echo \"File check via grep failed, will search differently\")"
     ]
   }
 }
