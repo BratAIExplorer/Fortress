@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { MarketSelector } from "@/components/ui/MarketSelector";
 import { LogOut, LayoutDashboard } from "lucide-react";
-import { signOut } from "next-auth/react";
 
 interface NavbarProps {
     title?: string;
@@ -56,18 +55,9 @@ export function Navbar({
     const handleLogout = async () => {
         try {
             await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-            try {
-                await signOut({ redirect: false });
-            } catch {
-                // Ignore if not signed in via NextAuth
-            }
             setIsLoggedIn(false);
             setUserName("");
-            if (window.location.pathname === "/") {
-                window.location.reload();
-            } else {
-                window.location.href = "/";
-            }
+            window.location.href = "/";
         } catch {
             alert("Logout failed");
         }
