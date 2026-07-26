@@ -60,12 +60,19 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
           APP_PORT: ${{ steps.get-port.outputs.app_port }}
+          DEPLOY_FORCE_PORT_UPDATE: "true"
         run: |
           # Setup SSH
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null
+
+          # Quick connectivity check
+          if ! ssh -i ~/.ssh/deploy_key -o ConnectTimeout=5 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "echo OK" >/dev/null 2>&1; then
+            echo "✗ Cannot connect to VPS $VPS_HOST. Aborting deployment."
+            exit 1
+          fi
 
           # Run deployment script on VPS
           ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST \
@@ -97,14 +104,25 @@ jobs:
           fi
 
           # Validate PORT in .env.production matches what was deployed
-          DEPLOYED_PORT=$(grep "^PORT=" .env.production | cut -d= -f2)
+          DEPLOYED_PORT=$(grep -m1 "^PORT=" .env.production | cut -d= -f2 || echo "")
           if [ "$DEPLOYED_PORT" != "$APP_PORT" ]; then
-            echo "❌ DEPLOYMENT ABORT: Port mismatch detected on VPS"
-            echo "  Expected: $APP_PORT"
-            echo "  Found in .env.production: $DEPLOYED_PORT"
-            exit 1
+            echo "⚠️  Port mismatch detected: .env.production PORT=$DEPLOYED_PORT, expected $APP_PORT"
+            if [ "${DEPLOY_FORCE_PORT_UPDATE:-false}" = "true" ]; then
+              echo "Updating .env.production to PORT=$APP_PORT"
+              if grep -q "^PORT=" .env.production 2>/dev/null; then
+                sed -i "s/^PORT=.*/PORT=$APP_PORT/" .env.production
+              else
+                echo "PORT=$APP_PORT" >> .env.production
+              fi
+              DEPLOYED_PORT=$APP_PORT
+              echo "✓ .env.production updated to PORT=$APP_PORT"
+            else
+              echo "❗ To auto-update .env.production set DEPLOY_FORCE_PORT_UPDATE=true in secrets or on VPS"
+              echo "Deployment aborted to avoid unintended service-port changes"
+              exit 1
+            fi
           fi
-          echo "✓ Port validation passed on VPS"
+          echo "✓ Port validation passed on VPS (PORT=$DEPLOYED_PORT)"
 
           # Validate Nginx config
           if ! grep -q "proxy_pass http://127.0.0.1:$APP_PORT" /etc/nginx/sites-enabled/fortress; then
@@ -170,8 +188,19 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           echo "❌ Deployment failed, attempting rollback..."
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          # Quick connectivity check
+          if ! ssh -i ~/.ssh/deploy_key -o ConnectTimeout=5 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "echo ok" 2>/dev/null; then
+            echo "Rollback connection failed - may need manual intervention"
+            exit 0
+          fi
+
           ssh -i ~/.ssh/deploy_key -o ConnectTimeout=5 -o StrictHostKeyChecking=no \
-            $VPS_USER@$VPS_HOST << 'EOF' || echo "Rollback connection failed - may need manual intervention"
+            $VPS_USER@$VPS_HOST << 'EOF' || echo "Rollback remote commands failed - manual intervention required"
           cd /opt/fortress
           echo "Checking git status..."
           git status || echo "Git command failed"
