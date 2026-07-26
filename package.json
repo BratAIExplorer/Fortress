@@ -9,8 +9,9 @@
     "lint": "next lint",
     "drizzle:push": "drizzle-kit push",
     "drizzle:generate": "drizzle-kit generate",
-    "db:validate": "tsx scripts/validate-db-schema.ts",
-    "seed": "tsx scripts/seed-fortress-30.ts"
+    "db:validate": "npx -y tsx --env-file=.env.local scripts/validate-db-schema.ts",
+    "test:auth": "npx -y tsx --env-file=.env.local scripts/test-auth-e2e.ts",
+    "seed": "npx -y tsx --env-file=.env.local scripts/seed-fortress-30.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -4,7 +4,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Database, FileText, Settings, Shield } from "lucide-react";
+import { LayoutDashboard, Database, FileText, Settings, Shield, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 const navigation = [
     { name: "Overview", href: "/admin", icon: LayoutDashboard },
@@ -52,14 +53,37 @@ export function Sidebar() {
                 </nav>
             </div>
             <div className="border-t p-4">
-                <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-                        AD
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                            AD
+                        </div>
+                        <div className="text-sm">
+                            <p className="font-medium">Administrator</p>
+                            <p className="text-xs text-muted-foreground">curator@fortress.in</p>
+                        </div>
                     </div>
-                    <div className="text-sm">
-                        <p className="font-medium">Administrator</p>
-                        <p className="text-xs text-muted-foreground">curator@fortress.in</p>
-                    </div>
+                    <button
+                        onClick={async () => {
+                            try {
+                                await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+                                try {
+                                    await signOut({ redirect: false });
+                                } catch {}
+                                if (window.location.pathname === "/") {
+                                    window.location.reload();
+                                } else {
+                                    window.location.href = "/";
+                                }
+                            } catch {
+                                alert("Logout failed");
+                            }
+                        }}
+                        className="p-2 text-muted-foreground hover:text-red-400 transition-colors rounded-md hover:bg-muted"
+                        title="Logout"
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </button>
                 </div>
             </div>
         </div>

@@ -92,7 +92,7 @@ function initializeTemplate(riskAppetite: number): AllocationTemplate {
     growth: 25 + ((100 - conservatism) * 0.25) / 100, // 25-35%
     upside: 5 + ((100 - conservatism) * 0.1) / 100, // 5-10%
     hedge: 10 + (conservatism * 0.1) / 100, // 10-15%
-    income: 10, // Fixed
+    income: 6 + (conservatism * 0.08) / 100, // 6-14%, scales with risk (more income tilt when conservative)
     swing: 5 + ((100 - conservatism) * 0.05) / 100, // 5-7%
     cash: 5 + (conservatism * 0.05) / 100, // 5-8%
   };
