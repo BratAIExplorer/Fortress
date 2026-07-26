@@ -94,6 +94,7 @@ export default function LoginForm() {
               <label className="text-sm font-medium">Email Address</label>
               <Input
                 type="email"
+                autoComplete="email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="you@example.com"
@@ -104,6 +105,7 @@ export default function LoginForm() {
               <label className="text-sm font-medium">Password</label>
               <Input
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
