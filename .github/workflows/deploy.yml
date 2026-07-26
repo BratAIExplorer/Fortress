@@ -68,14 +68,18 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null
 
-          # Quick connectivity check
-          if ! ssh -i ~/.ssh/deploy_key -o ConnectTimeout=5 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "echo OK" >/dev/null 2>&1; then
+          # Add verbose output for diagnostics
+          echo "Testing SSH connection with verbose output..."
+          ssh -vvv -i ~/.ssh/deploy_key -o ConnectTimeout=20 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "echo OK" 2>&1 | head -50 || true
+
+          # Quick connectivity check with increased timeout
+          if ! ssh -i ~/.ssh/deploy_key -o ConnectTimeout=20 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "echo OK" >/dev/null 2>&1; then
             echo "✗ Cannot connect to VPS $VPS_HOST. Aborting deployment."
             exit 1
           fi
 
-          # Run deployment script on VPS
-          ssh -i ~/.ssh/deploy_key $VPS_USER@$VPS_HOST \
+          # Run deployment script on VPS with keep-alive and strict host checking disabled
+          ssh -i ~/.ssh/deploy_key -o ConnectTimeout=20 -o StrictHostKeyChecking=no -o ServerAliveInterval=15 -o ServerAliveCountMax=3 $VPS_USER@$VPS_HOST \
             "bash -s ${{ github.sha }} $APP_PORT" << 'EOF'
 
           COMMIT_SHA=$1
@@ -160,7 +164,7 @@ jobs:
           echo "Checking local app health on port $APP_PORT..."
           MAX_ATTEMPTS=8
           for ATTEMPT in $(seq 1 $MAX_ATTEMPTS); do
-            RESULT=$(ssh -i ~/.ssh/deploy_key -o ConnectTimeout=5 -o StrictHostKeyChecking=no \
+            RESULT=$(ssh -i ~/.ssh/deploy_key -o ConnectTimeout=15 -o StrictHostKeyChecking=no \
               $VPS_USER@$VPS_HOST "curl -s -m 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:$APP_PORT/_health" 2>/dev/null || echo "000")
 
             if [ "$RESULT" = "200" ]; then
@@ -193,13 +197,13 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
 
-          # Quick connectivity check
-          if ! ssh -i ~/.ssh/deploy_key -o ConnectTimeout=5 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "echo ok" 2>/dev/null; then
+          # Quick connectivity check with increased timeout
+          if ! ssh -i ~/.ssh/deploy_key -o ConnectTimeout=20 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "echo ok" 2>/dev/null; then
             echo "Rollback connection failed - may need manual intervention"
             exit 0
           fi
 
-          ssh -i ~/.ssh/deploy_key -o ConnectTimeout=5 -o StrictHostKeyChecking=no \
+          ssh -i ~/.ssh/deploy_key -o ConnectTimeout=20 -o StrictHostKeyChecking=no -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
             $VPS_USER@$VPS_HOST << 'EOF' || echo "Rollback remote commands failed - manual intervention required"
           cd /opt/fortress
           echo "Checking git status..."
