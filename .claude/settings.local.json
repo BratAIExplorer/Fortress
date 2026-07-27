@@ -450,7 +450,9 @@
       "Bash(cat /etc/systemd/system/postgresql.service.d/override.conf 2>/dev/null || echo \"No override config found\")",
       "Bash(cat /etc/systemd/system/postgresql.service 2>/dev/null | head -20)",
       "Bash(grep -n \"useSession\\\\|session\" C:\\\\\\\\Antigravity\\\\\\\\Fortress\\\\\\\\app\\\\\\\\macro\\\\\\\\page.tsx)",
-      "Bash(grep -c \"const.*session\\\\|useSession\\(\\)\" /opt/fortress/app/macro/page.tsx 2>/dev/null || echo \"File check via grep failed, will search differently\")"
+      "Bash(grep -c \"const.*session\\\\|useSession\\(\\)\" /opt/fortress/app/macro/page.tsx 2>/dev/null || echo \"File check via grep failed, will search differently\")",
+      "Bash(ssh root@76.13.179.32 'pm2 status && pm2 restart fortress-app && pm2 logs fortress-app | head -30')",
+      "Bash(ssh root@76.13.179.32 'cd /opt/fortress && git fetch origin && git checkout main && git pull origin main && npm run build && pm2 restart fortress-app --update-env')"
     ]
   }
 }
