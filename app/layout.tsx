@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/fortress/Navbar";
 import { Breadcrumb } from "@/components/fortress/Breadcrumb";
+import { BetaBanner } from "@/components/fortress/BetaBanner";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -38,6 +39,7 @@ export default function RootLayout({
           <div className="relative flex min-h-screen flex-col">
             {/* Global Navigation */}
             <Navbar />
+            <BetaBanner />
             <Breadcrumb />
 
             {/* Page Content */}

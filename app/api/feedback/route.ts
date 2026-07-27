@@ -9,15 +9,14 @@ interface FeedbackRequest {
   message: string;
   pageUrl?: string;
   stockTicker?: string;
+  guestEmail?: string; // optional contact email when submitted while logged out
 }
 
 export async function POST(req: NextRequest) {
   try {
-    // Verify auth
+    // Feedback is open to anonymous visitors (e.g. the sitewide BETA banner);
+    // attach the session when one exists, otherwise fall back to guestEmail.
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const body: FeedbackRequest = await req.json();
 
@@ -47,8 +46,9 @@ export async function POST(req: NextRequest) {
     const result = await db
       .insert(feedback)
       .values({
-        userId: session.user.id as string,
-        userEmail: session.user.email!,
+        userId: session?.user?.id ?? null,
+        userEmail: session?.user?.email ?? null,
+        guestEmail: session?.user ? null : body.guestEmail || null,
         type: body.type,
         message: body.message,
         pageUrl: body.pageUrl,
@@ -66,14 +66,17 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+      const submitterLabel = session?.user
+        ? session.user.name || session.user.email
+        : body.guestEmail || "Anonymous (BETA banner)";
       if (alertEmail) {
         await sendEmailAlert({
           to: alertEmail,
-          subject: `[Fortress Feedback] ${body.type.toUpperCase()} from ${session.user.name || session.user.email}`,
+          subject: `[Fortress Feedback] ${body.type.toUpperCase()} from ${submitterLabel}`,
         body: `
           <h2>New Feedback Submission</h2>
           <p><strong>Type:</strong> ${body.type}</p>
-          <p><strong>User:</strong> ${session.user.email}</p>
+          <p><strong>User:</strong> ${submitterLabel}</p>
           <p><strong>Page:</strong> ${body.pageUrl || "N/A"}</p>
           <p><strong>Ticker:</strong> ${body.stockTicker || "N/A"}</p>
           

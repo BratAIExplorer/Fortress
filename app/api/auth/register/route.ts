@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 import { authUser } from "@/lib/db/schema/auth";
+import { privacyConsent } from "@/lib/db/schema/consent";
 import { eq } from "drizzle-orm";
 import { sendVerificationEmail } from "@/lib/email/service";
 import { validateEmail, normalizeEmail } from "@/lib/validation/email";
@@ -9,7 +10,16 @@ import { validatePassword } from "@/lib/validation/password";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name, consents } = await req.json();
+    const {
+      email,
+      password,
+      name,
+      agreedToTerms,
+      countryOfResidence,
+      countryOfOrigin,
+      signupPurpose,
+      referralSource,
+    } = await req.json();
 
     // Validation
     const emailCheck = validateEmail(email);
@@ -22,9 +32,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: passwordCheck.error }, { status: 400 });
     }
 
-    if (!consents?.dataCollection || !consents?.feedbackUsage) {
+    if (!name || !String(name).trim()) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    if (!countryOfResidence) {
+      return NextResponse.json({ error: "Country of residence is required" }, { status: 400 });
+    }
+
+    if (!signupPurpose) {
+      return NextResponse.json({ error: "Please tell us why you're signing up" }, { status: 400 });
+    }
+
+    if (!agreedToTerms) {
       return NextResponse.json(
-        { error: "You must agree to data collection and feedback usage" },
+        { error: "You must agree to the Terms & Privacy Policy" },
         { status: 400 }
       );
     }
@@ -53,10 +75,14 @@ export async function POST(req: NextRequest) {
       .insert(authUser)
       .values({
         email: normalizedEmail,
-        name: name || normalizedEmail.split("@")[0],
+        name: String(name).trim(),
         password: hashedPassword,
         isAdmin: false,
         emailVerified: null,
+        countryOfResidence,
+        countryOfOrigin: countryOfOrigin || null,
+        signupPurpose,
+        referralSource: referralSource || null,
       })
       .returning({
         id: authUser.id,
@@ -69,6 +95,18 @@ export async function POST(req: NextRequest) {
         { error: "Failed to create account" },
         { status: 500 }
       );
+    }
+
+    // Persist consent (a single "agree to terms" checkbox at signup implies
+    // both flags below — kept split to match the table's existing shape).
+    try {
+      await db.insert(privacyConsent).values({
+        userId: newUser[0].id,
+        dataCollection: true,
+        feedbackUsage: true,
+      });
+    } catch (consentError) {
+      console.error("Failed to record consent (non-blocking):", consentError);
     }
 
     // Send verification email (non-blocking)

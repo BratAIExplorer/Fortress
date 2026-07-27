@@ -4,8 +4,11 @@ export const feedback = pgTable(
   "feedback",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id").notNull(),
-    userEmail: varchar("user_email", { length: 255 }).notNull(),
+    // Nullable: anonymous (logged-out) visitors can also submit feedback from the BETA banner.
+    userId: uuid("user_id"),
+    userEmail: varchar("user_email", { length: 255 }),
+    // Optional contact email an anonymous submitter can leave for a reply.
+    guestEmail: varchar("guest_email", { length: 255 }),
     type: varchar("type", { length: 50 }).notNull(), // 'bug', 'suggestion', 'validation', 'question'
     message: text("message").notNull(),
     pageUrl: varchar("page_url", { length: 512 }),

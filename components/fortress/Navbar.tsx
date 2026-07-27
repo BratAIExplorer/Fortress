@@ -166,9 +166,14 @@ export function Navbar({
                                     </Button>
                                 </>
                             ) : (
-                                <Button variant="default" size="sm" asChild>
-                                    <Link href="/login">Sign In</Link>
-                                </Button>
+                                <>
+                                    <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
+                                        <Link href="/register">Create Account</Link>
+                                    </Button>
+                                    <Button variant="default" size="sm" asChild>
+                                        <Link href="/login">Sign In</Link>
+                                    </Button>
+                                </>
                             )}
                         </div>
                     )}
@@ -286,9 +291,14 @@ export function Navbar({
                                         </button>
                                     </>
                                 ) : (
-                                    <Link href="/login" onClick={() => setIsOpen(false)} className="text-lg font-medium text-primary py-2">
-                                        Sign In
-                                    </Link>
+                                    <>
+                                        <Link href="/register" onClick={() => setIsOpen(false)} className="text-lg font-medium hover:text-primary py-2 border-b border-border/50">
+                                            Create Account
+                                        </Link>
+                                        <Link href="/login" onClick={() => setIsOpen(false)} className="text-lg font-medium text-primary py-2">
+                                            Sign In
+                                        </Link>
+                                    </>
                                 )}
                             </div>
                         </motion.div>

@@ -16,7 +16,13 @@ export const authUser = pgTable("auth_user", {
   // Onboarding fields
   hasSeenOnboarding: boolean("has_seen_onboarding").default(false).notNull(),
   onboardingViewedAt: timestamp("onboarding_viewed_at"),
-  
+
+  // Profile fields (all nullable — optional at signup, safe to add without backfilling existing rows)
+  countryOfResidence: varchar("country_of_residence", { length: 2 }), // ISO 3166-1 alpha-2
+  countryOfOrigin: varchar("country_of_origin", { length: 2 }),
+  signupPurpose: varchar("signup_purpose", { length: 50 }),
+  referralSource: varchar("referral_source", { length: 50 }),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
