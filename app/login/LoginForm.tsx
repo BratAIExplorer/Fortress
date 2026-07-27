@@ -8,15 +8,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield } from "lucide-react";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
-export default function LoginForm({ callbackUrl: propCallbackUrl }: { callbackUrl?: string }) {
+export default function LoginForm() {
+  const [mounted, setMounted] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [callbackUrl, setCallbackUrl] = useState(propCallbackUrl || "/portfolio");
+  const [callbackUrl, setCallbackUrl] = useState("/portfolio");
 
   useEffect(() => {
-    // Get callback URL from query string if provided
+    setMounted(true);
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const urlCallback = params.get("callbackUrl");
@@ -50,18 +51,27 @@ export default function LoginForm({ callbackUrl: propCallbackUrl }: { callbackUr
       });
 
       if (response.ok) {
-        // Redirect to callback URL
         window.location.href = callbackUrl;
       } else {
         const data = await response.json();
         setError(data.error || "Login failed. Please try again.");
+        setLoading(false);
       }
     } catch {
       setError("Something went wrong. Please try again in a moment.");
-    } finally {
       setLoading(false);
     }
   };
+
+  // Render an identical-shaped skeleton until mounted so server/client HTML
+  // matches exactly — a mismatch here is what breaks form event handlers.
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="max-w-md w-full h-[520px] rounded-lg border border-primary/20 bg-card/50 backdrop-blur animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -100,25 +110,31 @@ export default function LoginForm({ callbackUrl: propCallbackUrl }: { callbackUr
               </div>
             )}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Email Address</label>
+              <label htmlFor="email" className="text-sm font-medium">Email Address</label>
               <Input
+                id="email"
+                name="email"
                 type="email"
                 autoComplete="email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="you@example.com"
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
+              <label htmlFor="password" className="text-sm font-medium">Password</label>
               <Input
+                id="password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
+                disabled={loading}
                 showPasswordToggle
               />
             </div>
@@ -134,7 +150,7 @@ export default function LoginForm({ callbackUrl: propCallbackUrl }: { callbackUr
               </Link>
             </div>
             <div>
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/register" className="text-primary hover:underline">
                 Create one
               </Link>
