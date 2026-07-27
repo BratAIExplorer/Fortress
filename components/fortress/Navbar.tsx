@@ -30,7 +30,7 @@ export function Navbar({
     const [advancedOpen, setAdvancedOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userName, setUserName] = useState<string>("");
-    const isAdmin = false;
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         const checkSession = async () => {
@@ -40,13 +40,16 @@ export function Navbar({
                     const data = await res.json();
                     setIsLoggedIn(true);
                     setUserName(data.user?.name || data.user?.email || "User");
+                    setIsAdmin(Boolean(data.user?.isAdmin));
                 } else {
                     setIsLoggedIn(false);
                     setUserName("");
+                    setIsAdmin(false);
                 }
             } catch {
                 setIsLoggedIn(false);
                 setUserName("");
+                setIsAdmin(false);
             }
         };
         checkSession();
@@ -149,12 +152,14 @@ export function Navbar({
                             {isLoggedIn ? (
                                 <>
                                     <span className="hidden md:inline text-xs text-muted-foreground px-2">{userName}</span>
-                                    <Button variant="ghost" size="sm" asChild className="hidden lg:flex">
-                                        <Link href="/admin" className="gap-2">
-                                            <LayoutDashboard className="h-4 w-4" />
-                                            Dashboard
-                                        </Link>
-                                    </Button>
+                                    {isAdmin && (
+                                        <Button variant="ghost" size="sm" asChild className="hidden lg:flex">
+                                            <Link href="/admin" className="gap-2">
+                                                <LayoutDashboard className="h-4 w-4" />
+                                                Dashboard
+                                            </Link>
+                                        </Button>
+                                    )}
                                     <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 border-primary/20 hover:bg-primary/5">
                                         <LogOut className="h-4 w-4" />
                                         Logout
@@ -269,10 +274,12 @@ export function Navbar({
                                         <div className="text-sm text-muted-foreground py-2 border-b border-border/50">
                                             Signed in as {userName}
                                         </div>
-                                        <Link href="/admin" onClick={() => setIsOpen(false)} className="text-lg font-medium hover:text-primary py-2 border-b border-border/50 flex items-center gap-2">
-                                            <LayoutDashboard className="h-4 w-4 text-primary" />
-                                            Dashboard
-                                        </Link>
+                                        {isAdmin && (
+                                            <Link href="/admin" onClick={() => setIsOpen(false)} className="text-lg font-medium hover:text-primary py-2 border-b border-border/50 flex items-center gap-2">
+                                                <LayoutDashboard className="h-4 w-4 text-primary" />
+                                                Dashboard
+                                            </Link>
+                                        )}
                                         <button onClick={() => { setIsOpen(false); handleLogout(); }} className="text-lg font-medium text-red-400 hover:text-red-300 py-2 flex items-center gap-2 text-left">
                                             <LogOut className="h-4 w-4" />
                                             Logout
