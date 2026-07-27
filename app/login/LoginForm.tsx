@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield } from "lucide-react";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
-export default function LoginForm({ callbackUrl }: { callbackUrl: string }) {
+export default function LoginForm({ callbackUrl: propCallbackUrl }: { callbackUrl?: string }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [callbackUrl, setCallbackUrl] = useState(propCallbackUrl || "/portfolio");
+
+  useEffect(() => {
+    // Get callback URL from query string if provided
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlCallback = params.get("callbackUrl");
+      if (urlCallback) {
+        setCallbackUrl(urlCallback);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
