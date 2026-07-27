@@ -13,15 +13,27 @@ declare module "next-auth" {
   }
 }
 
-// Get current session from cookies
+// Get current session from cookies.
+// The cookie payload stores the user id under `userId` (see
+// app/api/auth/login/route.ts); every caller of auth() expects the
+// client-facing shape `session.user.id`, matching /api/auth/session's
+// response contract. Reshape here so both stay in sync.
 async function getSession() {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("fortress-session")?.value;
 
   if (sessionCookie) {
     try {
-      const user = JSON.parse(Buffer.from(sessionCookie, "base64").toString());
-      return { user };
+      const raw = JSON.parse(Buffer.from(sessionCookie, "base64").toString());
+      if (!raw.userId) return { user: null };
+      return {
+        user: {
+          id: raw.userId,
+          email: raw.email,
+          name: raw.name,
+          isAdmin: raw.isAdmin,
+        },
+      };
     } catch {}
   }
 
