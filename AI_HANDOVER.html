@@ -192,60 +192,72 @@
         </ul>
       </div>
 
-      <h2>Session 31 — Admin Page Enhancements (July 28, 2026)</h2>
+      <h2>Session 32 — Bot Migration to VPS (July 28, 2026)</h2>
 
       <div class="card">
         <span class="badge live">SHIPPED</span>
-        <strong>✨ NEW: Bot Control Panel — Manual Start Instructions</strong>
+        <strong>✨ MAJOR: MACD Bot Migrated to VPS as Core Fortress Infrastructure</strong>
         <p>
-          Simple copy-paste command panel on admin dashboard for starting the bot manually.
-          When admins click the "Copy" button, the bot launch command is copied to clipboard,
-          then admins paste it on their Windows laptop to start the bot.
+          The standalone MACD bot (<code>Equity_The-Final-chapter</code>) is now integrated into Fortress
+          as a PM2-managed Python process on the VPS. Eliminates dependency on personal laptop; Momentum Radar
+          is now always-on and resilient.
         </p>
         <ul>
           <li>
-            Shows bot status (currently NOT RUNNING with last-active timestamp).
+            <strong>Architecture:</strong> Bot runs on VPS alongside Fortress app (separate Python process, managed by PM2).
           </li>
           <li>
-            Displays the full command in a code block:
-            <code>cd C:\The_Equity_Chapter\Equity_The-Final-chapter</code><br/>
-            <code>LAUNCH_MACD_BOT.bat</code>
+            <strong>Behavior:</strong> Every 5 minutes during market hours, bot scans Nifty 500 for MACD crossovers
+            (daily + weekly), POSTs active signals to <code>/api/analysis/momentum-signals</code>.
           </li>
           <li>
-            One-click <strong>"Copy"</strong> button copies both lines to clipboard.
+            <strong>Resilience:</strong> If bot crashes, PM2 auto-restarts it. If Fortress app crashes, bot continues running.
+            No single point of failure.
           </li>
           <li>
-            Includes a "How it works" info box explaining the 4-step flow (copy → paste on Windows → bot scans → signals auto-push).
+            <strong>Files added:</strong>
+            <ul>
+              <li><code>bot/</code> directory with Python bot source + venv</li>
+              <li><code>bot/requirements.txt</code> (Python dependencies)</li>
+              <li><code>bot/healthcheck.py</code> (pre-deployment verification)</li>
+              <li><code>BOT_DEPLOYMENT.md</code> (comprehensive VPS setup guide)</li>
+            </ul>
           </li>
           <li>
-            <strong>File changed:</strong> <code>app/admin/page.tsx</code> (added Bot Control Card with Copy icon).
+            <strong>PM2 config updated:</strong> <code>ecosystem.config.js</code> now includes <code>fortress-bot</code> process.
+          </li>
+          <li>
+            <strong>Credentials:</strong> Bot env vars in <code>.env.production</code> (TELEGRAM_BOT_TOKEN, FORTRESS_CRON_SECRET, etc.).
+          </li>
+          <li>
+            <strong>Commit:</strong> <code>c1b1aae5</code>
           </li>
         </ul>
       </div>
 
       <div class="card">
         <span class="badge live">SHIPPED</span>
-        <strong>Admin page: Bot credentials form</strong>
+        <strong>Admin page: Bot Credentials Form & Status Monitoring</strong>
         <p>
-          New secure UI for entering bot trading credentials (API keys, secrets,
-          etc.) directly in the web admin panel. No more manual .env editing on
-          the VPS.
+          Secure web UI for managing bot credentials (Telegram tokens, Zerodha API keys) and monitoring
+          bot health. No manual .env editing required.
         </p>
         <ul>
           <li>
-            <code>POST /api/admin/save-credentials</code> — Store encrypted
-            credentials server-side (authenticated with <code>x-cron-secret</code>).
+            <strong>Status View:</strong> Shows bot health, active signals count, last push timestamp, market hours indicator.
           </li>
           <li>
-            Credential form on the admin dashboard — enter Zerodha API key,
-            secret, username, password.
+            <strong>Credential Management:</strong> Securely enter/update bot credentials with masked inputs and "Save & Restart Bot" button.
+            Credentials trigger auto-restart via PM2.
           </li>
           <li>
-            Masked input fields + "saved" confirmation (never echo secrets in
-            response).
+            <strong>Password-gated:</strong> Uses <code>x-cron-secret</code> for authentication (same as scanner cron).
           </li>
           <li>
-            <strong>Commit:</strong> <code>74e6785c</code>
+            <strong>Files:</strong> <code>app/momentum-radar/admin/page.tsx</code> | <code>/api/admin/momentum-status</code> | <code>/api/admin/bot-config</code>
+          </li>
+          <li>
+            <strong>Commits:</strong> <code>74e6785c</code> | <code>59b6c3f4</code>
           </li>
         </ul>
       </div>
@@ -286,18 +298,98 @@
         </ul>
       </div>
 
-      <h2>Session 32 — BETA Welcome Modal (signed-in users, every login)</h2>
+      <h2>VPS Operations — PM2 Process Management</h2>
 
       <div class="card">
-        <span class="badge info">NOT YET DEPLOYED</span>
-        <strong
-          >New: <code>components/fortress/WelcomeBetaModal.tsx</code></strong
+        <span class="badge live">ACTIVE</span>
+        <strong>Three PM2 Processes Running on VPS</strong>
+        <p>
+          All processes are auto-managed by PM2. Check status, logs, and restart via
+          standard commands.
+        </p>
+        <table>
+          <tr>
+            <th>Process</th>
+            <th>Type</th>
+            <th>Purpose</th>
+            <th>Port/IO</th>
+          </tr>
+          <tr>
+            <td><code>fortress-app</code></td>
+            <td>Node.js</td>
+            <td>Next.js app (web UI, API routes)</td>
+            <td>Port 3000</td>
+          </tr>
+          <tr>
+            <td><code>fortress-cron</code></td>
+            <td>Node.js</td>
+            <td>Scanner cron jobs (NSE/US scans every 5 min)</td>
+            <td>Logs only</td>
+          </tr>
+          <tr>
+            <td><code>fortress-bot</code></td>
+            <td>Python 3</td>
+            <td>MACD bot (scans Nifty 500 every 5 min, posts to Momentum Radar)</td>
+            <td>Logs only</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <span class="badge info">REFERENCE</span>
+        <strong>Common PM2 Commands (VPS)</strong>
+        <ul>
+          <li><code>pm2 status</code> — Show all processes (status, PID, memory, uptime)</li>
+          <li><code>pm2 logs fortress-bot</code> — Watch bot logs in real-time</li>
+          <li><code>pm2 logs fortress-bot --lines 50</code> — Show last 50 lines</li>
+          <li><code>pm2 restart fortress-bot --update-env</code> — Restart bot with fresh env vars</li>
+          <li><code>pm2 restart all --update-env</code> — Restart all three processes</li>
+          <li><code>pm2 stop fortress-bot</code> — Stop bot (temporary)</li>
+          <li><code>pm2 start fortress-bot</code> — Start bot again</li>
+          <li><code>pm2 save && pm2 startup</code> — Save config and enable auto-start on server reboot</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="badge info">DEPLOYMENT FLOW</span>
+        <strong>Deploy New Code (Standard Process)</strong>
+        <ul>
+          <li>Push commits to <code>main</code> branch</li>
+          <li>GitHub Actions CI runs build + test</li>
+          <li>On success, trigger VPS deploy: <code>git pull && npm run build && pm2 restart all --update-env</code></li>
+          <li>All three PM2 processes restart automatically with fresh code + env vars</li>
+          <li>No manual steps required (PM2 handles process lifecycle)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="badge warn">IMPORTANT</span>
+        <strong>Bot Environment Variables (Must Be Set in .env.production)</strong>
+        <p>
+          These are required for the bot to function. Without them, the bot crashes on startup.
+        </p>
+        <ul>
+          <li><code>TELEGRAM_BOT_TOKEN</code> — Bot token from Telegram BotFather</li>
+          <li><code>TELEGRAM_ADMIN_ID</code> — Your Telegram chat ID (for alerts)</li>
+          <li><code>FORTRESS_API_URL</code> — <code>https://fortressintelligence.space/api/analysis/momentum-signals</code></li>
+          <li><code>FORTRESS_CRON_SECRET</code> — Shared secret (same value as <code>CRON_SECRET</code>)</li>
+          <li><code>ZERODHA_API_KEY</code>, <code>ZERODHA_API_SECRET</code>, <code>ZERODHA_CLIENT_ID</code> — Optional (for auto-trading)</li>
+        </ul>
+        <p style="color: var(--amber);">
+          <strong>⚠️ NOTE:</strong> If these are missing, the bot will crash and PM2 will keep restarting it.
+          Check <code>pm2 logs fortress-bot</code> for errors.
+        </p>
+      </div>
+
+      <h2>Session 33 — BETA Welcome Modal (signed-in users, every login)</h2>
+
+      <div class="card">
+        <span class="badge live">SHIPPED</span>
+        <strong>New: <code>components/fortress/WelcomeBetaModal.tsx</code></strong
         >
         <p>
-          A one-time-per-session popup (distinct from the existing persistent
-          <code>BetaBanner.tsx</code>) shown to every signed-in user, reminding
-          them the product is in public BETA and inviting feedback. Built at the
-          user's request after iterating on copy and visual style.
+          A one-time-per-session popup shown to every signed-in user, reminding
+          them the product is in public BETA and inviting feedback.
         </p>
         <ul>
           <li>
