@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Lock, ShieldCheck, RefreshCw, KeyRound, CheckCircle2, Circle } from "lucide-react";
+import { Lock, ShieldCheck, RefreshCw, KeyRound, CheckCircle2, Circle, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Status {
@@ -27,12 +27,14 @@ const CREDENTIAL_FIELDS: { key: string; label: string }[] = [
 
 export default function MomentumRadarAdminPage() {
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [status, setStatus] = useState<Status | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     const [fieldsSet, setFieldsSet] = useState<Record<string, boolean>>({});
     const [formValues, setFormValues] = useState<Record<string, string>>({});
+    const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});
     const [saving, setSaving] = useState(false);
     const [saveResult, setSaveResult] = useState<string | null>(null);
 
@@ -117,14 +119,22 @@ export default function MomentumRadarAdminPage() {
                                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Enter password</span>
                             </div>
                             <div className="flex gap-2">
-                                <Input
-                                    type="password"
-                                    placeholder="Password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && checkStatus()}
-                                    className="h-9 text-sm bg-white/5 border-white/10 flex-1"
-                                />
+                                <div className="relative flex-1">
+                                    <Input
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && checkStatus()}
+                                        className="h-9 text-sm bg-white/5 border-white/10 pr-9"
+                                    />
+                                    <button
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                                    </button>
+                                </div>
                                 <Button size="sm" onClick={checkStatus} disabled={loading || !password} className="h-9 px-4">
                                     {loading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "View Status"}
                                 </Button>
@@ -168,8 +178,8 @@ export default function MomentumRadarAdminPage() {
                         </div>
 
                         <Card className="bg-white/5 border-white/10">
-                            <CardContent className="p-4 space-y-1 text-xs text-muted-foreground">
-                                <p>Last updated: {status.lastUpdated ? new Date(status.lastUpdated).toLocaleString("en-IN") : "—"}</p>
+                            <CardContent className="p-4 space-y-2 text-xs text-muted-foreground">
+                                <p><strong>Last scan ran:</strong> {status.lastUpdated ? new Date(status.lastUpdated).toLocaleString("en-IN") : "Never"}</p>
                                 <p>NSE market hours right now: {status.marketHoursNow ? "Yes" : "No"}</p>
                                 <p>Flagged stale if no push for &gt;{status.staleThresholdMinutes} min during market hours.</p>
                             </CardContent>
@@ -194,13 +204,21 @@ export default function MomentumRadarAdminPage() {
                                             </div>
                                             <div className="flex-1 space-y-1">
                                                 <label className="text-xs text-muted-foreground">{f.label}</label>
-                                                <Input
-                                                    type="password"
-                                                    placeholder={fieldsSet[f.key] ? "Already set — leave blank to keep" : "Not set"}
-                                                    value={formValues[f.key] ?? ""}
-                                                    onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                                                    className="h-8 text-sm bg-white/5 border-white/10"
-                                                />
+                                                <div className="relative">
+                                                    <Input
+                                                        type={showCredentials[f.key] ? "text" : "password"}
+                                                        placeholder={fieldsSet[f.key] ? "Already set — leave blank to keep" : "Not set"}
+                                                        value={formValues[f.key] ?? ""}
+                                                        onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                                                        className="h-8 text-sm bg-white/5 border-white/10 pr-8"
+                                                    />
+                                                    <button
+                                                        onClick={() => setShowCredentials((v) => ({ ...v, [f.key]: !v[f.key] }))}
+                                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                                    >
+                                                        {showCredentials[f.key] ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

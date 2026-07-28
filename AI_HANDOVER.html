@@ -152,6 +152,16 @@
           Living document · Last updated: <strong>July 28, 2026</strong> ·
           Owner: Bharat Samant (bharatsamant@gmail.com)
         </div>
+
+        <div style="margin-top: 16px; padding: 12px 14px; background: #1a1e28; border-left: 3px solid var(--accent); border-radius: 4px;">
+          <p style="margin: 0 0 8px 0; font-size: 0.8rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.02em; font-weight: 600;">Working Principles</p>
+          <ul style="margin: 0; padding-left: 16px; font-size: 0.85rem; line-height: 1.4;">
+            <li><strong>Think Before Coding</strong> — Read the full problem, trace the complete flow, understand dependencies before writing code</li>
+            <li><strong>Simplicity First</strong> — Reuse existing patterns, prefer stdlib over new deps, shortest working solution wins</li>
+            <li><strong>Surgical Changes</strong> — Minimal diffs, targeted edits, fewest files possible, no unnecessary abstractions</li>
+            <li><strong>Goal-Driven</strong> — Ship what was asked, verify it works, document outcomes, no scope creep</li>
+          </ul>
+        </div>
       </header>
 
       <h2>Current Status</h2>
@@ -173,8 +183,105 @@
             temporarily removed, see below).
           </li>
           <li>
-            BETA welcome modal — <strong>built, not yet deployed</strong> (see
-            Session 32 below).
+            BETA welcome modal — <strong>deployed & live</strong> (Session 31).
+          </li>
+          <li>
+            Admin panel — <strong>new credential form for bot secrets</strong>
+            (Session 31).
+          </li>
+        </ul>
+      </div>
+
+      <h2>Session 31 — Admin Page Enhancements (July 28, 2026)</h2>
+
+      <div class="card">
+        <span class="badge live">SHIPPED</span>
+        <strong>✨ NEW: Bot Control Panel — Manual Start Instructions</strong>
+        <p>
+          Simple copy-paste command panel on admin dashboard for starting the bot manually.
+          When admins click the "Copy" button, the bot launch command is copied to clipboard,
+          then admins paste it on their Windows laptop to start the bot.
+        </p>
+        <ul>
+          <li>
+            Shows bot status (currently NOT RUNNING with last-active timestamp).
+          </li>
+          <li>
+            Displays the full command in a code block:
+            <code>cd C:\The_Equity_Chapter\Equity_The-Final-chapter</code><br/>
+            <code>LAUNCH_MACD_BOT.bat</code>
+          </li>
+          <li>
+            One-click <strong>"Copy"</strong> button copies both lines to clipboard.
+          </li>
+          <li>
+            Includes a "How it works" info box explaining the 4-step flow (copy → paste on Windows → bot scans → signals auto-push).
+          </li>
+          <li>
+            <strong>File changed:</strong> <code>app/admin/page.tsx</code> (added Bot Control Card with Copy icon).
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="badge live">SHIPPED</span>
+        <strong>Admin page: Bot credentials form</strong>
+        <p>
+          New secure UI for entering bot trading credentials (API keys, secrets,
+          etc.) directly in the web admin panel. No more manual .env editing on
+          the VPS.
+        </p>
+        <ul>
+          <li>
+            <code>POST /api/admin/save-credentials</code> — Store encrypted
+            credentials server-side (authenticated with <code>x-cron-secret</code>).
+          </li>
+          <li>
+            Credential form on the admin dashboard — enter Zerodha API key,
+            secret, username, password.
+          </li>
+          <li>
+            Masked input fields + "saved" confirmation (never echo secrets in
+            response).
+          </li>
+          <li>
+            <strong>Commit:</strong> <code>74e6785c</code>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="badge live">SHIPPED</span>
+        <strong>BETA welcome modal — committed & deployed</strong>
+        <p>
+          Session 32's modal is now in production. Shows once per browser session
+          to every signed-in user (no expiry limit, as requested).
+        </p>
+        <ul>
+          <li>Dismissible one-time-per-login popup with BETA messaging.</li>
+          <li>
+            "Got feedback?" button → opens existing feedback form (
+            <code>POST /api/feedback</code>).
+          </li>
+          <li>Generic copy, no specific feature names (everything not enabled yet).</li>
+          <li>
+            <strong>Commits:</strong> <code>d6c421a6</code> (modal),
+            <code>31d67cce</code> (formatting).
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="badge live">SHIPPED</span>
+        <strong>Admin health view — Momentum Radar bot status</strong>
+        <p>
+          New admin dashboard card showing the bot's last heartbeat, signal
+          count, and sync status. Helps spot stalled bots before users notice.
+        </p>
+        <ul>
+          <li>Password-gated (requires same <code>x-cron-secret</code>).</li>
+          <li>
+            <strong>Commit:</strong> <code>2c5daa7f</code>
           </li>
         </ul>
       </div>

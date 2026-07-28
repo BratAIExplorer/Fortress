@@ -21,6 +21,11 @@ interface MacdSignal {
     riskAmount: string | null;
 }
 
+interface SignalsResponse {
+    signals: MacdSignal[];
+    lastUpdated?: string;
+}
+
 type FetchState = "loading" | "ok" | "error";
 
 function money(v: string | null) {
@@ -32,14 +37,16 @@ function money(v: string | null) {
 // open to everyone with live data until auth+SMTP is fixed.
 export default function MomentumRadarPage() {
     const [signals, setSignals] = useState<MacdSignal[]>([]);
+    const [lastUpdated, setLastUpdated] = useState<string | null>(null);
     const [state, setState] = useState<FetchState>("loading");
 
     useEffect(() => {
         fetch("/api/analysis/momentum-signals")
             .then(async (res) => {
                 if (!res.ok) return setState("error");
-                const data = await res.json();
+                const data: SignalsResponse = await res.json();
                 setSignals(data.signals ?? []);
+                setLastUpdated(data.lastUpdated ?? null);
                 setState("ok");
             })
             .catch(() => setState("error"));
@@ -56,6 +63,11 @@ export default function MomentumRadarPage() {
                     <p className="text-muted-foreground mt-2 max-w-lg">
                         Dual-timeframe MACD crossover scan across Nifty 500 — daily and weekly bullish signals in a confirmed uptrend, with targets and stop loss.
                     </p>
+                    {lastUpdated && (
+                        <p className="text-xs text-muted-foreground mt-3">
+                            Last scan: {new Date(lastUpdated).toLocaleString("en-IN")}
+                        </p>
+                    )}
                 </div>
 
                 {state === "loading" && (
@@ -118,7 +130,7 @@ export default function MomentumRadarPage() {
                 )}
 
                 <div className="text-right">
-                    <a href="/momentum-radar/admin" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                    <a href="/momentum-radar/admin" className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">
                         Admin →
                     </a>
                 </div>

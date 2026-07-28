@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 // Disable prerendering for this page since it requires a session
 export const dynamic = "force-dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Users, ShieldCheck, AlertTriangle, TrendingUp, Globe } from "lucide-react";
+import { Activity, Users, ShieldCheck, AlertTriangle, TrendingUp, Globe, Copy, Zap } from "lucide-react";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { motion } from "framer-motion";
@@ -97,6 +97,51 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-7">
+                    <Card className="col-span-7 border-amber-500/20 bg-amber-500/5 backdrop-blur">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Zap className="h-5 w-5 text-amber-500" />
+                                Bot Control — Manual Start
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div className="p-3 rounded-lg bg-white/5 border border-white/5">
+                                    <p className="text-xs font-medium text-muted-foreground mb-2">BOT STATUS</p>
+                                    <p className="text-sm">❌ <span className="font-semibold">NOT RUNNING</span> — Last active: Never</p>
+                                </div>
+                                <div className="p-3 rounded-lg bg-white/5 border border-white/5">
+                                    <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center justify-between">
+                                        MANUAL START COMMAND
+                                        <button
+                                            onClick={() => {
+                                                const cmd = `cd C:\\The_Equity_Chapter\\Equity_The-Final-chapter\nLAUNCH_MACD_BOT.bat`;
+                                                navigator.clipboard.writeText(cmd);
+                                                alert("Command copied! Paste on Windows PowerShell.");
+                                            }}
+                                            className="text-xs px-2 py-1 bg-primary/20 hover:bg-primary/30 text-primary rounded flex items-center gap-1 transition"
+                                        >
+                                            <Copy className="h-3 w-3" /> Copy
+                                        </button>
+                                    </p>
+                                    <code className="block text-xs font-mono bg-black/20 p-3 rounded border border-border/30 text-amber-400 whitespace-pre-wrap">
+{`cd C:\\The_Equity_Chapter\\Equity_The-Final-chapter
+LAUNCH_MACD_BOT.bat`}
+                                    </code>
+                                </div>
+                                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                                    <p className="text-xs font-medium text-blue-300 mb-1">💡 How it works</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        1. Copy the command above → Paste on Windows PowerShell<br/>
+                                        2. Bot scans every 5 min for MACD crossovers<br/>
+                                        3. Signals auto-push to Fortress (every 5 min)<br/>
+                                        4. Momentum Radar tab updates live
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
                     <Card className="col-span-4 border-primary/10 bg-card/50 backdrop-blur">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
