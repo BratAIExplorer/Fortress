@@ -78,6 +78,13 @@ async function runScan(
                     category: "52W_LOW",
                     mbScore: score.mbScore,
                     mbTier: score.mbTier,
+                    macdStatus: score.macdStatus,
+                    macdTarget1: score.macdTarget1 ? score.macdTarget1.toString() : null,
+                    macdTarget2: score.macdTarget2 ? score.macdTarget2.toString() : null,
+                    macdStopLoss: score.macdStopLoss ? score.macdStopLoss.toString() : null,
+                    macdQty: score.macdQty,
+                    macdInvested: score.macdInvested ? score.macdInvested.toString() : null,
+                    macdRisk: score.macdRisk ? score.macdRisk.toString() : null,
                 });
             }
 

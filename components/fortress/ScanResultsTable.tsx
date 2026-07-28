@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowUpDown, ArrowDown, RefreshCw, AlertTriangle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { getMarket } from "@/lib/markets/config";
 
@@ -12,23 +13,31 @@ import { getMarket } from "@/lib/markets/config";
 
 interface ScanRow {
     symbol: string;
-    price: string | null;
-    total_score: number | null;
+    price: number | null;
+    totalScore: number | null;
     category: string | null;
     market: string;
-    mb_score: number | null;
-    mb_tier: string | null;
+    mbScore: number | null;
+    mbTier: string | null;
     megatrend: string | null;
-    megatrend_emoji: string | null;
-    fcf_yield_pct: number | null;
-    earnings_quality: number | null;
-    peg: number | null;
-    de_direction: string | null;
-    margin_direction: string | null;
-    cc_score: number | null;
-    cc_tier: string | null;
-    cc_revenue_cagr: number | null;
-    cc_years_checked: number | null;
+    megatrendEmoji: string | null;
+    fcfYieldPct: number | null;
+    earningsQuality: number | null;
+    pegRatio: number | null;
+    deDirection: string | null;
+    marginDirection: string | null;
+    ccScore: number | null;
+    ccTier: string | null;
+    ccRevenueCagr: number | null;
+    ccYearsChecked: number | null;
+    // MACD Crossover fields
+    macdStatus: string | null;
+    macdTarget1: number | null;
+    macdTarget2: number | null;
+    macdStopLoss: number | null;
+    macdQty: number | null;
+    macdInvested: number | null;
+    macdRisk: number | null;
 }
 
 type SortKey = "mb_score" | "total_score" | "cc_score";
@@ -248,27 +257,28 @@ export function ScanResultsTable({ scanId, market = "NSE" }: { scanId?: string; 
                                     onClick={() => toggleSort("cc_score")}>
                                     ☕ CC Score <SortIcon col="cc_score" sortKey={sortKey} />
                                 </th>
+                                <th className="text-left text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">MACD Crossover</th>
                                 <th className="text-left text-muted-foreground py-3 px-4 font-medium whitespace-nowrap">Category</th>
                             </tr>
                         </thead>
                         <tbody>
                             {rows.map((row, i) => {
-                                const tier = MB_TIER_CONFIG[row.mb_tier ?? ""] ?? { emoji: "–", color: "text-slate-400", bg: "bg-white/5 border-white/10" };
-                                const de = DE_ARROW[row.de_direction ?? "unknown"] ?? DE_ARROW.unknown;
-                                const margin = MARGIN_ARROW[row.margin_direction ?? "unknown"] ?? MARGIN_ARROW.unknown;
+                                const tier = MB_TIER_CONFIG[row.mbTier ?? ""] ?? { emoji: "–", color: "text-slate-400", bg: "bg-white/5 border-white/10" };
+                                const de = DE_ARROW[row.deDirection ?? "unknown"] ?? DE_ARROW.unknown;
+                                const margin = MARGIN_ARROW[row.marginDirection ?? "unknown"] ?? MARGIN_ARROW.unknown;
 
-                                const fcfColor = row.fcf_yield_pct == null ? "text-slate-500"
-                                    : row.fcf_yield_pct > 5 ? "text-emerald-400"
-                                    : row.fcf_yield_pct > 2 ? "text-amber-400" : "text-slate-400";
+                                const fcfColor = row.fcfYieldPct == null ? "text-slate-500"
+                                    : row.fcfYieldPct > 5 ? "text-emerald-400"
+                                    : row.fcfYieldPct > 2 ? "text-amber-400" : "text-slate-400";
 
-                                const eqColor = row.earnings_quality == null ? "text-slate-500"
-                                    : row.earnings_quality > 0.8 ? "text-emerald-400"
-                                    : row.earnings_quality > 0.5 ? "text-amber-400" : "text-red-400";
+                                const eqColor = row.earningsQuality == null ? "text-slate-500"
+                                    : row.earningsQuality > 0.8 ? "text-emerald-400"
+                                    : row.earningsQuality > 0.5 ? "text-amber-400" : "text-red-400";
 
-                                const pegColor = row.peg == null ? "text-slate-500"
-                                    : row.peg < 0.8 ? "text-emerald-400"
-                                    : row.peg < 1.2 ? "text-amber-400"
-                                    : row.peg < 2 ? "text-orange-400" : "text-red-400";
+                                const pegColor = row.pegRatio == null ? "text-slate-500"
+                                    : row.pegRatio < 0.8 ? "text-emerald-400"
+                                    : row.pegRatio < 1.2 ? "text-amber-400"
+                                    : row.pegRatio < 2 ? "text-orange-400" : "text-red-400";
 
                                 return (
                                     <tr
@@ -288,80 +298,128 @@ export function ScanResultsTable({ scanId, market = "NSE" }: { scanId?: string; 
                                         <td className="py-3 px-4">
                                             {row.megatrend ? (
                                                 <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                                    {row.megatrend_emoji} {row.megatrend.length > 20 ? row.megatrend.substring(0, 20) + "…" : row.megatrend}
+                                                    {row.megatrendEmoji} {row.megatrend.length > 20 ? row.megatrend.substring(0, 20) + "…" : row.megatrend}
                                                 </span>
                                             ) : <span className="text-slate-600">–</span>}
                                         </td>
 
                                         {/* MB Score bar */}
                                         <td className="py-3 px-4 text-right">
-                                            {row.mb_score != null
-                                                ? <ScoreBar value={row.mb_score} color={tier.color} />
+                                            {row.mbScore != null
+                                                ? <ScoreBar value={row.mbScore} color={tier.color} />
                                                 : <span className="text-slate-600">–</span>
                                             }
                                         </td>
 
                                         {/* MB Tier badge */}
                                         <td className="py-3 px-4">
-                                            {row.mb_tier ? (
+                                            {row.mbTier ? (
                                                 <span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-medium", tier.bg, tier.color)}>
-                                                    {tier.emoji} {row.mb_tier}
+                                                    {tier.emoji} {row.mbTier}
                                                 </span>
                                             ) : <span className="text-slate-600">–</span>}
                                         </td>
 
                                         {/* 5L Score */}
                                         <td className="py-3 px-4 text-right">
-                                            <span className={cn("font-mono font-bold", (row.total_score ?? 0) >= 80 ? "text-emerald-400" : (row.total_score ?? 0) >= 60 ? "text-amber-400" : "text-red-400")}>
-                                                {row.total_score ?? "–"}
+                                            <span className={cn("font-mono font-bold", (row.totalScore ?? 0) >= 80 ? "text-emerald-400" : (row.totalScore ?? 0) >= 60 ? "text-amber-400" : "text-red-400")}>
+                                                {row.totalScore ?? "–"}
                                             </span>
                                         </td>
 
                                         {/* FCF Yield */}
                                         <td className={cn("py-3 px-4 text-right font-mono", fcfColor)}>
-                                            {row.fcf_yield_pct != null ? `${row.fcf_yield_pct.toFixed(1)}%` : "–"}
+                                            {row.fcfYieldPct != null ? `${row.fcfYieldPct.toFixed(1)}%` : "–"}
                                         </td>
 
                                         {/* Earnings Quality */}
                                         <td className={cn("py-3 px-4 text-right font-mono", eqColor)}>
-                                            {row.earnings_quality != null ? row.earnings_quality.toFixed(2) : "–"}
+                                            {row.earningsQuality != null ? row.earningsQuality.toFixed(2) : "–"}
                                         </td>
 
                                         {/* PEG */}
                                         <td className={cn("py-3 px-4 text-right font-mono", pegColor)}>
-                                            {row.peg != null ? row.peg.toFixed(1) : "–"}
+                                            {row.pegRatio != null ? row.pegRatio.toFixed(1) : "–"}
                                         </td>
 
                                         {/* Debt direction */}
                                         <td className="py-3 px-4 text-center">
-                                            <span className={cn("font-bold text-base", de.color)} title={row.de_direction ?? "unknown"}>
+                                            <span className={cn("font-bold text-base", de.color)} title={row.deDirection ?? "unknown"}>
                                                 {de.icon}
                                             </span>
                                         </td>
 
                                         {/* Margin direction */}
                                         <td className="py-3 px-4 text-center">
-                                            <span className={cn("font-bold text-base", margin.color)} title={row.margin_direction ?? "unknown"}>
+                                            <span className={cn("font-bold text-base", margin.color)} title={row.marginDirection ?? "unknown"}>
                                                 {margin.icon}
                                             </span>
                                         </td>
 
                                         {/* Coffee Can Score */}
                                         <td className="py-3 px-4 text-right">
-                                            {row.cc_score != null && row.cc_tier && row.cc_tier !== "Insufficient Data" ? (() => {
-                                                const cc = CC_TIER_CONFIG[row.cc_tier] ?? CC_TIER_CONFIG.Inconsistent;
+                                            {row.ccScore != null && row.ccTier && row.ccTier !== "Insufficient Data" ? (() => {
+                                                const cc = CC_TIER_CONFIG[row.ccTier] ?? CC_TIER_CONFIG.Inconsistent;
                                                 return (
                                                     <div className="flex flex-col items-end gap-0.5">
-                                                        <span className={cn("font-mono font-bold text-sm", cc.color)}>{row.cc_score}</span>
+                                                        <span className={cn("font-mono font-bold text-sm", cc.color)}>{row.ccScore}</span>
                                                         <span className={cn("text-[9px] px-1.5 py-0.5 rounded-full border font-medium", cc.bg, cc.color)}>
-                                                            {cc.emoji} {row.cc_tier}
+                                                            {cc.emoji} {row.ccTier}
                                                         </span>
-                                                        {row.cc_revenue_cagr != null && (
-                                                            <span className="text-[9px] text-muted-foreground">Rev CAGR {row.cc_revenue_cagr.toFixed(1)}%</span>
+                                                        {row.ccRevenueCagr != null && (
+                                                            <span className="text-[9px] text-muted-foreground">Rev CAGR {row.ccRevenueCagr.toFixed(1)}%</span>
                                                         )}
                                                     </div>
                                                 );
                                             })() : <span className="text-slate-600">–</span>}
+                                        </td>
+
+                                        {/* MACD Crossover */}
+                                        <td className="py-3 px-4">
+                                            {row.macdStatus ? (
+                                                <TooltipProvider delayDuration={200}>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <span className={cn(
+                                                                "text-[10px] px-2.5 py-1 rounded-full border font-semibold cursor-help whitespace-nowrap shadow-sm transition-all hover:scale-[1.03]",
+                                                                row.macdStatus.includes("Daily")
+                                                                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:border-emerald-500/50"
+                                                                    : "bg-blue-500/10 border-blue-500/30 text-blue-400 hover:border-blue-500/50"
+                                                            )}>
+                                                                {row.macdStatus.includes("Daily") ? "🟢 " : "🔵 "}{row.macdStatus}
+                                                            </span>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent side="left" className="max-w-[280px] p-3 text-xs bg-slate-950/95 border border-white/10 text-slate-200 backdrop-blur-md shadow-2xl rounded-lg space-y-2">
+                                                            <div className="font-bold border-b border-white/10 pb-1 text-white flex justify-between items-center">
+                                                                <span>{row.symbol.replace(".NS", "")} Crossover</span>
+                                                                <span className={row.macdStatus.includes("Daily") ? "text-emerald-400" : "text-blue-400"}>{row.macdStatus}</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono text-[11px]">
+                                                                <span className="text-muted-foreground">Capital:</span>
+                                                                <span className="text-right text-white">₹25,000</span>
+
+                                                                <span className="text-muted-foreground">Quantity:</span>
+                                                                <span className="text-right text-white font-bold">{row.macdQty}</span>
+
+                                                                <span className="text-muted-foreground">Invested:</span>
+                                                                <span className="text-right text-white font-bold">{getMarket(row.market).currency}{Number(row.macdInvested).toFixed(0)}</span>
+
+                                                                <span className="text-muted-foreground">Stop Loss:</span>
+                                                                <span className="text-right text-rose-400 font-bold">{getMarket(row.market).currency}{Number(row.macdStopLoss).toFixed(2)}</span>
+
+                                                                <span className="text-muted-foreground">First Target:</span>
+                                                                <span className="text-right text-emerald-400 font-bold">{getMarket(row.market).currency}{Number(row.macdTarget1).toFixed(2)}</span>
+
+                                                                <span className="text-muted-foreground">Final Target:</span>
+                                                                <span className="text-right text-emerald-400 font-bold">{getMarket(row.market).currency}{Number(row.macdTarget2).toFixed(2)}</span>
+
+                                                                <span className="text-muted-foreground">Max Risk:</span>
+                                                                <span className="text-right text-rose-400 font-bold">{getMarket(row.market).currency}{Number(row.macdRisk).toFixed(0)}</span>
+                                                            </div>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            ) : <span className="text-slate-600 font-mono">–</span>}
                                         </td>
 
                                         {/* Category */}

@@ -152,6 +152,13 @@ export interface ScannerCandidate {
     ccScore: number | null;
     ccTier: string | null;
     scanRunAt: string | null;
+    macdStatus: string | null;
+    macdTarget1: number | null;
+    macdTarget2: number | null;
+    macdStopLoss: number | null;
+    macdQty: number | null;
+    macdInvested: number | null;
+    macdRisk: number | null;
 }
 
 export interface TopPick {
