@@ -27,6 +27,17 @@ build/
 dist/
 coverage/
 
+# Bot runtime (generated during execution, never commit)
+bot/venv/
+bot/macd_bot_state.json
+bot/MACD_Signals.xlsx
+bot/MACD_Signals_LOCKED.xlsx
+bot/nifty500_cache.csv
+bot/*.log
+bot/__pycache__/
+bot/*.pyc
+bot/.pytest_cache/
+
 # Temp
 .cache
 tmp/
