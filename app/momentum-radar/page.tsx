@@ -116,6 +116,12 @@ export default function MomentumRadarPage() {
                         </table>
                     </div>
                 )}
+
+                <div className="text-right">
+                    <a href="/momentum-radar/admin" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                        Admin →
+                    </a>
+                </div>
             </main>
         </div>
     );

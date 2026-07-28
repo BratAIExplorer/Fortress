@@ -6,6 +6,7 @@ const envSchema = z.object({
     ADMIN_SECRET: z.string().optional(),
     CRON_SECRET: z.string().optional(),
     PYTHON_BIN: z.string().optional(),
+    ADMIN_PANEL_PASSWORD: z.string().optional(),
 });
 
 // Validate process.env
