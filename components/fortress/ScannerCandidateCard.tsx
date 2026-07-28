@@ -201,15 +201,15 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
                         <div className="pt-2 border-t border-white/5 grid grid-cols-3 gap-1 text-[9px] font-mono text-slate-400">
                             <div className="flex flex-col">
                                 <span className="text-muted-foreground uppercase text-[8px]">T1 (EMA)</span>
-                                <span className="text-emerald-400 font-bold">{currency}{Number(candidate.macdTarget1).toFixed(2)}</span>
+                                <span className="text-emerald-400 font-bold">{market.currency}{Number(candidate.macdTarget1).toFixed(2)}</span>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-muted-foreground uppercase text-[8px]">Final T</span>
-                                <span className="text-emerald-400 font-bold">{currency}{Number(candidate.macdTarget2).toFixed(2)}</span>
+                                <span className="text-emerald-400 font-bold">{market.currency}{Number(candidate.macdTarget2).toFixed(2)}</span>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-muted-foreground uppercase text-[8px]">Stop Loss</span>
-                                <span className="text-rose-400 font-bold">{currency}{Number(candidate.macdStopLoss).toFixed(2)}</span>
+                                <span className="text-rose-400 font-bold">{market.currency}{Number(candidate.macdStopLoss).toFixed(2)}</span>
                             </div>
                         </div>
                     )}
