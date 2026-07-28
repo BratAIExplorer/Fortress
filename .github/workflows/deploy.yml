@@ -96,6 +96,14 @@ jobs:
           git fetch origin main
           git reset --hard $COMMIT_SHA
 
+          # Install deps & build ON THE VPS. The runner's earlier build step never
+          # leaves the runner (no artifact transfer), so without this the app kept
+          # serving whatever .next/standalone was last built on the VPS manually.
+          echo "Installing dependencies & building on VPS..."
+          npm ci
+          npm run build
+          echo "✓ Build complete on VPS"
+
           # Apply database schema migrations (idempotent — safe to re-run)
           echo "Applying database schema..."
           export DATABASE_URL=$(grep "^DATABASE_URL=" .env.production | cut -d= -f2-)
