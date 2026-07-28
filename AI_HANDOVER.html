@@ -666,6 +666,48 @@ curl -X POST https://fortressintelligence.space/api/admin/generate-reset-link \
         <p style="color: var(--green);"><strong>Files Modified:</strong> 6 files added/modified (schema, API routes, components, migration)</p>
       </div>
 
+      <h2>Session 34 — Momentum Radar Status Bar (July 29, 2026)</h2>
+
+      <div class="card">
+        <span class="badge live">SHIPPED</span>
+        <strong>✨ Enhanced Momentum Radar: Prominent Bot Status Display</strong>
+        <p>
+          Added a high-visibility status bar below the intro section showing the last bot run timestamp and prominent Admin Access button. Makes bot operational status immediately visible without scrolling.
+        </p>
+        <ul>
+          <li>
+            <strong>Visual:</strong> Blue gradient status bar with:
+            <ul>
+              <li>Green pulsing dot indicator (bot status)</li>
+              <li>"Last Bot Run" label + timestamp in readable format (e.g., "Jul 29, 11:45:32 AM")</li>
+              <li>Prominent blue "Admin Access →" button (top-right)</li>
+              <li>Fallback text "Never scanned yet" if no data</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Code:</strong> Reorganized <code>app/momentum-radar/page.tsx</code>:
+            <ul>
+              <li>Moved <code>lastUpdated</code> display from subtitle to dedicated status bar</li>
+              <li>Styled with <code>bg-gradient-to-r from-blue-600/20 to-blue-500/10</code></li>
+              <li>Timestamp formatted with <code>toLocaleString("en-IN", {month, day, hour, minute, second, hour12})</code></li>
+              <li>Admin link upgraded from `text-xs` footer link to `px-4 py-2 bg-blue-600` button</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Principles Applied:</strong>
+            <ul>
+              <li>Think Before Coding — data already in API response, just surface it</li>
+              <li>Simplicity First — no new components, pure layout reorganization</li>
+              <li>Surgical Changes — one file, ~30 lines added, zero breaking changes</li>
+              <li>Goal-Driven — make bot status & admin access immediately visible</li>
+            </ul>
+          </li>
+          <li><strong>Build Status:</strong> ✅ TypeScript compiles clean (0 errors in 17s)</li>
+          <li><strong>Deployment Status:</strong> ✅ Live on production (code already on origin/main)</li>
+          <li><strong>Testing:</strong> ✅ Validated on https://fortressintelligence.space/momentum-radar</li>
+        </ul>
+      </div>
+
       <h2>Backlog &amp; Recommendations</h2>
       <div class="card">
         <table>
