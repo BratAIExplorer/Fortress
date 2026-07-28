@@ -12,11 +12,11 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 
 New `components/fortress/WelcomeBetaModal.tsx` — a once-per-session popup shown to every signed-in user announcing public BETA status, generic (no tab names, since not all features are enabled for everyone yet), with an explicit "not financial advice / do your own research" disclaimer. Wired into `app/layout.tsx` next to the existing `BetaBanner`. Reuses the existing `FeedbackModal` for the "Got feedback?" action — no new backend.
 
-| Priority | Item | Notes |
-|---|---|---|
-| 🟡 MEDIUM | Commit &amp; deploy the welcome modal | `WelcomeBetaModal.tsx` + `app/layout.tsx` wiring are uncommitted. Review, commit, push, deploy. |
-| 🟡 MEDIUM | Manually verify in a real browser | Couldn't render the live preview this session (Browser pane wasn't compositing) — only `tsc --noEmit` and dev-server logs were checked. Log in and eyeball it before/after deploy. |
-| 🟢 LOW | Re-gate once out of BETA | Currently shows to every signed-in user indefinitely, by design. Marked with a `ponytail:` comment in the component — add real gating (e.g. `subscriptionStatus`, same pattern as Momentum Radar) when BETA ends. |
+| Priority  | Item                                  | Notes                                                                                                                                                                                                             |
+| --------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🟡 MEDIUM | Commit &amp; deploy the welcome modal | `WelcomeBetaModal.tsx` + `app/layout.tsx` wiring are uncommitted. Review, commit, push, deploy.                                                                                                                   |
+| 🟡 MEDIUM | Manually verify in a real browser     | Couldn't render the live preview this session (Browser pane wasn't compositing) — only `tsc --noEmit` and dev-server logs were checked. Log in and eyeball it before/after deploy.                                |
+| 🟢 LOW    | Re-gate once out of BETA              | Currently shows to every signed-in user indefinitely, by design. Marked with a `ponytail:` comment in the component — add real gating (e.g. `subscriptionStatus`, same pattern as Momentum Radar) when BETA ends. |
 
 ---
 
@@ -24,20 +24,21 @@ New `components/fortress/WelcomeBetaModal.tsx` — a once-per-session popup show
 
 See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 
-| Priority | Item | Notes |
-|---|---|---|
-| 🔴 HIGH | Configure real SMTP on the VPS | `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`/`SMTP_FROM` missing from `.env.production` — root cause of silently-failing password reset. Set them, `pm2 restart all --update-env`. |
-| 🔴 HIGH | Re-gate Momentum Radar | `requireAuth` + 30-day trial check were removed from `momentum-signals/route.ts` (and the nav's `isLoggedIn` condition) as a stopgap because broken auth blocked everyone. Restore once SMTP/auth is verified stable — don't leave this open indefinitely. Commit `d8209c46` has the removal; the original gated logic is in git history just before it. |
-| 🟡 MEDIUM | Duplicate `CRON_SECRET` in `.env.production` | Two conflicting `CRON_SECRET=` lines found on the VPS this session; only one is active. Remove the stale one. |
-| 🟡 MEDIUM | Investigate arundsamant@gmail.com | No matching `auth_user` row for that exact email via the new admin reset-link endpoint — likely a typo in the email. Run `SELECT email FROM auth_user WHERE email ILIKE '%arun%samant%'` on prod to confirm. |
-| 🟢 LOW | Remove `/api/admin/generate-reset-link` | Manual SMTP-bypass endpoint (commit `ad2b3b6b`) added to unblock users right now. Delete once SMTP is confirmed working end-to-end. |
-| 🟢 LOW | Reconcile parallel commits | `87b57386` (nav promotion) and `565bfdcd` (CI build fix) landed on `main` from a different session mid-work — worth a quick review against the gating rollback above. |
+| Priority  | Item                                         | Notes                                                                                                                                                                                                                                                                                                                                                    |
+| --------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔴 HIGH   | Configure real SMTP on the VPS               | `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`/`SMTP_FROM` missing from `.env.production` — root cause of silently-failing password reset. Set them, `pm2 restart all --update-env`.                                                                                                                                                                |
+| 🔴 HIGH   | Re-gate Momentum Radar                       | `requireAuth` + 30-day trial check were removed from `momentum-signals/route.ts` (and the nav's `isLoggedIn` condition) as a stopgap because broken auth blocked everyone. Restore once SMTP/auth is verified stable — don't leave this open indefinitely. Commit `d8209c46` has the removal; the original gated logic is in git history just before it. |
+| 🟡 MEDIUM | Duplicate `CRON_SECRET` in `.env.production` | Two conflicting `CRON_SECRET=` lines found on the VPS this session; only one is active. Remove the stale one.                                                                                                                                                                                                                                            |
+| 🟡 MEDIUM | Investigate arundsamant@gmail.com            | No matching `auth_user` row for that exact email via the new admin reset-link endpoint — likely a typo in the email. Run `SELECT email FROM auth_user WHERE email ILIKE '%arun%samant%'` on prod to confirm.                                                                                                                                             |
+| 🟢 LOW    | Remove `/api/admin/generate-reset-link`      | Manual SMTP-bypass endpoint (commit `ad2b3b6b`) added to unblock users right now. Delete once SMTP is confirmed working end-to-end.                                                                                                                                                                                                                      |
+| 🟢 LOW    | Reconcile parallel commits                   | `87b57386` (nav promotion) and `565bfdcd` (CI build fix) landed on `main` from a different session mid-work — worth a quick review against the gating rollback above.                                                                                                                                                                                    |
 
 ---
 
 ## ✅ SESSION 21 COMPLETE — Real Data Scoring LIVE
 
 ### Fixed: Mock Data Crisis
+
 - ✅ Replaced Massive-only scorer (US-only, no NSE) with `yahoo-finance2` (free, both markets)
 - ✅ Removed `MASSIVE_API_KEY` dependency entirely
 - ✅ Created `lib/scanners/yahoo-technical-scorer.ts` (portable, market-aware `.NS` suffix)
@@ -46,6 +47,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 - ✅ Commit: 8e3e1410
 
 ### Confirmed Stable
+
 - Both markets compute REAL technical scores (RSI, SMA20/50/200, 90-day proximity, volume trend)
 - Fortress 30 rankings are no longer placeholder data
 - Sequential 150ms/ticker throttle works for ~500-ticker universe (~10-15 min per scan)
@@ -54,14 +56,14 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 
 ## 🔄 CURRENT STATE — What We Scan
 
-| Market | Universe | Count | Status | Notes |
-|---|---|---|---|---|
-| **NSE** | Nifty 500 | ~500 | ✅ Live | Static CSV (Wayback Machine snapshot, needs refresh ~6mo) |
-| **US** | S&P 500 | ~503 | ✅ Live | Dynamic CSV feed (free, reachable from VPS) |
-| **NOT YET** | Nifty Smallcap 250 | ~250 | 🟡 Scoped Phase 2 | Requires concurrent fetching |
-| **NOT YET** | Russell 2000 | ~2,000 | 🟡 Scoped Phase 2 | Requires concurrent fetching |
-| **NOT YET** | Full NSE+BSE | ~2,781 | 🔴 Phase 3+ | Too large for current sequential model |
-| **NOT YET** | Full US | ~5,400+ | 🔴 Phase 3+ | Too large for current sequential model |
+| Market      | Universe           | Count   | Status            | Notes                                                     |
+| ----------- | ------------------ | ------- | ----------------- | --------------------------------------------------------- |
+| **NSE**     | Nifty 500          | ~500    | ✅ Live           | Static CSV (Wayback Machine snapshot, needs refresh ~6mo) |
+| **US**      | S&P 500            | ~503    | ✅ Live           | Dynamic CSV feed (free, reachable from VPS)               |
+| **NOT YET** | Nifty Smallcap 250 | ~250    | 🟡 Scoped Phase 2 | Requires concurrent fetching                              |
+| **NOT YET** | Russell 2000       | ~2,000  | 🟡 Scoped Phase 2 | Requires concurrent fetching                              |
+| **NOT YET** | Full NSE+BSE       | ~2,781  | 🔴 Phase 3+       | Too large for current sequential model                    |
+| **NOT YET** | Full US            | ~5,400+ | 🔴 Phase 3+       | Too large for current sequential model                    |
 
 ---
 
@@ -72,6 +74,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 **Timeline:** Aug-Sep 2026 (after 1-week observation of current stability)
 
 ### What Changes
+
 1. **Universe expansion:**
    - Add Nifty Smallcap 250 CSV feed (~250 tickers)
    - Add Russell 2000 CSV feed (~2,000 tickers)
@@ -89,18 +92,19 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 
 ### Effort & Risk
 
-| Task | Effort | Risk | Notes |
-|---|---|---|---|
-| Fetch smallcap + Russell CSV | 2 hrs | Low | Same pattern as S&P 500 |
-| Implement concurrent scorer | 8-12 hrs | Medium | Need proper backoff logic, test rate limits |
-| Update cron schedule | 1 hr | Low | Add a third scheduled scan |
-| Rate-limit testing | 4 hrs | Medium | Yahoo-finance2 unknown limit; test in staging |
-| Monitor for 1 week | N/A | Medium | Watch for silent throttling |
+| Task                         | Effort   | Risk   | Notes                                         |
+| ---------------------------- | -------- | ------ | --------------------------------------------- |
+| Fetch smallcap + Russell CSV | 2 hrs    | Low    | Same pattern as S&P 500                       |
+| Implement concurrent scorer  | 8-12 hrs | Medium | Need proper backoff logic, test rate limits   |
+| Update cron schedule         | 1 hr     | Low    | Add a third scheduled scan                    |
+| Rate-limit testing           | 4 hrs    | Medium | Yahoo-finance2 unknown limit; test in staging |
+| Monitor for 1 week           | N/A      | Medium | Watch for silent throttling                   |
 
 **Total effort:** 15-20 hours  
 **Blocking:** None — can be done anytime after Phase 5 stabilizes
 
 ### When to Start
+
 ✅ After 1-week observation (watch for stability issues, rate-limit hits)  
 ✅ Once confirmed: no regressions, consistent scoring, cron runs on schedule  
 ❌ Do NOT start before 1 week of stability
@@ -110,12 +114,14 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 ## 🔄 ONGOING — Phase 5 Observation Period (NEXT 1 WEEK)
 
 **What to watch:**
+
 - Do both scans (NSE + US) complete on schedule? (11:00 UTC + 09:00 UTC weekdays)
 - Any silent rate-limit hits? (check `/api/analysis/gem-score` logs for yfinance errors)
 - Fortress 30 rankings stable day-to-day? (or wild swings in scores?)
 - PM2 memory growth or crashes? (yahoo-finance2 is more memory-intensive than Massive API calls)
 
 **If problems appear:**
+
 - Increase per-ticker delay (150ms → 200ms)
 - Add jitter to delay (random ±50ms)
 - Reduce batch size if/when Phase 2 implements concurrency
@@ -131,6 +137,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 **Effort:** 2 hours (lazy Node.js inline approach vs. 4-6 Python subprocess)
 
 ### What's Built ✅
+
 - ✅ UI page at `/macro` (ready to display fetched data)
 - ✅ API endpoint `POST /api/macro` (accepts direct JSON + x-cron-secret header) — refactored to accept direct POST instead of subprocess
 - ✅ Database table `macroSnapshots` (stores weekly snapshots with upsert on date)
@@ -138,6 +145,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 - ✅ Weekly cron schedule (every Sunday 12:00 UTC / 5:30 PM IST)
 
 ### Implementation Details
+
 1. **Lazy approach:** Added `fetchYahooPrice()` + `runMacroSnapshot()` to `cron-scheduler.js`
    - Uses Yahoo Finance free API (same as rest of app)
    - Parallel fetches (Promise.all could be used, but sequential is fine for 8 metrics)
@@ -154,14 +162,15 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
    - Returns 201 on success
 
 ### Data Format
+
 ```json
 {
   "snapshot_date": "2026-07-21",
   "nifty_50": 24500.25,
-  "bank_nifty": 52300.50,
+  "bank_nifty": 52300.5,
   "usd_inr": 83.45,
   "gold_usd": 2350.75,
-  "crude_oil_usd": 78.50,
+  "crude_oil_usd": 78.5,
   "us_10y_yield": 4.15,
   "cboe_vix": 14.5,
   "india_vix": 16.2
@@ -169,12 +178,14 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 ```
 
 ### Ponytail Principles Applied ✅
+
 - **Think Before Coding:** Understood existing setup (cron-scheduler pattern, endpoint expectations)
 - **Simplicity First:** Inlined fetcher into Node.js (no Python subprocess, no new dependencies)
 - **Surgical Changes:** 2 files (cron-scheduler.js, macro/route.ts), ~60 LOC added
 - **Goal-Driven:** /macro page now has scheduled weekly data feed
 
 ### Next Steps
+
 - Deploy with `npm run build && pm2 restart all`
 - Monitor first Sunday run (July 27) for any fetch failures
 - If Yahoo Finance hits rate limits, add retry logic or switch to alternative (Alpha Vantage, FMP)
@@ -184,6 +195,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 ## ⏳ FUTURE PHASES (DO NOT START YET)
 
 ### Phase 3: Learning Engine & Personalization (Aug-Sep 2026)
+
 **Status:** 🔴 Not started  
 **Effort:** 40-60 hours
 
@@ -197,6 +209,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 ---
 
 ### Phase 4: Analytics & Real-Time Alerts (Sep 2026)
+
 **Status:** 🔴 Not started  
 **Effort:** 30-40 hours
 
@@ -210,6 +223,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 ---
 
 ### Phase 3+: Full Listed Universe (Oct 2026+)
+
 **Status:** 🔴 Not started  
 **Effort:** 50+ hours
 
@@ -227,6 +241,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 ## 🛠️ INFRASTRUCTURE TASKS (ONGOING)
 
 ### Monitoring & Health
+
 - ✅ Postgres auto-restart on crash (systemd override.conf, Session 20)
 - ✅ Last-scan timestamps on UI (shows staleness immediately)
 - ✅ Distinct DB-outage banner (vs. "scan hasn't run yet")
@@ -235,6 +250,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 - 🟡 Rate-limit tracking (log every 429 from yfinance, alert if >5% of scans)
 
 ### Deployment & Validation
+
 - ✅ DEPLOYMENT_AUDIT.md with 6 critical post-deploy checks (all passing)
 - ✅ Env-sync automation (`cp .env.production .next/standalone/.env.production` on deploy)
 - 🟡 Automated backups (PostgreSQL daily snapshots to S3)
@@ -249,7 +265,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 ❌ **Implement learning engine** — Phase 3, after Phase 5 observation complete  
 ❌ **Switch data sources** (Massive, FMP, Alpha Vantage) — don't; yahoo-finance2 is free and working  
 ❌ **Increase scan frequency** — stay 2x/day; any faster risks rate-limit hitting  
-✅ **Macro Snapshot fetcher (Phase 2X)** — Low priority, can start anytime (independent, 4-6 hrs)  
+✅ **Macro Snapshot fetcher (Phase 2X)** — Low priority, can start anytime (independent, 4-6 hrs)
 
 ---
 
@@ -258,21 +274,21 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 ✅ **Phase 2 micro-task:** Grab the Nifty Smallcap 250 CSV from any public source (5 min)  
 ✅ **Phase 2 micro-task:** Grab the Russell 2000 CSV from any public source (5 min)  
 ✅ **Phase 2 micro-task:** Concurrent scorer POC (test 10-ticker batch with 100ms jitter, 2 hrs)  
-✅ **Phase 2X micro-task:** Macro Snapshot fetcher (implement scanner/macro_fetcher.py, 4-6 hrs) — independent of Phase 2, can start anytime  
+✅ **Phase 2X micro-task:** Macro Snapshot fetcher (implement scanner/macro_fetcher.py, 4-6 hrs) — independent of Phase 2, can start anytime
 
 ---
 
 ## 🎯 SESSION 21 SUMMARY
 
-| Item | Status | Notes |
-|---|---|---|
-| Real data scoring | ✅ DONE | yahoo-finance2 live, Massive removed |
-| NSE + US scans | ✅ DONE | 480 + 501 real ratings per run |
-| Fortress 30 rankings | ✅ REAL | No more synthetic data |
-| 1-week stability watch | 🟡 ACTIVE | Monitor until ~July 27 |
-| Phase 2 concurrency | 🟡 SCOPED | Start after stability confirmed |
+| Item                     | Status       | Notes                                                   |
+| ------------------------ | ------------ | ------------------------------------------------------- |
+| Real data scoring        | ✅ DONE      | yahoo-finance2 live, Massive removed                    |
+| NSE + US scans           | ✅ DONE      | 480 + 501 real ratings per run                          |
+| Fortress 30 rankings     | ✅ REAL      | No more synthetic data                                  |
+| 1-week stability watch   | 🟡 ACTIVE    | Monitor until ~July 27                                  |
+| Phase 2 concurrency      | 🟡 SCOPED    | Start after stability confirmed                         |
 | Phase 2X (Macro fetcher) | 🔴 GAP FOUND | Endpoint built, Python script missing; added to backlog |
-| Phase 3+ (full universe) | 🔴 NOT YET | Blocked on Phase 2 completion |
+| Phase 3+ (full universe) | 🔴 NOT YET   | Blocked on Phase 2 completion                           |
 
 ---
 

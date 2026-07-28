@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Coins, TrendingUp, AlertTriangle, MessageSquarePlus, Rocket, Bug, Lightbulb, ShieldCheck } from "lucide-react";
+import {
+  X,
+  Coins,
+  TrendingUp,
+  AlertTriangle,
+  MessageSquarePlus,
+  Rocket,
+  Bug,
+  Lightbulb,
+  ShieldCheck,
+} from "lucide-react";
 import { FeedbackModal } from "./FeedbackModal";
 
 const SEEN_KEY = "fortress-welcome-modal-seen";
@@ -32,7 +42,10 @@ export function WelcomeBetaModal() {
 
   return (
     <>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={dismiss}>
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
+        onClick={dismiss}
+      >
         <div
           className="relative w-full max-w-md rounded-2xl border border-amber-500/30 bg-card overflow-hidden shadow-2xl"
           onClick={(e) => e.stopPropagation()}
@@ -57,7 +70,9 @@ export function WelcomeBetaModal() {
                   <span className="text-muted-foreground mx-3">GEM 84/100</span>
                   <span className="text-red-400 mx-3">▼ RISK -1.1%</span>
                   <span className="text-emerald-400 mx-3">▲ NIFTY +0.8%</span>
-                  <span className="text-muted-foreground mx-3">S&amp;P 500</span>
+                  <span className="text-muted-foreground mx-3">
+                    S&amp;P 500
+                  </span>
                 </span>
               ))}
             </div>
@@ -68,25 +83,33 @@ export function WelcomeBetaModal() {
             <TrendingUp className="absolute top-6 right-6 h-4 w-4 text-emerald-400" />
 
             <h2 className="text-xl font-bold font-serif mt-2 mb-1">
-              You&apos;re early. <span className="text-amber-400">Welcome aboard.</span>
+              You&apos;re early.{" "}
+              <span className="text-amber-400">Welcome aboard.</span>
             </h2>
             <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-              Fortress is a work in progress — features are rolling out gradually and still getting sharpened.
-              Some tools may change, move, or take a break while we tune them.
+              Fortress is a work in progress — features are rolling out
+              gradually and still getting sharpened. Some tools may change,
+              move, or take a break while we tune them.
             </p>
 
             <div className="space-y-2 mb-4">
               <div className="flex items-center gap-2.5 bg-white/5 rounded-lg px-3 py-2.5">
                 <Bug className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="text-sm">Bugs and rough edges? Expected — tell us.</span>
+                <span className="text-sm">
+                  Bugs and rough edges? Expected — tell us.
+                </span>
               </div>
               <div className="flex items-center gap-2.5 bg-white/5 rounded-lg px-3 py-2.5">
                 <Lightbulb className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="text-sm">Your feedback shapes what we build next.</span>
+                <span className="text-sm">
+                  Your feedback shapes what we build next.
+                </span>
               </div>
               <div className="flex items-center gap-2.5 bg-white/5 rounded-lg px-3 py-2.5">
                 <ShieldCheck className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="text-sm">No real money ever moves through this app.</span>
+                <span className="text-sm">
+                  No real money ever moves through this app.
+                </span>
               </div>
             </div>
 
@@ -95,8 +118,9 @@ export function WelcomeBetaModal() {
                 <AlertTriangle className="h-4 w-4" /> Not financial advice
               </p>
               <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                Everything here is informational only. Do your own homework before acting on it — any investing
-                decision, and its outcome, is on you.
+                Everything here is informational only. Do your own homework
+                before acting on it — any investing decision, and its outcome,
+                is on you.
               </p>
             </div>
 
@@ -118,12 +142,18 @@ export function WelcomeBetaModal() {
         </div>
       </div>
 
-      {feedbackOpen && <FeedbackModal isLoggedIn onClose={() => setFeedbackOpen(false)} />}
+      {feedbackOpen && (
+        <FeedbackModal isLoggedIn onClose={() => setFeedbackOpen(false)} />
+      )}
 
       <style jsx global>{`
         @keyframes marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
         }
       `}</style>
     </>

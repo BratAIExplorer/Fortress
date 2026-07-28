@@ -33,7 +33,7 @@ export default function RootLayout({
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           dmSans.variable,
-          ibmPlexMono.variable
+          ibmPlexMono.variable,
         )}
       >
         <Providers>
@@ -45,9 +45,7 @@ export default function RootLayout({
             <Breadcrumb />
 
             {/* Page Content */}
-            <main className="flex-1 w-full">
-              {children}
-            </main>
+            <main className="flex-1 w-full">{children}</main>
           </div>
           <Toaster theme="dark" richColors position="bottom-right" />
         </Providers>
