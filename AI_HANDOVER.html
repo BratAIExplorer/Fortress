@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fortress Intelligence — AI Handover (Living Document)</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --panel: #12151c;
+    --border: #232733;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #8b5cf6;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --blue: #60a5fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 40px 20px 80px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; }
+  h1 { font-size: 1.7rem; margin: 0 0 6px; }
+  .meta { color: var(--muted); font-size: 0.85rem; }
+  h2 { font-size: 1.15rem; margin: 40px 0 12px; border-left: 3px solid var(--accent); padding-left: 10px; }
+  h3 { font-size: 0.95rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin: 20px 0 8px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+  .badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-right: 8px; }
+  .badge.live { background: rgba(52,211,153,.15); color: var(--green); border: 1px solid rgba(52,211,153,.3); }
+  .badge.warn { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+  .badge.blocked { background: rgba(248,113,113,.15); color: var(--red); border: 1px solid rgba(248,113,113,.3); }
+  .badge.info { background: rgba(96,165,250,.15); color: var(--blue); border: 1px solid rgba(96,165,250,.3); }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 4px; }
+  code { background: #1a1e28; padding: 1px 6px; border-radius: 4px; font-size: 0.85em; color: #e0b3ff; }
+  a { color: var(--blue); }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; }
+  .note { font-size: 0.85rem; color: var(--muted); font-style: italic; }
+  .howto { border: 1px dashed var(--border); border-radius: 10px; padding: 16px 20px; margin-top: 40px; color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>🏰 Fortress Intelligence — AI Handover</h1>
+  <div class="meta">Living document · Last updated: <strong>July 28, 2026</strong> · Owner: Bharat Samant (bharatsamant@gmail.com)</div>
+</header>
+
+<h2>Current Status</h2>
+<div class="card">
+  <span class="badge live">LIVE</span> <a href="https://fortressintelligence.space">fortressintelligence.space</a> — Next.js on VPS (76.13.179.32), PM2 + Nginx, PostgreSQL, GitHub Actions CI/CD.
+  <ul>
+    <li>Fortress 30, Investment Genie, Portfolio Tracker, Hidden Gem Finder — all live, real data (yahoo-finance2).</li>
+    <li>Momentum Radar tab — <strong>live, open to everyone</strong> (sign-in/trial gate temporarily removed, see below).</li>
+    <li>BETA welcome modal — <strong>built, not yet deployed</strong> (see Session 32 below).</li>
+  </ul>
+</div>
+
+<h2>Session 32 — BETA Welcome Modal (signed-in users, every login)</h2>
+
+<div class="card">
+  <span class="badge info">NOT YET DEPLOYED</span> <strong>New: <code>components/fortress/WelcomeBetaModal.tsx</code></strong>
+  <p>A one-time-per-session popup (distinct from the existing persistent <code>BetaBanner.tsx</code>) shown to every signed-in user, reminding them the product is in public BETA and inviting feedback. Built at the user's request after iterating on copy and visual style.</p>
+  <ul>
+    <li>Fires once per browser session (<code>sessionStorage</code> key <code>fortress-welcome-modal-seen</code>) — reappears on the next login, unlike the banner's permanent <code>localStorage</code> dismiss.</li>
+    <li>Generic copy — deliberately does <strong>not</strong> name specific tabs/features, since not everything is enabled for everyone yet.</li>
+    <li>Explicit <strong>"Not financial advice"</strong> disclaimer block — informational only, user's own responsibility to research before acting.</li>
+    <li>Close (X) button and a primary "Let's go" button — both dismiss for the current session only.</li>
+    <li>"Got feedback?" button opens the existing <code>FeedbackModal.tsx</code> — no new backend, reuses <code>POST /api/feedback</code>.</li>
+    <li>Visual style: dark card, amber/orange accents, scrolling stock-ticker marquee strip, floating coin/trend icons, rotated "PUBLIC BETA" corner ribbon — matched to a poster-style reference image the user supplied.</li>
+    <li>Wired into <code>app/layout.tsx</code> globally, rendered alongside <code>BetaBanner</code>.</li>
+  </ul>
+  <p class="note">Originally scoped to only show during each user's first 30 days (via <code>authUser.createdAt</code>, same pattern as Momentum Radar's trial gate — this required a temporary addition to <code>/api/auth/session</code> to expose <code>createdAt</code>). The user asked to drop that entirely for the BETA phase — <strong>every signed-in user sees it, no expiry</strong> — so the <code>createdAt</code> plumbing was reverted out of <code>session/route.ts</code> to avoid unused code. A <code>ponytail:</code> comment marks the spot in <code>WelcomeBetaModal.tsx</code> to add real gating (e.g. subscription-based) once out of BETA.</p>
+  <p class="note">Not yet committed or deployed. Not visually verified in a live browser this session — the Browser pane wasn't compositing frames in this environment; verification was limited to <code>tsc --noEmit</code> (clean) and dev-server logs (no runtime errors on the touched routes).</p>
+</div>
+
+<h2>Most Recent Session — Auth Breakage &amp; Momentum Radar Gate Removed</h2>
+
+<div class="card">
+  <span class="badge blocked">KNOWN ISSUE</span> <strong>Password reset is broken in production.</strong>
+  <p>Root cause: SMTP is not configured on the VPS (<code>SMTP_HOST</code>/<code>SMTP_USER</code>/<code>SMTP_PASSWORD</code>). <code>/api/auth/forgot-password</code> deliberately swallows the email-send failure and always returns success (this is correct behavior — it avoids leaking which emails are registered) — but it means no reset email ever actually arrives, with no visible error anywhere. This has been a known backlog item since Session 28 and was never completed.</p>
+  <p class="note">This surfaced because a user (arundsamant@gmail.com) couldn't reset their password. That exact email does not appear to match any row in <code>auth_user</code> — needs a manual DB check (see Backlog).</p>
+</div>
+
+<div class="card">
+  <span class="badge info">WORKAROUND SHIPPED</span> <strong><code>POST /api/admin/generate-reset-link</code></strong>
+  <p>Admin-only endpoint (shared <code>x-cron-secret</code> auth, same pattern as the scan crons) that mints a valid <code>PASSWORD_RESET</code> token directly and returns the reset URL — bypassing email entirely. Use it to manually unblock a user until SMTP is fixed:</p>
+  <pre style="background:#1a1e28;padding:10px 14px;border-radius:8px;overflow-x:auto;font-size:0.8rem;">curl -X POST https://fortressintelligence.space/api/admin/generate-reset-link \
+  -H "Content-Type: application/json" \
+  -H "x-cron-secret: &lt;CRON_SECRET from /opt/fortress/.env.production&gt;" \
+  -d '{"email":"user@example.com"}'</pre>
+  <p class="note">Commit: <code>ad2b3b6b</code>. Retire this once SMTP is fixed and forgot-password is verified end-to-end.</p>
+</div>
+
+<div class="card">
+  <span class="badge warn">TEMPORARY CHANGE</span> <strong>Momentum Radar: sign-in/trial gate removed</strong>
+  <p>Because auth is currently unreliable (see above), gating a feature behind broken sign-in blocked everyone. Decision: open the tab to all visitors (logged in or not) with live MACD signal data, and defer re-gating until auth/SMTP is solid.</p>
+  <ul>
+    <li><code>components/fortress/Navbar.tsx</code> — Momentum Radar link no longer conditional on <code>isLoggedIn</code>.</li>
+    <li><code>app/api/analysis/momentum-signals/route.ts</code> — <code>GET</code> no longer calls <code>requireAuth</code> or checks the 30-day trial window; just returns the signals table.</li>
+    <li><code>app/momentum-radar/page.tsx</code> — dropped the <code>unauthenticated</code>/<code>trial_expired</code> UI states; always fetches and renders.</li>
+  </ul>
+  <p class="note">Commit: <code>d8209c46</code>. The original gated version (session/trial check) is intact in git history — restore it once auth is fixed rather than rewriting from scratch.</p>
+</div>
+
+<h2>Backlog &amp; Recommendations</h2>
+<div class="card">
+  <table>
+    <tr><th>Priority</th><th>Item</th><th>Notes</th></tr>
+    <tr><td><span class="badge blocked">HIGH</span></td><td>Configure real SMTP on the VPS</td><td>Set <code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASSWORD</code>, <code>SMTP_FROM</code> in <code>/opt/fortress/.env.production</code>, restart PM2 with <code>--update-env</code>. This is the actual fix, not the admin workaround.</td></tr>
+    <tr><td><span class="badge blocked">HIGH</span></td><td>Re-gate Momentum Radar</td><td>Restore <code>requireAuth</code> + 30-day trial check in <code>momentum-signals/route.ts</code> and the <code>isLoggedIn</code> nav condition once SMTP/auth is verified stable. Don't leave this open indefinitely.</td></tr>
+    <tr><td><span class="badge warn">MEDIUM</span></td><td>Resolve duplicate <code>CRON_SECRET</code> in <code>.env.production</code></td><td>Two conflicting <code>CRON_SECRET=</code> lines were found on the VPS during this session. Only one is actually active; the stale line should be removed to avoid future confusion.</td></tr>
+    <tr><td><span class="badge warn">MEDIUM</span></td><td>Investigate arundsamant@gmail.com</td><td>No matching row found via the admin reset-link endpoint. Run <code>SELECT email FROM auth_user WHERE email ILIKE '%arun%samant%'</code> on prod to confirm the actual registered email (likely a typo).</td></tr>
+    <tr><td><span class="badge info">LOW</span></td><td>Remove <code>/api/admin/generate-reset-link</code></td><td>Delete once SMTP is confirmed working end-to-end — it's a manual bypass, not meant to be permanent.</td></tr>
+    <tr><td><span class="badge info">LOW</span></td><td>Reconcile parallel nav/CI commits</td><td>Two commits (<code>87b57386</code>, <code>565bfdcd</code>) landed on <code>main</code> from a different session during this work (Momentum Radar nav promotion + a CI build fix). Worth a quick review to confirm they don't conflict with the gating rollback above.</td></tr>
+    <tr><td><span class="badge warn">MEDIUM</span></td><td>Commit &amp; deploy the BETA welcome modal</td><td><code>components/fortress/WelcomeBetaModal.tsx</code> + the two-line <code>app/layout.tsx</code> wiring are sitting uncommitted. Review, commit, push, deploy.</td></tr>
+    <tr><td><span class="badge warn">MEDIUM</span></td><td>Manually verify the welcome modal in a real browser</td><td>Log in as a real user and confirm it renders, the marquee/icon animations look right, and "Got feedback?" opens the feedback form correctly. Couldn't be done this session — the Browser pane wasn't compositing.</td></tr>
+    <tr><td><span class="badge info">LOW</span></td><td>Re-gate the welcome modal once out of BETA</td><td>Currently shows to every signed-in user indefinitely (by design, per the user). Marked with a <code>ponytail:</code> comment in <code>WelcomeBetaModal.tsx</code> — revisit with real gating (e.g. tie to <code>subscriptionStatus</code>, same pattern as Momentum Radar) when BETA ends.</td></tr>
+  </table>
+</div>
+
+<div class="howto">
+  <strong>How to keep this a living document:</strong> Each session that ships something notable should add a dated card above (status badge + what changed + commit hash), and move resolved backlog rows out of the table. Keep it short — this is a handover snapshot, not a full changelog (see <code>CLAUDE.md</code> for the full project history).
+</div>
+
+</div>
+</body>
+</html>

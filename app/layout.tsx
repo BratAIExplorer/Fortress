@@ -8,6 +8,7 @@ import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/fortress/Navbar";
 import { Breadcrumb } from "@/components/fortress/Breadcrumb";
 import { BetaBanner } from "@/components/fortress/BetaBanner";
+import { WelcomeBetaModal } from "@/components/fortress/WelcomeBetaModal";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 const ibmPlexMono = IBM_Plex_Mono({
@@ -40,6 +41,7 @@ export default function RootLayout({
             {/* Global Navigation */}
             <Navbar />
             <BetaBanner />
+            <WelcomeBetaModal />
             <Breadcrumb />
 
             {/* Page Content */}

@@ -1,8 +1,37 @@
 # 🏰 FORTRESS INTELLIGENCE — PENDING ITEMS & ROADMAP
 
 **Status:** 🟢 Core features live + real data scoring | Phase 2 expansion scoped  
-**Last Updated:** July 20, 2026 (Session 21)  
+**Last Updated:** July 28, 2026 (Session 32)  
 **Current Phase:** Phase 5 (Real Data Scoring) Complete → Phase 2 Expansion (Smallcap 250 + Russell 2000) Scoped
+
+---
+
+## 🟡 SESSION 32 (July 28) — BETA Welcome Modal (not yet deployed)
+
+See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
+
+New `components/fortress/WelcomeBetaModal.tsx` — a once-per-session popup shown to every signed-in user announcing public BETA status, generic (no tab names, since not all features are enabled for everyone yet), with an explicit "not financial advice / do your own research" disclaimer. Wired into `app/layout.tsx` next to the existing `BetaBanner`. Reuses the existing `FeedbackModal` for the "Got feedback?" action — no new backend.
+
+| Priority | Item | Notes |
+|---|---|---|
+| 🟡 MEDIUM | Commit &amp; deploy the welcome modal | `WelcomeBetaModal.tsx` + `app/layout.tsx` wiring are uncommitted. Review, commit, push, deploy. |
+| 🟡 MEDIUM | Manually verify in a real browser | Couldn't render the live preview this session (Browser pane wasn't compositing) — only `tsc --noEmit` and dev-server logs were checked. Log in and eyeball it before/after deploy. |
+| 🟢 LOW | Re-gate once out of BETA | Currently shows to every signed-in user indefinitely, by design. Marked with a `ponytail:` comment in the component — add real gating (e.g. `subscriptionStatus`, same pattern as Momentum Radar) when BETA ends. |
+
+---
+
+## 🔴 SESSION 31 (July 28) — URGENT: Auth/SMTP Broken, Momentum Radar Temporarily Ungated
+
+See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
+
+| Priority | Item | Notes |
+|---|---|---|
+| 🔴 HIGH | Configure real SMTP on the VPS | `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`/`SMTP_FROM` missing from `.env.production` — root cause of silently-failing password reset. Set them, `pm2 restart all --update-env`. |
+| 🔴 HIGH | Re-gate Momentum Radar | `requireAuth` + 30-day trial check were removed from `momentum-signals/route.ts` (and the nav's `isLoggedIn` condition) as a stopgap because broken auth blocked everyone. Restore once SMTP/auth is verified stable — don't leave this open indefinitely. Commit `d8209c46` has the removal; the original gated logic is in git history just before it. |
+| 🟡 MEDIUM | Duplicate `CRON_SECRET` in `.env.production` | Two conflicting `CRON_SECRET=` lines found on the VPS this session; only one is active. Remove the stale one. |
+| 🟡 MEDIUM | Investigate arundsamant@gmail.com | No matching `auth_user` row for that exact email via the new admin reset-link endpoint — likely a typo in the email. Run `SELECT email FROM auth_user WHERE email ILIKE '%arun%samant%'` on prod to confirm. |
+| 🟢 LOW | Remove `/api/admin/generate-reset-link` | Manual SMTP-bypass endpoint (commit `ad2b3b6b`) added to unblock users right now. Delete once SMTP is confirmed working end-to-end. |
+| 🟢 LOW | Reconcile parallel commits | `87b57386` (nav promotion) and `565bfdcd` (CI build fix) landed on `main` from a different session mid-work — worth a quick review against the gating rollback above. |
 
 ---
 
