@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Lock, ShieldCheck, RefreshCw } from "lucide-react";
+import { Lock, ShieldCheck, RefreshCw, KeyRound, CheckCircle2, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Status {
@@ -17,11 +17,36 @@ interface Status {
     staleThresholdMinutes: number;
 }
 
+const CREDENTIAL_FIELDS: { key: string; label: string }[] = [
+    { key: "telegramBotToken", label: "Telegram Bot Token" },
+    { key: "telegramAdminId", label: "Telegram Admin Chat ID" },
+    { key: "zerodhaApiKey", label: "Zerodha API Key" },
+    { key: "zerodhaApiSecret", label: "Zerodha API Secret" },
+    { key: "zerodhaClientId", label: "Zerodha Client ID" },
+];
+
 export default function MomentumRadarAdminPage() {
     const [password, setPassword] = useState("");
     const [status, setStatus] = useState<Status | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    const [fieldsSet, setFieldsSet] = useState<Record<string, boolean>>({});
+    const [formValues, setFormValues] = useState<Record<string, string>>({});
+    const [saving, setSaving] = useState(false);
+    const [saveResult, setSaveResult] = useState<string | null>(null);
+
+    const loadConfigStatus = async () => {
+        const res = await fetch("/api/admin/bot-config", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password }),
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setFieldsSet(data.fieldsSet ?? {});
+        }
+    };
 
     const checkStatus = async () => {
         setLoading(true);
@@ -35,6 +60,7 @@ export default function MomentumRadarAdminPage() {
             const data = await res.json();
             if (res.ok) {
                 setStatus(data);
+                await loadConfigStatus();
             } else {
                 setError(data.error === "INVALID_PASSWORD" ? "Wrong password." : "Status check failed.");
                 setStatus(null);
@@ -43,6 +69,30 @@ export default function MomentumRadarAdminPage() {
             setError("Network error.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const saveCredentials = async () => {
+        setSaving(true);
+        setSaveResult(null);
+        try {
+            const res = await fetch("/api/admin/bot-config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password, ...formValues }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSaveResult(`Saved ${data.fieldsUpdated?.length ?? 0} field(s) and restarted the bot.`);
+                setFormValues({});
+                await loadConfigStatus();
+            } else {
+                setSaveResult("Save failed — check the password.");
+            }
+        } catch {
+            setSaveResult("Network error saving credentials.");
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -122,6 +172,48 @@ export default function MomentumRadarAdminPage() {
                                 <p>Last updated: {status.lastUpdated ? new Date(status.lastUpdated).toLocaleString("en-IN") : "—"}</p>
                                 <p>NSE market hours right now: {status.marketHoursNow ? "Yes" : "No"}</p>
                                 <p>Flagged stale if no push for &gt;{status.staleThresholdMinutes} min during market hours.</p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-white/5 border-white/10">
+                            <CardContent className="p-5 space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
+                                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bot Credentials</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Saving restarts the bot on the VPS immediately. Fields left blank keep their current value — nothing already saved is ever shown back here.
+                                </p>
+                                <div className="space-y-3">
+                                    {CREDENTIAL_FIELDS.map((f) => (
+                                        <div key={f.key} className="flex items-center gap-3">
+                                            <div className="w-5 shrink-0">
+                                                {fieldsSet[f.key]
+                                                    ? <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                                                    : <Circle className="h-4 w-4 text-muted-foreground" />}
+                                            </div>
+                                            <div className="flex-1 space-y-1">
+                                                <label className="text-xs text-muted-foreground">{f.label}</label>
+                                                <Input
+                                                    type="password"
+                                                    placeholder={fieldsSet[f.key] ? "Already set — leave blank to keep" : "Not set"}
+                                                    value={formValues[f.key] ?? ""}
+                                                    onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                                                    className="h-8 text-sm bg-white/5 border-white/10"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Button
+                                    size="sm"
+                                    onClick={saveCredentials}
+                                    disabled={saving || Object.values(formValues).every((v) => !v?.trim())}
+                                    className="w-full"
+                                >
+                                    {saving ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Save & Restart Bot"}
+                                </Button>
+                                {saveResult && <p className="text-xs text-muted-foreground">{saveResult}</p>}
                             </CardContent>
                         </Card>
                     </div>
