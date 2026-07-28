@@ -1,0 +1,32 @@
+import { pgTable, uuid, varchar, numeric, integer, timestamp, index } from "drizzle-orm/pg-core";
+
+// Read-only mirror of the standalone MACD crossover bot's "Currently Active"
+// sheet. The bot (Equity_The-Final-chapter) pushes its scan output here via
+// POST /api/analysis/momentum-signals; it never reads from this table.
+export const macdSignals = pgTable(
+  "macd_signals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    timeframe: varchar("timeframe", { length: 10 }).notNull(), // Daily | Weekly
+    symbol: varchar("symbol", { length: 20 }).notNull(),
+    cmp: numeric("cmp").notNull(),
+    crossoverDate: varchar("crossover_date", { length: 20 }).notNull(),
+    daysSinceCrossover: integer("days_since_crossover").notNull(),
+    quantity: integer("quantity").notNull(),
+    investedAmount: numeric("invested_amount").notNull(),
+    firstTargetPrice: numeric("first_target_price"),
+    firstTargetEma: varchar("first_target_ema", { length: 10 }),
+    finalTargetPrice: numeric("final_target_price"),
+    finalTargetEma: varchar("final_target_ema", { length: 10 }),
+    stopLossPrice: numeric("stop_loss_price"),
+    stopLossEma: varchar("stop_loss_ema", { length: 10 }),
+    riskAmount: numeric("risk_amount"),
+    // Cleared and re-inserted on every bot scan cycle (matches the bot's
+    // own "Currently Active" sheet semantics — it's a snapshot, not a log).
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    symbolIdx: index("idx_macd_signals_symbol").on(table.symbol),
+    timeframeIdx: index("idx_macd_signals_timeframe").on(table.timeframe),
+  })
+);

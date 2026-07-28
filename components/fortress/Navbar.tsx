@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, Brain, Globe, BookMarked, Target, ChevronDown, Zap } from "lucide-react";
+import { Shield, Menu, X, Brain, Globe, BookMarked, Target, ChevronDown, Zap, Radar } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -126,6 +126,14 @@ export function Navbar({
                                             Hidden Gem Finder
                                         </Link>
                                     </Button>
+                                    {isLoggedIn && (
+                                        <Button variant="ghost" size="sm" asChild className="w-full justify-start rounded-none">
+                                            <Link href="/momentum-radar" className="gap-2">
+                                                <Radar className="h-4 w-4 text-primary" />
+                                                Momentum Radar
+                                            </Link>
+                                        </Button>
+                                    )}
                                     {isAdmin && (
                                         <Button variant="ghost" size="sm" asChild className="w-full justify-start rounded-none text-purple-400">
                                             <Link href="/alpha" className="gap-2">
@@ -262,6 +270,12 @@ export function Navbar({
                                             <Zap className="h-4 w-4 text-primary" />
                                             Hidden Gem Finder
                                         </Link>
+                                        {isLoggedIn && (
+                                            <Link href="/momentum-radar" onClick={() => setIsOpen(false)} className="text-base hover:text-primary py-2 pl-4 border-b border-border/50 flex items-center gap-2">
+                                                <Radar className="h-4 w-4 text-primary" />
+                                                Momentum Radar
+                                            </Link>
+                                        )}
                                         {isAdmin && (
                                             <Link href="/alpha" onClick={() => setIsOpen(false)} className="text-base hover:text-purple-400 text-purple-400 py-2 pl-4 border-b border-border/50 flex items-center gap-2">
                                                 <Target className="h-4 w-4" />

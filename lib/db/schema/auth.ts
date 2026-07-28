@@ -23,6 +23,10 @@ export const authUser = pgTable("auth_user", {
   signupPurpose: varchar("signup_purpose", { length: 50 }),
   referralSource: varchar("referral_source", { length: 50 }),
 
+  // Momentum Radar subscription gating — trial window is measured from
+  // createdAt (no separate trial-start column needed).
+  subscriptionStatus: varchar("subscription_status", { length: 20 }).default("trial").notNull(),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
