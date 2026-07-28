@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Radar, Lock } from "lucide-react";
+import { RefreshCw, Radar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MacdSignal {
@@ -21,22 +21,22 @@ interface MacdSignal {
     riskAmount: string | null;
 }
 
-type FetchState = "loading" | "ok" | "unauthenticated" | "trial_expired" | "error";
+type FetchState = "loading" | "ok" | "error";
 
 function money(v: string | null) {
     if (v == null) return "—";
     return `₹${parseFloat(v).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 }
 
+// ponytail: sign-in/trial gating disabled for now (see route.ts) — tab is
+// open to everyone with live data until auth+SMTP is fixed.
 export default function MomentumRadarPage() {
     const [signals, setSignals] = useState<MacdSignal[]>([]);
     const [state, setState] = useState<FetchState>("loading");
 
     useEffect(() => {
-        fetch("/api/analysis/momentum-signals", { credentials: "include" })
+        fetch("/api/analysis/momentum-signals")
             .then(async (res) => {
-                if (res.status === 401) return setState("unauthenticated");
-                if (res.status === 402) return setState("trial_expired");
                 if (!res.ok) return setState("error");
                 const data = await res.json();
                 setSignals(data.signals ?? []);
@@ -62,34 +62,6 @@ export default function MomentumRadarPage() {
                     <div className="flex items-center justify-center py-24">
                         <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                )}
-
-                {state === "unauthenticated" && (
-                    <Card className="bg-white/5 border-white/10">
-                        <CardContent className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-                            <Lock className="h-8 w-8 text-muted-foreground" />
-                            <h3 className="font-bold text-white">Sign in to view Momentum Radar</h3>
-                            <p className="text-sm text-muted-foreground max-w-sm">
-                                This tab is available to signed-in users only.
-                            </p>
-                            <a href="/login" className="text-sm text-blue-400 hover:underline mt-2">Go to login →</a>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {state === "trial_expired" && (
-                    <Card className="bg-amber-500/5 border-amber-500/20">
-                        <CardContent className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-                            <Lock className="h-8 w-8 text-amber-400" />
-                            <h3 className="font-bold text-white">Your 30-day free trial has ended</h3>
-                            <p className="text-sm text-muted-foreground max-w-sm">
-                                Momentum Radar requires a registration request and subscription to continue.
-                            </p>
-                            <a href="mailto:bharatsamant@gmail.com?subject=Momentum%20Radar%20Access%20Request" className="text-sm text-amber-400 hover:underline mt-2">
-                                Request access →
-                            </a>
-                        </CardContent>
-                    </Card>
                 )}
 
                 {state === "error" && (

@@ -1,54 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { authUser } from "@/lib/db/schema/auth";
 import { macdSignals } from "@/lib/db/schema/momentum";
-import { eq } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth/middleware";
 
-const TRIAL_DAYS = 30;
-
-// GET — read-only feed for the Momentum Radar tab. Gated: signed-in users
-// only, and only within the 30-day trial window unless subscriptionStatus
-// is "active".
-export async function GET(request: NextRequest) {
-  let session;
-  try {
-    session = requireAuth(request);
-  } catch {
-    return NextResponse.json(
-      { success: false, error: "UNAUTHENTICATED" },
-      { status: 401 }
-    );
-  }
-
-  const userRows = await db
-    .select({
-      createdAt: authUser.createdAt,
-      subscriptionStatus: authUser.subscriptionStatus,
-    })
-    .from(authUser)
-    .where(eq(authUser.id, session.userId))
-    .limit(1);
-
-  const user = userRows[0];
-  if (!user) {
-    return NextResponse.json(
-      { success: false, error: "UNAUTHENTICATED" },
-      { status: 401 }
-    );
-  }
-
-  const trialDaysElapsed =
-    (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24);
-  const trialExpired = trialDaysElapsed > TRIAL_DAYS;
-
-  if (trialExpired && user.subscriptionStatus !== "active") {
-    return NextResponse.json(
-      { success: false, error: "TRIAL_EXPIRED", trialDays: TRIAL_DAYS },
-      { status: 402 }
-    );
-  }
-
+// GET — read-only feed for the Momentum Radar tab.
+// ponytail: sign-in/trial gating is disabled until auth+SMTP is fixed (see
+// CLAUDE.md Phase 3 backlog). Re-add the requireAuth + trial-window check
+// (git history has it) once that's done.
+export async function GET(_request: NextRequest) {
   const signals = await db.select().from(macdSignals);
 
   return NextResponse.json({ success: true, signals }, { status: 200 });

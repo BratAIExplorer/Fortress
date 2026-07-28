@@ -84,14 +84,12 @@ export function Navbar({
                 <nav className="hidden md:flex items-center gap-1">
                     {showLinks && (
                         <>
-                            {isLoggedIn && (
-                                <Button variant="ghost" size="sm" asChild>
-                                    <Link href="/momentum-radar" className="gap-1.5">
-                                        <Radar className="h-3.5 w-3.5 text-primary" />
-                                        Momentum Radar
-                                    </Link>
-                                </Button>
-                            )}
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link href="/momentum-radar" className="gap-1.5">
+                                    <Radar className="h-3.5 w-3.5 text-primary" />
+                                    Momentum Radar
+                                </Link>
+                            </Button>
                             <Button variant="ghost" size="sm" asChild>
                                 <Link href="/fortress-30">Fortress 30</Link>
                             </Button>
@@ -222,16 +220,14 @@ export function Navbar({
                                         <div className="h-px bg-border/50 my-2" />
                                     </>
                                 )}
-                                {isLoggedIn && (
-                                    <Link
-                                        href="/momentum-radar"
-                                        onClick={() => setIsOpen(false)}
-                                        className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50 flex items-center gap-2"
-                                    >
-                                        <Radar className="h-4 w-4 text-primary" />
-                                        Momentum Radar
-                                    </Link>
-                                )}
+                                <Link
+                                    href="/momentum-radar"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-lg font-medium hover:text-primary transition-colors py-2 border-b border-border/50 flex items-center gap-2"
+                                >
+                                    <Radar className="h-4 w-4 text-primary" />
+                                    Momentum Radar
+                                </Link>
                                 <Link
                                     href="/fortress-30"
                                     onClick={() => setIsOpen(false)}
