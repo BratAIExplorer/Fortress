@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Radar } from "lucide-react";
+import { RefreshCw, Radar, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LogTradeModal } from "@/components/LogTradeModal";
 
 interface MacdSignal {
     id: string;
@@ -39,6 +40,8 @@ export default function MomentumRadarPage() {
     const [signals, setSignals] = useState<MacdSignal[]>([]);
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
     const [state, setState] = useState<FetchState>("loading");
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedSignal, setSelectedSignal] = useState<MacdSignal | null>(null);
 
     useEffect(() => {
         fetch("/api/analysis/momentum-signals")
@@ -63,11 +66,36 @@ export default function MomentumRadarPage() {
                     <p className="text-muted-foreground mt-2 max-w-lg">
                         Dual-timeframe MACD crossover scan across Nifty 500 — daily and weekly bullish signals in a confirmed uptrend, with targets and stop loss.
                     </p>
-                    {lastUpdated && (
-                        <p className="text-xs text-muted-foreground mt-3">
-                            Last scan: {new Date(lastUpdated).toLocaleString("en-IN")}
-                        </p>
-                    )}
+                </div>
+
+                {/* Status Bar: Last Scan Time + Admin Access */}
+                <div className="flex items-center justify-between px-4 py-4 bg-gradient-to-r from-blue-600/20 to-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                        {lastUpdated ? (
+                            <div className="flex flex-col">
+                                <span className="text-sm font-semibold text-white">Last Bot Run</span>
+                                <span className="text-lg font-mono text-emerald-400">
+                                    {new Date(lastUpdated).toLocaleString("en-IN", {
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                        hour12: true
+                                    })}
+                                </span>
+                            </div>
+                        ) : (
+                            <span className="text-sm text-muted-foreground">Never scanned yet</span>
+                        )}
+                    </div>
+                    <a
+                        href="/momentum-radar/admin"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-sm"
+                    >
+                        Admin Access →
+                    </a>
                 </div>
 
                 {state === "loading" && (
@@ -108,6 +136,7 @@ export default function MomentumRadarPage() {
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Final Target</th>
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Stop Loss</th>
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Crossover</th>
+                                    <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -122,6 +151,18 @@ export default function MomentumRadarPage() {
                                         <td className="px-4 py-3 text-right font-mono text-xs text-emerald-400">{money(s.finalTargetPrice)}</td>
                                         <td className="px-4 py-3 text-right font-mono text-xs text-red-400">{money(s.stopLossPrice)}</td>
                                         <td className="px-4 py-3 text-right text-xs text-muted-foreground">{s.crossoverDate} ({s.daysSinceCrossover}d ago)</td>
+                                        <td className="px-4 py-3 text-center">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedSignal(s);
+                                                    setModalOpen(true);
+                                                }}
+                                                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 rounded text-xs font-medium transition"
+                                            >
+                                                <LogIn size={14} />
+                                                Log
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -135,6 +176,29 @@ export default function MomentumRadarPage() {
                     </a>
                 </div>
             </main>
+
+            {selectedSignal && (
+                <LogTradeModal
+                    symbol={selectedSignal.symbol}
+                    timeframe={selectedSignal.timeframe}
+                    open={modalOpen}
+                    onClose={() => {
+                        setModalOpen(false);
+                        setSelectedSignal(null);
+                    }}
+                    onSuccess={() => {
+                        // Refresh signals to show updated data
+                        fetch("/api/analysis/momentum-signals")
+                            .then(async (res) => {
+                                if (res.ok) {
+                                    const data: SignalsResponse = await res.json();
+                                    setSignals(data.signals ?? []);
+                                }
+                            })
+                            .catch(() => {});
+                    }}
+                />
+            )}
         </div>
     );
 }

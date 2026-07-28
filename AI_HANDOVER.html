@@ -611,6 +611,61 @@ curl -X POST https://fortressintelligence.space/api/admin/generate-reset-link \
         </p>
       </div>
 
+      <h2>Session 33 — Feedback Loop Infrastructure (July 29, 2026)</h2>
+
+      <div class="card">
+        <span class="badge live">SHIPPED</span>
+        <strong>Closed-Loop Feedback System: Phase 1 Complete</strong>
+        <p>
+          Users can now log their trading decisions on MACD signals. Database captures actions, outcomes, and P&L.
+          Foundation for AI learning and performance analytics.
+        </p>
+        <h3>What Shipped</h3>
+        <ul>
+          <li><strong>Database:</strong> New table <code>bot_user_actions</code> with 10 fields
+            <ul>
+              <li>userId, symbol, timeframe, action (bought/skipped/sold), quantity, entry_price, exit_price, outcome, pnl, notes</li>
+              <li>Indexes on userId, symbol, action, createdAt for fast queries</li>
+            </ul>
+          </li>
+          <li><strong>API Endpoints:</strong>
+            <ul>
+              <li><code>POST /api/momentum/user-action</code> — Log trade (auth required, input validation)</li>
+              <li><code>GET /api/momentum/user-action</code> — Retrieve user's 100 recent actions</li>
+            </ul>
+          </li>
+          <li><strong>UI Components:</strong>
+            <ul>
+              <li><code>components/LogTradeModal.tsx</code> — Minimal form (action selector + conditional fields)</li>
+              <li>Momentum Radar table enhanced with "Log Trade" button per signal</li>
+            </ul>
+          </li>
+          <li><strong>Database Migration:</strong> <code>add_bot_user_actions.sql</code></li>
+          <li><strong>Backlog Document:</strong> <code>MOMENTUM_RADAR_BACKLOG.md</code> (Phase 2-4 planning)</li>
+        </ul>
+        <h3>Design (Ponytail: Minimal Viable)</h3>
+        <ul>
+          <li><strong>Outcome Entry:</strong> Manual (users log after trade exits) — not auto-calculated</li>
+          <li><strong>Trade Scope:</strong> Per-symbol only — no portfolio-level weighting</li>
+          <li><strong>Bot Trading:</strong> 100% private to user's laptop. Web tab is read-only signal mirror.</li>
+          <li><strong>Skipped Features:</strong> User metrics, A/B testing, advanced analytics (Phase 2-3 work)</li>
+        </ul>
+        <h3>Backlog Items (Not Yet Started)</h3>
+        <ul>
+          <li><strong>Phase 2:</strong> User engagement metrics, outcome tracking UI, analytics dashboard (6-8 hours)</li>
+          <li><strong>Phase 3:</strong> AI learning engine, confidence scoring, parameter tuning (10-15 hours)</li>
+          <li><strong>Phase 4:</strong> Batch import, export reports, P&L tracking (5-8 hours)</li>
+        </ul>
+        <h3>Build Status</h3>
+        <ul>
+          <li>✅ TypeScript compiles clean (zero errors)</li>
+          <li>✅ No breaking changes (all features additive)</li>
+          <li>✅ Auth integration verified (uses existing <code>requireAuth</code>)</li>
+          <li>✅ Ready for deployment: <code>npm run build && npm run drizzle:push</code></li>
+        </ul>
+        <p style="color: var(--green);"><strong>Files Modified:</strong> 6 files added/modified (schema, API routes, components, migration)</p>
+      </div>
+
       <h2>Backlog &amp; Recommendations</h2>
       <div class="card">
         <table>
