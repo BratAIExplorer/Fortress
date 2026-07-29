@@ -3,7 +3,7 @@ import { execFile } from "child_process";
 import fs from "fs";
 import { env } from "@/lib/env";
 
-const BOT_ENV_PATH = "/opt/fortress/scripts/macd-bot/.env.local";
+const BOT_ENV_PATH = "/opt/fortress/scripts/macd-bot/.env";
 const BOT_DIR = "/opt/fortress/scripts/macd-bot";
 
 // Maps the form field names to the exact env var names macd_excel_bot.py reads.
