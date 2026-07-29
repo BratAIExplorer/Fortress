@@ -189,11 +189,34 @@
         </ul>
       </div>
 
-      <h2>Session 37 — Bot Architecture Refactor + Growth Strategy (July 29, 2026) — DEPLOYMENT READY</h2>
+      <h2>Session 37 — Bot Architecture Refactor + Growth Strategy (July 29, 2026) — LIVE & CONSOLIDATED</h2>
 
       <div class="card">
-        <span class="badge live">DEPLOYMENT PACKAGE READY</span>
-        <strong>✨ Architecture Fix: Scanning-First Bot Design + Zero-Manual-Intervention Deployment</strong>
+        <span class="badge live">✅ DEPLOYED & RUNNING</span>
+        <strong>🚀 Bot Consolidation Complete: Full CI/CD Integration Achieved</strong>
+        <p>
+          <strong>Status:</strong> Bot refactored, consolidated into `/opt/fortress/scripts/macd-bot/`, and running successfully on VPS. Full version-control integration via git. All three Fortress processes (app, cron, bot) now deployed from single directory via CI/CD pipeline.
+        </p>
+        <ul>
+          <li><strong>Consolidation Path:</strong> Moved bot from separate `/opt/macd-bot/` → `/opt/fortress/scripts/macd-bot/`</li>
+          <li><strong>Version Control:</strong> Bot code now in git (commit fecc851d) — automatic deployment on push</li>
+          <li><strong>CI/CD Integration:</strong> All three PM2 processes managed from ecosystem.config.js in repo</li>
+          <li><strong>Bot Status (Live):</strong>
+            <ul>
+              <li>✅ Running from `/opt/fortress/scripts/macd-bot/macd_excel_bot.py`</li>
+              <li>✅ Scanning every 5 minutes (MANDATORY)</li>
+              <li>✅ Posting signals to `/api/analysis/momentum-signals` (MANDATORY)</li>
+              <li>✅ Graceful degradation on optional Telegram/Zerodha (no blocking)</li>
+              <li>✅ Logging: "Scanning: ENABLED (mandatory)" → "Cycle complete. Sleeping 300 seconds (5 min)"</li>
+            </ul>
+          </li>
+          <li><strong>Deployment Flow:</strong> Push to git → GitHub Actions builds → VPS auto-deploys + restarts all PM2 processes</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="badge live">ARCHITECTURE FIX</span>
+        <strong>✨ Scanning-First Bot Design: Root Cause Eliminated</strong>
         <p>
           <strong>Root-cause fix:</strong> Bot was blocking scanning on optional Telegram credentials. Refactored to decouple: scanning is MANDATORY (always-on), alerts/trading are OPTIONAL (fail gracefully). <strong>4 Principles Applied:</strong> Think ✓ | Simplicity ✓ | Surgical ✓ | Goal-Driven ✓ | Ponytail Mode: Full (lazy/efficient) ✓
         </p>
