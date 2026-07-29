@@ -124,51 +124,131 @@ class MACDBot:
         return all_data
 
     def analyze_stock(self, symbol, close_series, ltp):
-        """Detect MACD crossovers and calculate targets/SL."""
+        """EXACT COPY from standalone bot: Detect MACD crossovers with 0-3 day recency and dynamic EMA target/SL."""
         if isinstance(close_series, pd.DataFrame):
             close_series = close_series.squeeze()
+
         close_series = close_series.copy()
         close_series.index = pd.to_datetime(close_series.index).tz_localize(None)
 
-        if close_series.empty or len(close_series) < 200:
+        if close_series.empty:
             return None
 
-        close_series[pd.to_datetime(datetime.date.today())] = ltp
+        # Match standalone: append today's price with proper IST timezone handling
+        today_ist = datetime.datetime.now(IST).date()
+        is_weekday = today_ist.weekday() < 5
+        now_ist_time = datetime.datetime.now(IST).time()
+        is_after_market_open = now_ist_time >= datetime.time(9, 15)
+
+        if is_weekday and is_after_market_open:
+            target_date = today_ist
+        else:
+            target_date = close_series.index[-1].date()
+
+        target_dt = pd.to_datetime(target_date)
+        close_series[target_dt] = ltp
         close_series = close_series.dropna()
         close_series = close_series[~close_series.index.duplicated(keep='last')].sort_index()
 
         if len(close_series) < 200:
             return None
 
+        # Calculate MACD(12,26,9) - EXACT STANDALONE LOGIC
         ema12 = close_series.ewm(span=12, adjust=False).mean()
         ema26 = close_series.ewm(span=26, adjust=False).mean()
         macd_line = ema12 - ema26
         signal_line = macd_line.ewm(span=9, adjust=False).mean()
+
+        # Calculate ALL 6 EMAs (EXACT STANDALONE) - NOT just 3!
+        ema9 = close_series.ewm(span=9, adjust=False).mean().iloc[-1]
         ema20 = close_series.ewm(span=20, adjust=False).mean().iloc[-1]
         ema50 = close_series.ewm(span=50, adjust=False).mean().iloc[-1]
+        ema100 = close_series.ewm(span=100, adjust=False).mean().iloc[-1]
+        ema150 = close_series.ewm(span=150, adjust=False).mean().iloc[-1]
         ema200 = close_series.ewm(span=200, adjust=False).mean().iloc[-1]
 
-        macd_vals, sig_vals = macd_line.tolist(), signal_line.tolist()
+        macd_vals = macd_line.tolist()
+        sig_vals = signal_line.tolist()
         dates = close_series.index.tolist()
 
+        # Check crossovers UP TO 3 DAYS AGO (EXACT STANDALONE - NOT just 0-1 days!)
         crossover_today = (macd_vals[-1] > sig_vals[-1]) and (macd_vals[-2] <= sig_vals[-2])
         crossover_yesterday = (macd_vals[-2] > sig_vals[-2]) and (macd_vals[-3] <= sig_vals[-3])
-        is_bullish = macd_vals[-1] > sig_vals[-1]
+        crossover_2_days = (macd_vals[-3] > sig_vals[-3]) and (macd_vals[-4] <= sig_vals[-4])
+        crossover_3_days = (macd_vals[-4] > sig_vals[-4]) and (macd_vals[-5] <= sig_vals[-5])
 
-        if not is_bullish:
+        is_bullish_today = macd_vals[-1] > sig_vals[-1]
+
+        if not is_bullish_today:
             return None
+
+        crossover_date = None
+        days_since = None
+
+        if crossover_today:
+            crossover_date = dates[-1].strftime('%Y-%m-%d')
+            days_since = 0
+        elif crossover_yesterday:
+            crossover_date = dates[-2].strftime('%Y-%m-%d')
+            days_since = 1
+        elif crossover_2_days:
+            crossover_date = dates[-3].strftime('%Y-%m-%d')
+            days_since = 2
+        elif crossover_3_days:
+            crossover_date = dates[-4].strftime('%Y-%m-%d')
+            days_since = 3
+        else:
+            return None
+
+        # Trend Filter (EXACT STANDALONE)
         if ltp <= ema200 or ema50 <= ema200:
             return None
 
-        if not (crossover_today or crossover_yesterday):
-            return None
-
-        crossover_date = dates[-1].strftime('%Y-%m-%d') if crossover_today else dates[-2].strftime('%Y-%m-%d')
-        days_since = 0 if crossover_today else 1
-
-        capital, qty = 25000, int(np.floor(capital / ltp))
+        # Position Sizing (EXACT STANDALONE)
+        capital = 25000
+        qty = int(np.floor(capital / ltp))
         if qty <= 0:
             return None
+        invested = qty * ltp
+
+        # DYNAMIC EMA TARGET/SL SELECTION (EXACT STANDALONE - NOT hardcoded!)
+        emas = {
+            "EMA 20": float(ema20),
+            "EMA 50": float(ema50),
+            "EMA 100": float(ema100),
+            "EMA 150": float(ema150),
+            "EMA 200": float(ema200)
+        }
+
+        targets = {k: v for k, v in emas.items() if v > ltp}
+        supports = {k: v for k, v in emas.items() if v < ltp}
+
+        # First Target = nearest EMA above CMP
+        if targets:
+            first_target_ema_key = min(targets, key=targets.get)
+            first_target_price = round(targets[first_target_ema_key], 2)
+            first_target_ema = first_target_ema_key
+        else:
+            first_target_ema = "5% Default (Blue Sky)"
+            first_target_price = round(ltp * 1.05, 2)
+
+        # Final Target = highest EMA above CMP
+        if targets:
+            final_target_ema_key = max(targets, key=targets.get)
+            final_target_price = round(targets[final_target_ema_key], 2)
+            final_target_ema = final_target_ema_key
+        else:
+            final_target_ema = "15% Default (Blue Sky)"
+            final_target_price = round(ltp * 1.15, 2)
+
+        # Stop Loss = nearest EMA below CMP
+        if supports:
+            sl_ema_key = max(supports, key=supports.get)
+            sl_price = round(supports[sl_ema_key], 2)
+            sl_ema = sl_ema_key
+        else:
+            sl_ema = "5% Default (SL)"
+            sl_price = round(ltp * 0.95, 2)
 
         return {
             "symbol": symbol,
@@ -176,10 +256,13 @@ class MACDBot:
             "crossoverDate": crossover_date,
             "daysSinceCrossover": days_since,
             "quantity": qty,
-            "investedAmount": round(qty * ltp, 2),
-            "firstTargetPrice": round(ema20 if ema20 > ltp else ltp * 1.05, 2),
-            "finalTargetPrice": round(ema50 if ema50 > ltp else ltp * 1.15, 2),
-            "stopLossPrice": round(ema200 if ema200 < ltp else ltp * 0.95, 2),
+            "investedAmount": round(invested, 2),
+            "firstTargetPrice": first_target_price,
+            "firstTargetEma": first_target_ema,
+            "finalTargetPrice": final_target_price,
+            "finalTargetEma": final_target_ema,
+            "stopLossPrice": sl_price,
+            "stopLossEma": sl_ema,
         }
 
     def scan_nifty_500(self):
