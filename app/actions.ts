@@ -574,6 +574,13 @@ function mapToCandidate(
         ccScore: r.ccScore ?? null,
         ccTier: r.ccTier ?? null,
         scanRunAt: scanRunAt?.toISOString() ?? null,
+        macdStatus: r.macdStatus ?? null,
+        macdTarget1: r.macdTarget1 != null ? Number(r.macdTarget1) : null,
+        macdTarget2: r.macdTarget2 != null ? Number(r.macdTarget2) : null,
+        macdStopLoss: r.macdStopLoss != null ? Number(r.macdStopLoss) : null,
+        macdQty: r.macdQty ?? null,
+        macdInvested: r.macdInvested != null ? Number(r.macdInvested) : null,
+        macdRisk: r.macdRisk != null ? Number(r.macdRisk) : null,
     };
 }
 

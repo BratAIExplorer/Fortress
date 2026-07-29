@@ -156,11 +156,23 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
                 </CardHeader>
 
                 <CardContent className="p-4 pt-2 space-y-3">
-                    {candidate.megatrend && (
-                        <span className="inline-flex items-center gap-1 rounded-sm bg-secondary/10 px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
-                            {candidate.megatrendEmoji} {candidate.megatrend}
-                        </span>
-                    )}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        {candidate.megatrend && (
+                            <span className="inline-flex items-center gap-1 rounded-sm bg-secondary/10 px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
+                                {candidate.megatrendEmoji} {candidate.megatrend}
+                            </span>
+                        )}
+                        {candidate.macdStatus && (
+                            <span className={cn(
+                                "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-semibold border",
+                                candidate.macdStatus.includes("Daily")
+                                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                                    : "bg-blue-500/10 border-blue-500/30 text-blue-400"
+                            )}>
+                                {candidate.macdStatus.includes("Daily") ? "🟢 " : "🔵 "}{candidate.macdStatus}
+                            </span>
+                        )}
+                    </div>
 
                     <div className="grid grid-cols-3 gap-2 text-[9px] font-mono">
                         <div className="flex flex-col gap-0.5">
@@ -184,6 +196,23 @@ export function ScannerCandidateCard({ candidate }: { candidate: ScannerCandidat
                             {generateCandidateThesis(candidate)}
                         </p>
                     </div>
+
+                    {candidate.macdStatus && candidate.macdTarget1 && (
+                        <div className="pt-2 border-t border-white/5 grid grid-cols-3 gap-1 text-[9px] font-mono text-slate-400">
+                            <div className="flex flex-col">
+                                <span className="text-muted-foreground uppercase text-[8px]">T1 (EMA)</span>
+                                <span className="text-emerald-400 font-bold">{market.currency}{Number(candidate.macdTarget1).toFixed(2)}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-muted-foreground uppercase text-[8px]">Final T</span>
+                                <span className="text-emerald-400 font-bold">{market.currency}{Number(candidate.macdTarget2).toFixed(2)}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-muted-foreground uppercase text-[8px]">Stop Loss</span>
+                                <span className="text-rose-400 font-bold">{market.currency}{Number(candidate.macdStopLoss).toFixed(2)}</span>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Why Selected toggle */}
                     {hasCriteria && (

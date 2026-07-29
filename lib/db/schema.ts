@@ -98,6 +98,14 @@ export const scanResults = pgTable("scan_results", {
     ccTier: text("cc_tier"),                    // "Classic" | "Strong" | "Developing" | "Inconsistent"
     ccRevenueCagr: numeric("cc_revenue_cagr"),  // 4yr revenue CAGR as %
     ccYearsChecked: integer("cc_years_checked"), // how many years of data were available
+    // ── MACD Crossover fields ─────────────────────────────────────────────────
+    macdStatus: text("macd_status"),            // "Daily Bullish" | "Weekly Bullish" | null
+    macdTarget1: numeric("macd_target_1"),      // Target 1 price
+    macdTarget2: numeric("macd_target_2"),      // Final target price
+    macdStopLoss: numeric("macd_stop_loss"),    // Stop Loss price
+    macdQty: integer("macd_qty"),               // Sizing quantity based on 25k capital
+    macdInvested: numeric("macd_invested"),     // Sizing investment based on 25k capital
+    macdRisk: numeric("macd_risk"),             // Potential risk amount
 }, (table) => ({
     // ponytail: indexes for Fortress 30 queries (getBestScan → scanId, then sort by mbScore)
     scanIdIdx: index("idx_scan_results_scan_id").on(table.scanId),
