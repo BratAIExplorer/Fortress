@@ -317,6 +317,27 @@
         </table>
       </div>
 
+      <h2>Session 30c Continuation (July 30, 2026) — Admin Panel Path Fix</h2>
+
+      <div class="card">
+        <span class="badge live">FIXED & DEPLOYED</span>
+        <strong>🔧 Bot Config Write Path Corrected — Credentials Now Persisting Correctly</strong>
+        <p>
+          Fixed critical bug in <code>/momentum-radar/admin</code> credentials form: endpoint was writing Telegram/Zerodha keys to wrong location on VPS, causing credentials to be silently lost.
+        </p>
+        <ul>
+          <li><strong>The Problem:</strong> Admin panel form saved credentials to <code>/opt/macd-bot/.env</code> (OLD, stale location), but bot reads from <code>/opt/fortress/scripts/macd-bot/.env.local</code> (CORRECT location). Credentials appeared to save but never reached the bot.</li>
+          <li><strong>Root Cause:</strong> Code path was correct in source, but VPS was serving OLD compiled Next.js code. Simple restart didn't fix it — required full rebuild.</li>
+          <li><strong>The Fix:</strong> (1) Pushed empty commit to trigger GitHub Actions. (2) CI/CD auto-rebuilt the app. (3) VPS deployed new build + restarted PM2. (4) Admin panel now writes to correct <code>.env.local</code> path. (5) Migrated real Telegram credentials from old location → new location. (6) Verified bot running with working credentials.</li>
+          <li><strong>Verification:</strong> POST to admin endpoint with test credentials → credentials written to <code>/opt/fortress/scripts/macd-bot/.env.local</code> ✅ → bot restarted ✅ → real Telegram creds migrated ✅</li>
+          <li><strong>Impact:</strong> Admin panel now fully functional for credential rotation without SSH. Zerodha + Telegram keys can be updated instantly via web UI.</li>
+          <li><strong>Build:</strong> ✅ TypeScript 0 errors. <strong>Deploy:</strong> ✅ Automatic via GitHub Actions. <strong>Commit:</strong> 663c0242 (empty trigger) + real creds migrated same session.</li>
+        </ul>
+        <p style="margin-top: 12px; font-weight: bold; color: var(--green);">
+          <strong>✅ RESOLVED:</strong> Bot config persistence fully working. Credentials now survive bot restarts + are readable by the bot on startup.
+        </p>
+      </div>
+
       <h2>Session 36 — Momentum Radar BETA Ship (July 29, 2026)</h2>
 
       <div class="card">
