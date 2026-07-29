@@ -58,7 +58,7 @@ module.exports = {
     },
     {
       name: "fortress-bot",
-      script: "bot/macd_excel_bot.py",
+      script: "scripts/macd-bot/macd_excel_bot.py",
       interpreter: "python3",
       instances: 1,
       exec_mode: "fork",
