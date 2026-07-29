@@ -68,7 +68,7 @@ module.exports = {
         TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
         TELEGRAM_ADMIN_ID: process.env.TELEGRAM_ADMIN_ID,
         FORTRESS_API_URL: process.env.FORTRESS_API_URL,
-        FORTRESS_CRON_SECRET: process.env.FORTRESS_CRON_SECRET,
+        CRON_SECRET: process.env.CRON_SECRET,
         ZERODHA_API_KEY: process.env.ZERODHA_API_KEY,
         ZERODHA_API_SECRET: process.env.ZERODHA_API_SECRET,
         ZERODHA_CLIENT_ID: process.env.ZERODHA_CLIENT_ID,

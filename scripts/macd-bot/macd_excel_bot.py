@@ -12,7 +12,7 @@ class MACDBot:
     def __init__(self):
         self.logger = logger
         self.fortress_api_url = os.getenv('FORTRESS_API_URL', 'https://fortressintelligence.space/api/analysis/momentum-signals')
-        self.fortress_cron_secret = os.getenv('FORTRESS_CRON_SECRET')
+        self.fortress_cron_secret = os.getenv('CRON_SECRET')  # Uses CRON_SECRET from .env.production
         self.telegram_token = os.getenv('TELEGRAM_BOT_TOKEN', '')
         self.telegram_admin_id = os.getenv('TELEGRAM_ADMIN_ID', '')
         self.zerodha_api_key = os.getenv('ZERODHA_API_KEY', '')
