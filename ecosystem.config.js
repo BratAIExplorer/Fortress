@@ -58,12 +58,12 @@ module.exports = {
     },
     {
       name: "fortress-bot",
-      script: "scripts/macd-bot/macd_excel_bot.py",
+      script: "macd_excel_bot.py",
       interpreter: "python3",
       instances: 1,
       exec_mode: "fork",
       watch: false,
-      cwd: "/opt/fortress",
+      cwd: "/opt/fortress/scripts/macd-bot",
       env: {
         TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
         TELEGRAM_ADMIN_ID: process.env.TELEGRAM_ADMIN_ID,
