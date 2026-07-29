@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import logging, os, sys, time, io, datetime, pytz
+import logging, os, sys, time, io, datetime, pytz, json
 import requests, pandas as pd, numpy as np, yfinance as yf
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 IST = pytz.timezone('Asia/Kolkata')
 CACHE_FILE = "/tmp/nifty500_cache.csv"
+STATE_FILE = "/opt/fortress/scripts/macd-bot/.bot_state.json"
 
 class MACDBot:
     def __init__(self):
@@ -20,12 +21,32 @@ class MACDBot:
         self.telegram_admin_id = os.getenv('TELEGRAM_ADMIN_ID', '')
         self.zerodha_api_key = os.getenv('ZERODHA_API_KEY', '')
         self.zerodha_secret = os.getenv('ZERODHA_API_SECRET', '')
+        self.state = self.load_state()
 
         self.logger.info("=== Bot Initialization ===")
         self.logger.info("Scanning: ENABLED (mandatory)")
         self.logger.info(f"Telegram alerts: {'ENABLED' if self.telegram_token and self.telegram_admin_id else 'DISABLED (optional)'}")
         self.logger.info(f"Zerodha trading: {'ENABLED' if self.zerodha_api_key and self.zerodha_secret else 'DISABLED (optional)'}")
         self.logger.info("=== Starting main loop (5-min cycle) ===")
+
+    def load_state(self):
+        """Load state tracking to prevent duplicate signals."""
+        if os.path.exists(STATE_FILE):
+            try:
+                with open(STATE_FILE, 'r') as f:
+                    return json.load(f)
+            except:
+                pass
+        return {"alerted_crossovers": {}}
+
+    def save_state(self):
+        """Save state to prevent duplicate signals on next cycle."""
+        try:
+            os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+            with open(STATE_FILE, 'w') as f:
+                json.dump(self.state, f)
+        except Exception as e:
+            self.logger.warning(f"Failed to save state: {e}")
 
     def get_nifty500_symbols(self):
         """Fetch Nifty 500 symbols from NSE or fallback to cache/hardcoded."""
@@ -174,6 +195,8 @@ class MACDBot:
 
             historical_data = self.fetch_historical_data(valid_symbols)
             signals = []
+            new_crossovers = []
+            alerted_crossovers = self.state.get("alerted_crossovers", {})
 
             for sym in valid_symbols:
                 close_series = historical_data.get(sym)
@@ -183,10 +206,17 @@ class MACDBot:
                     result = self.analyze_stock(sym, close_series, live_prices[sym])
                     if result:
                         signals.append(result)
+                        crossover_date = result.get("crossoverDate")
+                        last_alerted = alerted_crossovers.get(sym)
+                        # Only mark as new if we haven't alerted on this crossover date
+                        if last_alerted != crossover_date:
+                            new_crossovers.append(result)
+                            alerted_crossovers[sym] = crossover_date
                 except Exception as e:
                     self.logger.debug(f"Analysis failed for {sym}: {e}")
 
-            self.logger.info(f"Scan complete: {len(signals)} signals found")
+            self.state["alerted_crossovers"] = alerted_crossovers
+            self.logger.info(f"Scan complete: {len(signals)} active signals, {len(new_crossovers)} new crossovers")
             return signals
         except Exception as e:
             self.logger.error(f"CRITICAL: Scan failed: {e}")
@@ -230,6 +260,7 @@ class MACDBot:
             try:
                 signals = self.scan_nifty_500()
                 self.post_signals_to_fortress(signals)
+                self.save_state()  # Persist state to avoid duplicate alerts
                 self.send_telegram_alert(signals)
                 self.execute_zerodha_trades(signals)
                 self.logger.info(f"Cycle complete. Sleeping 300 seconds (5 min)...")
