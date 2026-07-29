@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momentum Radar — Product Owner Handover &amp; Pre-Production Backlog</title>
+<style>
+  :root{
+    --bg:#0d0f14; --panel:#151922; --panel2:#1c2130; --line:#2a3040;
+    --tx:#e6e9f0; --tx2:#a4adc0; --tx3:#6f7a91;
+    --p0:#ef4444; --p1:#f59e0b; --p2:#3b82f6; --ok:#10b981; --accent:#8b5cf6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:32px 20px 80px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:36px}
+  h1{margin:0 0 8px;font-size:30px;letter-spacing:-.02em}
+  .sub{color:var(--tx2);font-size:15px}
+  .meta{margin-top:14px;color:var(--tx3);font-size:13px}
+  h2{font-size:20px;margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:-.01em}
+  h3{font-size:16px;margin:26px 0 10px;color:var(--tx)}
+  p{margin:10px 0;color:var(--tx2)}
+  strong{color:var(--tx);font-weight:600}
+  code{background:var(--panel2);padding:2px 6px;border-radius:4px;font-size:13px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#c4b5fd}
+  pre{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:14px 16px;
+    overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tx2);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+  .card.p0{border-left:3px solid var(--p0)}
+  .card.p1{border-left:3px solid var(--p1)}
+  .card.p2{border-left:3px solid var(--p2)}
+  .card.ok{border-left:3px solid var(--ok)}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+    padding:3px 9px;border-radius:999px;text-transform:uppercase;vertical-align:middle;margin-right:8px}
+  .t-p0{background:rgba(239,68,68,.15);color:#fca5a5}
+  .t-p1{background:rgba(245,158,11,.15);color:#fcd34d}
+  .t-p2{background:rgba(59,130,246,.15);color:#93c5fd}
+  .t-ok{background:rgba(16,185,129,.15);color:#6ee7b7}
+  .cardhead{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--tx)}
+  .kv{color:var(--tx3);font-size:13px;margin-top:10px}
+  .kv b{color:var(--tx2);font-weight:600}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--tx3);font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  td{color:var(--tx2)}
+  ul,ol{color:var(--tx2);padding-left:22px;margin:10px 0}
+  li{margin:6px 0}
+  .flow{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:18px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.8;
+    color:var(--tx2);overflow-x:auto;white-space:pre}
+  .callout{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.3);
+    border-radius:10px;padding:16px 20px;margin:18px 0}
+  .callout .cardhead{color:#fca5a5}
+  .good{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.3);
+    border-radius:10px;padding:16px 20px;margin:18px 0}
+  .good .cardhead{color:#6ee7b7}
+  .eli5{background:var(--panel);border:1px dashed var(--line);border-radius:10px;padding:16px 20px;margin:16px 0}
+  .eli5 .cardhead{color:#c4b5fd}
+  .footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--tx3);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Momentum Radar — Product Owner Handover</h1>
+  <div class="sub">Understanding, vision, flow, and the pre-production backlog. Written for a non-technical owner and for the next AI session picking this up cold.</div>
+  <div class="meta">
+    Product: Fortress Intelligence &middot; Feature: Momentum Radar (Sessions 30 / 30b / 30c)<br>
+    Date: 29 July 2026 &middot; Status: <strong style="color:#fcd34d">Open Beta — pipe built, no data flowing yet</strong><br>
+    Live: https://fortressintelligence.space/momentum-radar
+  </div>
+</header>
+
+<!-- ============ 1. WHAT IT IS ============ -->
+<h2>1. What Momentum Radar is, in one paragraph</h2>
+<p>A momentum scanner that watches all 500 Nifty stocks and flags the moment a stock's momentum flips from falling to rising (a <strong>MACD crossover</strong>). It runs on two timeframes — Daily and Weekly — and for each flagged stock it shows the current price, two upside targets, and a stop loss.</p>
+
+<div class="card ok">
+  <div class="cardhead">Where it sits in the product family</div>
+  <table>
+    <tr><th>Tab</th><th>Answers the question</th></tr>
+    <tr><td><strong>Investment Genie</strong></td><td>How should I split my money?</td></tr>
+    <tr><td><strong>Fortress 30</strong></td><td>What should I own?</td></tr>
+    <tr><td><strong>Hidden Gem Finder</strong></td><td>What is mispriced right now?</td></tr>
+    <tr><td><strong>Momentum Radar</strong></td><td><strong>When should I act?</strong></td></tr>
+    <tr><td><strong>Portfolio Tracker</strong></td><td>How am I actually doing?</td></tr>
+  </table>
+  <p style="margin-bottom:0">Momentum Radar is the <strong>timing layer</strong>. It is the only tab that is time-sensitive, which is exactly why it is the natural home for push alerts (Telegram) rather than pull (web).</p>
+</div>
+
+<!-- ============ 2. FLOW ============ -->
+<h2>2. How the flow works today</h2>
+
+<div class="flow">MACD BOT  (/opt/macd-bot on VPS 76.13.179.32, PM2 managed)
+  scans Nifty 500 every 5 minutes
+       │
+       ├──► ZERODHA ─────► places REAL orders      [OWNER'S account only. Private. Never exposed to users.]
+       │
+       ├──► TELEGRAM ────► sends alert             [OWNER'S chat only. One person. Not a user feature yet.]
+       │
+       └──► HTTP POST ───► /api/analysis/momentum-signals
+                            (auth: shared secret  x-cron-secret)
+                                   │
+                            macd_signals table  ⚠ SNAPSHOT, NOT HISTORY
+                                   │
+                            GET /api/analysis/momentum-signals   (currently ungated)
+                                   │
+                            /momentum-radar tab   ── visible to everyone, read-only</div>
+
+<h3>Key design decisions already locked in</h3>
+<ul>
+  <li><strong>Trading stays private.</strong> Order execution runs on the owner's personal Zerodha keys inside the standalone bot. The website mirrors signals only — no Buy/Sell buttons, no per-user broker credentials. This deliberately avoids broker-credential custody and the compliance scope that comes with it.</li>
+  <li><strong>Fail-safe ingest.</strong> The bot's push to Fortress is wrapped in try/except. If the website is down, the bot keeps trading. A marketing feature must never be able to break the trading loop.</li>
+  <li><strong>Reused auth pattern.</strong> Ingest uses the same <code>x-cron-secret</code> shared-secret pattern as the existing scanner cron. No new dependency added to the bot.</li>
+</ul>
+
+<!-- ============ 3. CURRENT STATE ============ -->
+<h2>3. Current state — verified live, 29 July 2026</h2>
+
+<div class="callout">
+  <div class="cardhead">The pipe is open. Nothing is flowing through it.</div>
+  <pre>GET https://fortressintelligence.space/api/analysis/momentum-signals
+→ {"success":true,"signals":[]}</pre>
+  <p>API is live and responding. Zero signals stored. The UI therefore shows an empty state.</p>
+  <p style="margin-bottom:0"><strong>Most likely cause:</strong> the bot has no real Telegram / Zerodha credentials yet, so it boots and sits idle — the exact behaviour observed during Session 30c dummy-credential testing.</p>
+  <div class="kv"><b>Next action:</b> open <code>/momentum-radar/admin</code> (password-gated, <code>ADMIN_PANEL_PASSWORD</code>) to read bot health, then enter the real Telegram Bot Token + Admin ID and the three Zerodha fields. Zerodha additionally needs VPS IP <code>76.13.179.32</code> whitelisted in the Kite Developer Portal, plus a one-time interactive login via Telegram on first real run.</div>
+</div>
+
+<table>
+  <tr><th>Component</th><th>State</th></tr>
+  <tr><td>Bot deployed to VPS under PM2</td><td style="color:#6ee7b7">Done — no laptop dependency</td></tr>
+  <tr><td>Ingest + read APIs</td><td style="color:#6ee7b7">Done, live</td></tr>
+  <tr><td><code>/momentum-radar</code> tab + nav placement</td><td style="color:#6ee7b7">Done, top-level, ahead of Fortress 30</td></tr>
+  <tr><td>Admin health + credentials page</td><td style="color:#6ee7b7">Done, validated end-to-end</td></tr>
+  <tr><td>CI/CD builds on deploy</td><td style="color:#6ee7b7">Fixed Session 30b</td></tr>
+  <tr><td>Real credentials entered</td><td style="color:#fcd34d">Pending owner</td></tr>
+  <tr><td>Signal history / accuracy tracking</td><td style="color:#fca5a5">Does not exist</td></tr>
+  <tr><td>Telegram alerts to users</td><td style="color:#fca5a5">Does not exist</td></tr>
+  <tr><td>Auth gate</td><td style="color:#fcd34d">Deliberately disabled for beta (commit <code>d8209c46</code>)</td></tr>
+</table>
+
+<!-- ============ 4. BETA PLAN ============ -->
+<h2>4. Agreed beta plan</h2>
+<div class="good">
+  <div class="cardhead">Owner decision — 29 July 2026</div>
+  <ul style="margin-bottom:0">
+    <li>Beta is <strong>free and open to all</strong>, no login, for <strong>1–2 weeks</strong>.</li>
+    <li>Purpose of beta: prove the signals are <em>correct and useful</em> before charging for them.</li>
+    <li>After beta: enable the authentication gate. Only authorised users see alerts, on web <em>and</em> Telegram.</li>
+    <li>Free trial model going forward: <strong>30 days, all features unlocked</strong> — not a crippled tier.</li>
+    <li>Buy/Sell action layer is reserved for a <strong>Top / exclusive tier only</strong>.</li>
+  </ul>
+</div>
+
+<h3>Tiering must be account-level, not feature-level</h3>
+<p>Momentum Radar must not get its own private paywall. Entitlement is a property of the <strong>account</strong>, checked identically by every tab — otherwise we end up maintaining five inconsistent paywalls across Fortress 30, Investment Genie, Hidden Gem, Portfolio Tracker and Momentum Radar.</p>
+
+<table>
+  <tr><th>Tier</th><th>Fortress 30 / Genie / Hidden Gem / Portfolio</th><th>Momentum Radar — Web</th><th>Momentum Radar — Telegram</th><th>Buy/Sell layer</th></tr>
+  <tr><td><strong>Trial</strong> (30 days)</td><td>Full</td><td>Full</td><td>Yes</td><td>No</td></tr>
+  <tr><td><strong>Free</strong> (post-trial)</td><td>Limited</td><td>Delayed or limited</td><td>No</td><td>No</td></tr>
+  <tr><td><strong>Paid</strong></td><td>Full</td><td>Full, real-time</td><td>Yes</td><td>No</td></tr>
+  <tr><td><strong>Top / Exclusive</strong></td><td>Full</td><td>Full, real-time</td><td>Yes, priority</td><td>Yes</td></tr>
+</table>
+
+<div class="card p1">
+  <span class="tag t-p1">Do now, costs 20 min</span>
+  <div class="cardhead">Add the columns during beta even though they are unused</div>
+  <p>Add <code>telegram_chat_id</code> and <code>subscription_tier</code> to <code>auth_user</code> now, while there are 8 accounts and no traffic. Adding columns to a live table with real paying users later means a migration and a maintenance window.</p>
+  <p style="margin-bottom:0"><strong>Cost today:</strong> 20 minutes, zero risk (additive, defaulted). <strong>Cost in October:</strong> a scheduled outage.</p>
+</div>
+
+<!-- ============ 5. THE BACKLOG ============ -->
+<h2>5. Pre-production backlog — must be closed before commercialising</h2>
+
+<div class="card p0">
+  <span class="tag t-p0">P0 — Blocker</span>
+  <div class="cardhead">1. Signal history &amp; accuracy tracking — the table currently deletes itself</div>
+  <p><strong>The problem, plainly:</strong> every 5 minutes the bot sends its current list and the API wipes the table and rewrites it:</p>
+  <pre>await tx.delete(macdSignals);      // erases everything
+await tx.insert(macdSignals)...    // writes the fresh snapshot</pre>
+  <p><code>macd_signals</code> is a <strong>whiteboard, not a ledger</strong>. A signal fires on a stock Monday, reaches its target Wednesday, drops off the bot's active list — and every trace of it is deleted. Permanently.</p>
+  <p><strong>Consequence:</strong> we cannot answer "what is your hit rate?" — the single most important question any paying user will ask. It also cannot appear in the UI or in the bot health check. And this is off-brand: Fortress's stated principle is <em>transparency, explainable scores, no black box</em>, and Hidden Gem Finder already tracks outcomes properly via the <code>trades</code> table with win-rate by score band.</p>
+  <p><strong>Fix:</strong> add an append-only <code>macd_signal_history</code> table. On each ingest, diff the new snapshot against the previous one — symbols that appear get an OPEN row; symbols that vanish get closed with an outcome (<code>TARGET_HIT</code> / <code>STOPPED_OUT</code> / <code>EXPIRED</code>) derived from last known price versus target and stop loss. Surface as a "Track Record" panel on the tab, and as a freshness/accuracy line in the admin health check.</p>
+  <div class="kv"><b>Effort:</b> ~1 day &nbsp;·&nbsp; <b>Why it cannot wait:</b> every day without it is a day of accuracy data that can never be recovered. If we start logging only at launch, the honest answer on day one of charging money is "I don't know yet."</div>
+</div>
+
+<div class="card p0">
+  <span class="tag t-p0">P0 — Privacy leak</span>
+  <div class="cardhead">2. The owner's position sizing is on a public page</div>
+  <p>The <code>macd_signals</code> table carries <code>quantity</code>, <code>invested_amount</code> and <code>risk_amount</code> — these come from the owner's own Zerodha position sizing, and the GET endpoint is currently ungated. Anyone visiting the page can see how much money the owner puts into each trade.</p>
+  <div class="kv"><b>Fix:</b> strip those three fields from the public GET response. <b>Effort:</b> ~5 minutes.</div>
+</div>
+
+<div class="card p0">
+  <span class="tag t-p0">P0 — Compliance</span>
+  <div class="cardhead">3. Signal language — observation vs. recommendation</div>
+  <p>There is a meaningful difference between these two sentences:</p>
+  <ul>
+    <li><em>"MACD crossover detected on SBIN. Price crossed above its signal line."</em> — an <strong>observation</strong>. Describes what the market did.</li>
+    <li><em>"Buy SBIN. Target ₹X. Stop loss ₹Y."</em> — a <strong>recommendation</strong>. Tells a person what to do with their money.</li>
+  </ul>
+  <p>A read-only public web table sits closer to the first. A paid push notification to a stranger's phone, telling them to buy at a price with a stop loss, sits much closer to the second — which is SEBI Research Analyst / Investment Adviser territory in India. <strong>It is the paywall plus the push that changes the risk profile, not the wording alone.</strong></p>
+  <p style="margin-bottom:0"><strong>Owner decision (29 Jul):</strong> continue beta as-is with current wording. This is logged as P0 and <strong>must be resolved before the first rupee is charged.</strong> Needs proper Indian regulatory review, not a judgement call.</p>
+</div>
+
+<div class="card p0">
+  <span class="tag t-p0">P0 — Do within 1 week</span>
+  <div class="cardhead">4. Separate the trading bot from the user-alerts bot</div>
+  <div class="eli5">
+    <div class="cardhead">Explained simply</div>
+    <p>Think of a Telegram bot as a <strong>phone number</strong>.</p>
+    <p>Right now there is one phone number. The trading bot uses it to text the owner: <em>"I just bought 50 SBIN."</em></p>
+    <p>If that same number is later given to 500 customers:</p>
+    <ul>
+      <li>Everyone's messages arrive through the same phone. Wires get crossed.</li>
+      <li>Telegram limits how many messages one number can send per second. A blast to 500 customers could <strong>delay the owner's own trade alert</strong> — the one message that actually needs to arrive instantly.</li>
+      <li>If a customer reports or blocks the number and Telegram restricts it, <strong>the owner's trading alerts die too.</strong></li>
+      <li>Customer messaging can never be changed without touching the live trading setup.</li>
+    </ul>
+    <p style="margin-bottom:0"><strong>So: get a second phone number.</strong> One bot for the owner's trading, one separate "Fortress Alerts" bot for customers. Creating a new Telegram bot is free and takes two minutes today. Untangling them after 500 people are on it takes a weekend.</p>
+  </div>
+  <div class="kv"><b>Owner decision:</b> approved, to be done within one week, before any user-facing Telegram work begins.</div>
+</div>
+
+<div class="card p1">
+  <span class="tag t-p1">P1 — Beta quality</span>
+  <div class="cardhead">5. UI cannot distinguish "no signals" from "bot is dead"</div>
+  <p>The tab currently shows "no active crossovers" — which reads identically whether the market genuinely has no crossovers or the bot crashed on Tuesday. This is the exact state the product is in right now, and it is invisible from the page.</p>
+  <div class="kv"><b>Fix:</b> show a "Last updated: HH:MM" timestamp from the most recent ingest, and a stale-data warning if older than ~30 minutes during market hours. <b>Effort:</b> ~1 hour.</div>
+</div>
+
+<div class="card p1">
+  <span class="tag t-p1">P1 — Beta quality</span>
+  <div class="cardhead">6. No disclaimer on the page</div>
+  <p>Even for a free, ungated beta: one visible line — <em>"Educational and informational only. Not investment advice."</em> Cheap insurance, and it sets user expectations correctly from day one.</p>
+</div>
+
+<div class="card p1">
+  <span class="tag t-p1">P1 — Beta quality</span>
+  <div class="cardhead">7. No feedback capture — beta's entire job is learning</div>
+  <p>Without a thumbs up/down or a "did you act on this?" control per signal, two weeks of beta will produce signals but zero evidence anyone found them useful. Learning is the only reason to run a beta.</p>
+</div>
+
+<div class="card p1">
+  <span class="tag t-p1">P1 — Beta quality</span>
+  <div class="cardhead">8. Nobody knows the tab exists, and MACD is jargon</div>
+  <p>No announcement to the 8 existing accounts. No onboarding tooltip explaining what a MACD crossover means to a non-technical NRI investor. A tab nobody visits generates no beta learning.</p>
+</div>
+
+<div class="card p2">
+  <span class="tag t-p2">P2 — Next phase, highest priority</span>
+  <div class="cardhead">9. Auth gate + tiering + Telegram fan-out ("the full loop")</div>
+  <div class="eli5">
+    <div class="cardhead">"Step by step" vs. "the full loop" — explained simply</div>
+    <p><strong>Option A — Steps.</strong> Ship the login gate first (~1 day). Users can log in and see the tab. Telegram alerts come weeks later.</p>
+    <p><strong>Option B — Full loop.</strong> Build everything at once (~1 week): login gate + a "Connect Telegram" button + the sending engine + alert preferences. Nothing goes live until the whole chain works end to end.</p>
+    <p style="margin-bottom:0"><strong>Recommended — Option C.</strong> Do neither yet. Leave the beta open, get the bot actually producing signals, watch the data for a week or two. <em>Then</em> build the full loop in one go — because by then we will know what the alert should actually say, which is unknown today.</p>
+  </div>
+  <p><strong>What the full loop requires, in order:</strong></p>
+  <ol>
+    <li><strong>Identity restored</strong> — re-enable the sign-in gate (the code is in git history on <code>lib/db/schema/auth.ts</code>, <code>app/api/analysis/momentum-signals/route.ts</code>, <code>app/momentum-radar/page.tsx</code>). No login means no way to send anyone a personal alert.</li>
+    <li><strong>Telegram linking</strong> — user clicks "Connect Telegram" in Fortress, receives a one-time code, sends it to the new Fortress Alerts bot, and we store their <code>telegram_chat_id</code> against their account.</li>
+    <li><strong>Fan-out sender lives in Fortress, not in the trading bot.</strong> When a new signal lands, Fortress pushes it to every linked, entitled user. The trading bot's job is trading — a Telegram outage must never be able to stall an order.</li>
+    <li><strong>User preferences</strong> — Daily only vs Daily+Weekly, sector filter, max alerts per day. Without this, a 500-stock scan will spam people into muting the channel within a week.</li>
+  </ol>
+  <div class="kv"><b>Owner decision:</b> parked as the highest-priority next phase, to begin after 1–2 weeks of beta testing.</div>
+</div>
+
+<!-- ============ 6. INDEPENDENCE NOTE ============ -->
+<h2>6. Important: the web tab does not need Telegram at all</h2>
+<div class="good">
+  <div class="cardhead">These are two independent consumers of the same data</div>
+  <p>The web tab reads the <code>macd_signals</code> table directly from the database. Telegram would be a <em>separate downstream consumer</em> of that same table — and it does not exist yet.</p>
+  <p style="margin-bottom:0">Therefore: <strong>the beta needs nothing whatsoever from Telegram.</strong> Signals will be fully visible on the UI with zero Telegram IDs, zero linking, and zero sending engine. Telegram is purely additive, later.</p>
+</div>
+
+<!-- ============ 7. IMMEDIATE ACTIONS ============ -->
+<h2>7. Immediate action list</h2>
+<table>
+  <tr><th>#</th><th>Action</th><th>Owner</th><th>Effort</th></tr>
+  <tr><td>1</td><td>Open <code>/momentum-radar/admin</code>, read bot health, confirm whether bot is idle or crashing</td><td>Owner / AI</td><td>10 min</td></tr>
+  <tr><td>2</td><td>Enter real Telegram Bot Token + Admin ID and the three Zerodha fields via the admin page</td><td>Owner</td><td>15 min</td></tr>
+  <tr><td>3</td><td>Whitelist VPS IP <code>76.13.179.32</code> in the Kite Developer Portal; complete one-time Zerodha login via Telegram</td><td>Owner</td><td>20 min</td></tr>
+  <tr><td>4</td><td>Strip <code>quantity</code> / <code>invested_amount</code> / <code>risk_amount</code> from the public GET</td><td>AI</td><td>5 min</td></tr>
+  <tr><td>5</td><td>Build <code>macd_signal_history</code> append-only table + outcome diffing</td><td>AI</td><td>~1 day</td></tr>
+  <tr><td>6</td><td>Add <code>telegram_chat_id</code> + <code>subscription_tier</code> columns to <code>auth_user</code> (unused for now)</td><td>AI</td><td>20 min</td></tr>
+  <tr><td>7</td><td>Add "Last updated" timestamp, stale-data warning, and disclaimer line to the tab</td><td>AI</td><td>~1 hour</td></tr>
+  <tr><td>8</td><td>Create the separate "Fortress Alerts" Telegram bot (do not wire it up yet)</td><td>Owner</td><td>2 min</td></tr>
+</table>
+
+<!-- ============ 8. KNOWN GOTCHAS ============ -->
+<h2>8. Known gotchas for the next session</h2>
+<ul>
+  <li><strong>CI/CD may finish the VPS build but silently skip <code>pm2 restart</code>.</strong> Observed once in Session 30c with no visible error. The workflow needs an explicit "restart confirmed" check that fails loudly rather than trailing off silently. Until then, verify <code>.next/BUILD_ID</code> changed and the process actually restarted after every deploy.</li>
+  <li><strong>Duplicate <code>CRON_SECRET</code> entries</strong> were found in the VPS <code>.env.production</code> (two different values). Cleaned up in Session 30b — but always confirm the live value with <code>pm2 env</code> before debugging any 401 on the ingest endpoint.</li>
+  <li><strong>The bot's GitHub repo belongs to a different account</strong> with no push access. Bot code was copied to <code>/opt/macd-bot</code> over SSH, not via git. Any bot code change must be copied the same way.</li>
+  <li><strong>Credentials can be changed from the browser</strong> via <code>/momentum-radar/admin</code> → <code>POST /api/admin/bot-config</code>, which writes directly into <code>/opt/macd-bot/.env</code> and restarts the bot. No SSH needed for key rotation.</li>
+</ul>
+
+<div class="footer">
+  Momentum Radar Handover · Fortress Intelligence · Antigravity Ventures<br>
+  Generated 29 July 2026 from the Session 30/30b/30c product-owner brainstorm. Supersedes nothing; complements <code>CLAUDE.md</code> and <code>AI_HANDOVER.html</code>.
+</div>
+
+</div>
+</body>
+</html>

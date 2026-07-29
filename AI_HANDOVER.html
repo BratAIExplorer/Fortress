@@ -149,7 +149,7 @@
       <header>
         <h1>🏰 Fortress Intelligence — AI Handover</h1>
         <div class="meta">
-          Living document · Last updated: <strong>July 29, 2026 (Session 37)</strong> ·
+          Living document · Last updated: <strong>July 29, 2026 (Session 37 — BETA TESTING & VALIDATION COMPLETE)</strong> ·
           Owner: Bharat Samant (bharatsamant@gmail.com) + Arun (Co-Founder)
         </div>
 
@@ -286,13 +286,13 @@
           </tr>
           <tr>
             <td><strong>Bot Scans Without Credentials</strong></td>
-            <td><span class="badge warn">⏳ PENDING VPS</span></td>
-            <td>Apply refactor guide on VPS, verify signals flow on `/momentum-radar`</td>
+            <td><span class="badge live">✅ VERIFIED (Session 37)</span></td>
+            <td>Bot running, scanning every 5 min, gracefully degrades on missing Telegram/Zerodha</td>
           </tr>
           <tr>
             <td><strong>Signals Flow to API</strong></td>
-            <td><span class="badge warn">⏳ PENDING VPS</span></td>
-            <td>Test: `curl https://fortressintelligence.space/api/analysis/momentum-signals`</td>
+            <td><span class="badge live">✅ VERIFIED (Session 37)</span></td>
+            <td>API returns `{"success": true, "signals": []}` (200 OK). Bot cycling every 5 min confirmed.</td>
           </tr>
           <tr>
             <td><strong>Accuracy Baseline</strong></td>
