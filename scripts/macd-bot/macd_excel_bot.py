@@ -308,7 +308,7 @@ class MACDBot:
     def post_signals_to_fortress(self, signals):
         try:
             headers = {'Content-Type': 'application/json', 'x-cron-secret': self.fortress_cron_secret}
-            payload = {'signals': signals, 'timestamp': datetime.utcnow().isoformat()}
+            payload = {'signals': signals, 'timestamp': datetime.datetime.utcnow().isoformat()}
             response = requests.post(f"{self.fortress_api_url}?action=update", json=payload, headers=headers, timeout=10)
             if response.status_code == 200:
                 self.logger.info(f"✅ Fortress API: {len(signals)} signals posted")
