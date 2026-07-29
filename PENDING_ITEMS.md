@@ -253,6 +253,7 @@ See [AI_HANDOVER.html](AI_HANDOVER.html) for full write-up. Summary:
 
 - ✅ DEPLOYMENT_AUDIT.md with 6 critical post-deploy checks (all passing)
 - ✅ Env-sync automation (`cp .env.production .next/standalone/.env.production` on deploy)
+- 🟡 Blue-green deployment (zero-downtime updates, instant rollback) — **[[blue_green_deployment_setup.md](C:\Users\user\.claude\projects\C--Antigravity-Fortress\memory\blue_green_deployment_setup.md)]** — 3-hour implementation, trigger after Phase 3 stabilization
 - 🟡 Automated backups (PostgreSQL daily snapshots to S3)
 - 🟡 Schema version tracking (auto-detect schema drift)
 

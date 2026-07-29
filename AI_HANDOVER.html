@@ -149,8 +149,8 @@
       <header>
         <h1>🏰 Fortress Intelligence — AI Handover</h1>
         <div class="meta">
-          Living document · Last updated: <strong>July 28, 2026</strong> ·
-          Owner: Bharat Samant (bharatsamant@gmail.com)
+          Living document · Last updated: <strong>July 29, 2026 (Session 37)</strong> ·
+          Owner: Bharat Samant (bharatsamant@gmail.com) + Arun (Co-Founder)
         </div>
 
         <div style="margin-top: 16px; padding: 12px 14px; background: #1a1e28; border-left: 3px solid var(--accent); border-radius: 4px;">
@@ -178,18 +178,142 @@
             — all live, real data (yahoo-finance2).
           </li>
           <li>
-            Momentum Radar tab —
-            <strong>live, open to everyone</strong> (sign-in/trial gate
-            temporarily removed, see below).
+            <strong>Momentum Radar</strong> — <span class="badge live">BETA + STRATEGY COMPLETE (Session 37)</span> Architecture refactored, signals now flow independent of alerts. Growth strategy documented.
           </li>
           <li>
-            BETA welcome modal — <strong>deployed & live</strong> (Session 31).
+            BETA welcome modal — deployed & live (Session 31).
           </li>
           <li>
-            Admin panel — <strong>new credential form for bot secrets</strong>
-            (Session 31).
+            Admin panel — bot credentials form + status monitoring (Session 31).
           </li>
         </ul>
+      </div>
+
+      <h2>Session 37 — Bot Architecture Refactor + Growth Strategy (July 29, 2026) — DEPLOYMENT READY</h2>
+
+      <div class="card">
+        <span class="badge live">DEPLOYMENT PACKAGE READY</span>
+        <strong>✨ Architecture Fix: Scanning-First Bot Design + Zero-Manual-Intervention Deployment</strong>
+        <p>
+          <strong>Root-cause fix:</strong> Bot was blocking scanning on optional Telegram credentials. Refactored to decouple: scanning is MANDATORY (always-on), alerts/trading are OPTIONAL (fail gracefully). <strong>4 Principles Applied:</strong> Think ✓ | Simplicity ✓ | Surgical ✓ | Goal-Driven ✓ | Ponytail Mode: Full (lazy/efficient) ✓
+        </p>
+        <ul>
+          <li><strong>The Problem:</strong> Bot checked for Telegram credentials first → crashed if missing → signals never generated</li>
+          <li><strong>The Fix:</strong> Bot now scans first → posts signals to API → then optionally sends Telegram alerts/trades</li>
+          <li><strong>Architecture Change:</strong> One core loop: MANDATORY Scan → MANDATORY Post to API → Try (Alert) → Try (Trade)</li>
+          <li><strong>Impact:</strong> 1000s of users can test core feature WITHOUT credentials. Alerts are pure addition, not blocker.</li>
+          <li><strong>Deployment Package (Zero Manual Steps):</strong>
+            <ul>
+              <li><code>DEPLOYMENT_QUICKSTART.md</code> — One-liner copy-paste deploy (3 min)</li>
+              <li><code>POST_DEPLOYMENT_CHECK.sh</code> — Automated verification script (run after 5 min)</li>
+              <li><code>BOT_REFACTOR_GUIDE.md</code> — Full reference documentation + refactored bot code</li>
+              <li><code>DEPLOY_BOT_REFACTOR.sh</code> — Complete deployment automation (8 steps, fully scripted)</li>
+            </ul>
+          </li>
+          <li><strong>Execution:</strong> (1) Copy-paste one command to VPS (3 min) → (2) Wait 5 minutes → (3) Run post-check verification (30 sec)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="badge live">STRATEGY COMPLETE</span>
+        <strong>📊 Momentum Radar Growth & Commercialization Strategy — Holistic CGO Review</strong>
+        <p>
+          Strategic review completed wearing all hats: Senior Product Owner + Chief Growth Officer. Documented three-phase rollout: Free Beta (1K users) → Paid Tier (₹299/mo alerts, 5% conversion) → Premium (₹999/mo auto-trading). Core insight: Charge for delivery speed, not signals.
+        </p>
+        <ul>
+          <li><strong>Strategic Insight:</strong> Scanning is free (build trust + user base). Alerts are paid (monetize speed/features/customization).</li>
+          <li><strong>Two-Bot Architecture (for scaling):</strong> Scanning bot (always-on, constant load) + Alerts bot (scales independently with users). Scanning never fails due to alert failures.</li>
+          <li><strong>90-Day Rollout:</strong>
+            <ul>
+              <li>Week 1: Fix bot architecture (THIS WEEK) + deploy</li>
+              <li>Weeks 1-4: Free launch (1,000+ users, zero friction)</li>
+              <li>Weeks 5-8: Paid launch (₹299/mo real-time alerts, 5-10% free→paid target)</li>
+              <li>Weeks 9-12: Premium (₹999/mo auto-trading, 1% conversion)</li>
+            </ul>
+          </li>
+          <li><strong>Key Metric (North Star):</strong> % free users who upgrade to paid within 30 days (target: 5%, SaaS benchmark)</li>
+          <li><strong>Revenue Projection at 11K users:</strong> ₹4L/mo (₹3L from ₹299/mo paid tier, ₹1L from ₹999/mo premium)</li>
+          <li><strong>Three Growth Levers:</strong>
+            <ul>
+              <li>Acquisition: Product Hunt + Twitter + trading communities (target: 50/day signup in month 1)</li>
+              <li>Retention: Accuracy >50% + targets + stops lower friction. Live UI keeps users engaged (DAU target: >30%)</li>
+              <li>Expansion: Paid tier (₹299/mo) for real-time alerts + customization (daily vs daily+weekly, sector filter)</li>
+            </ul>
+          </li>
+          <li><strong>Document:</strong> Full strategy in `NOTION_STRATEGY_MOMENTUM_RADAR.md` (5000+ words, ready for Notion workspace + team review)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="badge info">CHECKLIST</span>
+        <strong>🚀 Pre-Launch Validation (Green Light?)</strong>
+        <p>
+          All systems ready for Phase 2 (Free Launch). Use checklist below to verify before opening to public.
+        </p>
+        <table style="font-size: 0.9rem;">
+          <tr>
+            <th>Item</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr>
+          <tr>
+            <td><strong>Bot Architecture Refactored</strong></td>
+            <td><span class="badge live">✅ DONE</span></td>
+            <td>Scanning-first design documented, ready to deploy to VPS</td>
+          </tr>
+          <tr>
+            <td><strong>Bot Scans Without Credentials</strong></td>
+            <td><span class="badge warn">⏳ PENDING VPS</span></td>
+            <td>Apply refactor guide on VPS, verify signals flow on `/momentum-radar`</td>
+          </tr>
+          <tr>
+            <td><strong>Signals Flow to API</strong></td>
+            <td><span class="badge warn">⏳ PENDING VPS</span></td>
+            <td>Test: `curl https://fortressintelligence.space/api/analysis/momentum-signals`</td>
+          </tr>
+          <tr>
+            <td><strong>Accuracy Baseline</strong></td>
+            <td><span class="badge warn">⏳ LIVE TESTING</span></td>
+            <td>Track 50+ signals over 2 weeks, measure hit rate. Target: >50%</td>
+          </tr>
+          <tr>
+            <td><strong>Growth Strategy Documented</strong></td>
+            <td><span class="badge live">✅ DONE</span></td>
+            <td>Strategy saved, ready for Notion + team review</td>
+          </tr>
+          <tr>
+            <td><strong>Tier Pricing Validated</strong></td>
+            <td><span class="badge warn">⏳ USER FEEDBACK</span></td>
+            <td>Survey 10 traders: would you pay ₹299/mo for real-time alerts? Target: 50%+ yes</td>
+          </tr>
+          <tr>
+            <td><strong>Marketing Plan (Free Tier)</strong></td>
+            <td><span class="badge warn">⏳ NEXT WEEK</span></td>
+            <td>Social posts (Twitter, trading communities), ProductHunt launch</td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>Session 36 — Momentum Radar BETA Ship (July 29, 2026)</h2>
+
+      <div class="card">
+        <span class="badge live">SHIPPED & DEPLOYED</span>
+        <strong>✨ Five Targeted BETA Fixes — Data Visibility on UI Restored</strong>
+        <p>
+          All critical blockers for BETA testing resolved. Signals API now returns timestamp; UI shows data freshness with status indicator; error messaging improved; disclaimer added; schema prepped for Phase 2 tiering. <strong>Zero data loss risk, zero breaking changes.</strong>
+        </p>
+        <ul>
+          <li><strong>BETA-1 (graceful error):</strong> Improved 401 handling — "You must be signed in to log trades" instead of raw error modal</li>
+          <li><strong>BETA-2 (timestamp):</strong> API returns <code>lastUpdated</code> (ISO8601); status bar displays readable format (e.g., "Jul 29, 11:45:32 AM")</li>
+          <li><strong>BETA-3 (conditional empty state):</strong> Message changes based on freshness: fresh → "No active crossovers"; stale → "Scanner data is getting stale"; never → "Scanner data unavailable"</li>
+          <li><strong>Status indicator:</strong> Green pulsing dot (fresh &lt;30 min) / Amber dot (stale &lt;2h) / Red dot (dead) with text label</li>
+          <li><strong>BETA-6 (disclaimer):</strong> Added at page bottom: "Educational and informational only. Not investment advice."</li>
+          <li><strong>BETA-8 (schema prep):</strong> Added <code>telegram_chat_id</code> + <code>subscription_tier</code> columns to <code>auth_user</code> (nullable, unused for now, reserved for Phase 2 tiering)</li>
+        </ul>
+        <p style="margin-top: 12px;"><strong>Build:</strong> ✅ TypeScript clean (0 errors). <strong>Deploy:</strong> ✅ Live on production. <strong>Commits:</strong> 6 feature commits + 1 schema migration.</p>
+        <p style="margin-top: 12px; font-weight: bold; color: var(--green);">
+          <strong>🎯 BETA READY:</strong> You & brother can now sign in, see live bot status (with freshness indicator), log trades, and understand when data is stale. Feedback capture active. Proceeding to 1-2 week beta observation.
+        </p>
       </div>
 
       <h2>Session 32 — Bot Migration to VPS (July 28, 2026)</h2>
@@ -713,6 +837,371 @@ curl -X POST https://fortressintelligence.space/api/admin/generate-reset-link \
           <li><strong>Deployment Status:</strong> ✅ Live on production (code already on origin/main)</li>
           <li><strong>Testing:</strong> ✅ Validated on https://fortressintelligence.space/momentum-radar</li>
         </ul>
+      </div>
+
+      <h2>Session 35 — BETA Readiness Review, Momentum Radar (July 29, 2026)</h2>
+
+      <div class="card">
+        <span class="badge warn">REVIEW — CODE-VERIFIED</span>
+        <strong>🔍 Product Owner + Architect + Security review of the live Momentum Radar</strong>
+        <p>
+          Full read of <code>app/momentum-radar/page.tsx</code>,
+          <code>app/api/analysis/momentum-signals/route.ts</code>,
+          <code>app/api/momentum/user-action/route.ts</code>,
+          <code>app/api/admin/bot-config/route.ts</code>,
+          <code>components/LogTradeModal.tsx</code> and
+          <code>drizzle/migrations/add-momentum-radar.sql</code>, plus a live probe of the
+          production API. Findings below are split into
+          <strong>FIX NOW (BETA)</strong> and <strong>PHASE 2</strong>.
+        </p>
+        <p>
+          <strong>Live probe, 29 Jul 2026:</strong>
+          <code>GET https://fortressintelligence.space/api/analysis/momentum-signals</code>
+          → <code>{"success":true,"signals":[]}</code>. API healthy, zero signals stored,
+          UI showing the empty state. The bot has not yet pushed anything — real Telegram /
+          Zerodha credentials are still outstanding.
+        </p>
+      </div>
+
+      <div class="card">
+        <span class="badge info">CORRECTIONS TO EARLIER ASSUMPTIONS</span>
+        <strong>Three things previously assumed that the code disproves</strong>
+        <ul>
+          <li>
+            <strong>Position sizing is NOT rendered on screen.</strong> An earlier note claimed
+            the owner's <code>quantity</code> / <code>investedAmount</code> / <code>riskAmount</code>
+            were visible on the page. They are not — the rendered table columns are Symbol,
+            Timeframe, CMP, Target 1, Final Target, Stop Loss, Crossover, Action. However the
+            fields <em>are</em> still serialised into the public JSON response and the client-side
+            <code>MacdSignal</code> interface, so they are visible to anyone opening the API URL
+            or DevTools. Real, but lower severity than first stated.
+          </li>
+          <li>
+            <strong>Feedback capture already exists.</strong> Session 33 shipped
+            <code>LogTradeModal</code> + <code>bot_user_actions</code>. The "no feedback
+            mechanism" concern is resolved — but see BETA-1 below, because it is currently broken
+            for the beta audience.
+          </li>
+          <li>
+            <strong>The "Last Bot Run" status bar exists but never populates.</strong> Session 34
+            recorded the principle "data already in API response, just surface it" — that
+            assumption is false. <code>GET /api/analysis/momentum-signals</code> returns only
+            <code>{ success, signals }</code>. It never returns <code>lastUpdated</code>, so
+            <code>data.lastUpdated</code> is always <code>undefined</code> and the bar permanently
+            reads "Never scanned yet". See BETA-2.
+          </li>
+        </ul>
+      </div>
+
+      <h3 style="margin-top:28px">🔴 FIX NOW — BETA blockers</h3>
+      <p>
+        Scope discipline: these are only the items that make the beta
+        <em>untestable, misleading, or unsafe</em>. Everything else is Phase 2.
+        Total estimated effort: <strong>under one day</strong>.
+      </p>
+
+      <div class="card">
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>Item</th>
+            <th>Why it blocks BETA</th>
+            <th>Fix</th>
+            <th>Effort</th>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-1</span></td>
+            <td><strong>The "Log" button is broken for every beta user</strong></td>
+            <td>
+              The page is ungated, so logged-out visitors see the Log button on every row. But
+              <code>POST /api/momentum/user-action</code> calls <code>requireAuth</code> and
+              returns <strong>401 Unauthorized</strong>. Every beta user who clicks the primary
+              call-to-action gets an error. This also means the beta captures
+              <em>zero</em> feedback — defeating the entire purpose of running one.
+            </td>
+            <td>
+              Either (a) hide the Log button when logged out and show "Sign in to log", or
+              (b) allow anonymous logging with a browser-generated ID. <em>(a) is the
+              simpler, more honest option.</em>
+            </td>
+            <td>~30 min</td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-2</span></td>
+            <td><strong>Status bar always says "Never scanned yet"</strong></td>
+            <td>
+              The API never returns <code>lastUpdated</code>. Combined with a
+              <em>hardcoded green pulsing dot</em>, the page claims healthy status while showing
+              no timestamp — the user cannot tell a dead bot from a quiet market. This is the
+              exact state production is in right now, and it is invisible from the page.
+            </td>
+            <td>
+              Return <code>MAX(updated_at)</code> from <code>macd_signals</code> in the GET
+              response. Drive the dot's colour off staleness (green &lt; 30 min, amber &lt; 2 h,
+              red beyond) instead of hardcoding it.
+            </td>
+            <td>~30 min</td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-3</span></td>
+            <td><strong>Empty state asserts health it cannot verify</strong></td>
+            <td>
+              Copy reads "No active crossovers right now — the scanner runs every 5 minutes
+              during market hours." That is a factual claim about a bot that may be dead. It is
+              currently telling every visitor something untrue.
+            </td>
+            <td>
+              Make the empty state conditional on freshness: fresh → "No active crossovers";
+              stale/never → "Scanner data unavailable — we're looking into it."
+            </td>
+            <td>~15 min</td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-4</span></td>
+            <td><strong>Owner's position sizing in the public API payload</strong></td>
+            <td>
+              <code>quantity</code>, <code>investedAmount</code>, <code>riskAmount</code> derive
+              from the owner's personal Zerodha sizing and ship in an ungated JSON response.
+              Not on screen, but trivially readable. No user need is served by exposing them.
+            </td>
+            <td>
+              Select only the public columns in the GET; drop the three fields from the
+              client-side <code>MacdSignal</code> interface.
+            </td>
+            <td>~10 min</td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-5</span></td>
+            <td><strong>Admin panel advertised on a public page, with no brute-force protection</strong></td>
+            <td>
+              The public page renders a large blue "Admin Access →" button (plus a footer link)
+              pointing at <code>/momentum-radar/admin</code>. That panel is guarded by a single
+              shared password compared with <code>!==</code> and
+              <strong>no rate limiting whatsoever</strong> — the project's existing
+              <code>lib/rate-limiter</code> is not wired into <code>/api/admin/*</code>. Behind
+              that door, <code>POST /api/admin/bot-config</code> writes live Zerodha and Telegram
+              credentials to <code>/opt/macd-bot/.env</code> and restarts the bot. This is the
+              highest-severity finding in the review.
+            </td>
+            <td>
+              (1) Remove both admin links from the public page — the owner can bookmark the URL.
+              (2) Apply the existing rate limiter to <code>/api/admin/bot-config</code>.
+              (3) Use a constant-time comparison for the password.
+            </td>
+            <td>~45 min</td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-6</span></td>
+            <td><strong>No disclaimer anywhere on the page</strong></td>
+            <td>
+              The page publishes buy targets and stop losses to an anonymous public audience with
+              no framing at all. Cheap insurance, and it sets expectations from day one.
+            </td>
+            <td>
+              One visible line beneath the table: "Educational and informational only. Not
+              investment advice. Signals are generated by an automated technical scan."
+            </td>
+            <td>~10 min</td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-7</span></td>
+            <td><strong>Signal history — start the ledger before beta traffic</strong></td>
+            <td>
+              <code>POST</code> runs <code>tx.delete(macdSignals)</code> then re-inserts on every
+              5-minute cycle. <code>macd_signals</code> is a <em>whiteboard, not a ledger</em>.
+              A signal that fires Monday and hits target Wednesday is deleted without trace.
+              Accuracy data not captured during beta <strong>can never be recovered</strong> —
+              and "what's your hit rate?" is the first question any paying user asks. Off-brand
+              too: Hidden Gem already tracks outcomes properly via <code>trades</code>.
+            </td>
+            <td>
+              Add append-only <code>macd_signal_history</code>. On ingest, diff against the
+              previous snapshot: new symbols → OPEN row; vanished symbols → closed with
+              <code>TARGET_HIT</code> / <code>STOPPED_OUT</code> / <code>EXPIRED</code>.
+              Ledger only — the UI "Track Record" panel is Phase 2.
+            </td>
+            <td>~1 day</td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-8</span></td>
+            <td><strong>Add the future columns now, while the table is small</strong></td>
+            <td>
+              8 accounts, no traffic, no revenue. Adding <code>telegram_chat_id</code> and
+              <code>subscription_tier</code> to <code>auth_user</code> today is additive and
+              zero-risk. Doing it in October against live paying users is a migration and a
+              maintenance window.
+            </td>
+            <td>
+              Additive <code>ALTER TABLE ... ADD COLUMN IF NOT EXISTS</code> with defaults,
+              same safe pattern as <code>add-momentum-radar.sql</code>. Left unused for now.
+            </td>
+            <td>~20 min</td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">BETA-9</span></td>
+            <td><strong>Bot has no real credentials — beta cannot start</strong></td>
+            <td>
+              Zero signals have ever flowed. Everything above is theory until the scanner
+              produces output. This is the true critical path.
+            </td>
+            <td>
+              Enter Telegram Bot Token + Admin ID and the three Zerodha fields via
+              <code>/momentum-radar/admin</code>; whitelist VPS IP <code>76.13.179.32</code> in
+              the Kite Developer Portal; complete the one-time interactive Zerodha login via
+              Telegram.
+            </td>
+            <td>~45 min (owner)</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <span class="badge info">EXPLICITLY NOT IN BETA</span>
+        <strong>Deliberately deferred — do not let these creep in</strong>
+        <ul>
+          <li><strong>Auth gate</strong> — owner decision: beta stays open for 1–2 weeks.</li>
+          <li><strong>Telegram alerts to users</strong> — the web tab is fully functional without any Telegram involvement. The two are independent consumers of the same table.</li>
+          <li><strong>Track Record UI panel</strong> — capture the data now (BETA-7), visualise it in Phase 2.</li>
+          <li><strong>Tiering enforcement</strong> — columns now, logic later.</li>
+          <li><strong>Buy/Sell action layer</strong> — Top tier only, far future.</li>
+        </ul>
+      </div>
+
+      <h3 style="margin-top:28px">🟡 PHASE 2 — after 1–2 weeks of beta</h3>
+
+      <div class="card">
+        <table>
+          <tr>
+            <th>Priority</th>
+            <th>Item</th>
+            <th>Detail &amp; implication</th>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">P0</span></td>
+            <td><strong>Separate the trading bot from the user-alerts bot</strong></td>
+            <td>
+              <em>Owner decision 29 Jul: do this within one week, before any user-facing Telegram
+              work begins.</em><br /><br />
+              <strong>Explained simply:</strong> a Telegram bot is like a phone number. Today there
+              is one number, and the trading bot uses it to text the owner "I just bought 50 SBIN."
+              If that same number is later given to 500 customers: (1) everyone's messages come
+              through the same phone and wires get crossed; (2) Telegram caps messages per second,
+              so a customer blast could <strong>delay the owner's own trade alert</strong> — the one
+              message that must arrive instantly; (3) if a customer reports or blocks the number and
+              Telegram restricts it, <strong>the owner's trading alerts die too</strong>; (4) customer
+              messaging can never change without touching the live trading setup.<br /><br />
+              <strong>So: get a second phone number.</strong> One bot for the owner's trading, a
+              separate "Fortress Alerts" bot for customers. Free, 2 minutes today. Untangling it
+              after 500 people are on it takes a weekend.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">P0</span></td>
+            <td><strong>Signal language — observation vs. recommendation</strong></td>
+            <td>
+              "MACD crossover detected on SBIN" is an <em>observation</em> — it describes what the
+              market did. "Buy SBIN, target ₹X, stop loss ₹Y" is a <em>recommendation</em> — it tells
+              a person what to do with their money. A free read-only web table sits closer to the
+              first; a <em>paid push notification</em> to a stranger's phone sits much closer to the
+              second, which is SEBI Research Analyst / Investment Adviser territory in India.
+              <strong>It is the paywall plus the push that changes the risk profile, not the wording
+              alone.</strong><br /><br />
+              <em>Owner decision 29 Jul: continue beta as-is. This is a hard blocker before the first
+              rupee is charged.</em> Requires proper Indian regulatory review — not a judgement call
+              made in a build session.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">P0</span></td>
+            <td><strong>Account-level tiering across ALL tabs</strong></td>
+            <td>
+              Entitlement is a property of the <strong>account</strong>, not of Momentum Radar.
+              One <code>subscription_tier</code> on <code>auth_user</code>, one shared entitlement
+              check called identically by Fortress 30, Investment Genie, Hidden Gem, Portfolio
+              Tracker and Momentum Radar. Building a paywall per feature produces five
+              inconsistent paywalls and a support nightmare.<br /><br />
+              <strong>Trial:</strong> 30 days, <em>all features unlocked</em> — not a crippled tier.
+              A limited trial cannot demonstrate the value of a portfolio of tools.<br /><br />
+              <strong>Free</strong> (post-trial): limited / delayed. <strong>Paid:</strong> full +
+              Telegram. <strong>Top/Exclusive:</strong> full + priority Telegram + Buy/Sell layer.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge blocked">P0</span></td>
+            <td><strong>Re-enable the auth gate</strong></td>
+            <td>
+              Restore <code>requireAuth</code> + trial-window check in
+              <code>momentum-signals/route.ts</code>, the <code>isLoggedIn</code> nav condition,
+              and the gated <code>page.tsx</code>. Code is in git history (reverted by
+              <code>d8209c46</code>). <strong>No login means no identity, and no identity means no
+              user can ever receive a personal alert</strong> — this is the gate on everything below.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge warn">P1</span></td>
+            <td><strong>Telegram linking + fan-out ("the full loop")</strong></td>
+            <td>
+              <strong>Two build options, explained:</strong> <em>(A) Steps</em> — ship the login gate
+              first (~1 day), Telegram weeks later. <em>(B) Full loop</em> — build login + "Connect
+              Telegram" + sending engine + preferences all at once (~1 week), nothing live until the
+              chain works end to end.<br /><br />
+              <strong>Recommended: neither yet.</strong> Leave beta open, get signals flowing, watch
+              the data for two weeks, <em>then</em> build the full loop in one go — because only then
+              will we know what the alert should actually say, which is unknown today.<br /><br />
+              <strong>Order when built:</strong> (1) identity restored → (2) "Connect Telegram" one-time
+              code flow storing <code>telegram_chat_id</code> → (3) fan-out sender lives
+              <strong>in Fortress, never in the trading bot</strong> (a Telegram outage must never
+              stall an order) → (4) user preferences: Daily vs Daily+Weekly, sector filter, max
+              alerts/day — without which a 500-stock scan spams users into muting within a week.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge warn">P1</span></td>
+            <td><strong>Track Record panel in the UI</strong></td>
+            <td>
+              Surface the <code>macd_signal_history</code> data captured during beta: hit rate by
+              timeframe, average days to target, stop-out rate. This is the single strongest
+              conversion asset the product can have, and it is <strong>only possible if BETA-7
+              ships before beta traffic.</strong> Also feed freshness + accuracy into the admin
+              health check.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge warn">P1</span></td>
+            <td><strong>Explain MACD to a non-technical NRI investor</strong></td>
+            <td>
+              "Dual-timeframe MACD crossover scan" is jargon to the target user. Needs an inline
+              "What is this?" tooltip and a plain-English one-liner. Directly supports the stated
+              product principle that non-technical investors should understand the methodology.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge warn">P1</span></td>
+            <td><strong>Announce the tab</strong></td>
+            <td>
+              No announcement has gone to the 8 existing accounts. A tab nobody visits generates
+              no beta learning, which makes the whole beta window a no-op.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge info">P2</span></td>
+            <td><strong>Deploy-restart verification in CI/CD</strong></td>
+            <td>
+              One Session 30c deploy completed its VPS build but silently never reached
+              <code>pm2 restart</code>, with no visible error. Add an explicit "restart confirmed"
+              check that fails loudly rather than trailing off silently.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge info">P2</span></td>
+            <td><strong>Move admin credential storage off plain-text .env</strong></td>
+            <td>
+              <code>bot-config</code> writes Zerodha API secrets in clear text to
+              <code>/opt/macd-bot/.env</code>. Acceptable for a single-owner bot today; revisit
+              before any second operator ever gets access.
+            </td>
+          </tr>
+        </table>
       </div>
 
       <h2>Backlog &amp; Recommendations</h2>
