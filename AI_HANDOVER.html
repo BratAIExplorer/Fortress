@@ -192,6 +192,23 @@
       <h2>Session 39 — Duplicate Bot Process (Root Cause), Multi-User Telegram, Error Alerting (July 30, 2026) — VERIFIED LIVE</h2>
 
       <div class="card">
+        <span class="badge live">✅ POST-DEPLOYMENT VALIDATION — 10/10 checks passed</span>
+        <p>Full pass run after every fix in this session landed, checking real state, not assumptions:</p>
+        <ol style="margin: 8px 0 0 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+          <li>VPS <code>git rev-parse HEAD</code> matches local — deploy is current, no drift</li>
+          <li><code>pm2 jlist</code>: fortress-app/fortress-cron/macd-bot online, fortress-bot cleanly stopped, no crash-looping</li>
+          <li>Six key pages (home, Fortress 30, portfolio, trading specialist, Momentum Radar, admin) all return expected status codes</li>
+          <li>fortress-app error log: zero entries since deploy (grepped by today's date specifically — the "errors" seen earlier in a raw <code>pm2 logs</code> dump were stale July 29 history, confirmed and excluded)</li>
+          <li>Full <code>tsc --noEmit</code> repo-wide: no new errors beyond the pre-existing, unrelated test-config issues noted at session start</li>
+          <li><code>macd_signals</code>: 40 rows in DB, matches live API exactly</li>
+          <li>Disclaimer renders on the public page</li>
+          <li>Telegram subscriber add → list → remove: fresh round trip after deploy, table left empty and clean</li>
+          <li><code>/api/admin/bot-config</code> status read still works after the path fix (read path unaffected, as intended)</li>
+          <li><code>/api/admin/momentum-status</code> still reports correctly (40 active, 8 min since update, not stale)</li>
+        </ol>
+      </div>
+
+      <div class="card">
         <span class="badge live">✅ ROOT CAUSE FOUND, FIXED, HELD STABLE UNDER OBSERVATION</span>
         <p>
           <strong>The real story behind "Telegram alerts fire but nothing shows in DB/UI":</strong> Session 38's fixes (widened columns, added missing scan_results columns) were correct but incomplete. After deploying them, force-run tests kept flapping between 40 rows and 0 rows within minutes, with no errors in the logs. Investigation found <strong>two separate bot processes running in parallel</strong> against the same production endpoint:
