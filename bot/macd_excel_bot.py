@@ -787,7 +787,7 @@ def send_daily_summary(state):
     total_pnl = sum(s["pnl"] for s in sells)
     cum_pnl = state.get("cumulative_pnl", 0.0)
     
-    msg = f"📊 *MACD Bot Daily Summary - {now.strftime('%b %d, %Y')}*\n\n"
+    msg = f"📊 *Daily Summary - {now.strftime('%b %d, %Y')}*\n\n"
     
     # 1. Booked Profits Section
     if sells:
@@ -1070,7 +1070,7 @@ def run_scan_cycle(state):
         tf = item["Timeframe"]
         period_unit = "days" if tf == "Daily" else "weeks"
         msg = (
-            f"📢 *New MACD {tf} Bullish Crossover Detected!*\n\n"
+            f"📢 *New {tf} Bullish Signal Detected!*\n\n"
             f"● *Stock*: **{item['Symbol']}**\n"
             f"● *CMP*: {format_rs(item['CMP'])}\n"
             f"● *Crossover Date*: `{item['Crossover Date']}` ({item['Days Since Crossover']} {period_unit} ago)\n"
