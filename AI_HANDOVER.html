@@ -149,7 +149,7 @@
       <header>
         <h1>🏰 Fortress Intelligence — AI Handover</h1>
         <div class="meta">
-          Living document · Last updated: <strong>July 30, 2026 (Session 37 Continued — BOT LOGIC RESTORATION COMPLETE)</strong> ·
+          Living document · Last updated: <strong>July 30, 2026 (Session 38 — Momentum Radar schema-drift fix, DB grants, live validation)</strong> ·
           Owner: Bharat Samant (bharatsamant@gmail.com) + Arun (Co-Founder)
         </div>
 
@@ -186,6 +186,51 @@
           <li>
             Admin panel — bot credentials form + status monitoring (Session 31).
           </li>
+        </ul>
+      </div>
+
+      <h2>Session 38 — Momentum Radar Schema-Drift Fix + DB Grants (July 30, 2026) — VERIFIED LIVE</h2>
+
+      <div class="card">
+        <span class="badge live">✅ ROOT-CAUSED, FIXED, VALIDATED END-TO-END</span>
+        <p>
+          <strong>Reported symptom:</strong> standalone MACD bot sends real Telegram crossover alerts (confirmed by screenshot — SBILIFE, CREDITACC, DEEPAKFERT etc.), but nothing appeared in the Momentum Radar UI and <code>macd_signals</code> table was permanently empty.
+        </p>
+        <p><strong>Root causes found via direct VPS log/DB inspection (not guessed):</strong></p>
+        <ul>
+          <li>
+            <code>macd_signals.first_target_ema</code> / <code>final_target_ema</code> / <code>stop_loss_ema</code> were <code>varchar(10)</code>, but the bot sends full labels like <code>"5% Default (Blue Sky)"</code> (22 chars) and <code>"Weekly EMA 20"</code> (13 chars). Every batch insert (all 40 signals in one transaction) failed with <code>value too long for type character varying(10)</code> and rolled back completely — zero rows landed, no user-facing error, because the bot's push function only catches network exceptions, not HTTP/DB failures.
+          </li>
+          <li>
+            <code>scan_results</code> was missing 7 columns (<code>macd_status</code>, <code>macd_target_1</code>, <code>macd_target_2</code>, <code>macd_stop_loss</code>, <code>macd_qty</code>, <code>macd_invested</code>, <code>macd_risk</code>) that <code>lib/db/schema.ts</code> already declared — a migration was never applied to the live DB (<code>column "macd_status" does not exist</code>), causing the July 29 Fortress 30 cron scans (NSE 11:00 UTC, US 09:00 UTC) to fail outright with 0 rows stored.
+          </li>
+          <li>
+            Found and fixed a third, unrelated bug in the same log sweep: <code>fortress_user</code> lacked ALTER/some table privileges on <code>postgres</code>-owned tables (<code>permission denied for table scans</code> recurring in logs) — granted full privileges + set default privileges so future tables don't drift again.
+          </li>
+          <li>
+            GET <code>/api/analysis/momentum-signals</code> never returned <code>lastUpdated</code> even though the UI (<code>app/momentum-radar/page.tsx</code>) already reads it — status bar always showed "Never scanned yet" regardless of data. Fixed to return <code>max(updatedAt)</code> across signals.
+          </li>
+        </ul>
+        <p><strong>Fixes applied:</strong></p>
+        <ul>
+          <li><code>lib/db/schema/momentum.ts</code> — widened the three EMA-label columns to <code>varchar(50)</code>; ALTER TABLE applied on VPS.</li>
+          <li><code>ALTER TABLE scan_results ADD COLUMN ...</code> (7 columns, nullable, additive-only) run on VPS as <code>postgres</code> superuser.</li>
+          <li><code>GRANT ALL PRIVILEGES ... TO fortress_user</code> + <code>ALTER DEFAULT PRIVILEGES</code> on the <code>public</code> schema.</li>
+          <li><code>app/api/analysis/momentum-signals/route.ts</code> — GET now returns <code>lastUpdated</code>.</li>
+          <li>Commit <code>a7f10636</code>, deployed via <code>git pull && npm run build && pm2 restart fortress-app --update-env</code>.</li>
+        </ul>
+        <p><strong>Validated end-to-end (not just "should work"):</strong></p>
+        <ul>
+          <li>Force-ran <code>/opt/macd-bot/run_one_off_scan.py</code> on the VPS directly (not local) — 40 real crossovers found.</li>
+          <li>Telegram alerts fired (confirmed by user screenshots, e.g. CREDITACC, DEEPAKFERT).</li>
+          <li><code>macd_signals</code> table: <strong>40 rows</strong>, <code>max(updated_at) = 2026-07-30 01:38:26</code> — full-length labels (<code>"5% Default (Blue Sky)"</code>, <code>"Weekly EMA 20"</code>) stored correctly.</li>
+          <li>Live API check: <code>GET https://fortressintelligence.space/api/analysis/momentum-signals</code> → <code>success: true, count: 40, lastUpdated: 2026-07-30T01:38:26.964Z</code>.</li>
+        </ul>
+        <p><strong>Known follow-up (not yet built):</strong></p>
+        <ul>
+          <li>Multi-user Telegram alerts — bot currently sends to one hardcoded <code>TELEGRAM_ADMIN_ID</code> only; no subscriber table/registration flow exists yet. Scoped but not implemented.</li>
+          <li><code>/momentum-radar</code> page fetches signals once on mount, no polling — during market hours the page won't show the next 5-min cycle's results without a manual browser refresh.</li>
+          <li>Other tables seen failing in the same VPS log sweep and not yet investigated: <code>concepts</code>, <code>macro_snapshots</code>, <code>intelligence_reports</code>, <code>page_views</code>, <code>strategies</code>, <code>privacy_consent</code>, <code>trades</code> — same "relation does not exist" pattern, likely more un-applied migrations.</li>
         </ul>
       </div>
 
