@@ -149,7 +149,7 @@
       <header>
         <h1>🏰 Fortress Intelligence — AI Handover</h1>
         <div class="meta">
-          Living document · Last updated: <strong>July 30, 2026 (Session 38 — Momentum Radar schema-drift fix, DB grants, live validation)</strong> ·
+          Living document · Last updated: <strong>July 30, 2026 (Session 39 — Duplicate bot process found & disabled, multi-user Telegram, error alerting, disclaimer)</strong> ·
           Owner: Bharat Samant (bharatsamant@gmail.com) + Arun (Co-Founder)
         </div>
 
@@ -187,6 +187,35 @@
             Admin panel — bot credentials form + status monitoring (Session 31).
           </li>
         </ul>
+      </div>
+
+      <h2>Session 39 — Duplicate Bot Process (Root Cause), Multi-User Telegram, Error Alerting (July 30, 2026) — VERIFIED LIVE</h2>
+
+      <div class="card">
+        <span class="badge live">✅ ROOT CAUSE FOUND, FIXED, HELD STABLE UNDER OBSERVATION</span>
+        <p>
+          <strong>The real story behind "Telegram alerts fire but nothing shows in DB/UI":</strong> Session 38's fixes (widened columns, added missing scan_results columns) were correct but incomplete. After deploying them, force-run tests kept flapping between 40 rows and 0 rows within minutes, with no errors in the logs. Investigation found <strong>two separate bot processes running in parallel</strong> against the same production endpoint:
+        </p>
+        <ul>
+          <li><code>macd-bot</code> (pm2 id 5, <code>/opt/macd-bot</code>) — the real, full-featured bot: daily + weekly analysis, real interactive Telegram alerts with Buy/Sell buttons, Zerodha integration, the one in every screenshot this session.</li>
+          <li><code>fortress-bot</code> (pm2 id 6, <code>/opt/fortress/scripts/macd-bot</code>, defined in git-tracked <code>ecosystem.config.js</code>) — a Session 37 rewrite/"consolidation" attempt. Its <code>send_telegram_alert()</code> and <code>execute_zerodha_trades()</code> were unimplemented stubs (log a line, do nothing — so no duplicate Telegram messages), and it has <strong>no weekly-timeframe logic at all</strong>. It ran every 5 minutes regardless of market hours and, for over 1.5 hours of observed cycles, always found 0 daily signals — and posted that empty list to <code>/api/analysis/momentum-signals</code> every time. Since that endpoint does delete-then-reinsert, <strong>it was silently wiping out whatever the real bot had just written</strong>, minutes after every successful scan. This is the actual root cause — Session 38's DB fixes were necessary but not sufficient.
+        </p>
+        <p><strong>Fix:</strong> Stopped <code>fortress-bot</code> via <code>pm2 stop</code> + <code>pm2 save</code> (survives reboot), and commented it out of <code>ecosystem.config.js</code> (not deleted — left documented so the Session 37 work isn't silently lost; needs a real finish-or-retire decision, not a silent double-run). Commit <code>5a7c2cc0</code>.</p>
+        <p><strong>Validated:</strong> Force-ran a real scan (40 signals) at <code>03:21:16 UTC</code>, then waited a full 2 minutes — the exact window that previously always wiped the table — and re-checked both the DB directly and the live API. <strong>Count held at 40, unchanged.</strong> This is the first time this session the data has actually stayed put.</p>
+      </div>
+
+      <div class="card">
+        <span class="badge live">✅ SHIPPED — Multi-user Telegram, admin-managed</span>
+        <p>New <code>telegram_subscribers</code> table + <code>/api/admin/telegram-subscribers</code> (GET secret-protected for the bot, POST password-protected for the admin page). <code>/momentum-radar/admin</code> now has an add/remove UI — each subscriber gets their own DM, no group chat, takes effect on the bot's next 5-minute cycle, no restart needed.</p>
+        <p>Bot side: added <code>broadcast_alert()</code>, used <em>only</em> for new-crossover discovery messages. <code>send_telegram_message()</code> is untouched for everything else (order-flow replies, position/stop-loss alerts, daily P&amp;L) — those stay admin-only/personal by design, never broadcast. Confirmed <code>handle_callback_query</code> already no-ops for any non-admin <code>chat_id</code>, so the Buy/Sell buttons on broadcast messages are safe as-is (tap does nothing for non-admin recipients).</p>
+        <p><strong>Also fixed in the same pass:</strong> <code>/api/admin/bot-config</code> (the credentials form on the admin page) was writing to <code>/opt/fortress/scripts/macd-bot/.env</code> — the wrong bot. The next credential save via that UI would have silently done nothing to the real, running bot. Pointed it at <code>/opt/macd-bot</code>.</p>
+        <p><strong>Validated:</strong> Full DB→API round trip proven live — added a test subscriber via the admin POST endpoint, confirmed it appeared via the bot-facing GET (secret-protected) endpoint, removed it, confirmed empty. Force-ran the bot with alert-dedup state reset to force 40 new-crossover broadcasts through the new code path — zero send failures, zero exceptions, state file restored cleanly afterward.</p>
+      </div>
+
+      <div class="card">
+        <span class="badge live">✅ SHIPPED — Backend error alerting + public-page disclaimer</span>
+        <p><code>lib/telegram-alert.ts</code> — best-effort, no-ops if unconfigured, never throws. Wired into the two routes that actually broke this week: cron scan failures (<code>app/api/scan/run/route.ts</code>) and momentum-signals ingestion (previously had no try/catch around the DB transaction at all — added one). Reuses the MACD bot's existing Telegram token/admin ID, no new bot needed. <strong>Validated:</strong> sent a real test message through the exact same token/chat-id path — delivered successfully.</p>
+        <p>Added a disclaimer to <code>/momentum-radar</code> — it was showing buy quantities and invested amounts against a real ₹25,000 capital assumption to anonymous visitors with no "not investment advice" language. Found pre-existing, more complete disclosure work already sitting locally uncommitted (<code>components/fortress/ResearchDisclaimer.tsx</code>, covers Momentum Radar/Hidden Gem Finder/Portfolio) — committed that instead of a narrower inline version. <em>Caught mid-deploy:</em> the first commit referenced this component without including the file, breaking the VPS build; fixed in the very next commit before it caused any downtime beyond one failed build.</p>
       </div>
 
       <h2>Session 38 — Momentum Radar Schema-Drift Fix + DB Grants (July 30, 2026) — VERIFIED LIVE</h2>
@@ -228,16 +257,31 @@
         </ul>
         <p><strong>Known follow-up (not yet built):</strong></p>
         <ul>
-          <li>Multi-user Telegram alerts — bot currently sends to one hardcoded <code>TELEGRAM_ADMIN_ID</code> only; no subscriber table/registration flow exists yet. Scoped but not implemented.</li>
-          <li><code>/momentum-radar</code> page fetches signals once on mount, no polling — during market hours the page won't show the next 5-min cycle's results without a manual browser refresh.</li>
-          <li>Other tables seen failing in the same VPS log sweep and not yet investigated: <code>concepts</code>, <code>macro_snapshots</code>, <code>intelligence_reports</code>, <code>page_views</code>, <code>strategies</code>, <code>privacy_consent</code>, <code>trades</code> — same "relation does not exist" pattern, likely more un-applied migrations.</li>
+          <li><s>Multi-user Telegram alerts</s> — shipped Session 39, see below.</li>
+          <li><code>/momentum-radar</code> page fetches signals once on mount, no polling — during market hours the page won't show the next 5-min cycle's results without a manual browser refresh. Still open.</li>
+          <li>Other tables seen failing in the same VPS log sweep — re-checked Session 39: all 7 tables (<code>concepts</code>, <code>macro_snapshots</code>, <code>intelligence_reports</code>, <code>page_views</code>, <code>strategies</code>, <code>privacy_consent</code>, <code>trades</code>) actually exist in the live DB; <code>strategies</code>/<code>privacy_consent</code>/<code>trades</code> have real data. The log errors were stale historical entries from already-resolved incidents, not a current problem — false alarm, corrected same session.</li>
         </ul>
       </div>
 
-      <h2>Session 37 — Bot Architecture Refactor + Growth Strategy (July 29, 2026) — LIVE & CONSOLIDATED</h2>
+      <div class="card">
+        <strong>📋 Backlog — explicitly deferred, not started this session:</strong>
+        <ul>
+          <li><strong>2-day rolling signal history</strong> — table currently does delete-then-reinsert (snapshot semantics); needs upsert-by-(symbol,timeframe,crossoverDate) plus a date filter to show "yesterday + today, nothing older."</li>
+          <li><strong>EOD target/stop-loss outcome tracking</strong> — no job checks a signal against its target/stop after the alert fires. Needs the history table above plus a market-close cron that marks each open signal active/target1_hit/final_hit/stopped.</li>
+          <li><strong>Auto-refresh polling on <code>/momentum-radar</code></strong> — 60s client poll, small change, do alongside the history work above.</li>
+          <li><strong>Sort + pagination</strong> once the rolling history makes the table regularly exceed ~40 rows.</li>
+          <li><strong>fortress-bot finish-or-retire decision</strong> — see amendment above. Currently stopped; needs an explicit call, not a default.</li>
+        </ul>
+      </div>
+
+      <h2>Session 37 — Bot Architecture Refactor + Growth Strategy (July 29, 2026)</h2>
+
+      <div class="card" style="border-left: 3px solid #f59e0b;">
+        <strong>⚠️ Amended Session 39 (July 30):</strong> the "fortress-bot" process described below was found running in parallel with the original bot and silently deleting real signal data every 5 minutes — see the Session 39 entry above for the full root-cause writeup. It has been stopped and commented out of <code>ecosystem.config.js</code>, not deleted. The claims immediately below ("DEPLOYED & RUNNING", "MANDATORY" scanning) describe intent at the time, not current state — treat this section as historical until someone makes an explicit call to finish this rewrite (add weekly-timeframe support, real Telegram/Zerodha) or retire it for good.
+      </div>
 
       <div class="card">
-        <span class="badge live">✅ DEPLOYED & RUNNING</span>
+        <span class="badge live">✅ DEPLOYED & RUNNING (superseded — see amendment above)</span>
         <strong>🚀 Bot Consolidation Complete: Full CI/CD Integration Achieved</strong>
         <p>
           <strong>Status:</strong> Bot refactored, consolidated into `/opt/fortress/scripts/macd-bot/`, and running successfully on VPS. Full version-control integration via git. All three Fortress processes (app, cron, bot) now deployed from single directory via CI/CD pipeline.
