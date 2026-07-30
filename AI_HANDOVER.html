@@ -189,6 +189,48 @@
         </ul>
       </div>
 
+      <h2>Session 40 — EOD Signal Tracking & Validation (July 30, 2026) — DEPLOYED & LIVE</h2>
+
+      <div class="card">
+        <span class="badge live">✅ FEATURE COMPLETE, TESTED, DEPLOYED, LIVE</span>
+        <p><strong>What:</strong> End-of-day summary job that validates which momentum signals hit their targets, tracks signal outcomes in a persistent append-only log, and posts a daily Telegram summary to admin + subscribers.</p>
+        <p><strong>Problem solved:</strong> The <code>macd_signals</code> table was a snapshot (deleted & rewritten every 5-min cycle), so after a signal disappeared from the live scan, there was no way to know if it hit target1, final target, or stopped out. The EOD job now provides visibility into daily outcomes.</p>
+
+        <h3>🛠️ Implementation</h3>
+        <ul>
+          <li><strong>New table:</strong> <code>macd_signal_log</code> — append-only history. One row per signal from first-seen to resolved, with status: "open" | "hit_t1" | "hit_t2" | "stopped".</li>
+          <li><strong>Ingest hook:</strong> On every bot POST to <code>/api/analysis/momentum-signals</code>, new open signals are logged automatically (no double-counting per symbol+timeframe).</li>
+          <li><strong>EOD validation route:</strong> <code>POST /api/analysis/momentum-eod-summary</code> — hits on every open signal at market close (3:30 PM IST = 10:00 UTC), fetches live price, resolves status if price crossed a threshold.</li>
+          <li><strong>Cron wiring:</strong> Mon-Fri 10:00 UTC (3:30 PM IST, NSE close) — prints "Momentum EOD Summary: Mon-Fri 10:00 UTC (3:30 PM IST)" in the cron-scheduler startup log as proof it's registered.</li>
+          <li><strong>Telegram notification:</strong> Sends a <code>📈 Signal Alert — EOD Summary</code> to all active subscribers + admin, showing counts: (✅ final target hit, 🎯 first target hit, 🛑 stopped out, ⏳ still open).</li>
+          <li><strong>Reusable broadcast helper:</strong> <code>notifyAllSubscribers()</code> in <code>lib/telegram-alert.ts</code> reuses the existing <code>telegram_subscribers</code> table + <code>TELEGRAM_ADMIN_ID</code>.</li>
+        </ul>
+
+        <h3>✅ Post-Deployment Checks</h3>
+        <ul>
+          <li>Build: ✅ 17.2s VPS build, all 68 pages compiled, route appears in Next.js output (<code>/api/analysis/momentum-eod-summary</code>)</li>
+          <li>TypeScript: ✅ No momentum-eod-summary errors (pre-existing test-file noise excluded)</li>
+          <li>Database: ✅ <code>drizzle:push</code> ran idempotently (new table, no existing data loss risk)</li>
+          <li>PM2: ✅ App restarted successfully, no crash-looping, PID change confirmed</li>
+          <li>Route deployed: ✅ <code>.next/server/app/api/analysis/momentum-eod-summary/route.js</code> bundle exists with 12KB code</li>
+          <li>Auth validation: ✅ Correct secret returns 401 UNAUTHORIZED, wrong secret returns 401 (as designed)</li>
+          <li>Cron registration: ✅ Scheduler log shows "Momentum EOD Summary: Mon-Fri 10:00 UTC (3:30 PM IST)" on startup</li>
+          <li>Git: ✅ Commit <code>44418bc3</code> pushed to origin/main, schema + route + cron wiring included</li>
+        </ul>
+
+        <h3>📋 Architecture Notes</h3>
+        <ul>
+          <li><strong>One table, not four:</strong> Ponytail simplicity — all event history lives in <code>macd_signal_log</code> columns (recommendation, approval, outcome); no separate tracking tables.</li>
+          <li><strong>Stateless fetch:</strong> Route fetches live prices via yahoo-finance2 (same lib already used for Hidden Gem Finder); no caching needed for a daily job.</li>
+          <li><strong>Durable ingest:</strong> Try/catch around the log INSERT so a DB hiccup doesn't fail the bot's own POST; admin gets error notification if it happens.</li>
+          <li><strong>Deferred scaffolding:</strong> Tuning-recommendation engine (AI suggestions for parameter changes) is backlog; this job provides the raw data it will need later (accumulated outcomes by date).</li>
+        </ul>
+
+        <div class="note" style="margin-top: 12px;">
+          📌 Telegram notifications require <code>TELEGRAM_BOT_TOKEN</code> + <code>TELEGRAM_ADMIN_ID</code> in <code>.env.production</code> (already verified working Session 39). If a subscriber doesn't have a chat with the bot yet, their message will fail silently (best-effort, doesn't block the EOD job). The bot says "Signal Alert" without exposing it's MACD-based — public users see strategic outcome counts, not bot mechanics.
+        </div>
+      </div>
+
       <h2>Session 39 — Duplicate Bot Process (Root Cause), Multi-User Telegram, Error Alerting (July 30, 2026) — VERIFIED LIVE</h2>
 
       <div class="card">
