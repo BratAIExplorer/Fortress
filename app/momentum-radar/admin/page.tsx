@@ -5,8 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Lock, ShieldCheck, RefreshCw, KeyRound, CheckCircle2, Circle, Eye, EyeOff } from "lucide-react";
+import { Lock, ShieldCheck, RefreshCw, KeyRound, CheckCircle2, Circle, Eye, EyeOff, Users, Trash2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface Subscriber {
+    id: string;
+    chatId: string;
+    label: string | null;
+    active: boolean;
+}
 
 interface Status {
     activeSignalCount: number;
@@ -38,6 +45,67 @@ export default function MomentumRadarAdminPage() {
     const [saving, setSaving] = useState(false);
     const [saveResult, setSaveResult] = useState<string | null>(null);
 
+    const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+    const [newChatId, setNewChatId] = useState("");
+    const [newLabel, setNewLabel] = useState("");
+    const [subBusy, setSubBusy] = useState(false);
+    const [subError, setSubError] = useState<string | null>(null);
+
+    const loadSubscribers = async () => {
+        const res = await fetch("/api/admin/telegram-subscribers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password, action: "list" }),
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setSubscribers(data.subscribers ?? []);
+        }
+    };
+
+    const addSubscriber = async () => {
+        const chatId = newChatId.trim();
+        if (!chatId) return;
+        setSubBusy(true);
+        setSubError(null);
+        try {
+            const res = await fetch("/api/admin/telegram-subscribers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password, action: "add", chatId, label: newLabel.trim() || undefined }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSubscribers(data.subscribers ?? []);
+                setNewChatId("");
+                setNewLabel("");
+            } else {
+                setSubError("Could not add — check the password.");
+            }
+        } catch {
+            setSubError("Network error.");
+        } finally {
+            setSubBusy(false);
+        }
+    };
+
+    const removeSubscriber = async (id: string) => {
+        setSubBusy(true);
+        try {
+            const res = await fetch("/api/admin/telegram-subscribers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password, action: "remove", id }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setSubscribers(data.subscribers ?? []);
+            }
+        } finally {
+            setSubBusy(false);
+        }
+    };
+
     const loadConfigStatus = async () => {
         const res = await fetch("/api/admin/bot-config", {
             method: "POST",
@@ -63,6 +131,7 @@ export default function MomentumRadarAdminPage() {
             if (res.ok) {
                 setStatus(data);
                 await loadConfigStatus();
+                await loadSubscribers();
             } else {
                 setError(data.error === "INVALID_PASSWORD" ? "Wrong password." : "Status check failed.");
                 setStatus(null);
@@ -232,6 +301,60 @@ export default function MomentumRadarAdminPage() {
                                     {saving ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Save & Restart Bot"}
                                 </Button>
                                 {saveResult && <p className="text-xs text-muted-foreground">{saveResult}</p>}
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-white/5 border-white/10">
+                            <CardContent className="p-5 space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Telegram Alert Recipients</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    The admin chat ID above always gets alerts. Add more people here — each gets their own DM, no group chat needed. Takes effect on the bot&apos;s next 5-minute scan cycle, no restart required.
+                                </p>
+
+                                {subscribers.length > 0 && (
+                                    <div className="space-y-2">
+                                        {subscribers.map((s) => (
+                                            <div key={s.id} className="flex items-center justify-between gap-2 bg-white/5 rounded-lg px-3 py-2">
+                                                <div className="min-w-0">
+                                                    <p className="text-sm text-white truncate">{s.label || "Unnamed"}</p>
+                                                    <p className="text-xs text-muted-foreground font-mono">{s.chatId}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => removeSubscriber(s.id)}
+                                                    disabled={subBusy}
+                                                    className="text-muted-foreground hover:text-red-400 transition-colors shrink-0"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder="Chat ID (e.g. 123456789)"
+                                        value={newChatId}
+                                        onChange={(e) => setNewChatId(e.target.value)}
+                                        className="h-9 text-sm bg-white/5 border-white/10 flex-1"
+                                    />
+                                    <Input
+                                        placeholder="Label (optional)"
+                                        value={newLabel}
+                                        onChange={(e) => setNewLabel(e.target.value)}
+                                        className="h-9 text-sm bg-white/5 border-white/10 flex-1"
+                                    />
+                                    <Button size="sm" onClick={addSubscriber} disabled={subBusy || !newChatId.trim()} className="h-9 gap-1.5 shrink-0">
+                                        <Plus className="h-3.5 w-3.5" /> Add
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    To find someone&apos;s chat ID: they message the bot on Telegram first, then visit <code className="text-[11px]">https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> and read the <code className="text-[11px]">chat.id</code> field.
+                                </p>
+                                {subError && <p className="text-xs text-red-400">{subError}</p>}
                             </CardContent>
                         </Card>
                     </div>

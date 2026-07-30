@@ -3,8 +3,13 @@ import { execFile } from "child_process";
 import fs from "fs";
 import { env } from "@/lib/env";
 
-const BOT_ENV_PATH = "/opt/fortress/scripts/macd-bot/.env";
-const BOT_DIR = "/opt/fortress/scripts/macd-bot";
+// ponytail: bot actually runs from /opt/macd-bot (confirmed via `pm2 describe
+// macd-bot` — script path + exec cwd), NOT /opt/fortress/scripts/macd-bot.
+// That second directory exists too (leftover from an earlier consolidation
+// attempt) and was silently the wrong target — credential writes there never
+// reached the running process. Pointing this at the real location.
+const BOT_ENV_PATH = "/opt/macd-bot/.env";
+const BOT_DIR = "/opt/macd-bot";
 
 // Maps the form field names to the exact env var names macd_excel_bot.py reads.
 const FIELD_TO_ENV_KEY: Record<string, string> = {
