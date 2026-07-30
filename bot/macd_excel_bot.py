@@ -1082,6 +1082,7 @@ def run_scan_cycle(state):
             f"  ↳ Expected Profit: {format_rs(item['Profit Final'])}\n"
             f"🛑 *Stop Loss*: **{format_rs(item['Stop Loss Price'])}** ({item['Stop Loss EMA']})\n"
             f"  ↳ Risk Amount: {format_rs(item['Risk Amount'])}\n\n"
+            f"⚠️ *Disclaimer*: This is not financial advice. Past performance is not indicative of future results. Please consult with a financial advisor before trading.\n\n"
             f"💡 *Action*: If you buy it now at CMP of {format_rs(item['CMP'])}, these number of quantities ({item['Quantity']}), "
             f"the expected profit is {format_rs(item['Profit T1'])} (Target 1) or {format_rs(item['Profit Final'])} (Final Target) "
             f"with a stop loss of {format_rs(item['Stop Loss Price'])} basis the above conditions."
