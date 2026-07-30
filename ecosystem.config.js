@@ -56,29 +56,42 @@ module.exports = {
       max_restarts: 10,
       min_uptime: "10s",
     },
-    {
-      name: "fortress-bot",
-      script: "macd_excel_bot.py",
-      interpreter: "python3",
-      instances: 1,
-      exec_mode: "fork",
-      watch: false,
-      cwd: "/opt/fortress/scripts/macd-bot",
-      env: {
-        TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
-        TELEGRAM_ADMIN_ID: process.env.TELEGRAM_ADMIN_ID,
-        FORTRESS_API_URL: process.env.FORTRESS_API_URL,
-        CRON_SECRET: process.env.CRON_SECRET,
-        ZERODHA_API_KEY: process.env.ZERODHA_API_KEY,
-        ZERODHA_API_SECRET: process.env.ZERODHA_API_SECRET,
-        ZERODHA_CLIENT_ID: process.env.ZERODHA_CLIENT_ID,
-      },
-      error_file: "/var/log/fortress/bot-error.log",
-      out_file: "/var/log/fortress/bot-out.log",
-      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
-      restart_delay: 4000,
-      max_restarts: 10,
-      min_uptime: "10s",
-    },
+    // ponytail: "fortress-bot" (this app was a Session 37 rewrite/consolidation
+    // attempt) intentionally disabled July 30, 2026 — it ran in parallel with
+    // the real bot (pm2 "macd-bot", /opt/macd-bot) and posted to the SAME
+    // /api/analysis/momentum-signals endpoint every 5 minutes. Its
+    // send_telegram_alert()/execute_zerodha_trades() were unimplemented stubs
+    // (log a line, do nothing) and it has no Weekly-timeframe logic at all —
+    // it isn't a real alternative, just a leftover. Worse: it posted an EMPTY
+    // signal list on most cycles, and since the API does delete-then-reinsert,
+    // it was silently wiping out real signals the actual bot had just written
+    // — the root cause of "Telegram alerts fired but the DB/UI showed nothing"
+    // investigated on July 30. Re-enable only after either finishing this
+    // rewrite properly (Weekly support, real Telegram/Zerodha) and retiring
+    // the old bot, or deleting this block for good — never run both at once.
+    // {
+    //   name: "fortress-bot",
+    //   script: "macd_excel_bot.py",
+    //   interpreter: "python3",
+    //   instances: 1,
+    //   exec_mode: "fork",
+    //   watch: false,
+    //   cwd: "/opt/fortress/scripts/macd-bot",
+    //   env: {
+    //     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    //     TELEGRAM_ADMIN_ID: process.env.TELEGRAM_ADMIN_ID,
+    //     FORTRESS_API_URL: process.env.FORTRESS_API_URL,
+    //     CRON_SECRET: process.env.CRON_SECRET,
+    //     ZERODHA_API_KEY: process.env.ZERODHA_API_KEY,
+    //     ZERODHA_API_SECRET: process.env.ZERODHA_API_SECRET,
+    //     ZERODHA_CLIENT_ID: process.env.ZERODHA_CLIENT_ID,
+    //   },
+    //   error_file: "/var/log/fortress/bot-error.log",
+    //   out_file: "/var/log/fortress/bot-out.log",
+    //   log_date_format: "YYYY-MM-DD HH:mm:ss Z",
+    //   restart_delay: 4000,
+    //   max_restarts: 10,
+    //   min_uptime: "10s",
+    // },
   ],
 };
