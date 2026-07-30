@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { macdSignals } from "@/lib/db/schema/momentum";
+import { macdSignals, macdSignalLog } from "@/lib/db/schema/momentum";
+import { and, eq } from "drizzle-orm";
 import { notifyAdminError } from "@/lib/telegram-alert";
 
 // GET — read-only feed for the Momentum Radar tab.
@@ -61,6 +62,41 @@ export async function POST(request: NextRequest) {
     console.error("[momentum-signals] insert failed:", e);
     void notifyAdminError(`momentum-signals POST (${items.length} signals)`, e);
     return NextResponse.json({ success: false, error: "INSERT_FAILED" }, { status: 500 });
+  }
+
+  // Log any symbol+timeframe not already open, so the EOD job has a durable
+  // row to resolve later — macd_signals itself gets wiped next cycle.
+  try {
+    for (const item of items as Record<string, unknown>[]) {
+      const timeframe = String(item.timeframe ?? "");
+      const symbol = String(item.symbol ?? "");
+      if (!timeframe || !symbol) continue;
+
+      const existing = await db
+        .select({ id: macdSignalLog.id })
+        .from(macdSignalLog)
+        .where(
+          and(
+            eq(macdSignalLog.symbol, symbol),
+            eq(macdSignalLog.timeframe, timeframe),
+            eq(macdSignalLog.status, "open")
+          )
+        )
+        .limit(1);
+      if (existing.length > 0) continue;
+
+      await db.insert(macdSignalLog).values({
+        timeframe,
+        symbol,
+        entryCmp: String(item.cmp ?? "0"),
+        firstTargetPrice: item.firstTargetPrice != null ? String(item.firstTargetPrice) : null,
+        finalTargetPrice: item.finalTargetPrice != null ? String(item.finalTargetPrice) : null,
+        stopLossPrice: item.stopLossPrice != null ? String(item.stopLossPrice) : null,
+      });
+    }
+  } catch (e) {
+    console.error("[momentum-signals] signal log insert failed:", e);
+    void notifyAdminError("momentum-signals signal log insert", e);
   }
 
   return NextResponse.json({ success: true, count: items.length }, { status: 200 });

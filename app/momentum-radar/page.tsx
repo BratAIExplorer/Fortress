@@ -65,7 +65,7 @@ export default function MomentumRadarPage() {
                         <Radar className="h-7 w-7 text-blue-400" /> Momentum Radar
                     </h1>
                     <p className="text-muted-foreground mt-2 max-w-lg">
-                        Dual-timeframe MACD crossover scan across Nifty 500 — daily and weekly bullish signals in a confirmed uptrend, with targets and stop loss.
+                        Dual-timeframe momentum scan across Nifty 500 — daily and weekly bullish signals in a confirmed uptrend, with targets and stop loss.
                     </p>
                 </div>
 

@@ -55,6 +55,24 @@ async function fetchYahooPrice(ticker) {
   }
 }
 
+async function runMomentumEodSummary() {
+  try {
+    console.log(`[${new Date().toISOString()}] 📈 Running momentum EOD summary...`);
+    const response = await fetch(`${BASE_URL}/api/analysis/momentum-eod-summary`, {
+      method: 'POST',
+      headers: { 'x-cron-secret': CRON_SECRET },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      console.log(`✅ Momentum EOD summary sent (${data.total} tracked, ${data.hitT1 + data.hitT2} hit target, ${data.stopped} stopped)`);
+    } else {
+      console.error(`❌ Momentum EOD summary failed:`, data.error);
+    }
+  } catch (error) {
+    console.error(`❌ Momentum EOD summary error:`, error.message);
+  }
+}
+
 async function runMacroSnapshot() {
   try {
     console.log(`[${new Date().toISOString()}] 📊 Fetching macro snapshot...`);
@@ -110,10 +128,16 @@ cron.schedule('0 12 * * 0', () => {
   runMacroSnapshot().catch(err => console.error('Macro snapshot cron error:', err));
 }, { timezone: 'UTC' });
 
+// Momentum EOD Summary: Every Monday-Friday at 10:00 UTC (3:30 PM IST, NSE close)
+cron.schedule('0 10 * * 1-5', () => {
+  runMomentumEodSummary().catch(err => console.error('Momentum EOD summary cron error:', err));
+}, { timezone: 'UTC' });
+
 console.log('🟢 Fortress Scanner Cron Scheduler started');
 console.log('  NSE: Mon-Fri 11:00 UTC (4:30 AM IST)');
 console.log('  US:  Mon-Fri 09:00 UTC (2:30 PM IST)');
 console.log('  Macro: Sunday 12:00 UTC (5:30 PM IST)');
+console.log('  Momentum EOD Summary: Mon-Fri 10:00 UTC (3:30 PM IST)');
 console.log('');
 
 // Keep process alive

@@ -31,3 +31,31 @@ export const macdSignals = pgTable(
     timeframeIdx: index("idx_macd_signals_timeframe").on(table.timeframe),
   })
 );
+
+// Append-only log, separate from the snapshot table above. macd_signals gets
+// wiped every scan cycle, so it can't answer "did signal X hit its target" —
+// this table keeps one row per signal from first-seen until resolved, so the
+// EOD job (and later, tuning recommendations) has something to measure against.
+export const macdSignalLog = pgTable(
+  "macd_signal_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    timeframe: varchar("timeframe", { length: 10 }).notNull(),
+    symbol: varchar("symbol", { length: 20 }).notNull(),
+    entryCmp: numeric("entry_cmp").notNull(),
+    firstTargetPrice: numeric("first_target_price"),
+    finalTargetPrice: numeric("final_target_price"),
+    stopLossPrice: numeric("stop_loss_price"),
+    // open | hit_t1 | hit_t2 | stopped
+    status: varchar("status", { length: 20 }).notNull().default("open"),
+    firstSeenAt: timestamp("first_seen_at").defaultNow().notNull(),
+    resolvedAt: timestamp("resolved_at"),
+  },
+  (table) => ({
+    statusIdx: index("idx_macd_signal_log_status").on(table.status),
+    symbolIdx: index("idx_macd_signal_log_symbol").on(table.symbol),
+  })
+);
+// ponytail: "one open row per symbol+timeframe" is enforced in the ingest
+// route (check-then-insert), not a DB constraint — Postgres partial unique
+// indexes aren't worth the schema complexity for a table this size.

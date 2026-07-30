@@ -23,3 +23,39 @@ export async function notifyAdminError(context: string, error: unknown): Promise
     // never throw and mask the original error.
   }
 }
+
+async function sendTelegramMessage(chatId: string, text: string): Promise<void> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
+      signal: AbortSignal.timeout(5000),
+    });
+  } catch {
+    // Best-effort only — one failed recipient shouldn't block the rest.
+  }
+}
+
+// Sends to the admin (TELEGRAM_ADMIN_ID) plus every active row in
+// telegram_subscribers — the same recipient set the momentum-radar bot uses.
+export async function notifyAllSubscribers(text: string): Promise<void> {
+  const adminId = process.env.TELEGRAM_ADMIN_ID;
+  if (!process.env.TELEGRAM_BOT_TOKEN) return;
+
+  const { db } = await import("@/lib/db");
+  const { telegramSubscribers } = await import("@/lib/db/schema/telegram-subscribers");
+  const { eq } = await import("drizzle-orm");
+
+  const rows = await db
+    .select({ chatId: telegramSubscribers.chatId })
+    .from(telegramSubscribers)
+    .where(eq(telegramSubscribers.active, true));
+
+  const chatIds = new Set(rows.map((r) => r.chatId));
+  if (adminId) chatIds.add(adminId);
+
+  await Promise.all([...chatIds].map((id) => sendTelegramMessage(id, text)));
+}
