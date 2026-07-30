@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { macdSignals } from "@/lib/db/schema/momentum";
+import { notifyAdminError } from "@/lib/telegram-alert";
 
 // GET — read-only feed for the Momentum Radar tab.
 // ponytail: sign-in/trial gating is disabled until auth+SMTP is fixed (see
@@ -32,29 +33,35 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const items = Array.isArray(body?.signals) ? body.signals : [];
 
-  await db.transaction(async (tx) => {
-    await tx.delete(macdSignals);
-    if (items.length > 0) {
-      await tx.insert(macdSignals).values(
-        items.map((item: Record<string, unknown>) => ({
-          timeframe: String(item.timeframe ?? ""),
-          symbol: String(item.symbol ?? ""),
-          cmp: String(item.cmp ?? "0"),
-          crossoverDate: String(item.crossoverDate ?? ""),
-          daysSinceCrossover: Number(item.daysSinceCrossover ?? 0),
-          quantity: Number(item.quantity ?? 0),
-          investedAmount: String(item.investedAmount ?? "0"),
-          firstTargetPrice: item.firstTargetPrice != null ? String(item.firstTargetPrice) : null,
-          firstTargetEma: item.firstTargetEma != null ? String(item.firstTargetEma) : null,
-          finalTargetPrice: item.finalTargetPrice != null ? String(item.finalTargetPrice) : null,
-          finalTargetEma: item.finalTargetEma != null ? String(item.finalTargetEma) : null,
-          stopLossPrice: item.stopLossPrice != null ? String(item.stopLossPrice) : null,
-          stopLossEma: item.stopLossEma != null ? String(item.stopLossEma) : null,
-          riskAmount: item.riskAmount != null ? String(item.riskAmount) : null,
-        }))
-      );
-    }
-  });
+  try {
+    await db.transaction(async (tx) => {
+      await tx.delete(macdSignals);
+      if (items.length > 0) {
+        await tx.insert(macdSignals).values(
+          items.map((item: Record<string, unknown>) => ({
+            timeframe: String(item.timeframe ?? ""),
+            symbol: String(item.symbol ?? ""),
+            cmp: String(item.cmp ?? "0"),
+            crossoverDate: String(item.crossoverDate ?? ""),
+            daysSinceCrossover: Number(item.daysSinceCrossover ?? 0),
+            quantity: Number(item.quantity ?? 0),
+            investedAmount: String(item.investedAmount ?? "0"),
+            firstTargetPrice: item.firstTargetPrice != null ? String(item.firstTargetPrice) : null,
+            firstTargetEma: item.firstTargetEma != null ? String(item.firstTargetEma) : null,
+            finalTargetPrice: item.finalTargetPrice != null ? String(item.finalTargetPrice) : null,
+            finalTargetEma: item.finalTargetEma != null ? String(item.finalTargetEma) : null,
+            stopLossPrice: item.stopLossPrice != null ? String(item.stopLossPrice) : null,
+            stopLossEma: item.stopLossEma != null ? String(item.stopLossEma) : null,
+            riskAmount: item.riskAmount != null ? String(item.riskAmount) : null,
+          }))
+        );
+      }
+    });
+  } catch (e) {
+    console.error("[momentum-signals] insert failed:", e);
+    void notifyAdminError(`momentum-signals POST (${items.length} signals)`, e);
+    return NextResponse.json({ success: false, error: "INSERT_FAILED" }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true, count: items.length }, { status: 200 });
 }

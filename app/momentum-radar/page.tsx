@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Radar, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogTradeModal } from "@/components/LogTradeModal";
+import { ResearchDisclaimer } from "@/components/fortress/ResearchDisclaimer";
 
 interface MacdSignal {
     id: string;
@@ -65,6 +66,9 @@ export default function MomentumRadarPage() {
                     </h1>
                     <p className="text-muted-foreground mt-2 max-w-lg">
                         Dual-timeframe MACD crossover scan across Nifty 500 — daily and weekly bullish signals in a confirmed uptrend, with targets and stop loss.
+                    </p>
+                    <p className="text-xs text-muted-foreground/70 mt-3 max-w-lg border-l-2 border-white/10 pl-3">
+                        Not investment advice. Quantities and invested amounts shown are a hypothetical ₹25,000-capital sizing example, not a recommendation to buy — do your own research and consider your own risk tolerance before acting on any signal.
                     </p>
                 </div>
 
@@ -169,6 +173,8 @@ export default function MomentumRadarPage() {
                         </table>
                     </div>
                 )}
+
+                <ResearchDisclaimer variant="signals" />
 
                 <div className="text-right">
                     <a href="/momentum-radar/admin" className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">

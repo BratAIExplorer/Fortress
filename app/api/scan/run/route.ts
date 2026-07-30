@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db/client";
 import { eq, and, desc, notInArray, ne, count } from "drizzle-orm";
 import { getScanDeltas } from "@/lib/db/scanner-utils";
+import { notifyAdminError } from "@/lib/telegram-alert";
 import { scoreTicker } from "@/lib/scanners/yahoo-technical-scorer";
 import { getUSUniverse, getNSEUniverse } from "@/lib/scanners/universe";
 import { auth } from "@/auth";
@@ -184,6 +185,7 @@ export async function POST(req: NextRequest) {
     if (isCron) {
         runScan(scan.id, scan.runAt!, market, weights, isCron).catch((e) => {
             console.error(`[cron-scan] background scan failed (${scan.id}):`, e);
+            void notifyAdminError(`cron-scan (${market}, scan ${scan.id})`, e);
         });
         return NextResponse.json({ scanId: scan.id, status: "ACCEPTED" }, { status: 202 });
     }
