@@ -15,11 +15,12 @@ export const macdSignals = pgTable(
     quantity: integer("quantity").notNull(),
     investedAmount: numeric("invested_amount").notNull(),
     firstTargetPrice: numeric("first_target_price"),
-    firstTargetEma: varchar("first_target_ema", { length: 10 }),
+    // e.g. "5% Default (Blue Sky)" or "Weekly EMA 50" — bot sends full labels, not short codes
+    firstTargetEma: varchar("first_target_ema", { length: 50 }),
     finalTargetPrice: numeric("final_target_price"),
-    finalTargetEma: varchar("final_target_ema", { length: 10 }),
+    finalTargetEma: varchar("final_target_ema", { length: 50 }),
     stopLossPrice: numeric("stop_loss_price"),
-    stopLossEma: varchar("stop_loss_ema", { length: 10 }),
+    stopLossEma: varchar("stop_loss_ema", { length: 50 }),
     riskAmount: numeric("risk_amount"),
     // Cleared and re-inserted on every bot scan cycle (matches the bot's
     // own "Currently Active" sheet semantics — it's a snapshot, not a log).

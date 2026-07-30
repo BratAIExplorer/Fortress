@@ -8,8 +8,12 @@ import { macdSignals } from "@/lib/db/schema/momentum";
 // (git history has it) once that's done.
 export async function GET(_request: NextRequest) {
   const signals = await db.select().from(macdSignals);
+  const lastUpdated = signals.reduce<string | null>((latest, s) => {
+    const iso = new Date(s.updatedAt).toISOString();
+    return !latest || iso > latest ? iso : latest;
+  }, null);
 
-  return NextResponse.json({ success: true, signals }, { status: 200 });
+  return NextResponse.json({ success: true, signals, lastUpdated }, { status: 200 });
 }
 
 // POST — ingest from the standalone MACD bot (Equity_The-Final-chapter).
