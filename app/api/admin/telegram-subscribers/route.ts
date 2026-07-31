@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { telegramSubscribers } from "@/lib/db/schema/telegram-subscribers";
 import { eq } from "drizzle-orm";
 import { env } from "@/lib/env";
+import { adminService } from "@/lib/services/admin";
 
 // GET — bot-facing, same shared-secret pattern as /api/analysis/momentum-signals.
 // Returns only active subscriber chat IDs; the bot always sends to
@@ -13,12 +14,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: "UNAUTHORIZED" }, { status: 401 });
   }
 
-  const rows = await db
-    .select({ chatId: telegramSubscribers.chatId })
-    .from(telegramSubscribers)
-    .where(eq(telegramSubscribers.active, true));
-
-  return NextResponse.json({ success: true, chatIds: rows.map((r) => r.chatId) });
+  const subscribers = await adminService.getTelegramSubscribers();
+  const activeRows = subscribers.filter((s: any) => s.active);
+  return NextResponse.json({ success: true, chatIds: activeRows.map((r: any) => r.chatId) });
 }
 
 // POST — admin-page-facing, same password pattern as /api/admin/bot-config.
