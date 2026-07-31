@@ -1467,7 +1467,7 @@ def main():
         _lock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         _lock_socket.bind(('127.0.0.1', 48261))
     except socket.error:
-        logger.warning("Another instance of MACD Crossover Scanner Bot is already running. Exiting.")
+        logger.warning("Another scanner instance already running. Exiting to prevent conflicts.")
         sys.exit(0)
 
     logger.info("Initializing MACD Crossover Scanning Bot...")
@@ -1515,7 +1515,7 @@ def main():
     autosell_thread.start()
 
     # Send Bot Start Notification - NO Zerodha status message
-    send_telegram_message("🤖 *MACD Crossover Scanner Bot Started Online* — Scanning active")
+    send_telegram_message("🚀 *Signal Scanner Online* — Ready to hunt for crossovers! 🎯")
     
     while True:
         try:
@@ -1542,11 +1542,11 @@ def main():
                 time.sleep(60)
         except KeyboardInterrupt:
             logger.info("Bot manually terminated by user.")
-            send_telegram_message("🛑 *MACD Crossover Scanner Bot Stopped*")
+            send_telegram_message("⏹️ Scanner offline — catch you next time!")
             break
         except Exception as e:
             logger.error(f"Error in main loop: {e}")
-            send_telegram_message(f"⚠️ *Error in MACD Scanner Bot*: `{e}`")
+            send_telegram_message(f"⚠️ *Scanner Hiccup*: `{e}` — recovering automatically")
             time.sleep(60) # wait before retry
 
 if __name__ == "__main__":
