@@ -60,25 +60,55 @@ def format_pct(val):
         return "0.00%"
     return f"{val:+.2f}%"
 
-# Send Telegram Message
-def send_telegram_message(text, reply_markup=None):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": TELEGRAM_ADMIN_ID,
-        "text": text,
-        "parse_mode": "Markdown"
-    }
-    if reply_markup:
-        payload["reply_markup"] = reply_markup
+# Fetch subscriber chat IDs from Fortress API
+def fetch_subscriber_chat_ids():
+    if not FORTRESS_API_URL or not CRON_SECRET:
+        return []
     try:
-        r = requests.post(url, json=payload, timeout=10)
-        if r.status_code != 200:
-            logger.error(f"Failed to send Telegram message: {r.text}")
-            return False
-        return True
+        r = requests.get(
+            f"{FORTRESS_API_URL.rsplit('/', 1)[0]}/admin/telegram-subscribers",
+            headers={"x-cron-secret": CRON_SECRET},
+            timeout=10,
+        )
+        if r.status_code == 200:
+            data = r.json()
+            return data.get("chatIds", []) if data.get("success") else []
+        return []
     except Exception as e:
-        logger.error(f"Error sending Telegram message: {e}")
-        return False
+        logger.warning(f"Failed to fetch subscriber list: {e}")
+        return []
+
+# Send Telegram Message to Admin + All Subscribers
+def send_telegram_message(text, reply_markup=None):
+    chat_ids = [TELEGRAM_ADMIN_ID]
+    chat_ids.extend(fetch_subscriber_chat_ids())
+    chat_ids = list(set(chat_ids))
+
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    sent_count = 0
+
+    for chat_id in chat_ids:
+        payload = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "Markdown"
+        }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
+        try:
+            r = requests.post(url, json=payload, timeout=10)
+            if r.status_code == 200:
+                sent_count += 1
+            else:
+                logger.warning(f"Failed to send to chat {chat_id}: {r.text}")
+        except Exception as e:
+            logger.warning(f"Error sending to chat {chat_id}: {e}")
+
+    if sent_count > 0:
+        logger.info(f"✅ Message sent to {sent_count} chat(s)")
+        return True
+    logger.error("Failed to send message to any chat")
+    return False
 
 # Load State File
 def load_state():
