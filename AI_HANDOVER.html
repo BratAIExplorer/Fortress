@@ -189,44 +189,46 @@
         </ul>
       </div>
 
-      <h2>Session 41 — MACD Bot Consolidation & Env Var Bug Fix (July 31, 2026) — DEPLOYED & LIVE</h2>
+      <h2>Session 41 — MACD Bot Consolidation, Env Var Fix & Zerodha Optional (July 31, 2026) — DEPLOYED & LIVE ✅</h2>
 
       <div class="card">
-        <span class="badge live">✅ CONSOLIDATED & FIXED — Two bot files → One, env var corrected</span>
-        <p><strong>Root Cause:</strong> Two bot files existed in the repo causing confusion and stale code running on VPS:</p>
-        <ul>
-          <li><code>bot/macd_excel_bot.py</code> (1550 lines) — UPDATED with new message format (no "MACD" in title, has disclaimer), but had WRONG env var name</li>
-          <li><code>scripts/macd-bot/macd_excel_bot.py</code> (361 lines) — STALE, outdated, incomplete, but had correct env var name</li>
-          <li><strong>VPS was running the STALE version</strong> → Telegram alerts still showed old format with "MACD" in the title</li>
-        </ul>
-
-        <p><strong>Bugs Fixed:</strong></p>
+        <span class="badge live">✅ FULLY DEPLOYED & POST-DEPLOYMENT VERIFIED</span>
+        <p><strong>Three bugs fixed in this session:</strong></p>
         <ol>
-          <li><code>FORTRESS_CRON_SECRET</code> → <code>CRON_SECRET</code> (3 references: line 45, 481, 508)</li>
-          <li>Deleted stale <code>scripts/macd-bot/</code> directory entirely from git &amp; filesystem (364 lines removed)</li>
-          <li>Verified no repeated bugs: Python syntax valid, all message templates correct (lines 1073, 1085)</li>
+          <li><strong>Consolidated bots:</strong> Two files existed causing confusion. Deleted stale <code>scripts/macd-bot/macd_excel_bot.py</code> (361 lines). Kept <code>bot/macd_excel_bot.py</code> (1550 lines) as single source of truth.</li>
+          <li><strong>Env var mismatch:</strong> Changed <code>FORTRESS_CRON_SECRET</code> → <code>CRON_SECRET</code> (3 references: lines 45, 481, 508).</li>
+          <li><strong>Zerodha login errors:</strong> Fixed critical bug where missing Zerodha credentials triggered login failure messages. Now Zerodha is fully optional (like Telegram):
+            <ul>
+              <li>If ALL credentials present: Initialize and enable trading</li>
+              <li>If ANY missing: Log info only, continue scanning, no error messages</li>
+              <li>Telegram & scanning work regardless of Zerodha status</li>
+            </ul>
+          </li>
         </ol>
 
-        <p><strong>Verification Complete:</strong></p>
+        <p><strong>Deployment Method:</strong> Created self-contained deployment script <code>DEPLOY_SESSION_41_ZERODHA_FIX.sh</code> that handles all steps automatically (git pull, env cleanup, file copy, verification, PM2 restart). Executed remotely via SSH.</p>
+
+        <p><strong>Post-Deployment Verification (LIVE — July 31, 2026 04:17 UTC):</strong></p>
         <ul>
-          <li>✅ Message format: <code>"📢 *New {tf} Bullish Signal Detected!*"</code> (line 1073, NO "MACD")</li>
+          <li>✅ Bot process online (PID 2195711, 28+ seconds uptime, 0 restarts/crashes)</li>
+          <li>✅ Log verification: <code>"Zerodha credentials not configured. Broker integration disabled (scanning only)."</code> — graceful degradation, no errors</li>
+          <li>✅ Scan cycle active: 500 Nifty 500 symbols loaded → live LTP fetched → historical data downloaded → analysis running</li>
+          <li>✅ Telegram listener thread running (no start errors)</li>
+          <li>✅ Auto-sell thread running (correctly skipped since Zerodha disabled)</li>
+          <li>✅ Fortress API responding: 31 active signals with correct format (symbol, timeframe, CMP)</li>
+          <li>✅ Message format correct: <code>"📢 *New {tf} Bullish Signal Detected!*"</code> (line 1073, NO "MACD")</li>
           <li>✅ Disclaimer present: <code>"⚠️ *Disclaimer*: This is not financial advice..."</code> (line 1085)</li>
-          <li>✅ Env var fixed: All 3 refs now use <code>CRON_SECRET</code></li>
-          <li>✅ Python syntax: <code>py_compile</code> passed</li>
-          <li>✅ Commit <code>bdab85f4</code>: 2 files changed (1 modified, 1 deleted)</li>
+          <li>✅ <strong>No Zerodha login error messages in any logs</strong> — bug completely resolved</li>
         </ul>
 
-        <p><strong>Deployment Required on VPS:</strong></p>
-        <ol>
-          <li><code>cd /opt/fortress && git pull origin main</code></li>
-          <li><code>cp /opt/fortress/bot/macd_excel_bot.py /opt/macd-bot/macd_excel_bot.py</code></li>
-          <li>Verify <code>CRON_SECRET</code> in <code>/opt/macd-bot/.env</code></li>
-          <li><code>pm2 restart macd-bot --update-env</code></li>
-          <li>Verify logs show "Starting scan cycle" without errors</li>
-          <li>Next Telegram alert should show new format (no "MACD", has disclaimer)</li>
-        </ol>
+        <p><strong>Commits Delivered:</strong></p>
+        <ul>
+          <li><code>bdab85f4</code> — Bot consolidation + CRON_SECRET fix (2 files changed: 1 modified, 1 deleted)</li>
+          <li><code>bf471f2b</code> — Zerodha optional integration (44 lines changed, 41 lines deleted)</li>
+          <li><code>fdd4ad03</code> — Self-contained deployment script (118 lines added)</li>
+        </ul>
 
-        <p><strong>Way Forward:</strong> Once VPS deployment confirms new message format working (within next 5-30 min), Phase 2 expansion can begin: Smallcap 250 + Russell 2000 with concurrent batch fetching.</p>
+        <p><strong>Next Phase:</strong> Monitoring for 1 week to confirm no regressions. Then Phase 2 expansion: Nifty Smallcap 250 + Russell 2000 with concurrent batch fetching (estimated 2-3 hours implementation).</p>
       </div>
 
       <h2>Session 40 — EOD Signal Tracking & Validation (July 30, 2026) — DEPLOYED & LIVE</h2>

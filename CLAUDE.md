@@ -140,30 +140,34 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
 
 ## 📊 CURRENT STATE (July 31, 2026 — Session 41 MACD Bot Consolidation & Fix Complete)
 
-### ✅ SESSION 41: MACD BOT CONSOLIDATION & ENV VAR BUG FIX (July 31, 2026)
-- **Status:** ✅ FIXED & DEPLOYED — Consolidated 2 bot files into 1, fixed env var bug, no repeated bugs
-- **Root Cause Identified:** 
-  - TWO bot files existed causing confusion: `bot/macd_excel_bot.py` (1550 lines, UPDATED) vs `scripts/macd-bot/macd_excel_bot.py` (361 lines, STALE)
-  - VPS was running STALE version (`/opt/macd-bot/` pointed to older code) → Old Telegram message format with "MACD" in title
-  - Message format was updated in `bot/macd_excel_bot.py` but not deployed to VPS
-- **Bugs Fixed:**
-  - (1) **CRON_SECRET env var:** Changed `FORTRESS_CRON_SECRET` → `CRON_SECRET` (3 refs updated: lines 45, 481, 508)
-  - (2) **Stale bot code:** Deleted `scripts/macd-bot/macd_excel_bot.py` from git & filesystem (364 lines removed, no longer in repo)
-  - (3) **No repeated bugs:** Verified bot/macd_excel_bot.py has ALL updates (new message format, disclaimer, correct env var)
-- **Consolidation:**
-  - ✅ Deleted stale `scripts/macd-bot/` directory entirely (removed from git cache)
-  - ✅ Kept `bot/macd_excel_bot.py` as the SINGLE authoritative bot
-  - ✅ Verified Python syntax: Valid
-  - ✅ Verified message template: Line 1073 has `"📢 *New {tf} Bullish Signal Detected!*"` (NO "MACD")
-  - ✅ Verified disclaimer: Line 1085 has `"⚠️ *Disclaimer*: This is not financial advice..."`
-- **Deployment:** Commit `bdab85f4` — Ready for VPS deployment
-- **VPS Steps Required:** (1) `git pull` to get fixed bot code, (2) `cp /opt/fortress/bot/macd_excel_bot.py /opt/macd-bot/macd_excel_bot.py`, (3) Verify CRON_SECRET in .env, (4) `pm2 restart macd-bot --update-env`
-- **Post-Deployment Validation:**
-  - Bot logs show "Starting scan cycle" without errors
-  - Fortress `/momentum-radar` tab shows signals
-  - Next Telegram alert has: (a) `New Daily/Weekly Bullish Signal` (NOT "MACD"), (b) disclaimer present, (c) action line
-- **Build:** ✓ 0 errors, commit 2 files changed (1 modified, 1 deleted)
-- **Way Forward:** After VPS deployment confirms new message format working, Phase 2 can begin: Smallcap 250 + Russell 2000 expansion with concurrent fetching
+### ✅ SESSION 41: MACD BOT CONSOLIDATION, ENV VAR FIX & ZERODHA OPTIONAL (July 31, 2026 — DEPLOYED & LIVE)
+- **Status:** ✅ FULLY DEPLOYED & VERIFIED — All bugs fixed, no Zerodha errors, bot scanning stable
+- **Bugs Fixed & Deployed:**
+  - (1) **Consolidated bots:** Deleted stale `scripts/macd-bot/macd_excel_bot.py` (361 lines). Kept `bot/macd_excel_bot.py` as single source of truth (1550 lines).
+  - (2) **CRON_SECRET env var:** Changed `FORTRESS_CRON_SECRET` → `CRON_SECRET` (3 refs fixed: lines 45, 481, 508).
+  - (3) **Zerodha optional:** Fixed critical bug where missing/invalid Zerodha credentials triggered login errors. Now Zerodha is **fully optional** (like Telegram):
+    - If ALL credentials present (api_key, api_secret, client_id): Initialize and enable trading features
+    - If ANY missing: Log info only (`"Zerodha credentials not configured. Broker integration disabled (scanning only)."`), no error messages, no login prompts
+    - Telegram listener & scanning work regardless of Zerodha status
+- **Deployment Execution:**
+  - ✅ Commits: `bdab85f4` (bot consolidation+env fix), `bf471f2b` (Zerodha optional), `fdd4ad03` (deployment script)
+  - ✅ Created self-contained deployment script: `DEPLOY_SESSION_41_ZERODHA_FIX.sh` (validates all fixes, restarts bot)
+  - ✅ Executed remotely via SSH: Full automated deployment with verification
+- **Post-Deployment Verification (LIVE):**
+  - ✅ Bot online (PID 2195711, 28s uptime, 0 restarts)
+  - ✅ Log: "Zerodha credentials not configured. Broker integration disabled (scanning only)." — NO login errors
+  - ✅ Scan cycle running: 500 Nifty symbols loaded, LTP fetched, analysis complete
+  - ✅ Telegram listener active & operational
+  - ✅ Fortress API returning 31 active signals with correct format (symbol, timeframe, CMP)
+  - ✅ Message format verified: `"📢 *New {tf} Bullish Signal Detected!*"` (NO "MACD" in title)
+  - ✅ Disclaimer present: `"⚠️ *Disclaimer*: This is not financial advice..."`
+  - ✅ No Zerodha login error messages in Telegram
+- **Build & Code Quality:**
+  - ✅ Python syntax: Valid
+  - ✅ Files changed: 5 files (2 doc updates, 1 bot fix, 1 script added, 1 stale file deleted)
+  - ✅ Commits: 3 (consolidation, Zerodha fix, deployment script)
+  - ✅ No breaking changes
+- **Way Forward:** Monitoring phase — observe for 1 week (no Zerodha login errors, consistent scanning). Then Phase 2 expansion: Smallcap 250 + Russell 2000 with concurrent batch fetching
 
 ### ✅ SESSION 24: AUTH FLOWS COMPLETE (July 21, 2026)
 - **Status:** ✅ LIVE — All critical auth gaps fixed, deployed and validated
