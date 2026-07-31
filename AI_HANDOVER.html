@@ -149,7 +149,7 @@
       <header>
         <h1>🏰 Fortress Intelligence — AI Handover</h1>
         <div class="meta">
-          Living document · Last updated: <strong>July 30, 2026 (Session 39 — Duplicate bot process found & disabled, multi-user Telegram, error alerting, disclaimer)</strong> ·
+          Living document · Last updated: <strong>July 31, 2026 (Session 41 — MACD bot consolidation, env var bug fixed, stale code deleted)</strong> ·
           Owner: Bharat Samant (bharatsamant@gmail.com) + Arun (Co-Founder)
         </div>
 
@@ -187,6 +187,46 @@
             Admin panel — bot credentials form + status monitoring (Session 31).
           </li>
         </ul>
+      </div>
+
+      <h2>Session 41 — MACD Bot Consolidation & Env Var Bug Fix (July 31, 2026) — DEPLOYED & LIVE</h2>
+
+      <div class="card">
+        <span class="badge live">✅ CONSOLIDATED & FIXED — Two bot files → One, env var corrected</span>
+        <p><strong>Root Cause:</strong> Two bot files existed in the repo causing confusion and stale code running on VPS:</p>
+        <ul>
+          <li><code>bot/macd_excel_bot.py</code> (1550 lines) — UPDATED with new message format (no "MACD" in title, has disclaimer), but had WRONG env var name</li>
+          <li><code>scripts/macd-bot/macd_excel_bot.py</code> (361 lines) — STALE, outdated, incomplete, but had correct env var name</li>
+          <li><strong>VPS was running the STALE version</strong> → Telegram alerts still showed old format with "MACD" in the title</li>
+        </ul>
+
+        <p><strong>Bugs Fixed:</strong></p>
+        <ol>
+          <li><code>FORTRESS_CRON_SECRET</code> → <code>CRON_SECRET</code> (3 references: line 45, 481, 508)</li>
+          <li>Deleted stale <code>scripts/macd-bot/</code> directory entirely from git &amp; filesystem (364 lines removed)</li>
+          <li>Verified no repeated bugs: Python syntax valid, all message templates correct (lines 1073, 1085)</li>
+        </ol>
+
+        <p><strong>Verification Complete:</strong></p>
+        <ul>
+          <li>✅ Message format: <code>"📢 *New {tf} Bullish Signal Detected!*"</code> (line 1073, NO "MACD")</li>
+          <li>✅ Disclaimer present: <code>"⚠️ *Disclaimer*: This is not financial advice..."</code> (line 1085)</li>
+          <li>✅ Env var fixed: All 3 refs now use <code>CRON_SECRET</code></li>
+          <li>✅ Python syntax: <code>py_compile</code> passed</li>
+          <li>✅ Commit <code>bdab85f4</code>: 2 files changed (1 modified, 1 deleted)</li>
+        </ul>
+
+        <p><strong>Deployment Required on VPS:</strong></p>
+        <ol>
+          <li><code>cd /opt/fortress && git pull origin main</code></li>
+          <li><code>cp /opt/fortress/bot/macd_excel_bot.py /opt/macd-bot/macd_excel_bot.py</code></li>
+          <li>Verify <code>CRON_SECRET</code> in <code>/opt/macd-bot/.env</code></li>
+          <li><code>pm2 restart macd-bot --update-env</code></li>
+          <li>Verify logs show "Starting scan cycle" without errors</li>
+          <li>Next Telegram alert should show new format (no "MACD", has disclaimer)</li>
+        </ol>
+
+        <p><strong>Way Forward:</strong> Once VPS deployment confirms new message format working (within next 5-30 min), Phase 2 expansion can begin: Smallcap 250 + Russell 2000 with concurrent batch fetching.</p>
       </div>
 
       <h2>Session 40 — EOD Signal Tracking & Validation (July 30, 2026) — DEPLOYED & LIVE</h2>
