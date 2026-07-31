@@ -741,3 +741,39 @@ This CLAUDE.md serves as the project's living memory. When:
 - Database migrations and schema changes
 - Documentation and memory updates
 - Code reviews and quality validation
+
+---
+
+## 🏗️ ARCHITECTURE UPDATES (July 31, 2026)
+
+### Service Layer Extraction — Phase 1 ✅
+
+**Status:** Deployed to production and validated  
+**Scope:** Admin read-only queries extracted to `lib/services/admin.ts`
+
+**Why:** Routes were tightly coupled to database schema (37 routes directly importing db). Schema change = 10+ routes breaking simultaneously.
+
+**What Changed:**
+- Created `lib/services/admin.ts` with 3 extracted functions:
+  - `getDiagnosticData()` — aggregated scan data (4 queries → 1 service call)
+  - `getTelegramSubscribers()` — active subscriber list
+  - `getMomentumStatus()` — recent MACD signals
+- Updated 2 routes to delegate queries to service:
+  - `/api/admin/diagnostic` — now 48% smaller, uses service
+  - `/api/admin/telegram-subscribers` GET — uses service for reads
+
+**Impact:**
+- Schema change impact reduced: 10+ routes → 1 service file
+- Enables future caching at service layer (Phase 2)
+- Routes 48% smaller, more testable
+- Zero behavioral changes (response format identical)
+
+**Next Phases:**
+- Phase 2 (Aug): Extract remaining admin routes (feedback, seed operations)
+- Phase 3 (Aug): Extract analysis service (trades, weights, learning)
+- Phase 4 (Aug): Extract portfolio service + caching layer
+
+**Rollback:** `git checkout backup/before-service-layer-20260731_193608`
+
+See: [ARCHITECTURE_REFACTOR_ANALYSIS.md](ARCHITECTURE_REFACTOR_ANALYSIS.md) | [POST_DEPLOYMENT_VALIDATION.md](POST_DEPLOYMENT_VALIDATION.md)
+
