@@ -42,7 +42,7 @@ load_dotenv()
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_ADMIN_ID = os.getenv("TELEGRAM_ADMIN_ID")
 FORTRESS_API_URL = os.getenv("FORTRESS_API_URL")  # e.g. https://fortressintelligence.space/api/analysis/momentum-signals
-FORTRESS_CRON_SECRET = os.getenv("FORTRESS_CRON_SECRET")
+CRON_SECRET = os.getenv("CRON_SECRET")
 
 if not TELEGRAM_BOT_TOKEN or not TELEGRAM_ADMIN_ID:
     logger.error("Missing TELEGRAM_BOT_TOKEN or TELEGRAM_ADMIN_ID in .env file!")
@@ -478,7 +478,7 @@ def push_signals_to_fortress(active_list):
     (read-only display for other users; never places or influences orders).
     Best-effort only — never breaks the scan loop if Fortress is unreachable.
     """
-    if not FORTRESS_API_URL or not FORTRESS_CRON_SECRET:
+    if not FORTRESS_API_URL or not CRON_SECRET:
         return
     try:
         payload = {
@@ -505,7 +505,7 @@ def push_signals_to_fortress(active_list):
         requests.post(
             FORTRESS_API_URL,
             json=payload,
-            headers={"x-cron-secret": FORTRESS_CRON_SECRET},
+            headers={"x-cron-secret": CRON_SECRET},
             timeout=10,
         )
     except Exception as e:
