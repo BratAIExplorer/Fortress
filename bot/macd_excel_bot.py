@@ -1384,22 +1384,25 @@ def handle_text_message(message):
             send_telegram_message("❌ Invalid quantity. Please send a valid positive number, or send `cancel` to abort.")
             return
 
-    # Check if user pasted a token/URL or typed 'login'
+    # Check if user pasted a token/URL or typed 'login' — only process if Zerodha is configured
+    if not zerodha_client:
+        send_telegram_message("⚠️ Zerodha integration is not configured. Broker credentials are required to enable trading features.")
+        return
+
     is_token_or_url = "request_token=" in text or (text.isalnum() and 20 <= len(text) <= 64)
-    
+
     if is_token_or_url:
-        send_telegram_message("⏳ Verifying token and generating Zerodha session...")
+        logger.info("User sent Zerodha token - processing login...")
         access_token = zerodha_client.verify_request_token_and_login(text)
         if access_token:
-            send_telegram_message("✅ *Zerodha Login Successful!* Session is active.")
-            # Cache the session token to the state
+            send_telegram_message("✅ *Zerodha Login Successful!* Trading features now active.")
             state = load_state()
             state["zerodha_access_token"] = access_token
             state["last_login_date"] = datetime.datetime.now(IST).strftime('%Y-%m-%d')
             save_state(state)
-            logger.info("Successfully cached Zerodha access token in state.")
+            logger.info("Zerodha access token cached successfully.")
         else:
-            send_telegram_message("❌ *Zerodha Login Failed*. Ensure the token is fresh and try again or send `login` to get a new link.")
+            send_telegram_message("❌ Zerodha token verification failed. Send `login` to get a fresh link.")
     elif text.lower() == "login":
         trigger_zerodha_login(force=True)
 
@@ -1472,47 +1475,47 @@ def main():
     # Load state file first
     state = load_state()
     
-    # Initialize ZerodhaClient and start Telegram listener thread
+    # Zerodha integration is OPTIONAL - only initialize if ALL credentials are present
     global zerodha_client
     api_key = os.getenv("ZERODHA_API_KEY")
     api_secret = os.getenv("ZERODHA_API_SECRET")
     client_id = os.getenv("ZERODHA_CLIENT_ID")
-    
+
     if all([api_key, api_secret, client_id]):
-        logger.info("Initializing Zerodha client...")
-        zerodha_client = ZerodhaClient(api_key, api_secret, client_id)
-        zerodha_client.initialize_client()
-        
-        # Start Telegram Listener Thread
-        listener = threading.Thread(target=telegram_listener_thread, daemon=True)
-        listener.start()
-        
-        # Start Auto-Sell Checker Thread
-        autosell_thread = threading.Thread(target=autosell_monitor_thread, daemon=True)
-        autosell_thread.start()
-        
-        # Send Bot Start Notification
-        send_telegram_message("🤖 *MACD Crossover Scanner Bot Started Online*")
-        
-        # Check if we have a saved token in state
-        saved_token = state.get("zerodha_access_token")
-        session_restored = False
-        if saved_token:
-            logger.info("Found saved Zerodha access token. Verifying session...")
-            zerodha_client.kite.set_access_token(saved_token)
-            if zerodha_client.validate_session():
-                logger.info("Zerodha session successfully restored from saved token!")
-                send_telegram_message("✅ *Zerodha Session Restored*: Connected successfully.")
-                session_restored = True
+        # All credentials present - initialize Zerodha client
+        logger.info("Zerodha credentials found. Initializing broker integration...")
+        try:
+            zerodha_client = ZerodhaClient(api_key, api_secret, client_id)
+            zerodha_client.initialize_client()
+
+            # Check if we have a saved token in state
+            saved_token = state.get("zerodha_access_token")
+            if saved_token:
+                logger.info("Attempting to restore Zerodha session from saved token...")
+                zerodha_client.kite.set_access_token(saved_token)
+                if zerodha_client.validate_session():
+                    logger.info("✅ Zerodha session restored successfully")
+                else:
+                    logger.warning("Saved Zerodha token expired - manual login required")
             else:
-                logger.warning("Saved Zerodha access token is invalid or expired.")
-                
-        if not session_restored:
-            # Trigger login to request token
-            trigger_zerodha_login(force=False)
+                logger.info("No saved Zerodha session. Manual login required to enable trading.")
+        except Exception as e:
+            logger.warning(f"Zerodha initialization failed: {e}. Trading will be disabled.")
+            zerodha_client = None
     else:
-        logger.warning("Zerodha credentials incomplete. Order placement is disabled.")
-        send_telegram_message("🤖 *MACD Crossover Scanner Bot Started Online* (Zerodha Disabled)")
+        logger.info("Zerodha credentials not configured. Broker integration disabled (scanning only).")
+        zerodha_client = None
+
+    # Start Telegram Listener Thread (independent of Zerodha status)
+    listener = threading.Thread(target=telegram_listener_thread, daemon=True)
+    listener.start()
+
+    # Start Auto-Sell Checker Thread (only active if Zerodha is initialized)
+    autosell_thread = threading.Thread(target=autosell_monitor_thread, daemon=True)
+    autosell_thread.start()
+
+    # Send Bot Start Notification - NO Zerodha status message
+    send_telegram_message("🤖 *MACD Crossover Scanner Bot Started Online* — Scanning active")
     
     while True:
         try:
