@@ -2,7 +2,7 @@
 
 **Project:** Fortress Intelligence — Multi-market investment allocation & stock screening  
 **Owner:** Bharat Samant (bharatsamant@gmail.com)  
-**Status:** 🟢 LIVE — Hidden Gem Finder fully operational (Session 25) | ✅ **US tickers fully working** | ✅ **NSE/LSE gracefully degraded** | ✅ **CI/CD simplified** (Session 26) | ✅ **Momentum Radar tab live, gated (Session 30)** | ✅ **CI/CD actually builds on deploy now (Session 30b)** | ✅ **Bot config write path fixed (Session 30c cont'd)**  
+**Status:** 🟢 LIVE — Hidden Gem Finder fully operational (Session 25) | ✅ **US tickers fully working** | ✅ **NSE/LSE gracefully degraded** | ✅ **CI/CD simplified** (Session 26) | ✅ **Momentum Radar tab live** (Session 30) | ✅ **MACD Bot consolidated & Zerodha optional** (Session 41) | ✅ **Multi-recipient alerts + API auth fixed** (Session 41b)  
 **Live App:** https://fortressintelligence.space (HTTPS 200 OK, fully deployed, CI/CD active)  
 **Production VPS:** 76.13.179.32 (port 3000 via PM2, Nginx reverse proxy 80/443 → 3000, active)  
 **Latest Status:** ✅ v0.8.0 LIVE — All core features deployed and stable. Session history archived to [SESSION_ARCHIVE.md](SESSION_ARCHIVE.md).  
@@ -168,6 +168,32 @@ Build a user-friendly investment portfolio allocation engine with real-time stoc
   - ✅ Commits: 3 (consolidation, Zerodha fix, deployment script)
   - ✅ No breaking changes
 - **Way Forward:** Monitoring phase — observe for 1 week (no Zerodha login errors, consistent scanning). Then Phase 2 expansion: Smallcap 250 + Russell 2000 with concurrent batch fetching
+
+### ✅ SESSION 41b: API AUTH + MULTI-RECIPIENT ALERTS COMPLETE (July 31, 2026 — SAME DAY)
+- **Status:** ✅ ALL BUGS FIXED — Signals now post to database (200 ✅), alerts broadcast to all subscribers
+- **Bugs Fixed:**
+  - (1) **API Push Logging:** Added status code + signal count to logs (can now debug API issues)
+  - (2) **API 401 Auth Error:** Fortress app wasn't loading CRON_SECRET correctly — restarted app, fixed
+  - (3) **Multi-Recipient Alerts:** Bot now fetches subscribers from `/api/admin/telegram-subscribers`, broadcasts to admin + all subscribers (was sending to admin only)
+  - (4) **CRON_SECRET Typo:** Bot's .env had `auBicMCURgeTjEfDgnRRbpdIwjwbvd4Iora51w8pMBs` (missing trailing `=`), API expected `auBicMCURgeTjEfDgnRRbpdIwjwbvd4Iora51w8pMBs=` — fixed
+- **Verification (LIVE):**
+  - ✅ Scan at 07:17:48 posted 35 signals with **status 200** (not 401)
+  - ✅ Database confirmed: 35 active signals (ALKEM, APARINDS, AUROPHARMA, BELRISE, BAJFINANCE, etc.)
+  - ✅ Admin panel "Last Push" now reflects current timestamp (was stale 50m+ ago)
+  - ✅ Multi-recipient broadcasting live: Messages sent to admin + all subscribers
+  - ✅ Order error messages now broadcast to all (same function as signal alerts)
+- **Commits This Session:**
+  - `53bf728e` — Add logging to Fortress API push
+  - `ff5c027d` — Broadcast alerts to all subscribers (multi-recipient)
+  - `.env.production` (VPS only) — Fixed CRON_SECRET trailing `=`
+- **Code Changes:**
+  - Bot: New `fetch_subscriber_chat_ids()` function, updated `send_telegram_message()` to broadcast
+  - Fortress: Already had `/api/admin/telegram-subscribers` endpoint (line 7-22 of route.ts)
+- **Testing:**
+  - ✅ Multiple scan cycles verified (07:02, 07:08, 07:14 with 401; 07:17 with 200+)
+  - ✅ Signal database populated and queryable via `/api/analysis/momentum-signals`
+  - ✅ Broadcasting tested: logs show "Message sent to X chat(s)"
+- **Next:** Monitor for 1 week to confirm stability. All critical issues resolved.
 
 ### ✅ SESSION 24: AUTH FLOWS COMPLETE (July 21, 2026)
 - **Status:** ✅ LIVE — All critical auth gaps fixed, deployed and validated
