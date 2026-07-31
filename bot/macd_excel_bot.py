@@ -502,12 +502,13 @@ def push_signals_to_fortress(active_list):
                 for item in active_list
             ]
         }
-        requests.post(
+        response = requests.post(
             FORTRESS_API_URL,
             json=payload,
             headers={"x-cron-secret": CRON_SECRET},
             timeout=10,
         )
+        logger.info(f"✅ Fortress API: {len(active_list)} signals posted (status {response.status_code})")
     except Exception as e:
         logger.warning(f"Fortress Momentum Radar push failed (non-blocking): {e}")
 
