@@ -45,6 +45,6 @@ export const adminService = {
 
   // Momentum status: recent MACD signals
   getMomentumStatus: async () => {
-    return db.select().from(schema.macdSignals).orderBy(desc(schema.macdSignals.timestamp)).limit(50);
+    return db.select().from(schema.macdSignals).orderBy(desc(schema.macdSignals.updatedAt)).limit(50);
   },
 };

@@ -650,3 +650,5 @@ export const learningMetrics = pgTable("learning_metrics", {
 export * from "./schema/auth";
 export * from "./schema/feedback";
 export * from "./schema/analytics";
+export * from "./schema/telegram-subscribers";
+export * from "./schema/momentum";

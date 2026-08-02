@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fortress — Cost &amp; Structure Checker</title>
+<style>
+  :root{
+    --bg:#0a0b0f; --panel:#13151d; --panel2:#1a1d27; --line:#262a38;
+    --txt:#e8eaf0; --dim:#8b91a4; --gold:#d4af6a; --green:#34d399;
+    --red:#f87171; --amber:#fbbf24; --blue:#60a5fa; --purple:#a78bfa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:28px 18px 80px}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:27px;font-weight:700;letter-spacing:-.5px;
+     background:linear-gradient(90deg,var(--gold),#f0d9a8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--dim);margin:6px 0 26px;font-size:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:14px;font-weight:600}
+  label{display:block;font-size:12px;color:var(--dim);margin-bottom:5px}
+  select,input{background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);
+    padding:10px 11px;font-size:14px;width:100%;font-family:inherit}
+  select:focus,input:focus{outline:none;border-color:var(--gold)}
+  optgroup{color:var(--gold);font-style:normal}
+  option{color:var(--txt)}
+  .row{display:grid;grid-template-columns:1fr 170px 42px;gap:10px;align-items:end;margin-bottom:10px}
+  button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;
+    padding:10px 16px;font-size:14px;cursor:pointer;font-family:inherit;transition:.15s}
+  button:hover{border-color:var(--gold);color:var(--gold)}
+  .primary{background:linear-gradient(90deg,var(--gold),#c19a52);color:#0a0b0f;border:none;font-weight:700;width:100%;padding:14px;font-size:15px;margin-top:8px}
+  .primary:hover{color:#0a0b0f;opacity:.9}
+  .del{padding:10px 0;color:var(--dim)}
+  .del:hover{border-color:var(--red);color:var(--red)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:18px}
+  .kpi{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .kpi .lab{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px}
+  .kpi .val{font-size:24px;font-weight:700;margin-top:6px;letter-spacing:-.5px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.7px;
+     padding:0 9px 9px;font-weight:600;border-bottom:1px solid var(--line)}
+  td{padding:11px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+  td.n,th.n{text-align:right}
+  .tag{font-size:10.5px;padding:3px 8px;border-radius:20px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+  .t-IE{background:rgba(52,211,153,.13);color:var(--green)}
+  .t-US{background:rgba(248,113,113,.13);color:var(--red)}
+  .t-SG{background:rgba(96,165,250,.13);color:var(--blue)}
+  .t-HK{background:rgba(167,139,250,.13);color:var(--purple)}
+  .warn{border-left:3px solid var(--amber);background:rgba(251,191,36,.06);padding:14px 16px;border-radius:0 10px 10px 0;margin-bottom:14px;font-size:13.5px}
+  .good{border-left:3px solid var(--green);background:rgba(52,211,153,.06);padding:14px 16px;border-radius:0 10px 10px 0;font-size:13.5px}
+  .swap{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+  .swap:last-child{border:0}
+  .save{color:var(--green);font-weight:700;white-space:nowrap}
+  .foot{color:var(--dim);font-size:11.5px;margin-top:26px;line-height:1.7}
+  .hide{display:none}
+  .rule{font-size:13px;color:var(--dim);line-height:1.8}
+  .rule b{color:var(--txt)}
+  @media(max-width:660px){.row{grid-template-columns:1fr 110px 42px} table{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Cost &amp; Structure Checker</h1>
+  <p class="sub">The boring money leak nobody shows you — fund fees, dividend tax, and estate-tax exposure across US, Ireland, Singapore and Hong Kong wrappers.</p>
+
+  <div class="card">
+    <h2>The one rule that decides everything</h2>
+    <div class="rule">
+      <b>Does the fund hold US stocks?</b><br>
+      → <b style="color:var(--green)">Yes: Ireland wins.</b> Ireland has a US tax treaty — only <b>15%</b> of US dividends get taken. Singapore and Hong Kong have <b>no US treaty</b>, so their funds lose the full <b>30%</b>. Same stocks, double the tax.<br>
+      → <b style="color:var(--blue)">No (Asia-only): local wins.</b> For STI, Hang Seng, S-REITs or China A-shares there is no US tax at all — so an SG or HK fund is cleanest, cheapest, and avoids currency conversion.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>1 · Where do you live for tax?</h2>
+    <select id="country">
+      <option value="30">Malaysia — no US tax treaty (30%)</option>
+      <option value="30">Singapore — no US tax treaty (30%)</option>
+      <option value="30">Hong Kong — no US tax treaty (30%)</option>
+      <option value="30">UAE — no US tax treaty (30%)</option>
+      <option value="25">India — US treaty rate (25%)</option>
+      <option value="15">UK / Ireland — US treaty rate (15%)</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>2 · What do you hold?</h2>
+    <div id="rows"></div>
+    <button onclick="addRow()">+ Add another holding</button>
+    <button class="primary" onclick="run()">Check my costs →</button>
+  </div>
+
+  <div id="out" class="hide"></div>
+
+  <p class="foot">
+    Expense ratios, yields and US-exposure weights are approximate and hardcoded as of August 2026 — verify on the fund factsheet before acting.<br>
+    Model covers US-source dividend withholding only. It does not model non-US local withholding, capital-gains tax on switching, brokerage/FX costs, bid-ask spread, or CPF/SRS eligibility.<br>
+    Not financial or tax advice. Estate-tax and treaty treatment varies by personal situation. Confirm with a qualified tax professional.
+  </p>
+</div>
+
+<script>
+/* er = expense ratio %, y = dividend yield %, d = domicile, ix = index, us = share of holdings that are US stocks */
+const ETFS = {
+  // ---------- US-domiciled ----------
+  SPY :{n:"SPDR S&P 500",             er:0.0945,y:1.2,d:"US",ix:"SP500",   us:1.00},
+  VOO :{n:"Vanguard S&P 500",         er:0.03,  y:1.2,d:"US",ix:"SP500",   us:1.00},
+  IVV :{n:"iShares Core S&P 500",     er:0.03,  y:1.2,d:"US",ix:"SP500",   us:1.00},
+  VTI :{n:"Vanguard Total US Market", er:0.03,  y:1.2,d:"US",ix:"TOTALUS", us:1.00},
+  QQQ :{n:"Invesco Nasdaq 100",       er:0.20,  y:0.6,d:"US",ix:"NDX",     us:0.97},
+  VT  :{n:"Vanguard Total World",     er:0.06,  y:1.9,d:"US",ix:"ALLWORLD",us:0.62},
+  VEA :{n:"Vanguard Developed ex-US", er:0.03,  y:2.9,d:"US",ix:"EXUS",    us:0.00},
+  VXUS:{n:"Vanguard Intl ex-US",      er:0.05,  y:2.9,d:"US",ix:"EXUS",    us:0.00},
+  VWO :{n:"Vanguard Emerging Mkts",   er:0.07,  y:2.7,d:"US",ix:"EM",      us:0.00},
+  IEMG:{n:"iShares Core Emerging",    er:0.09,  y:2.5,d:"US",ix:"EM",      us:0.00},
+  MCHI:{n:"iShares MSCI China",       er:0.59,  y:2.0,d:"US",ix:"CHINA",   us:0.00},
+  INDA:{n:"iShares MSCI India",       er:0.62,  y:0.6,d:"US",ix:"INDIA",   us:0.00},
+  SMH :{n:"VanEck Semiconductor",     er:0.35,  y:0.4,d:"US",ix:"SEMIS",   us:0.75},
+  GLD :{n:"SPDR Gold Shares",         er:0.40,  y:0.0,d:"US",ix:"GOLD",    us:0.00},
+  IAU :{n:"iShares Gold Trust",       er:0.25,  y:0.0,d:"US",ix:"GOLD",    us:0.00},
+  TQQQ:{n:"ProShares 3x Nasdaq",      er:0.84,  y:1.3,d:"US",ix:"LEV",     us:0.97},
+  SOXL:{n:"Direxion 3x Semis",        er:0.75,  y:0.9,d:"US",ix:"LEV",     us:0.75},
+
+  // ---------- Ireland-domiciled UCITS (LSE / SGX, USD) ----------
+  SPYL:{n:"SPDR S&P 500 UCITS (acc)",     er:0.03,y:1.2,d:"IE",ix:"SP500",   us:1.00},
+  CSPX:{n:"iShares Core S&P 500 (acc)",   er:0.07,y:1.2,d:"IE",ix:"SP500",   us:1.00},
+  VUAA:{n:"Vanguard S&P 500 (acc)",       er:0.07,y:1.2,d:"IE",ix:"SP500",   us:1.00},
+  VUSA:{n:"Vanguard S&P 500 (dist)",      er:0.07,y:1.2,d:"IE",ix:"SP500",   us:1.00},
+  SWRD:{n:"SPDR MSCI World (acc)",        er:0.12,y:1.7,d:"IE",ix:"WORLD",   us:0.72},
+  IWDA:{n:"iShares Core MSCI World (acc)",er:0.20,y:1.7,d:"IE",ix:"WORLD",   us:0.72},
+  VWRA:{n:"Vanguard FTSE All-World (acc)",er:0.22,y:1.8,d:"IE",ix:"ALLWORLD",us:0.62},
+  EIMI:{n:"iShares Core EM IMI (acc)",    er:0.18,y:2.5,d:"IE",ix:"EM",      us:0.00},
+  CNDX:{n:"iShares Nasdaq 100 (acc)",     er:0.33,y:0.6,d:"IE",ix:"NDX",     us:0.97},
+  NDIA:{n:"iShares MSCI India (acc)",     er:0.65,y:0.6,d:"IE",ix:"INDIA",   us:0.00},
+  ICHN:{n:"iShares MSCI China (acc)",     er:0.28,y:2.0,d:"IE",ix:"CHINA",   us:0.00},
+  IGLN:{n:"iShares Physical Gold",        er:0.12,y:0.0,d:"IE",ix:"GOLD",    us:0.00},
+
+  // ---------- Singapore-domiciled (SGX, SGD) ----------
+  ES3 :{n:"SPDR Straits Times Index ETF",  er:0.30,y:4.0,d:"SG",ix:"STI",   us:0.00},
+  G3B :{n:"Nikko AM Singapore STI ETF",    er:0.30,y:4.2,d:"SG",ix:"STI",   us:0.00},
+  CLR :{n:"Lion-Phillip S-REIT ETF",       er:0.60,y:5.5,d:"SG",ix:"SREIT", us:0.00},
+  A35 :{n:"ABF Singapore Bond Index Fund", er:0.25,y:2.8,d:"SG",ix:"SGBOND",us:0.00},
+
+  // ---------- Hong Kong-domiciled (HKEX, HKD) ----------
+  HK2800:{n:"Tracker Fund of Hong Kong (HSI)",er:0.09,y:3.5,d:"HK",ix:"HSI",   us:0.00},
+  HK2828:{n:"Hang Seng China Enterprises ETF",er:0.55,y:3.0,d:"HK",ix:"HSCEI", us:0.00},
+  HK2801:{n:"iShares Core MSCI China ETF",    er:0.20,y:2.0,d:"HK",ix:"CHINA", us:0.00},
+  HK3033:{n:"CSOP Hang Seng TECH Index ETF",  er:0.99,y:0.2,d:"HK",ix:"HSTECH",us:0.00},
+  HK2823:{n:"iShares FTSE China A50 ETF",     er:0.99,y:1.8,d:"HK",ix:"CHINAA",us:0.00}
+};
+
+const GROUPS = {US:"🇺🇸 US-domiciled",IE:"🇮🇪 Ireland (UCITS)",SG:"🇸🇬 Singapore",HK:"🇭🇰 Hong Kong"};
+const NOTE   = {SEMIS:"No liquid Irish equivalent",LEV:"Leveraged — no Irish equivalent"};
+const ESTATE_EXEMPT = 60000, GROWTH = 0.07, YEARS = 20;
+
+const $ = id => document.getElementById(id);
+const money = v => "$" + Math.round(v).toLocaleString();
+
+/* withholding rate applied to the fund's US-source dividends */
+function usRate(dom, investorRate){
+  if(dom === "IE") return 15;                 // US–Ireland treaty
+  if(dom === "SG" || dom === "HK") return 30; // no US treaty
+  return investorRate;                        // US-domiciled: investor's own treaty rate
+}
+/* annual drag in dollars for a given ticker + amount */
+function drag(t, amt, investorRate){
+  const e = ETFS[t];
+  const fee = amt * e.er/100;
+  const tax = amt * (e.y/100) * e.us * (usRate(e.d, investorRate)/100);
+  return {fee, tax, total: fee + tax};
+}
+
+function addRow(t){
+  const opts = Object.keys(GROUPS).map(g =>
+    `<optgroup label="${GROUPS[g]}">` +
+    Object.keys(ETFS).filter(k => ETFS[k].d === g).map(k =>
+      `<option value="${k}" ${k===t?"selected":""}>${k.replace("HK","")} — ${ETFS[k].n}</option>`).join("") +
+    `</optgroup>`).join("");
+  const div = document.createElement("div");
+  div.className = "row";
+  div.innerHTML = `<div><label>ETF</label><select>${opts}</select></div>
+    <div><label>Amount (USD equiv.)</label><input type="number" min="0" step="1000" value="10000"></div>
+    <button class="del" onclick="this.parentNode.remove()">✕</button>`;
+  $("rows").appendChild(div);
+}
+addRow("SPY"); addRow("HK2800");
+
+function run(){
+  const inv = +$("country").value;
+  const rows = [...$("rows").children].map(r => ({
+    t: r.querySelector("select").value,
+    amt: +r.querySelector("input").value || 0
+  })).filter(r => r.amt > 0);
+  if(!rows.length){ $("out").className = "hide"; return; }
+
+  let total=0, feeCost=0, taxCost=0, usExposure=0, saveTotal=0, tbody="", swaps="";
+
+  rows.forEach(r => {
+    const e = ETFS[r.t], d = drag(r.t, r.amt, inv);
+    total += r.amt; feeCost += d.fee; taxCost += d.tax;
+    if(e.d === "US") usExposure += r.amt;
+
+    const pct = d.total / r.amt * 100;
+    tbody += `<tr>
+      <td><b>${r.t.replace("HK","")}</b><br><span style="color:var(--dim);font-size:12px">${e.n}</span></td>
+      <td><span class="tag t-${e.d}">${e.d}</span></td>
+      <td class="n">${(e.us*100).toFixed(0)}%</td>
+      <td class="n">${money(r.amt)}</td>
+      <td class="n">${money(d.fee)}</td>
+      <td class="n">${money(d.tax)}</td>
+      <td class="n" style="color:${pct>0.35?"var(--red)":"var(--green)"}"><b>${pct.toFixed(2)}%</b></td>
+    </tr>`;
+
+    // find the cheapest wrapper tracking the SAME index
+    const peers = Object.keys(ETFS).filter(k => ETFS[k].ix === e.ix);
+    let best = r.t, bestDrag = d.total;
+    peers.forEach(k => { const c = drag(k, r.amt, inv).total; if(c < bestDrag - 0.5){ best = k; bestDrag = c; } });
+
+    if(best !== r.t){
+      const save = d.total - bestDrag; saveTotal += save;
+      swaps += `<div class="swap">
+        <div><b>${r.t.replace("HK","")}</b> <span class="tag t-${e.d}">${e.d}</span>
+          → <b style="color:var(--gold)">${best.replace("HK","")}</b> <span class="tag t-${ETFS[best].d}">${ETFS[best].d}</span>
+          <span style="color:var(--dim)"> · ${ETFS[best].n}</span></div>
+        <div class="save">save ${money(save)}/yr</div></div>`;
+    } else {
+      swaps += `<div class="swap">
+        <div><b>${r.t.replace("HK","")}</b> <span style="color:var(--dim)"> · ${NOTE[e.ix] || "already the best wrapper for this index"}</span></div>
+        <div style="color:var(--green)">✓ keep</div></div>`;
+    }
+  });
+
+  const dragNow = feeCost + taxCost, dragBest = dragNow - saveTotal;
+  const cost20 = total*Math.pow(1+GROWTH-dragBest/total,YEARS) - total*Math.pow(1+GROWTH-dragNow/total,YEARS);
+  const estateExcess = Math.max(0, usExposure - ESTATE_EXEMPT);
+
+  $("out").className = "";
+  $("out").innerHTML = `
+    <div class="card">
+      <h2>Your leak, per year</h2>
+      <div class="cards">
+        <div class="kpi"><div class="lab">Portfolio</div><div class="val">${money(total)}</div></div>
+        <div class="kpi"><div class="lab">Fund fees / yr</div><div class="val" style="color:var(--amber)">${money(feeCost)}</div></div>
+        <div class="kpi"><div class="lab">US dividend tax / yr</div><div class="val" style="color:var(--red)">${money(taxCost)}</div></div>
+        <div class="kpi"><div class="lab">Fixable / yr</div><div class="val" style="color:var(--green)">${money(saveTotal)}</div></div>
+      </div>
+      <table>
+        <thead><tr><th>Holding</th><th>Domicile</th><th class="n">US stocks</th><th class="n">Amount</th>
+          <th class="n">Fee/yr</th><th class="n">US div tax/yr</th><th class="n">Total drag</th></tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Same index, better wrapper</h2>
+      ${swaps}
+      ${saveTotal > 1 ? `<div class="good" style="margin-top:16px">
+        <b>Over ${YEARS} years at 7% growth, fixing this is worth about ${money(cost20)}.</b><br>
+        <span style="color:var(--dim)">Same holdings. Same index. Just a cheaper, better-taxed container.</span>
+      </div>` : `<div class="good" style="margin-top:16px">
+        <b>Nothing to fix.</b> Every holding is already in the best available wrapper for its index.
+      </div>`}
+    </div>
+
+    ${estateExcess > 0 ? `<div class="card">
+      <h2>⚠ US estate-tax exposure</h2>
+      <div class="warn">
+        You hold <b>${money(usExposure)}</b> in <b>US-domiciled</b> funds.<br>
+        Non-US residents get only a <b>${money(ESTATE_EXEMPT)}</b> exemption on US-situs assets.<br>
+        Potentially exposed: <b style="color:var(--red)">${money(estateExcess)}</b> — taxed up to <b>40%</b>
+        (≈ ${money(estateExcess*0.4)}) on death.<br><br>
+        <span style="color:var(--dim)">Irish, Singapore and Hong Kong domiciled funds are not US assets, so they sit outside this entirely.
+        For most expat investors this is a bigger risk than the fee difference.</span>
+      </div>
+    </div>` : ""}
+  `;
+}
+</script>
+</body>
+</html>

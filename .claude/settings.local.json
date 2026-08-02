@@ -513,7 +513,15 @@
       "Bash(cp \"C:\\\\The_Equity_Chapter\\\\Equity_The-Final-chapter\\\\mstock_client.py\" \"C:\\\\Antigravity\\\\Fortress\\\\bot\\\\\" && cp \"C:\\\\The_Equity_Chapter\\\\Equity_The-Final-chapter\\\\run_one_off_scan.py\" \"C:\\\\Antigravity\\\\Fortress\\\\bot\\\\\")",
       "Bash(cd \"C:\\\\Antigravity\\\\Fortress\" && rm -rf \"bot\"* && ls -la bot/)",
       "Bash(healthcheck)",
-      "Bash(README\")"
+      "Bash(README\")",
+      "Bash(ssh ubuntu@76.13.179.32 \"ps aux | grep -i macd | grep -v grep\")",
+      "Bash(python -m graphify.cli . --no-viz)",
+      "Bash(python -m graphify . --code-only)",
+      "Bash(python -m graphify . --cluster-only)",
+      "Bash(python -m graphify . export html --code-only)",
+      "Bash(python -m graphify.cli . export html)",
+      "Bash(curl -s -I http://localhost:8000/graphify-out/graph.html)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Antigravity\" -Directory | Where-Object { Test-Path \\(Join-Path $_.FullName \"graphify-out\\\\graph.json\"\\) } | Select-Object @{Name=\"Project\";Expression={$_.Name}}, @{Name=\"Graph Path\";Expression={Join-Path $_.FullName \"graphify-out\\\\graph.json\"}} | Format-Table -AutoSize)"
     ]
   }
 }
