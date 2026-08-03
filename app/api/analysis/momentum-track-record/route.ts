@@ -36,12 +36,20 @@ export async function GET(_request: NextRequest) {
     };
   }
 
+  // Per-signal detail behind the summary cards — most recently resolved
+  // first, capped at 30 rows since this is a glance-back list, not a report.
+  const recentResolved = rows
+    .filter((r) => r.status !== "open" && r.resolvedAt)
+    .sort((a, b) => new Date(b.resolvedAt as Date).getTime() - new Date(a.resolvedAt as Date).getTime())
+    .slice(0, 30);
+
   return NextResponse.json(
     {
       success: true,
       overall: summarize(rows),
       daily: summarize(rows.filter((r) => r.timeframe === "Daily")),
       weekly: summarize(rows.filter((r) => r.timeframe === "Weekly")),
+      recentResolved,
     },
     { status: 200 }
   );

@@ -40,11 +40,31 @@ interface TrackRecordBucket {
     avgDaysToResolve: number | null;
 }
 
+interface ResolvedSignal {
+    id: string;
+    timeframe: string;
+    symbol: string;
+    entryCmp: string;
+    firstTargetPrice: string | null;
+    finalTargetPrice: string | null;
+    stopLossPrice: string | null;
+    status: string;
+    firstSeenAt: string;
+    resolvedAt: string | null;
+}
+
 interface TrackRecordResponse {
     overall: TrackRecordBucket;
     daily: TrackRecordBucket;
     weekly: TrackRecordBucket;
+    recentResolved: ResolvedSignal[];
 }
+
+const STATUS_LABEL: Record<string, { text: string; className: string }> = {
+    hit_t1: { text: "Hit T1", className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+    hit_t2: { text: "Hit T2", className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+    stopped: { text: "Stopped", className: "bg-red-500/20 text-red-400 border-red-500/30" },
+};
 
 type FetchState = "loading" | "ok" | "error";
 
@@ -177,6 +197,44 @@ export default function MomentumRadarPage() {
                                 </div>
                             </CardContent>
                         </Card>
+                    </div>
+                )}
+
+                {trackRecord && trackRecord.recentResolved.length > 0 && (
+                    <div className="overflow-x-auto rounded-xl border border-white/10">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-white/10 bg-white/5">
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Symbol</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Timeframe</th>
+                                    <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Result</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Entry</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Resolved</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {trackRecord.recentResolved.map((r, i) => {
+                                    const label = STATUS_LABEL[r.status] ?? { text: r.status, className: "" };
+                                    return (
+                                        <tr key={r.id} className={cn("border-b border-white/5 hover:bg-white/5 transition-colors", i % 2 === 0 ? "" : "bg-white/[0.02]")}>
+                                            <td className="px-4 py-3 font-semibold text-white">{r.symbol}</td>
+                                            <td className="px-4 py-3">
+                                                <Badge variant="outline" className="text-xs">{r.timeframe}</Badge>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                <Badge className={cn("text-xs", label.className)}>{label.text}</Badge>
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-mono text-xs text-white">{money(r.entryCmp)}</td>
+                                            <td className="px-4 py-3 text-right text-xs text-muted-foreground">
+                                                {r.resolvedAt
+                                                    ? new Date(r.resolvedAt).toLocaleDateString("en-IN", { month: "short", day: "numeric" })
+                                                    : "—"}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
                 )}
 
