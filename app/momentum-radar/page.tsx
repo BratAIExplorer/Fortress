@@ -7,6 +7,7 @@ import { RefreshCw, Radar, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogTradeModal } from "@/components/LogTradeModal";
 import { ResearchDisclaimer } from "@/components/fortress/ResearchDisclaimer";
+import { scoreFundamentals } from "@/lib/momentum/score";
 
 interface MacdSignal {
     id: string;
@@ -81,6 +82,14 @@ function fundamentalsLabel(f: MacdSignal["fundamentals"]) {
     if (f.revGrowth != null) parts.push(`Rev ${(f.revGrowth * 100).toFixed(0)}%`);
     return parts.join(" · ");
 }
+
+const SCORE_COLOR: Record<number, string> = {
+    5: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    4: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+    3: "bg-yellow-500/15 text-yellow-400 border-yellow-500/25",
+    2: "bg-orange-500/15 text-orange-400 border-orange-500/25",
+    1: "bg-red-500/15 text-red-400 border-red-500/25",
+};
 
 // ponytail: sign-in/trial gating disabled for now (see route.ts) — tab is
 // open to everyone with live data until auth+SMTP is fixed.
@@ -201,6 +210,14 @@ export default function MomentumRadarPage() {
                 )}
 
                 {trackRecord && trackRecord.recentResolved.length > 0 && (
+                  <>
+                    <p className="text-xs text-muted-foreground -mb-2">
+                        <span className="inline-flex items-center gap-1"><Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">Hit T1</Badge> price reached the Target 1 column</span>
+                        {" · "}
+                        <span className="inline-flex items-center gap-1"><Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">Hit T2</Badge> reached the Final Target column</span>
+                        {" · "}
+                        <span className="inline-flex items-center gap-1"><Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Stopped</Badge> hit the Stop Loss column first</span>
+                    </p>
                     <div className="overflow-x-auto rounded-xl border border-white/10">
                         <table className="w-full text-sm">
                             <thead>
@@ -236,6 +253,7 @@ export default function MomentumRadarPage() {
                             </tbody>
                         </table>
                     </div>
+                  </>
                 )}
 
                 {state === "loading" && (
@@ -283,7 +301,20 @@ export default function MomentumRadarPage() {
                                 {signals.map((s, i) => (
                                     <tr key={s.id} className={cn("border-b border-white/5 hover:bg-white/5 transition-colors", i % 2 === 0 ? "" : "bg-white/[0.02]")}>
                                         <td className="px-4 py-3">
-                                            <div className="font-semibold text-white">{s.symbol}</div>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="font-semibold text-white">{s.symbol}</span>
+                                                {scoreFundamentals(s.fundamentals) != null && (
+                                                    <span
+                                                        title="Fundamentals score (1-5) — see legend below the table"
+                                                        className={cn(
+                                                            "inline-flex items-center justify-center h-4 min-w-4 px-1 rounded text-[10px] font-bold border",
+                                                            SCORE_COLOR[scoreFundamentals(s.fundamentals) as number]
+                                                        )}
+                                                    >
+                                                        {scoreFundamentals(s.fundamentals)}
+                                                    </span>
+                                                )}
+                                            </div>
                                             {fundamentalsLabel(s.fundamentals) && (
                                                 <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
                                                     {fundamentalsLabel(s.fundamentals)}
@@ -315,6 +346,43 @@ export default function MomentumRadarPage() {
                             </tbody>
                         </table>
                     </div>
+                )}
+
+                {state === "ok" && signals.length > 0 && (
+                    <Card className="bg-white/5 border-white/10">
+                        <CardContent className="py-4 px-4">
+                            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                                Fundamentals Score Legend
+                            </div>
+                            <div className="flex flex-wrap gap-3 mb-3">
+                                {[5, 4, 3, 2, 1].map((n) => (
+                                    <span
+                                        key={n}
+                                        className={cn(
+                                            "inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs border",
+                                            SCORE_COLOR[n]
+                                        )}
+                                    >
+                                        <span className="font-bold">{n}</span>
+                                        {n === 5 && "Excellent"}
+                                        {n === 4 && "Good"}
+                                        {n === 3 && "Fair"}
+                                        {n === 2 && "Weak"}
+                                        {n === 1 && "Poor"}
+                                    </span>
+                                ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Average of up to 3 sub-scores (whichever fields Yahoo Finance has) — missing fields
+                                are skipped, not counted against the score:
+                            </p>
+                            <ul className="text-xs text-muted-foreground mt-1.5 space-y-0.5 list-disc list-inside">
+                                <li><span className="text-white font-medium">PE ratio</span> (cheaper = higher score): ≤15 → 5, ≤25 → 4, ≤40 → 3, ≤60 → 2, above → 1</li>
+                                <li><span className="text-white font-medium">Debt/Equity</span> (less leverage = higher score): ≤25 → 5, ≤50 → 4, ≤100 → 3, ≤250 → 2, above → 1</li>
+                                <li><span className="text-white font-medium">Revenue growth</span> (faster = higher score): ≥40% → 5, ≥25% → 4, ≥15% → 3, ≥0% → 2, negative → 1</li>
+                            </ul>
+                        </CardContent>
+                    </Card>
                 )}
 
                 <ResearchDisclaimer variant="signals" />

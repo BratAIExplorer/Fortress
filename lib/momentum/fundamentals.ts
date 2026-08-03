@@ -1,13 +1,10 @@
 import YahooFinance from "yahoo-finance2";
 import { toYahooSymbol } from "@/lib/scanners/smallcap-fundamentals";
+import type { FundamentalsBadge } from "@/lib/momentum/score";
+
+export type { FundamentalsBadge } from "@/lib/momentum/score";
 
 const yahooFinance = new YahooFinance({ suppressNotices: ["ripHistorical", "yahooSurvey"] });
-
-export interface FundamentalsBadge {
-  pe: number | null;
-  debtToEquity: number | null;
-  revGrowth: number | null;
-}
 
 // ponytail: module-level Map cache, same pattern as lib/portfolio/yfinance.ts
 // (intelCache). Fundamentals move slowly, 1hr TTL is generous headroom.
