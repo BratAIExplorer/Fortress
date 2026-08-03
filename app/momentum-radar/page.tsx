@@ -28,6 +28,23 @@ interface SignalsResponse {
     lastUpdated?: string;
 }
 
+interface TrackRecordBucket {
+    total: number;
+    open: number;
+    hitT1: number;
+    hitT2: number;
+    stopped: number;
+    resolved: number;
+    winRate: number | null;
+    avgDaysToResolve: number | null;
+}
+
+interface TrackRecordResponse {
+    overall: TrackRecordBucket;
+    daily: TrackRecordBucket;
+    weekly: TrackRecordBucket;
+}
+
 type FetchState = "loading" | "ok" | "error";
 
 function money(v: string | null) {
@@ -43,6 +60,7 @@ export default function MomentumRadarPage() {
     const [state, setState] = useState<FetchState>("loading");
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSignal, setSelectedSignal] = useState<MacdSignal | null>(null);
+    const [trackRecord, setTrackRecord] = useState<TrackRecordResponse | null>(null);
 
     useEffect(() => {
         fetch("/api/analysis/momentum-signals")
@@ -54,6 +72,16 @@ export default function MomentumRadarPage() {
                 setState("ok");
             })
             .catch(() => setState("error"));
+
+        // Track record is a nice-to-have summary — a failure here shouldn't
+        // block the signals table above from rendering.
+        fetch("/api/analysis/momentum-track-record")
+            .then(async (res) => {
+                if (!res.ok) return;
+                const data = await res.json();
+                setTrackRecord(data);
+            })
+            .catch(() => {});
     }, []);
 
     return (
@@ -98,6 +126,49 @@ export default function MomentumRadarPage() {
                         Admin Access →
                     </a>
                 </div>
+
+                {trackRecord && trackRecord.overall.resolved > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <Card className="bg-white/5 border-white/10">
+                            <CardContent className="py-4 px-4">
+                                <div className="text-xs text-muted-foreground uppercase tracking-wider">Win Rate</div>
+                                <div className="text-2xl font-bold text-emerald-400 font-mono">
+                                    {trackRecord.overall.winRate != null ? `${(trackRecord.overall.winRate * 100).toFixed(0)}%` : "—"}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">{trackRecord.overall.resolved} resolved</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-white/5 border-white/10">
+                            <CardContent className="py-4 px-4">
+                                <div className="text-xs text-muted-foreground uppercase tracking-wider">Hit Target</div>
+                                <div className="text-2xl font-bold text-white font-mono">
+                                    {trackRecord.overall.hitT1 + trackRecord.overall.hitT2}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                    {trackRecord.overall.hitT1} T1 · {trackRecord.overall.hitT2} T2
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-white/5 border-white/10">
+                            <CardContent className="py-4 px-4">
+                                <div className="text-xs text-muted-foreground uppercase tracking-wider">Stopped Out</div>
+                                <div className="text-2xl font-bold text-red-400 font-mono">{trackRecord.overall.stopped}</div>
+                                <div className="text-xs text-muted-foreground mt-1">{trackRecord.overall.open} still open</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-white/5 border-white/10">
+                            <CardContent className="py-4 px-4">
+                                <div className="text-xs text-muted-foreground uppercase tracking-wider">Avg Days to Resolve</div>
+                                <div className="text-2xl font-bold text-white font-mono">
+                                    {trackRecord.overall.avgDaysToResolve != null ? trackRecord.overall.avgDaysToResolve.toFixed(1) : "—"}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                    Daily {trackRecord.daily.resolved} · Weekly {trackRecord.weekly.resolved}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
 
                 {state === "loading" && (
                     <div className="flex items-center justify-center py-24">
