@@ -21,6 +21,7 @@ interface MacdSignal {
     finalTargetPrice: string | null;
     stopLossPrice: string | null;
     riskAmount: string | null;
+    fundamentals: { pe: number | null; debtToEquity: number | null; revGrowth: number | null } | null;
 }
 
 interface SignalsResponse {
@@ -50,6 +51,15 @@ type FetchState = "loading" | "ok" | "error";
 function money(v: string | null) {
     if (v == null) return "—";
     return `₹${parseFloat(v).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+}
+
+// ponytail: plain text, not a component — three numbers, not worth abstracting.
+function fundamentalsLabel(f: MacdSignal["fundamentals"]) {
+    if (!f || f.pe == null) return null;
+    const parts = [`PE ${f.pe.toFixed(1)}`];
+    if (f.debtToEquity != null) parts.push(`D/E ${f.debtToEquity.toFixed(0)}`);
+    if (f.revGrowth != null) parts.push(`Rev ${(f.revGrowth * 100).toFixed(0)}%`);
+    return parts.join(" · ");
 }
 
 // ponytail: sign-in/trial gating disabled for now (see route.ts) — tab is
@@ -214,7 +224,14 @@ export default function MomentumRadarPage() {
                             <tbody>
                                 {signals.map((s, i) => (
                                     <tr key={s.id} className={cn("border-b border-white/5 hover:bg-white/5 transition-colors", i % 2 === 0 ? "" : "bg-white/[0.02]")}>
-                                        <td className="px-4 py-3 font-semibold text-white">{s.symbol}</td>
+                                        <td className="px-4 py-3">
+                                            <div className="font-semibold text-white">{s.symbol}</div>
+                                            {fundamentalsLabel(s.fundamentals) && (
+                                                <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
+                                                    {fundamentalsLabel(s.fundamentals)}
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="px-4 py-3">
                                             <Badge variant="outline" className="text-xs">{s.timeframe}</Badge>
                                         </td>

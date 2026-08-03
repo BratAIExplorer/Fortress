@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { macdSignals, macdSignalLog } from "@/lib/db/schema/momentum";
 import { and, eq } from "drizzle-orm";
 import { notifyAdminError } from "@/lib/telegram-alert";
+import { fetchFundamentalsBatch } from "@/lib/momentum/fundamentals";
 
 // GET — read-only feed for the Momentum Radar tab.
 // ponytail: sign-in/trial gating is disabled until auth+SMTP is fixed (see
@@ -15,7 +16,17 @@ export async function GET(_request: NextRequest) {
     return !latest || iso > latest ? iso : latest;
   }, null);
 
-  return NextResponse.json({ success: true, signals, lastUpdated }, { status: 200 });
+  // Fundamentals are a nice-to-have overlay — a Yahoo hiccup here shouldn't
+  // block the signal table itself from rendering.
+  let fundamentals: Record<string, { pe: number | null; debtToEquity: number | null; revGrowth: number | null } | null> = {};
+  try {
+    fundamentals = await fetchFundamentalsBatch(signals.map((s) => s.symbol));
+  } catch (e) {
+    console.error("[momentum-signals] fundamentals fetch failed:", e);
+  }
+  const enriched = signals.map((s) => ({ ...s, fundamentals: fundamentals[s.symbol] ?? null }));
+
+  return NextResponse.json({ success: true, signals: enriched, lastUpdated }, { status: 200 });
 }
 
 // POST — ingest from the standalone MACD bot (Equity_The-Final-chapter).
