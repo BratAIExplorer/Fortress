@@ -76,11 +76,12 @@ function money(v: string | null) {
 
 // ponytail: plain text, not a component — three numbers, not worth abstracting.
 function fundamentalsLabel(f: MacdSignal["fundamentals"]) {
-    if (!f || f.pe == null) return null;
-    const parts = [`PE ${f.pe.toFixed(1)}`];
+    if (!f) return null;
+    const parts = [];
+    if (f.pe != null) parts.push(`PE ${f.pe.toFixed(1)}`);
     if (f.debtToEquity != null) parts.push(`D/E ${f.debtToEquity.toFixed(0)}`);
     if (f.revGrowth != null) parts.push(`Rev ${(f.revGrowth * 100).toFixed(0)}%`);
-    return parts.join(" · ");
+    return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 const SCORE_COLOR: Record<number, string> = {
