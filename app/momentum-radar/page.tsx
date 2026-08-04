@@ -387,17 +387,58 @@ export default function MomentumRadarPage() {
                 )}
 
                 {state === "ok" && signals.length > 0 && (
+                    <>
+                    {trackRecord && (trackRecord.daily.total > 0 || trackRecord.overall.total > 0) && (
+                        <Card className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/30">
+                            <CardContent className="py-6 px-6">
+                                <div className="text-sm font-bold text-white mb-4">Today's Performance</div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <div className="text-2xl font-bold text-white font-mono">{trackRecord.daily.hitT1 + trackRecord.daily.hitT2}</div>
+                                        <div className="text-sm text-emerald-400 font-medium">Signals Hit</div>
+                                        <div className="text-xs text-muted-foreground mt-1">{trackRecord.daily.hitT1} T1 · {trackRecord.daily.hitT2} T2</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-red-400 font-mono">{trackRecord.daily.stopped}</div>
+                                        <div className="text-sm text-red-400 font-medium">Stopped Out</div>
+                                        <div className="text-xs text-muted-foreground mt-1">{trackRecord.daily.open} still open</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-white font-mono">
+                                            {trackRecord.daily.resolved > 0
+                                                ? `${(((trackRecord.daily.hitT1 + trackRecord.daily.hitT2) / trackRecord.daily.resolved) * 100).toFixed(0)}%`
+                                                : "—"}
+                                        </div>
+                                        <div className="text-sm text-blue-400 font-medium">Daily Win Rate</div>
+                                        <div className="text-xs text-muted-foreground mt-1">{trackRecord.daily.resolved} resolved today</div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                     <Card className="bg-white/5 border-white/10">
-                        <CardContent className="py-4 px-4 space-y-4">
+                        <CardContent className="py-6 px-6 space-y-6">
                             <div>
-                                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                                <div className="text-lg font-bold text-white mb-4">
                                     How to Read This Table
                                 </div>
-                                <div className="text-xs text-muted-foreground space-y-1">
-                                    <p><span className="text-white font-medium">T1 Profit</span> — Expected rupee gain if Target 1 is hit</p>
-                                    <p><span className="text-white font-medium">Risk</span> — Potential loss if Stop Loss is hit</p>
-                                    <p><span className="text-white font-medium">Ratio</span> — Profit/Risk ratio: <span className="text-emerald-400">≥1.5x (high)</span>, <span className="text-yellow-400">0.5–1.5x (medium)</span>, <span className="text-red-400">&lt;0.5x (low)</span></p>
-                                    <p><span className="text-white font-medium">Qty</span> — Units to buy at current CMP (based on ₹25K capital)</p>
+                                <div className="space-y-3">
+                                    <div className="flex items-start gap-3">
+                                        <div className="text-sm font-semibold text-emerald-400 min-w-fit">T1 Profit</div>
+                                        <div className="text-sm text-muted-foreground">Expected rupee gain if Target 1 price is hit at entry size</div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="text-sm font-semibold text-red-400 min-w-fit">Risk</div>
+                                        <div className="text-sm text-muted-foreground">Potential loss in rupees if Stop Loss price is hit</div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="text-sm font-semibold text-blue-400 min-w-fit">Ratio</div>
+                                        <div className="text-sm text-muted-foreground">Profit ÷ Risk: <span className="text-emerald-400 font-medium">≥1.5x (high, green)</span> · <span className="text-yellow-400 font-medium">0.5–1.5x (medium, yellow)</span> · <span className="text-red-400 font-medium">&lt;0.5x (low risk)</span></div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="text-sm font-semibold text-blue-400 min-w-fit">Qty</div>
+                                        <div className="text-sm text-muted-foreground">Share units to buy = ₹25K capital ÷ current price</div>
+                                    </div>
                                 </div>
                             </div>
                             <div className="border-t border-white/10 pt-4">
@@ -434,6 +475,7 @@ export default function MomentumRadarPage() {
                             </div>
                         </CardContent>
                     </Card>
+                    </>
                 )}
 
                 <ResearchDisclaimer variant="signals" />
