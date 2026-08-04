@@ -28,3 +28,19 @@ CREATE TABLE IF NOT EXISTS "macd_signals" (
 
 CREATE INDEX IF NOT EXISTS "idx_macd_signals_symbol" ON "macd_signals" ("symbol");
 CREATE INDEX IF NOT EXISTS "idx_macd_signals_timeframe" ON "macd_signals" ("timeframe");
+
+CREATE TABLE IF NOT EXISTS "macd_signal_log" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "timeframe" varchar(10) NOT NULL,
+  "symbol" varchar(20) NOT NULL,
+  "entry_cmp" numeric NOT NULL,
+  "first_target_price" numeric,
+  "final_target_price" numeric,
+  "stop_loss_price" numeric,
+  "status" varchar(20) NOT NULL DEFAULT 'open',
+  "first_seen_at" timestamp NOT NULL DEFAULT now(),
+  "resolved_at" timestamp
+);
+
+CREATE INDEX IF NOT EXISTS "idx_macd_signal_log_status" ON "macd_signal_log" ("status");
+CREATE INDEX IF NOT EXISTS "idx_macd_signal_log_symbol" ON "macd_signal_log" ("symbol");
