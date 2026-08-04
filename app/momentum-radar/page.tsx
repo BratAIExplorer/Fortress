@@ -88,10 +88,10 @@ function calculateRiskReward(expectedProfit: number | null, riskAmount: string |
     return expectedProfit / risk;
 }
 
-function riskLevel(winRate: number | null, ratio: number | null): "high" | "medium" | "low" {
-    if (winRate == null || ratio == null) return "medium";
-    if (winRate > 0.5 && ratio > 1.5) return "high";
-    if (winRate < 0.2 || ratio < 0.5) return "low";
+function riskLevel(ratio: number | null): "high" | "medium" | "low" {
+    if (ratio == null) return "medium";
+    if (ratio >= 1.5) return "high";
+    if (ratio < 0.5) return "low";
     return "medium";
 }
 
@@ -323,7 +323,7 @@ export default function MomentumRadarPage() {
                                 {signals.map((s, i) => {
                                     const expectedProfit = calculateExpectedProfit(s.firstTargetPrice, s.cmp, s.quantity);
                                     const ratio = calculateRiskReward(expectedProfit, s.riskAmount);
-                                    const risk = riskLevel(null, ratio); // null for now, Phase 2 adds win rate
+                                    const risk = riskLevel(ratio);
 
                                     return (
                                     <tr key={s.id} className={cn("border-b border-white/5 hover:bg-white/5 transition-colors", i % 2 === 0 ? "" : "bg-white/[0.02]")}>
