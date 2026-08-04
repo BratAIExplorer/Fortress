@@ -74,6 +74,27 @@ function money(v: string | null) {
     return `₹${parseFloat(v).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 }
 
+// ponytail: compute expected profit and risk:reward from existing signal data
+function calculateExpectedProfit(targetPrice: string | null, cmp: string, quantity: number): number | null {
+    if (!targetPrice) return null;
+    const profit = (parseFloat(targetPrice) - parseFloat(cmp)) * quantity;
+    return profit;
+}
+
+function calculateRiskReward(expectedProfit: number | null, riskAmount: string | null): number | null {
+    if (!expectedProfit || !riskAmount) return null;
+    const risk = parseFloat(riskAmount);
+    if (risk === 0) return null;
+    return expectedProfit / risk;
+}
+
+function riskLevel(winRate: number | null, ratio: number | null): "high" | "medium" | "low" {
+    if (winRate == null || ratio == null) return "medium";
+    if (winRate > 0.5 && ratio > 1.5) return "high";
+    if (winRate < 0.2 || ratio < 0.5) return "low";
+    return "medium";
+}
+
 // ponytail: plain text, not a component — three numbers, not worth abstracting.
 function fundamentalsLabel(f: MacdSignal["fundamentals"]) {
     if (!f) return null;
@@ -288,18 +309,23 @@ export default function MomentumRadarPage() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-white/10 bg-white/5">
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Symbol</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Timeframe</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Signal</th>
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">CMP</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Target 1</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Final Target</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Stop Loss</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Crossover</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Qty</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">T1 Profit</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Risk</th>
+                                    <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground">Ratio</th>
+                                    <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground">Signal</th>
                                     <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {signals.map((s, i) => (
+                                {signals.map((s, i) => {
+                                    const expectedProfit = calculateExpectedProfit(s.firstTargetPrice, s.cmp, s.quantity);
+                                    const ratio = calculateRiskReward(expectedProfit, s.riskAmount);
+                                    const risk = riskLevel(null, ratio); // null for now, Phase 2 adds win rate
+
+                                    return (
                                     <tr key={s.id} className={cn("border-b border-white/5 hover:bg-white/5 transition-colors", i % 2 === 0 ? "" : "bg-white/[0.02]")}>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-1.5">
@@ -316,20 +342,30 @@ export default function MomentumRadarPage() {
                                                     </span>
                                                 )}
                                             </div>
-                                            {fundamentalsLabel(s.fundamentals) && (
-                                                <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
-                                                    {fundamentalsLabel(s.fundamentals)}
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <Badge variant="outline" className="text-xs">{s.timeframe}</Badge>
+                                            <div className="text-[11px] text-muted-foreground space-y-0.5 mt-0.5">
+                                                <div>{s.timeframe === 'Daily' ? '📊 Daily' : '📈 Weekly'}</div>
+                                                {fundamentalsLabel(s.fundamentals) && (
+                                                    <div className="font-mono">{fundamentalsLabel(s.fundamentals)}</div>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3 text-right font-mono text-xs text-white">{money(s.cmp)}</td>
-                                        <td className="px-4 py-3 text-right font-mono text-xs text-emerald-400">{money(s.firstTargetPrice)}</td>
-                                        <td className="px-4 py-3 text-right font-mono text-xs text-emerald-400">{money(s.finalTargetPrice)}</td>
-                                        <td className="px-4 py-3 text-right font-mono text-xs text-red-400">{money(s.stopLossPrice)}</td>
-                                        <td className="px-4 py-3 text-right text-xs text-muted-foreground">{s.crossoverDate} ({s.daysSinceCrossover}d ago)</td>
+                                        <td className="px-4 py-3 text-right font-mono text-xs text-blue-400">{s.quantity}</td>
+                                        <td className="px-4 py-3 text-right font-mono text-xs text-emerald-400">{expectedProfit != null ? money(expectedProfit.toString()) : '—'}</td>
+                                        <td className="px-4 py-3 text-right font-mono text-xs text-red-400">{money(s.riskAmount)}</td>
+                                        <td className="px-4 py-3 text-center">
+                                            {ratio != null ? (
+                                                <span className={cn(
+                                                    "inline-block px-2 py-0.5 rounded text-xs font-semibold",
+                                                    risk === 'high' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                    risk === 'low' ? 'bg-red-500/20 text-red-400' :
+                                                    'bg-yellow-500/20 text-yellow-400'
+                                                )}>
+                                                    {ratio.toFixed(2)}x
+                                                </span>
+                                            ) : '—'}
+                                        </td>
+                                        <td className="px-4 py-3 text-center text-xs text-muted-foreground">{s.crossoverDate.split('-')[2]}d ago</td>
                                         <td className="px-4 py-3 text-center">
                                             <button
                                                 onClick={() => {
@@ -343,7 +379,8 @@ export default function MomentumRadarPage() {
                                             </button>
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -351,37 +388,50 @@ export default function MomentumRadarPage() {
 
                 {state === "ok" && signals.length > 0 && (
                     <Card className="bg-white/5 border-white/10">
-                        <CardContent className="py-4 px-4">
-                            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                                Fundamentals Score Legend
+                        <CardContent className="py-4 px-4 space-y-4">
+                            <div>
+                                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                                    How to Read This Table
+                                </div>
+                                <div className="text-xs text-muted-foreground space-y-1">
+                                    <p><span className="text-white font-medium">T1 Profit</span> — Expected rupee gain if Target 1 is hit</p>
+                                    <p><span className="text-white font-medium">Risk</span> — Potential loss if Stop Loss is hit</p>
+                                    <p><span className="text-white font-medium">Ratio</span> — Profit/Risk ratio: <span className="text-emerald-400">≥1.5x (high)</span>, <span className="text-yellow-400">0.5–1.5x (medium)</span>, <span className="text-red-400">&lt;0.5x (low)</span></p>
+                                    <p><span className="text-white font-medium">Qty</span> — Units to buy at current CMP (based on ₹25K capital)</p>
+                                </div>
                             </div>
-                            <div className="flex flex-wrap gap-3 mb-3">
-                                {[5, 4, 3, 2, 1].map((n) => (
-                                    <span
-                                        key={n}
-                                        className={cn(
-                                            "inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs border",
-                                            SCORE_COLOR[n]
-                                        )}
-                                    >
-                                        <span className="font-bold">{n}</span>
-                                        {n === 5 && "Excellent"}
-                                        {n === 4 && "Good"}
-                                        {n === 3 && "Fair"}
-                                        {n === 2 && "Weak"}
-                                        {n === 1 && "Poor"}
-                                    </span>
-                                ))}
+                            <div className="border-t border-white/10 pt-4">
+                                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                                    Fundamentals Score Legend
+                                </div>
+                                <div className="flex flex-wrap gap-3 mb-3">
+                                    {[5, 4, 3, 2, 1].map((n) => (
+                                        <span
+                                            key={n}
+                                            className={cn(
+                                                "inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs border",
+                                                SCORE_COLOR[n]
+                                            )}
+                                        >
+                                            <span className="font-bold">{n}</span>
+                                            {n === 5 && "Excellent"}
+                                            {n === 4 && "Good"}
+                                            {n === 3 && "Fair"}
+                                            {n === 2 && "Weak"}
+                                            {n === 1 && "Poor"}
+                                        </span>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Average of up to 3 sub-scores (whichever fields Yahoo Finance has) — missing fields
+                                    are skipped, not counted against the score:
+                                </p>
+                                <ul className="text-xs text-muted-foreground mt-1.5 space-y-0.5 list-disc list-inside">
+                                    <li><span className="text-white font-medium">PE ratio</span> (cheaper = higher score): ≤15 → 5, ≤25 → 4, ≤40 → 3, ≤60 → 2, above → 1</li>
+                                    <li><span className="text-white font-medium">Debt/Equity</span> (less leverage = higher score): ≤25 → 5, ≤50 → 4, ≤100 → 3, ≤250 → 2, above → 1</li>
+                                    <li><span className="text-white font-medium">Revenue growth</span> (faster = higher score): ≥40% → 5, ≥25% → 4, ≥15% → 3, ≥0% → 2, negative → 1</li>
+                                </ul>
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                Average of up to 3 sub-scores (whichever fields Yahoo Finance has) — missing fields
-                                are skipped, not counted against the score:
-                            </p>
-                            <ul className="text-xs text-muted-foreground mt-1.5 space-y-0.5 list-disc list-inside">
-                                <li><span className="text-white font-medium">PE ratio</span> (cheaper = higher score): ≤15 → 5, ≤25 → 4, ≤40 → 3, ≤60 → 2, above → 1</li>
-                                <li><span className="text-white font-medium">Debt/Equity</span> (less leverage = higher score): ≤25 → 5, ≤50 → 4, ≤100 → 3, ≤250 → 2, above → 1</li>
-                                <li><span className="text-white font-medium">Revenue growth</span> (faster = higher score): ≥40% → 5, ≥25% → 4, ≥15% → 3, ≥0% → 2, negative → 1</li>
-                            </ul>
                         </CardContent>
                     </Card>
                 )}
